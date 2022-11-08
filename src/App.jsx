@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import adapter from 'webrtc-adapter'
 
 function App(props) {
+  var sipcall = null
+  let registered = false
+
   useEffect(() => {
     const script = document.createElement('script')
     script.src = 'libs/janus.js'
@@ -9,6 +12,11 @@ function App(props) {
     script.onload = () => {
       console.log('loaded')
       console.log(Janus)
+
+      navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      })
 
       const setupDeps = () =>
         Janus.useDefaultDependencies({
@@ -27,14 +35,13 @@ function App(props) {
         progress: [],
         destroyed: [],
       }
-      var sipcall = null
 
       Janus.init({
         debug: 'all',
         dependencies: setupDeps(),
         callback: function () {
           const janus = new Janus({
-            server: 'https://nethvoice.nethesis.it/janus',
+            server: 'https://nv-seb/janus',
             success: () => {
               console.log('success')
 
@@ -51,15 +58,18 @@ function App(props) {
                       ')',
                   )
 
+                  console.log('sipcall')
+                  console.log(sipcall)
+
                   sipcall.send({
                     message: {
                       request: 'register',
-                      username: 'sip:' + '226' + '@' + '127.0.0.1',
+                      username: 'sip:' + '211' + '@' + '127.0.0.1',
                       display_name: 'Sebastian',
-                      secret: 'Nethesis,1234Seb21',
+                      secret: '0081a9189671e8c3d1ad8b025f92403da',
                       proxy: 'sip:' + '127.0.0.1' + ':5060',
                       sips: false,
-                      refresh: true
+                      refresh: true,
                     },
                   })
 
@@ -101,12 +111,12 @@ function App(props) {
                   // Any error?
                   var error = msg['error']
                   if (error != null && error != undefined) {
-                    // if (!registered) {
-                    //   Janus.log('User is not registered')
-                    // } else {
-                    //   // Reset status
-                    //   sipcall.hangup()
-                    // }
+                    if (!registered) {
+                      Janus.log('User is not registered')
+                    } else {
+                      //   // Reset status
+                      //   sipcall.hangup()
+                    }
                     for (var evt in evtObservers['error']) {
                       evtObservers['error'][evt](msg, jsep)
                     }
@@ -144,7 +154,7 @@ function App(props) {
                       case 'registered':
                         Janus.log('Successfully registered as ' + result['username'] + '!')
                         if (!registered) {
-                          // registered = true
+                          registered = true
                         }
                         // lastActivity = new Date().getTime()
                         break
@@ -243,6 +253,14 @@ function App(props) {
       })
     }
     document.body.appendChild(script)
+
+    return () => {
+      sipcall.send({
+        message: {
+          request: 'unregister',
+        },
+      })
+    }
   }, [])
 
   return <div className='text-red-300'>App Widget</div>
