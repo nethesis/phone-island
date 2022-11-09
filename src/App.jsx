@@ -1,9 +1,76 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import adapter from 'webrtc-adapter'
 
 function App(props) {
-  var sipcall = null
+  const [calling, setCalling] = useState(false)
+  const [sipcall, setSipCall] = useState(null)
+  const [jsepGlobal, setJsepGlobal] = useState(null)
+  const [accepted, setAccepted] = useState(false)
+  const [callee, setCallee] = useState({})
+  const localStream = useRef(null)
+
   let registered = false
+
+  const decline = () => {
+    sipcall.send({
+      message: {
+        request: 'decline',
+      },
+    })
+  }
+
+  const hangup = () => {
+    sipcall.send({
+      message: {
+        request: 'hangup',
+      },
+    })
+  }
+
+  const answer = () => {
+    sipcall.createAnswer({
+      jsep: jsepGlobal,
+      media: {
+        audio: true,
+        videoSend: false,
+        videoRecv: false,
+      },
+      success: (jsep) => {
+        console.log('SUCCESS INSIDE CREATE ANSWER')
+        sipcall.send({
+          message: {
+            request: 'accept',
+          },
+          jsep: jsep,
+        })
+      },
+      error: (error) => {
+        console.log('ERROR INSIDE CREATE ANSWER')
+        Janus.error('WebRTC error:', error)
+        sipcall.send({
+          message: {
+            request: 'decline',
+            code: 480,
+          },
+        })
+      },
+    })
+  }
+
+  const register = (sipcall) => {
+    // Register after Janus initialization
+    sipcall.send({
+      message: {
+        request: 'register',
+        username: 'sip:' + '211' + '@' + '127.0.0.1',
+        display_name: 'Foo 1',
+        secret: '0081a9189671e8c3d1ad8b025f92403da',
+        proxy: 'sip:' + '127.0.0.1' + ':5060',
+        sips: false,
+        refresh: false,
+      },
+    })
+  }
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -15,7 +82,7 @@ function App(props) {
 
       navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true
+        audio: true,
       })
 
       const setupDeps = () =>
@@ -49,30 +116,16 @@ function App(props) {
                 plugin: 'janus.plugin.sip',
                 opaqueId: 'sebastian' + '_' + new Date().getTime(),
                 success: function (pluginHandle) {
-                  sipcall = pluginHandle
+                  setSipCall(pluginHandle)
+                  register(pluginHandle)
+
                   console.log(
                     'SIP plugin attached! (' +
-                      sipcall.getPlugin() +
-                      ', handle id = ' +
-                      sipcall.getId() +
+                      pluginHandle.getPlugin() +
+                      ', id = ' +
+                      pluginHandle.getId() +
                       ')',
                   )
-
-                  console.log('sipcall')
-                  console.log(sipcall)
-
-                  sipcall.send({
-                    message: {
-                      request: 'register',
-                      username: 'sip:' + '211' + '@' + '127.0.0.1',
-                      display_name: 'Sebastian',
-                      secret: '0081a9189671e8c3d1ad8b025f92403da',
-                      proxy: 'sip:' + '127.0.0.1' + ':5060',
-                      sips: false,
-                      refresh: true,
-                    },
-                  })
-
                   // getSupportedDevices(function () {
                   //   resolve()
                   // })
@@ -114,8 +167,8 @@ function App(props) {
                     if (!registered) {
                       Janus.log('User is not registered')
                     } else {
-                      //   // Reset status
-                      //   sipcall.hangup()
+                      // Reset status
+                      sipcall.hangup()
                     }
                     for (var evt in evtObservers['error']) {
                       evtObservers['error'][evt](msg, jsep)
@@ -169,7 +222,17 @@ function App(props) {
                         break
 
                       case 'incomingcall':
-                        // jsepGlobal = jsep
+                        setJsepGlobal(jsep)
+                        setCalling(true)
+
+                        setCallee((state) => ({
+                          ...state,
+                          display_name: result.displayname,
+                        }))
+                        console.log('RESULT RESULT')
+                        console.log(result)
+                        console.log(jsep)
+
                         Janus.log('Incoming call from ' + result['username'] + '!')
                         // lastActivity = new Date().getTime()
                         break
@@ -187,6 +250,8 @@ function App(props) {
                         break
 
                       case 'accepted':
+                        setAccepted(true)
+
                         Janus.log(result['username'] + ' accepted the call!')
                         // if (jsep !== null && jsep !== undefined) {
                         // handleRemote(jsep)
@@ -195,6 +260,9 @@ function App(props) {
                         break
 
                       case 'hangup':
+                        setCalling(false)
+                        setAccepted(false)
+
                         if (
                           result['code'] === 486 &&
                           result['event'] === 'hangup' &&
@@ -207,6 +275,7 @@ function App(props) {
                           incoming = null
                         }
                         sipcall.hangup()
+
                         // lastActivity = new Date().getTime()
                         // stopScreenSharingI()
                         break
@@ -219,9 +288,7 @@ function App(props) {
                 onlocalstream: function (stream) {
                   Janus.debug(' ::: Got a local stream :::')
                   Janus.debug(stream)
-
-                  Janus.attachMediaStream(localStream, stream)
-
+                  Janus.attachMediaStream(localStream.current, stream)
                   /* IS VIDEO ENABLED ? */
                   var videoTracks = stream.getVideoTracks()
                   /* */
@@ -229,11 +296,9 @@ function App(props) {
                 onremotestream: function (stream) {
                   Janus.debug(' ::: Got a remote stream :::')
                   Janus.debug(stream)
-
                   // retrieve stream track
                   var audioTracks = stream.getAudioTracks()
                   var videoTracks = stream.getVideoTracks()
-
                   Janus.attachMediaStream(remoteStreamAudio, new MediaStream(audioTracks))
                   Janus.attachMediaStream(remoteStreamVideo, new MediaStream(videoTracks))
                 },
@@ -260,10 +325,39 @@ function App(props) {
           request: 'unregister',
         },
       })
+      document.body.removeChild(script)
     }
   }, [])
 
-  return <div className='text-red-300'>App Widget</div>
+  return (
+    <>
+      {calling && (
+        <>
+          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit'>
+            <div className='flex items-center'>
+              <span>{callee.display_name ? callee.display_name.replace(/"/g, '') : '-'}</span>
+              {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
+            </div>
+            <div className='flex gap-3'>
+              <button
+                onClick={answer}
+                className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+              >
+                Answer
+              </button>
+              <button
+                onClick={accepted ? hangup : decline}
+                className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+      <video ref={localStream} muted autoPlay></video>
+    </>
+  )
 }
 
 export default App
