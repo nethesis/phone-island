@@ -1,2 +1,2 @@
 
-export * as AppWidget from './App'
+export * from './App'

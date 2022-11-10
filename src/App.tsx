@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import adapter from 'webrtc-adapter'
+import Janus from './lib/janus.js'
 
-function App(props) {
-  const [calling, setCalling] = useState(false)
-  const [sipcall, setSipCall] = useState(null)
-  const [jsepGlobal, setJsepGlobal] = useState(null)
-  const [accepted, setAccepted] = useState(false)
-  const [callee, setCallee] = useState({})
+export const App = (props) => {
+  const [calling, setCalling] = useState<any>(false)
+  const [sipcall, setSipCall] = useState<any>(null)
+  const [jsepGlobal, setJsepGlobal] = useState<any>(null)
+  const [accepted, setAccepted] = useState<any>(false)
+  const [callee, setCallee] = useState<any>({})
   const localStream = useRef(null)
 
   let registered = false
@@ -46,6 +47,7 @@ function App(props) {
       },
       error: (error) => {
         console.log('ERROR INSIDE CREATE ANSWER')
+        // @ts-ignore
         Janus.error('WebRTC error:', error)
         sipcall.send({
           message: {
@@ -73,45 +75,42 @@ function App(props) {
   }
 
   useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'libs/janus.js'
-    script.async = true
-    script.onload = () => {
-      console.log('loaded')
-      console.log(Janus)
+    navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    })
 
-      navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
+    const setupDeps = () =>
+      // @ts-ignore
+      Janus.useDefaultDependencies({
+        adapter,
       })
 
-      const setupDeps = () =>
-        Janus.useDefaultDependencies({
-          adapter,
-        })
+    var evtObservers = {
+      registration_failed: [],
+      registered: [],
+      calling: [],
+      incomingcall: [],
+      accepted: [],
+      hangup: [],
+      gateway_down: [],
+      error: [],
+      progress: [],
+      destroyed: [],
+    }
 
-      var evtObservers = {
-        registration_failed: [],
-        registered: [],
-        calling: [],
-        incomingcall: [],
-        accepted: [],
-        hangup: [],
-        gateway_down: [],
-        error: [],
-        progress: [],
-        destroyed: [],
-      }
-
+    const webRtc = () => {
+      // @ts-ignore
       Janus.init({
         debug: 'all',
         dependencies: setupDeps(),
         callback: function () {
+          // @ts-ignore
           const janus = new Janus({
             server: 'https://nv-seb/janus',
             success: () => {
               console.log('success')
-
+              // @ts-ignore
               janus.attach({
                 plugin: 'janus.plugin.sip',
                 opaqueId: 'sebastian' + '_' + new Date().getTime(),
@@ -159,18 +158,22 @@ function App(props) {
                   }
                 },
                 onmessage: function (msg, jsep) {
+                  // @ts-ignore
                   Janus.debug(' ::: Got a message :::')
+                  // @ts-ignore
                   Janus.debug(JSON.stringify(msg))
                   // Any error?
                   var error = msg['error']
                   if (error != null && error != undefined) {
                     if (!registered) {
+                      // @ts-ignore
                       Janus.log('User is not registered')
                     } else {
                       // Reset status
                       sipcall.hangup()
                     }
                     for (var evt in evtObservers['error']) {
+                      // @ts-ignore
                       evtObservers['error'][evt](msg, jsep)
                     }
                     return
@@ -193,6 +196,7 @@ function App(props) {
                     //switch event
                     switch (event) {
                       case 'registration_failed':
+                        // @ts-ignore
                         Janus.error(
                           'Registration failed: ' + result['code'] + ' ' + result['reason'],
                         )
@@ -200,11 +204,13 @@ function App(props) {
                         break
 
                       case 'unregistered':
+                        // @ts-ignore
                         Janus.log('Successfully un-registered as ' + result['username'] + '!')
                         // registered = false
                         break
 
                       case 'registered':
+                        // @ts-ignore
                         Janus.log('Successfully registered as ' + result['username'] + '!')
                         if (!registered) {
                           registered = true
@@ -213,10 +219,12 @@ function App(props) {
                         break
 
                       case 'registering':
+                        // @ts-ignore
                         Janus.log('janus registering')
                         break
 
                       case 'calling':
+                        // @ts-ignore
                         Janus.log('Waiting for the peer to answer...')
                         // lastActivity = new Date().getTime()
                         break
@@ -233,11 +241,13 @@ function App(props) {
                         console.log(result)
                         console.log(jsep)
 
+                        // @ts-ignore
                         Janus.log('Incoming call from ' + result['username'] + '!')
                         // lastActivity = new Date().getTime()
                         break
 
                       case 'progress':
+                        // @ts-ignore
                         Janus.log(
                           "There's early media from " +
                             result['username'] +
@@ -252,6 +262,7 @@ function App(props) {
                       case 'accepted':
                         setAccepted(true)
 
+                        // @ts-ignore
                         Janus.log(result['username'] + ' accepted the call!')
                         // if (jsep !== null && jsep !== undefined) {
                         // handleRemote(jsep)
@@ -268,10 +279,14 @@ function App(props) {
                           result['event'] === 'hangup' &&
                           result['reason'] === 'Busy Here'
                         ) {
+                          // @ts-ignore
                           busyToneSound.play()
                         }
+                        // @ts-ignore
                         Janus.log('Call hung up (' + result['code'] + ' ' + result['reason'] + ')!')
+                        // @ts-ignore
                         if (incoming != null) {
+                          // @ts-ignore
                           incoming = null
                         }
                         sipcall.hangup()
@@ -286,20 +301,27 @@ function App(props) {
                   }
                 },
                 onlocalstream: function (stream) {
+                  // @ts-ignore
                   Janus.debug(' ::: Got a local stream :::')
+                  // @ts-ignore
                   Janus.debug(stream)
+                  // @ts-ignore
                   Janus.attachMediaStream(localStream.current, stream)
                   /* IS VIDEO ENABLED ? */
                   var videoTracks = stream.getVideoTracks()
                   /* */
                 },
                 onremotestream: function (stream) {
+                  // @ts-ignore
                   Janus.debug(' ::: Got a remote stream :::')
+                  // @ts-ignore
                   Janus.debug(stream)
                   // retrieve stream track
                   var audioTracks = stream.getAudioTracks()
                   var videoTracks = stream.getVideoTracks()
+                  // @ts-ignore
                   Janus.attachMediaStream(remoteStreamAudio, new MediaStream(audioTracks))
+                  // @ts-ignore
                   Janus.attachMediaStream(remoteStreamVideo, new MediaStream(videoTracks))
                 },
                 oncleanup: function () {
@@ -317,15 +339,17 @@ function App(props) {
         },
       })
     }
-    document.body.appendChild(script)
+
+    webRtc()
 
     return () => {
-      sipcall.send({
-        message: {
-          request: 'unregister',
-        },
-      })
-      document.body.removeChild(script)
+      if (sipcall) {
+        sipcall.send({
+          message: {
+            request: 'unregister',
+          },
+        })
+      }
     }
   }, [])
 
@@ -333,7 +357,7 @@ function App(props) {
     <>
       {calling && (
         <>
-          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit'>
+          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-18'>
             <div className='flex items-center'>
               <span>{callee.display_name ? callee.display_name.replace(/"/g, '') : '-'}</span>
               {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
@@ -360,4 +384,4 @@ function App(props) {
   )
 }
 
-export default App
+App.displayName = 'App'

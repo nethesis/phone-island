@@ -10,10 +10,8 @@ const extensions = ['.js', '.ts', '.jsx', '.tsx']
 export default {
   input: ['./src/index.ts', ...getFiles('./src/components', extensions)],
   output: {
-    dir: 'dist',
-    format: 'esm',
-    preserveModules: true,
-    preserveModulesRoot: 'src',
+    format: 'cjs',
+    file: 'dist/index.js',
     sourcemap: true,
   },
   plugins: [
@@ -28,11 +26,11 @@ export default {
         '**/*.test.{js,jsx,ts,tsx}',
         '**/__stories__',
         '**/*.stories.{js,jsx,ts,tsx}',
-        '**/*.widget.{js,jsx,ts,tsx}'
+        '**/*.widget.{js,jsx,ts,tsx}',
       ],
     }),
     postcss(),
     terser(),
   ],
-  external: ['react', 'react-dom'],
+  external: ['react'],
 }

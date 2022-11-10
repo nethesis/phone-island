@@ -2,16 +2,18 @@
   "name": "react-widget-ts",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/index.js",
+  "module": "dist/es/index.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "janus-gateway": "git://github.com/meetecho/janus-gateway.git#1c4b1106867ffc4f49a01df02cb785996ca4fa0b",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "5.0.1",
     "webrtc-adapter": "^8.2.0"
   },
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "react-scripts start",
     "dev": "start-storybook -p 6006 -s public",
@@ -66,7 +68,6 @@
     "@storybook/react": "^6.5.13",
     "@storybook/testing-library": "^0.0.13",
     "@types/jest": "^29.2.2",
-    "@types/node": "^18.11.9",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "autoprefixer": "^10.4.13",

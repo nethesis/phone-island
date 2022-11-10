@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
-import App from '../App'
+import React from 'react'
+import { App } from '../App'
 
 const meta = {
   title: 'App Widget',
