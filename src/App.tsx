@@ -117,14 +117,14 @@ export const App = (props) => {
                 success: function (pluginHandle) {
                   setSipCall(pluginHandle)
                   register(pluginHandle)
-
-                  console.log(
-                    'SIP plugin attached! (' +
-                      pluginHandle.getPlugin() +
-                      ', id = ' +
-                      pluginHandle.getId() +
-                      ')',
-                  )
+                  if (pluginHandle) {
+                    console.log(
+                      'SIP plugin attached! (' +
+                        pluginHandle.getPlugin() +
+                        ', id = ' +
+                        ')',
+                    )
+                  }
                   // getSupportedDevices(function () {
                   //   resolve()
                   // })
@@ -143,9 +143,11 @@ export const App = (props) => {
                   )
                 },
                 iceState: function (newState) {
-                  console.log(
-                    `ICE state of PeerConnection of handle ${sipcall.getId()} has changed to "${newState}"`,
-                  )
+                  if (sipcall) {
+                    console.log(
+                      `ICE state of PeerConnection of handle has changed to "${newState}"`,
+                    )
+                  }
                 },
                 mediaState: function (medium, on) {
                   console.log('Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
@@ -320,9 +322,9 @@ export const App = (props) => {
                   var audioTracks = stream.getAudioTracks()
                   var videoTracks = stream.getVideoTracks()
                   // @ts-ignore
-                  Janus.attachMediaStream(remoteStreamAudio, new MediaStream(audioTracks))
+                  // Janus.attachMediaStream(remoteStreamAudio, new MediaStream(audioTracks))
                   // @ts-ignore
-                  Janus.attachMediaStream(remoteStreamVideo, new MediaStream(videoTracks))
+                  // Janus.attachMediaStream(remoteStreamVideo, new MediaStream(videoTracks))
                 },
                 oncleanup: function () {
                   console.log(' ::: janus Got a cleanup notification :::')
@@ -357,7 +359,7 @@ export const App = (props) => {
     <>
       {calling && (
         <>
-          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-18'>
+          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20'>
             <div className='flex items-center'>
               <span>{callee.display_name ? callee.display_name.replace(/"/g, '') : '-'}</span>
               {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
