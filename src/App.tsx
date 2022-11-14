@@ -1,14 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react'
 import adapter from 'webrtc-adapter'
 import Janus from './lib/janus.js'
+import { io } from 'socket.io-client'
 
 export const App = (props) => {
-  const [calling, setCalling] = useState<any>(false)
+  const [calling, setCalling] = useState<boolean>(false)
   const [sipcall, setSipCall] = useState<any>(null)
-  const [jsepGlobal, setJsepGlobal] = useState<any>(null)
-  const [accepted, setAccepted] = useState<any>(false)
-  const [callee, setCallee] = useState<any>({})
+  const [jsepGlobal, setJsepGlobal] = useState<object | null>(null)
+  const [accepted, setAccepted] = useState<boolean>(false)
+  const [callee, setCallee] = useState<object>({})
+  const [currentCall, setCurrentCall] = useState<{ [index: string]: string | number }>({})
   const localStream = useRef(null)
+
+  const HOST_NAME: string = 'nv-seb'
+  const USERNAME: string = 'foo1'
+  const AUTH_TOKEN: string = '791ff10b8666939426eb1b5507e983558f0e5806'
+  const SIP_EXTEN: string = '211'
+  const SIP_SECRET: string = '0081a9189671e8c3d1ad8b025f92403da'
 
   let registered = false
 
@@ -37,7 +45,6 @@ export const App = (props) => {
         videoRecv: false,
       },
       success: (jsep) => {
-        console.log('SUCCESS INSIDE CREATE ANSWER')
         sipcall.send({
           message: {
             request: 'accept',
@@ -46,7 +53,6 @@ export const App = (props) => {
         })
       },
       error: (error) => {
-        console.log('ERROR INSIDE CREATE ANSWER')
         // @ts-ignore
         Janus.error('WebRTC error:', error)
         sipcall.send({
@@ -64,9 +70,9 @@ export const App = (props) => {
     sipcall.send({
       message: {
         request: 'register',
-        username: 'sip:' + '211' + '@' + '127.0.0.1',
+        username: 'sip:' + SIP_EXTEN + '@' + '127.0.0.1',
         display_name: 'Foo 1',
-        secret: '0081a9189671e8c3d1ad8b025f92403da',
+        secret: SIP_SECRET,
         proxy: 'sip:' + '127.0.0.1' + ':5060',
         sips: false,
         refresh: false,
@@ -74,7 +80,90 @@ export const App = (props) => {
     })
   }
 
+  interface ConvType {
+    [index: string]: string | number
+  }
+
+  const getDispName = (conv: ConvType): string => {
+    let dispName = ''
+    if (
+      conv &&
+      conv.counterpartName !== '<unknown>' &&
+      typeof conv.counterpartName === 'string' &&
+      conv.counterpartName.length > 0
+    ) {
+      dispName = conv.counterpartName
+    } else if (
+      conv &&
+      conv.counterpartNum &&
+      typeof conv.counterpartNum === 'string' &&
+      conv.counterpartNum.length > 0
+    ) {
+      dispName = conv.counterpartNum
+    } else {
+      dispName = 'Anonymous'
+    }
+    return dispName
+  }
+
   useEffect(() => {
+    const handleCalls = (res: any) => {
+      // Initialize conversation
+      const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
+
+      // Check conversation isn't empty
+      if (Object.keys(conv).length > 0) {
+        const status: string = res.status
+        if (status) {
+          switch (status) {
+            case 'ringing':
+              setCurrentCall((state) => ({
+                ...state,
+                displayName: getDispName(conv),
+              }))
+              break
+            default:
+              break
+          }
+        }
+      }
+    }
+
+    const initWsConnection = () => {
+      const socket = io(HOST_NAME, {
+        upgrade: false,
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionDelay: 2000,
+      })
+
+      socket.on('connect', () => {
+        console.log(`ws connected sid: ${socket.id}`)
+      })
+
+      socket.on('connect', () => {
+        console.log('Socket on: ' + HOST_NAME + ' is connected !')
+
+        socket.emit('login', {
+          accessKeyId: USERNAME,
+          token: AUTH_TOKEN,
+          uaType: 'desktop',
+        })
+      })
+
+      socket.on('authe_ok', () => {
+        console.log('AUTH OK')
+      })
+
+      socket.on('extenUpdate', (res) => {
+        if (res.username === USERNAME) {
+          handleCalls(res)
+        }
+      })
+    }
+
+    initWsConnection()
+
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -99,7 +188,7 @@ export const App = (props) => {
       destroyed: [],
     }
 
-    const webRtc = () => {
+    const initWebRTC = () => {
       // @ts-ignore
       Janus.init({
         debug: 'all',
@@ -119,10 +208,7 @@ export const App = (props) => {
                   register(pluginHandle)
                   if (pluginHandle) {
                     console.log(
-                      'SIP plugin attached! (' +
-                        pluginHandle.getPlugin() +
-                        ', id = ' +
-                        ')',
+                      'SIP plugin attached! (' + pluginHandle.getPlugin() + ', id = ' + ')',
                     )
                   }
                   // getSupportedDevices(function () {
@@ -342,7 +428,7 @@ export const App = (props) => {
       })
     }
 
-    webRtc()
+    initWebRTC()
 
     return () => {
       if (sipcall) {
@@ -359,9 +445,9 @@ export const App = (props) => {
     <>
       {calling && (
         <>
-          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20'>
+          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
             <div className='flex items-center'>
-              <span>{callee.display_name ? callee.display_name.replace(/"/g, '') : '-'}</span>
+              <span>{currentCall.displayName ? currentCall.displayName : '-'}</span>
               {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
             </div>
             <div className='flex gap-3'>
