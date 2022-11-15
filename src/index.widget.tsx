@@ -8,9 +8,14 @@ const widgetDivs = document.querySelectorAll('.phone-island')
 
 // Inject our React App into each element
 widgetDivs.forEach((div) => {
+  const config: string = div.getAttribute('data-config')  || ''
+
+  console.log("CONFIG")
+  console.log(config)
+
   ReactDOM.render(
     <React.StrictMode>
-      <App token={''} />
+      <App dataConfig={config} />
     </React.StrictMode>,
     div,
   )

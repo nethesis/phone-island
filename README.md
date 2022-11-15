@@ -21,6 +21,26 @@ The main component can be developed using Storybook. Inside the story is rendere
 
 Tailwind CSS is enable by default.
 
+# Import locally
+
+Run build and start watch
+
+```
+npm run watch
+```
+
+Go to the project directory
+
+```
+cd <local-project>
+```
+
+Link the ```./dist``` directory
+
+```
+npm link <path-to-phone-island/dist>
+```
+
 # Build
 
 Build component library
@@ -41,3 +61,4 @@ As you can see the app/component can be built in two ways.
 
 - The component library built with Rollup
 - The widget files built with Parcel
+

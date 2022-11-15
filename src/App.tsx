@@ -1,22 +1,26 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, FC } from 'react'
 import adapter from 'webrtc-adapter'
 import Janus from './lib/janus.js'
 import { io } from 'socket.io-client'
 
-export const App = (props) => {
+interface PhoneIslandType {
+  dataConfig: string
+}
+
+export const PhoneIsland: FC<PhoneIslandType> = ({ dataConfig }) => {
   const [calling, setCalling] = useState<boolean>(false)
   const [sipcall, setSipCall] = useState<any>(null)
   const [jsepGlobal, setJsepGlobal] = useState<object | null>(null)
   const [accepted, setAccepted] = useState<boolean>(false)
-  const [callee, setCallee] = useState<object>({})
   const [currentCall, setCurrentCall] = useState<{ [index: string]: string | number }>({})
   const localStream = useRef(null)
 
-  const HOST_NAME: string = 'nv-seb'
-  const USERNAME: string = 'foo1'
-  const AUTH_TOKEN: string = '791ff10b8666939426eb1b5507e983558f0e5806'
-  const SIP_EXTEN: string = '211'
-  const SIP_SECRET: string = '0081a9189671e8c3d1ad8b025f92403da'
+  const CONFIG: string[] = atob(dataConfig).split(':')
+  const HOST_NAME: string = CONFIG[0]
+  const USERNAME: string = CONFIG[1]
+  const AUTH_TOKEN: string = CONFIG[2]
+  const SIP_EXTEN: string = CONFIG[3]
+  const SIP_SECRET: string = CONFIG[4]
 
   let registered = false
 
@@ -84,7 +88,7 @@ export const App = (props) => {
     [index: string]: string | number
   }
 
-  const getDispName = (conv: ConvType): string => {
+  const getDisplayName = (conv: ConvType): string => {
     let dispName = ''
     if (
       conv &&
@@ -119,7 +123,7 @@ export const App = (props) => {
             case 'ringing':
               setCurrentCall((state) => ({
                 ...state,
-                displayName: getDispName(conv),
+                displayName: getDisplayName(conv),
               }))
               break
             default:
@@ -135,10 +139,6 @@ export const App = (props) => {
         transports: ['websocket'],
         reconnection: true,
         reconnectionDelay: 2000,
-      })
-
-      socket.on('connect', () => {
-        console.log(`ws connected sid: ${socket.id}`)
       })
 
       socket.on('connect', () => {
@@ -321,14 +321,6 @@ export const App = (props) => {
                         setJsepGlobal(jsep)
                         setCalling(true)
 
-                        setCallee((state) => ({
-                          ...state,
-                          display_name: result.displayname,
-                        }))
-                        console.log('RESULT RESULT')
-                        console.log(result)
-                        console.log(jsep)
-
                         // @ts-ignore
                         Janus.log('Incoming call from ' + result['username'] + '!')
                         // lastActivity = new Date().getTime()
@@ -467,9 +459,9 @@ export const App = (props) => {
           </div>
         </>
       )}
-      <video ref={localStream} muted autoPlay></video>
+      <video className='hidden' ref={localStream} muted autoPlay></video>
     </>
   )
 }
 
-App.displayName = 'App'
+PhoneIsland.displayName = 'PhoneIsland'

@@ -9,7 +9,7 @@
 # production
 /build
 /dist
-/widget-build
+/dist-widget
 
 # delopment
 /widget-example/static
