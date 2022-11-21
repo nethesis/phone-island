@@ -5,7 +5,6 @@ import postcss from 'rollup-plugin-postcss'
 import babel from '@rollup/plugin-babel'
 import { terser } from 'rollup-plugin-terser'
 import { getFiles } from './scripts/buildUtils'
-import generatePackageJson from 'rollup-plugin-generate-package-json'
 
 export default {
   input: ['./src/index.ts', ...getFiles('./src/components', ['.js', '.ts', '.jsx', '.tsx'])],
@@ -44,15 +43,6 @@ export default {
     }),
     postcss(),
     terser(),
-    generatePackageJson({
-      baseContents: (pkg) => ({
-        name: pkg.name,
-        dependencies: pkg.dependencies,
-        private: true,
-        main: './index.js',
-        types: './index.d.ts',
-      }),
-    }),
   ],
   external: ['react', 'react-dom', 'react-scripts'],
 }

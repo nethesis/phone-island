@@ -1,8 +1,23 @@
 {
   "name": "@nethesis/phone-island",
   "author": "Nethesis",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.8",
+  "private": false,
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "targets": {
+    "main": false,
+    "types": false,
+    "default": {
+      "distDir": "./dist-widget"
+    }
+  },
   "dependencies": {
     "@swc/helpers": "^0.4.12",
     "@testing-library/jest-dom": "^5.11.4",
@@ -21,26 +36,10 @@
     "watch": "rm -rf ./dist && npm run build:css && rollup -w -c",
     "build": "rm -rf ./dist && npm run build:css && rollup -c",
     "build:css": "NODE_ENV=production npx tailwindcss -o ./dist/index.css --minify",
-    "build:widget": "parcel build ./src/index.widget.tsx --dist-dir dist-widget --no-source-maps",
+    "build:widget": "parcel build ./src/index.widget.tsx --no-source-maps",
     "serve:widget": "rm -rf ./widget-example/static/* && cp -rf ./dist-widget/* ./widget-example/static && npx http-server ./widget-example -o -c-1",
     "build-storybook": "build-storybook -s public",
-    "publish": "np --no-tests"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
-    ]
+    "publish": "np"
   },
   "browserslist": {
     "production": [
