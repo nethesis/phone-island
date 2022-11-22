@@ -37,6 +37,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
   cdn-publish:
+    needs: npm-publish
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout source code'
