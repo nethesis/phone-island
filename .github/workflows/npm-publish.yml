@@ -27,23 +27,17 @@ jobs:
         uses: 'actions/checkout@v2'
         with:
           ref: ${{ github.ref }}
-      - name: 'cat package.json'
-        run: cat ./package.json
       - name:  'Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
         env:
           GITHUB_TOKEN: ${{ secrets.NETHBOT_TOKEN }}
+          GITHUB_USER: NethBot
+          GITHUB_EMAIL: NethBot@users.noreply.github.com
         with:
           version-type:  'patch'
-      - name: 'cat package.json'
-        run: cat ./package.json
-      - name: 'Output Step'
-        env:
-          NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-        run: echo "new tag $NEW_TAG"
 
   publish-npm:
-    needs: build
+    needs: bump
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
