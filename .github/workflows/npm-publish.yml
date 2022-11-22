@@ -30,7 +30,7 @@ jobs:
       - name:  'Version Bump'
         uses:  'phips28/gh-action-bump-version@master'
         env:
-          GITHUB_TOKEN: ${{ secrets.NETHBOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_USER: NethBot
           GITHUB_EMAIL: NethBot@users.noreply.github.com
         with:
