@@ -35,3 +35,20 @@ jobs:
       - run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+  cdn-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout source code'
+        uses: 'actions/checkout@v3'
+        with:
+          ref: ${{ github.ref }}
+      - run: npm ci
+      - run: npm run build:widget
+      - name: 'Commit and publish to cdn'
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: NethBot
+          author_email: NethBot@users.noreply.github.com
+          message: 'widget: release for jsDelivr'
+          add: 'dist-widget/ --force'
