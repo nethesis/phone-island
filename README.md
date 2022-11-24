@@ -1,4 +1,17 @@
-# Scaffolding
+# NethVoice CTI Phone Island
+A fully standalone component for managing calls, video calls, screen sharing and more...
+
+## Builds
+Available as component on `npm`
+
+[![alt text](https://img.shields.io/npm/dw/@nethesis/phone-island?label=npm&color=red&style=for-the-badge)](https://www.npmjs.com/package/@nethesis/phone-island)
+
+Available as widget on `jsDelivr`
+
+[![alt_text](https://img.shields.io/jsdelivr/gh/hd/nethesis/phone-island?label=jsdelivr-js&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.js)
+[![alt_text](https://img.shields.io/jsdelivr/gh/hd/nethesis/phone-island?label=jsdelivr-css&color=blue&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.css)
+
+## Scaffolding
 
 - **widget-build** - contains the build of the widget version
 - **widget-example** - contains the usage example of the built widget
@@ -6,7 +19,7 @@
 - **src/index.ts** - is the entry point for the component lib and exports the React component
 - **src/index.widget.tsx** - is the entry point for the widget that is built as a single js and css file
 
-# Development
+## Development
 
 Install deps
 ```
@@ -21,7 +34,7 @@ The main component can be developed using Storybook. Inside the story is rendere
 
 Tailwind CSS is enable by default.
 
-# Import locally
+## Import locally
 
 Run build and start watch
 
@@ -41,7 +54,7 @@ Link the ```./dist``` directory
 npm link <path-to-phone-island/dist>
 ```
 
-# Build
+## Build
 
 Build component library
 
