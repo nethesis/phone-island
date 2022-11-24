@@ -19,7 +19,7 @@ export default meta as Meta
 // Uses the configuration token from .env
 const config = process.env.CONFIG_TOKEN
 
-const Template: Story<any> = (args) => <PhoneIsland dataConfig={config} {...args} />
+const Template: Story<any> = (args) => <PhoneIsland always={true} dataConfig={config} {...args} />
 
 export const Default = Template.bind({})
 Default.args = {}

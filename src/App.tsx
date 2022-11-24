@@ -5,9 +5,10 @@ import { io } from 'socket.io-client'
 
 interface PhoneIslandType {
   dataConfig: string
+  always: boolean
 }
 
-export const PhoneIsland: FC<PhoneIslandType> = ({ dataConfig }) => {
+export const PhoneIsland: FC<PhoneIslandType> = ({ dataConfig, always }) => {
   const [calling, setCalling] = useState<boolean>(false)
   const [sipcall, setSipCall] = useState<any>(null)
   const [jsepGlobal, setJsepGlobal] = useState<object | null>(null)
@@ -435,7 +436,7 @@ export const PhoneIsland: FC<PhoneIslandType> = ({ dataConfig }) => {
 
   return (
     <>
-      {calling && (
+      {(calling || always) && (
         <>
           <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
             <div className='flex items-center'>
