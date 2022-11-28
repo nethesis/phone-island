@@ -1,7 +1,6 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-
 export const getSupportedDevices = function (origCallback) {
   let supportedDevices = null
 
@@ -43,9 +42,7 @@ export const getSupportedDevices = function (origCallback) {
       window.MediaStreamTrack.getSources
     ) {
       // @ts-ignore
-      navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(
-        window.MediaStreamTrack,
-      )
+      navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack)
     }
     // @ts-ignore
     if (!navigator.enumerateDevices && navigator.enumerateDevices) {

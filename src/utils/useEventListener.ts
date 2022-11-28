@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect'
 
 // Event listener hook
-export const useEventListener = (eventName, handler, element = window) =>  {
+export const useEventListener = (eventName, handler, element = window) => {
   // Create a ref that stores handler
   const savedHandler = useRef()
   // Update ref.current value if handler changes.

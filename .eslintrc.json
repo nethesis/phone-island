@@ -31,9 +31,7 @@
     "react/display-name": false,
     "import/no-anonymous-default-export": "off"
   },
-  "files": [
-    "**/*.stories.*"
-  ],
+  "files": ["**/*.stories.*"],
   "settings": {
     "import/resolver": {
       "typescript": {}

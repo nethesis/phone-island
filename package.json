@@ -54,7 +54,8 @@
     "serve:widget": "rm -rf ./widget-example/static/* && cp -rf ./dist-widget/* ./widget-example/static && npx http-server ./widget-example -o -c-1",
     "build-storybook": "build-storybook -s public",
     "release": "npm publish",
-    "release:widget": "np patch"
+    "release:widget": "np patch",
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "browserslist": {
     "production": [
@@ -97,6 +98,7 @@
     "np": "^7.6.2",
     "parcel": "^2.0.0",
     "postcss": "^8.4.18",
+    "prettier": "^2.8.0",
     "prop-types": "^15.8.1",
     "rollup": "^2.79.1",
     "rollup-plugin-generate-package-json": "^3.2.0",

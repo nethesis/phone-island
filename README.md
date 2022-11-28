@@ -1,4 +1,5 @@
 # NethVoice CTI Phone Island
+
 A fully standalone component for managing calls, video calls, screen sharing and more...
 
 ## Preview
@@ -36,6 +37,7 @@ flowchart LR
 ```
 
 ## Builds
+
 Available as component on `npm`
 
 [![alt text](https://img.shields.io/npm/dw/@nethesis/phone-island?label=npm&color=red&style=for-the-badge)](https://www.npmjs.com/package/@nethesis/phone-island)
@@ -56,14 +58,17 @@ Available as widget on `jsDelivr`
 ## Development
 
 Install deps
+
 ```
 npm install
 ```
 
 Run Storybook
+
 ```
 npm run dev
 ```
+
 The main component can be developed using Storybook. Inside the story is rendered the component exported by the final component library.
 
 Tailwind CSS is enable by default.
@@ -82,7 +87,7 @@ Go to the project directory
 cd <local-project>
 ```
 
-Link the ```./dist``` directory
+Link the `./dist` directory
 
 ```
 npm link <path-to-phone-island/dist>
@@ -95,11 +100,15 @@ Build component library
 ```
 npm run build
 ```
+
 Build widget
+
 ```
 npm run build:widget
 ```
+
 Serve the widget
+
 ```
 npm run serve:widget
 ```

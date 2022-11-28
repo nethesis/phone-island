@@ -7,6 +7,6 @@ export const useEventDispatch = (
   element: HTMLElement | Window = window,
 ) => {
   typeof element !== 'undefined'
-    ? element.dispatchEvent(new CustomEvent(name, {'detail': data}))
+    ? element.dispatchEvent(new CustomEvent(name, { detail: data }))
     : console.error(new Error('EventDispatch error: element is not defined'))
 }

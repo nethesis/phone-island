@@ -1,8 +1,8 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { getSupportedDevices } from "../devices/devices"
-import outgoingRingtone from "../../static/outgoing_ringtone"
+import { getSupportedDevices } from '../devices/devices'
+import outgoingRingtone from '../../static/outgoing_ringtone'
 
 /**
  * Starts a call
@@ -13,7 +13,6 @@ import outgoingRingtone from "../../static/outgoing_ringtone"
  */
 
 export const call = (janus: any, sipcall: any, sipURI: string) => {
-
   const playAudio = (audio) => {
     // Play outgoing audio
     const player: HTMLAudioElement = new Audio(`data:audio/ogg;base64, ${audio}`)
