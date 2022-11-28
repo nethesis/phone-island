@@ -3,19 +3,22 @@
 
 import { getSupportedDevices } from '../devices/devices'
 import outgoingRingtone from '../../static/outgoing_ringtone'
-import { playBase64Ringtone } from './audio'
+import { store } from '../../store'
+import Janus from '../janus'
 
 /**
  * Starts a call
  *
- * @param Janus The Janus instance
  * @param sipcall The sipcall object
  * @param sipURI The sip uri string
  */
 
-export const call = (janus: any, sipcall: any, sipURI: string) => {
+export const call = (sipcall, sipURI: string) => {
+  // Set Janus type
+  const janus: any = Janus
+
   getSupportedDevices(() => {
-    janus.log('This is a SIP call')
+    // janus.log('This is a SIP call')
     let mediaObj = {
       audio: {
         mandatory: {
@@ -37,8 +40,8 @@ export const call = (janus: any, sipcall: any, sipURI: string) => {
     sipcall.createOffer({
       media: mediaObj,
       success: function (jsep) {
-        janus.debug('Got SDP!')
-        janus.debug(jsep)
+        // janus.debug('Got SDP!')
+        // janus.debug(jsep)
         // By default, you only pass the SIP URI to call as an
         // argument to a "call" request. Should you want the
         // SIP stack to add some custom headers to the INVITE,
@@ -69,15 +72,14 @@ export const call = (janus: any, sipcall: any, sipURI: string) => {
         })
 
         // Play outgoing audio
-        const outRing: HTMLAudioElement = playBase64Ringtone(outgoingRingtone)
-        if (outRing) {
-          setTimeout(() => {
-            outRing.pause()
-          }, 5000)
-        }
+        store.dispatch.player.updateSource({
+          src: outgoingRingtone,
+        })
+        store.dispatch.player.play()
       },
       error: function (error) {
-        janus.error('WebRTC error...', error)
+        // janus.error('WebRTC error...', error)
+        janus.error('WebRTC error call on createOffer: ', error)
       },
     })
   })

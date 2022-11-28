@@ -4,7 +4,8 @@ import Janus from './lib/janus.js'
 import { io } from 'socket.io-client'
 import { Events } from './components'
 import incomingRingtone from './static/incoming_ringtone'
-import { playBase64Ringtone } from './lib/phone/audio'
+import { Provider } from 'react-redux'
+import { store } from './store'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -73,19 +74,22 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
     })
   }
 
-  const register = (sipcall) => {
+  const register = () => {
+    const { sipcall }: any = store.getState().webrtc
     // Register after Janus initialization
-    sipcall.send({
-      message: {
-        request: 'register',
-        username: 'sip:' + SIP_EXTEN + '@' + '127.0.0.1',
-        display_name: 'Foo 1',
-        secret: SIP_SECRET,
-        proxy: 'sip:' + '127.0.0.1' + ':5060',
-        sips: false,
-        refresh: false,
-      },
-    })
+    if (sipcall) {
+      sipcall.send({
+        message: {
+          request: 'register',
+          username: 'sip:' + SIP_EXTEN + '@' + '127.0.0.1',
+          display_name: 'Foo 1',
+          secret: SIP_SECRET,
+          proxy: 'sip:' + '127.0.0.1' + ':5060',
+          sips: false,
+          refresh: false,
+        },
+      })
+    }
   }
 
   interface ConvType {
@@ -212,7 +216,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
                 opaqueId: 'sebastian' + '_' + new Date().getTime(),
                 success: function (pluginHandle) {
                   setSipCall(pluginHandle)
-                  register(pluginHandle)
+                  // Set sipcall to the store
+                  store.dispatch.webrtc.updateSipcall({
+                    sipcall: pluginHandle,
+                  })
+                  // Register the extension to the server
+                  register()
                   if (pluginHandle) {
                     console.log(
                       'SIP plugin attached! (' + pluginHandle.getPlugin() + ', id = ' + ')',
@@ -327,7 +336,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
                       case 'incomingcall':
                         setJsepGlobal(jsep)
                         setCalling(true)
-                        currentAudio = playBase64Ringtone(incomingRingtone) || null
+
+                        store.dispatch.player.updateSource({
+                          src: incomingRingtone,
+                        })
+                        store.dispatch.player.play()
 
                         // @ts-ignore
                         Janus.log('Incoming call from ' + result['username'] + '!')
@@ -361,7 +374,10 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
                       case 'hangup':
                         setCalling(false)
                         setAccepted(false)
-                        
+
+                        // Stop ringtone playing
+                        store.dispatch.player.stop()
+
                         if (currentAudio) {
                           // Stop playing incoming ringtone audio
                           currentAudio.pause()
@@ -448,32 +464,34 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
 
   return (
     <>
-      <Events janus={Janus} sipcall={sipcall}>
-        {(calling || always) && (
-          <>
-            <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
-              <div className='flex items-center'>
-                <span>{currentCall.displayName ? currentCall.displayName : '-'}</span>
-                {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
+      <Provider store={store}>
+        <Events>
+          {(calling || always) && (
+            <>
+              <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
+                <div className='flex items-center'>
+                  <span>{currentCall.displayName ? currentCall.displayName : '-'}</span>
+                  {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
+                </div>
+                <div className='flex gap-3'>
+                  <button
+                    onClick={answer}
+                    className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+                  >
+                    Answer
+                  </button>
+                  <button
+                    onClick={accepted ? hangup : decline}
+                    className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+                  >
+                    Decline
+                  </button>
+                </div>
               </div>
-              <div className='flex gap-3'>
-                <button
-                  onClick={answer}
-                  className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-                >
-                  Answer
-                </button>
-                <button
-                  onClick={accepted ? hangup : decline}
-                  className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-                >
-                  Decline
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-      </Events>
+            </>
+          )}
+        </Events>
+      </Provider>
       <video className='hidden' ref={localStream} muted autoPlay></video>
     </>
   )

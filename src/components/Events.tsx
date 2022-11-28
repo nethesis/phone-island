@@ -6,14 +6,12 @@ import { CallEvents } from '../events'
 
 interface EventsProps {
   children: ReactNode
-  janus: any
-  sipcall: any
 }
 
-export const Events: FC<EventsProps> = ({ children, janus, sipcall }) => {
+export const Events: FC<EventsProps> = ({ children }) => {
   return (
     <>
-      {janus && sipcall && <CallEvents janus={janus} sipcall={sipcall} />}
+      {<CallEvents />}
       {children}
     </>
   )
