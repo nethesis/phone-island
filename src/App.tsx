@@ -3,6 +3,8 @@ import adapter from 'webrtc-adapter'
 import Janus from './lib/janus.js'
 import { io } from 'socket.io-client'
 import { Events } from './components'
+import incomingRingtone from './static/incoming_ringtone'
+import { playBase64Ringtone } from './lib/phone/audio'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -147,7 +149,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
         console.log('Socket on: ' + HOST_NAME + ' is connected !')
 
         socket.emit('login', {
-          accessKeyId: USERNAME,
+          accessKeyId: `${USERNAME}_phone-island`,
           token: AUTH_TOKEN,
           uaType: 'desktop',
         })
@@ -189,6 +191,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
       progress: [],
       destroyed: [],
     }
+
+    // Put it into a store in the next step
+    let currentAudio: HTMLAudioElement | null = null
 
     const initWebRTC = () => {
       // @ts-ignore
@@ -322,6 +327,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
                       case 'incomingcall':
                         setJsepGlobal(jsep)
                         setCalling(true)
+                        currentAudio = playBase64Ringtone(incomingRingtone) || null
 
                         // @ts-ignore
                         Janus.log('Incoming call from ' + result['username'] + '!')
@@ -355,6 +361,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
                       case 'hangup':
                         setCalling(false)
                         setAccepted(false)
+                        
+                        if (currentAudio) {
+                          // Stop playing incoming ringtone audio
+                          currentAudio.pause()
+                        }
 
                         if (
                           result['code'] === 486 &&

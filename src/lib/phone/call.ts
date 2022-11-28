@@ -3,6 +3,7 @@
 
 import { getSupportedDevices } from '../devices/devices'
 import outgoingRingtone from '../../static/outgoing_ringtone'
+import { playBase64Ringtone } from './audio'
 
 /**
  * Starts a call
@@ -13,14 +14,6 @@ import outgoingRingtone from '../../static/outgoing_ringtone'
  */
 
 export const call = (janus: any, sipcall: any, sipURI: string) => {
-  const playAudio = (audio) => {
-    // Play outgoing audio
-    const player: HTMLAudioElement = new Audio(`data:audio/ogg;base64, ${audio}`)
-    player.loop = true
-    player.play()
-  }
-
-  // Get supported devices must be add
   getSupportedDevices(() => {
     janus.log('This is a SIP call')
     let mediaObj = {
@@ -76,7 +69,12 @@ export const call = (janus: any, sipcall: any, sipURI: string) => {
         })
 
         // Play outgoing audio
-        playAudio(outgoingRingtone)
+        const outRing: HTMLAudioElement = playBase64Ringtone(outgoingRingtone)
+        if (outRing) {
+          setTimeout(() => {
+            outRing.pause()
+          }, 5000)
+        }
       },
       error: function (error) {
         janus.error('WebRTC error...', error)
