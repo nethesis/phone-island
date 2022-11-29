@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef, FC } from 'react'
 import adapter from 'webrtc-adapter'
 import Janus from './lib/janus.js'
-import { io } from 'socket.io-client'
 import { Events } from './components'
 import incomingRingtone from './static/incoming_ringtone'
 import { Provider } from 'react-redux'
-import { store } from './store'
+import { RootState, store } from './store'
+import { Socket } from './components'
+import { Base64 } from 'js-base64'
+import { useSelector } from 'react-redux'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -17,10 +19,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
   const [sipcall, setSipCall] = useState<any>(null)
   const [jsepGlobal, setJsepGlobal] = useState<object | null>(null)
   const [accepted, setAccepted] = useState<boolean>(false)
-  const [currentCall, setCurrentCall] = useState<{ [index: string]: string | number }>({})
   const localStream = useRef(null)
 
-  const CONFIG: string[] = atob(dataConfig).split(':')
+  const CONFIG: string[] = Base64.atob(dataConfig).split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
   const AUTH_TOKEN: string = CONFIG[2]
@@ -92,86 +93,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
     }
   }
 
-  interface ConvType {
-    [index: string]: string | number
-  }
-
-  const getDisplayName = (conv: ConvType): string => {
-    let dispName = ''
-    if (
-      conv &&
-      conv.counterpartName !== '<unknown>' &&
-      typeof conv.counterpartName === 'string' &&
-      conv.counterpartName.length > 0
-    ) {
-      dispName = conv.counterpartName
-    } else if (
-      conv &&
-      conv.counterpartNum &&
-      typeof conv.counterpartNum === 'string' &&
-      conv.counterpartNum.length > 0
-    ) {
-      dispName = conv.counterpartNum
-    } else {
-      dispName = 'Anonymous'
-    }
-    return dispName
-  }
-
   useEffect(() => {
-    const handleCalls = (res: any) => {
-      // Initialize conversation
-      const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
-
-      // Check conversation isn't empty
-      if (Object.keys(conv).length > 0) {
-        const status: string = res.status
-        if (status) {
-          switch (status) {
-            case 'ringing':
-              setCurrentCall((state) => ({
-                ...state,
-                displayName: getDisplayName(conv),
-              }))
-              break
-            default:
-              break
-          }
-        }
-      }
-    }
-
-    const initWsConnection = () => {
-      const socket = io(HOST_NAME, {
-        upgrade: false,
-        transports: ['websocket'],
-        reconnection: true,
-        reconnectionDelay: 2000,
-      })
-
-      socket.on('connect', () => {
-        console.log('Socket on: ' + HOST_NAME + ' is connected !')
-
-        socket.emit('login', {
-          accessKeyId: `${USERNAME}_phone-island`,
-          token: AUTH_TOKEN,
-          uaType: 'desktop',
-        })
-      })
-
-      socket.on('authe_ok', () => {
-        console.log('AUTH OK')
-      })
-
-      socket.on('extenUpdate', (res) => {
-        if (res.username === USERNAME) {
-          handleCalls(res)
-        }
-      })
-    }
-
-    initWsConnection()
-
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -462,35 +384,43 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
     }
   }, [])
 
+  const DisplayName = () => {
+    const { displayName } = useSelector((state: RootState) => state.currentCall)
+
+    return <span>{displayName ? displayName : '-'}</span>
+  }
+
   return (
     <>
       <Provider store={store}>
-        <Events>
-          {(calling || always) && (
-            <>
-              <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
-                <div className='flex items-center'>
-                  <span>{currentCall.displayName ? currentCall.displayName : '-'}</span>
-                  {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
+        <Socket host_name={HOST_NAME} username={USERNAME} auth_token={AUTH_TOKEN}>
+          <Events>
+            {(calling || always) && (
+              <>
+                <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-20 font-sans'>
+                  <div className='flex items-center'>
+                    <DisplayName />
+                    {accepted && <span className='ml-5 w-3 h-3 bg-red-600 rounded-full'></span>}
+                  </div>
+                  <div className='flex gap-3'>
+                    <button
+                      onClick={answer}
+                      className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+                    >
+                      Answer
+                    </button>
+                    <button
+                      onClick={accepted ? hangup : decline}
+                      className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
+                    >
+                      Decline
+                    </button>
+                  </div>
                 </div>
-                <div className='flex gap-3'>
-                  <button
-                    onClick={answer}
-                    className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-                  >
-                    Answer
-                  </button>
-                  <button
-                    onClick={accepted ? hangup : decline}
-                    className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-                  >
-                    Decline
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-        </Events>
+              </>
+            )}
+          </Events>
+        </Socket>
       </Provider>
       <video className='hidden' ref={localStream} muted autoPlay></video>
     </>
