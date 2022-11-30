@@ -5,19 +5,20 @@ import React, { type ReactNode, FC, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
+import incomingRingtone from '../static/incoming_ringtone'
 
 interface SocketProps {
   children: ReactNode
-  host_name: string
+  hostName: string
   username: string
-  auth_token: string
+  authToken: string
 }
 
 interface ConvType {
   [index: string]: string | number
 }
 
-export const Socket: FC<SocketProps> = ({ host_name, username, auth_token, children }) => {
+export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
 
   useEffect(() => {
@@ -54,8 +55,23 @@ export const Socket: FC<SocketProps> = ({ host_name, username, auth_token, child
             case 'ringing':
               dispatch.currentCall.updateCurrentCall({
                 displayName: getDisplayName(conv),
+                incoming: true,
+                ringing: true,
+              })
+              dispatch.player.updateAudioSource({
+                src: incomingRingtone,
+              })
+              dispatch.player.playAudio({
+                loop: true,
               })
               break
+            // @ts-ignore
+            case 'busy':
+              if (conv && conv.connected) {
+                dispatch.currentCall.updateCurrentCall({
+                  accepted: true,
+                })
+              }
             default:
               break
           }
@@ -64,7 +80,7 @@ export const Socket: FC<SocketProps> = ({ host_name, username, auth_token, child
     }
 
     const initWsConnection = () => {
-      const socket = io(host_name, {
+      const socket = io(hostName, {
         upgrade: false,
         transports: ['websocket'],
         reconnection: true,
@@ -72,10 +88,10 @@ export const Socket: FC<SocketProps> = ({ host_name, username, auth_token, child
       })
 
       socket.on('connect', () => {
-        console.log('Socket on: ' + host_name + ' is connected !')
+        console.log('Socket on: ' + hostName + ' is connected !')
         socket.emit('login', {
           accessKeyId: `${username}_phone-island`,
-          token: auth_token,
+          token: authToken,
           uaType: 'desktop',
         })
       })

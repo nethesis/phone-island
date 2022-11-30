@@ -5,11 +5,17 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
 interface CurrentCallTypes {
-  displayName: string
+  displayName?: string
+  incoming?: boolean
+  ringing?: boolean
+  accepted?: boolean
 }
 
 const defaultState = {
   displayName: '',
+  incoming: false,
+  ringing: false,
+  accepted: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -18,7 +24,7 @@ export const currentCall = createModel<RootModel>()({
     updateCurrentCall: (state, payload: CurrentCallTypes) => {
       return {
         ...state,
-        ...payload
+        ...payload,
       }
     },
   },

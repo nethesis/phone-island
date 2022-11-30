@@ -3,3 +3,5 @@
 
 export * from './Events'
 export * from './Socket'
+export * from './WebRTC'
+export * from './Island'

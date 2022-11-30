@@ -8,26 +8,48 @@ interface UpdateAudioSourceTypes {
   src: string
 }
 
-const audioElement: HTMLAudioElement = new Audio()
-audioElement.loop = true
+interface PlayerTypes {
+  audio: HTMLAudioElement | null
+  localVideo: HTMLVideoElement | null
+  remoteVideo: HTMLVideoElement | null
+}
 
-const defaultState = {
-  audio: audioElement,
+interface PlayAudioTypes {
+  loop: boolean
+}
+
+const defaultState: PlayerTypes = {
+  audio: null,
+  localVideo: null,
+  remoteVideo: null,
 }
 
 export const player = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    updateSource: (state, payload: UpdateAudioSourceTypes) => {
-      state.audio.src = `data:audio/ogg;base64, ${payload.src}`
+    updatePlayer: (state, payload: PlayerTypes) => {
+      return {
+        ...state,
+        ...payload,
+      }
+    },
+    updateAudioSource: (state, payload: UpdateAudioSourceTypes) => {
+      if (state.audio) {
+        state.audio.src = `data:audio/ogg;base64, ${payload.src}`
+      }
       return state
     },
-    play: (state) => {
-      state.audio.play()
+    playAudio: (state, payload: PlayAudioTypes) => {
+      if (state.audio) {
+        if (payload && payload.loop) state.audio.loop = true
+        state.audio.play()
+      }
     },
-    stop: (state) => {
-      state.audio.pause()
-      state.audio.currentTime = 0
+    stopAudio: (state) => {
+      if (state.audio) {
+        state.audio.pause()
+        state.audio.currentTime = 0
+      }
     },
     reset: () => {
       return defaultState

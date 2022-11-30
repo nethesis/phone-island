@@ -4,7 +4,7 @@
 import { getSupportedDevices } from '../devices/devices'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { store } from '../../store'
-import Janus from '../janus'
+import Janus from '../webrtc/janus'
 
 /**
  * Starts a call
@@ -72,10 +72,12 @@ export const call = (sipcall, sipURI: string) => {
         })
 
         // Play outgoing audio
-        store.dispatch.player.updateSource({
+        store.dispatch.player.updateAudioSource({
           src: outgoingRingtone,
         })
-        store.dispatch.player.play()
+        store.dispatch.player.playAudio({
+          loop: true
+        })
       },
       error: function (error) {
         // janus.error('WebRTC error...', error)
