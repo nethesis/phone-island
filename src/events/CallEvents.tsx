@@ -3,7 +3,7 @@
 
 import React, { FC } from 'react'
 import { useEventListener } from '../utils/useEventListener'
-import { call } from '../lib/phone/call'
+import { callSipURI } from '../lib/phone/call'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 
@@ -16,7 +16,7 @@ export const CallEvents: FC = () => {
    */
   useEventListener('phone-island-call-start', (data) => {
     const callURI = 'sip:' + data.detail.number + '@' + BASE_HOST_URL
-    call(sipcall, callURI)
+    callSipURI(callURI)
   })
   return sipcall && <></>
 }

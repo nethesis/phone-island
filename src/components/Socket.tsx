@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import incomingRingtone from '../static/incoming_ringtone'
+import { getDisplayName, type ConvType } from '../lib/phone/conversation'
 
 interface SocketProps {
   children: ReactNode
@@ -14,36 +15,10 @@ interface SocketProps {
   authToken: string
 }
 
-interface ConvType {
-  [index: string]: string | number
-}
-
 export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
 
   useEffect(() => {
-    const getDisplayName = (conv: ConvType): string => {
-      let dispName = ''
-      if (
-        conv &&
-        conv.counterpartName !== '<unknown>' &&
-        typeof conv.counterpartName === 'string' &&
-        conv.counterpartName.length > 0
-      ) {
-        dispName = conv.counterpartName
-      } else if (
-        conv &&
-        conv.counterpartNum &&
-        typeof conv.counterpartNum === 'string' &&
-        conv.counterpartNum.length > 0
-      ) {
-        dispName = conv.counterpartNum
-      } else {
-        dispName = 'Anonymous'
-      }
-      return dispName
-    }
-
     const handleCalls = (res: any) => {
       // Initialize conversation
       const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
@@ -64,18 +39,30 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               dispatch.player.playAudio({
                 loop: true,
               })
+
               break
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
+                  outgoing: false,
+                  displayName: `${conv.counterpartName}`,
+                })
+              }
+              // Handle outgoing call
+              else if (conv && !conv.connected && conv.direction === 'out') {
+                dispatch.currentCall.updateCurrentCall({
+                  outgoing: true,
+                  displayName: `${conv.counterpartName}`,
                 })
               }
             default:
               break
           }
         }
+      } else {
+        console.log(res)
       }
     }
 
@@ -97,7 +84,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       })
 
       socket.on('authe_ok', () => {
-        console.log('AUTH OK')
+        console.log('auth_ok')
       })
 
       socket.on('extenUpdate', (res) => {

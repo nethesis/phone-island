@@ -20,8 +20,8 @@ export const webrtc = createModel<RootModel>()({
     updateWebRTC: (state, payload: WebRTCTypes) => {
       return {
         ...state,
-        ...payload
+        ...payload,
       }
-    }
+    },
   },
 })

@@ -9,6 +9,7 @@ interface CurrentCallTypes {
   incoming?: boolean
   ringing?: boolean
   accepted?: boolean
+  outgoing?: boolean
 }
 
 const defaultState = {
@@ -16,6 +17,7 @@ const defaultState = {
   incoming: false,
   ringing: false,
   accepted: false,
+  outgoing: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -26,6 +28,9 @@ export const currentCall = createModel<RootModel>()({
         ...state,
         ...payload,
       }
+    },
+    reset: () => {
+      return defaultState
     },
   },
 })

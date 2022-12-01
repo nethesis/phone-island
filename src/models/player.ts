@@ -15,7 +15,7 @@ interface PlayerTypes {
 }
 
 interface PlayAudioTypes {
-  loop: boolean
+  loop?: boolean
 }
 
 const defaultState: PlayerTypes = {
@@ -39,7 +39,7 @@ export const player = createModel<RootModel>()({
       }
       return state
     },
-    playAudio: (state, payload: PlayAudioTypes) => {
+    playAudio: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
       if (state.audio) {
         if (payload && payload.loop) state.audio.loop = true
         state.audio.play()

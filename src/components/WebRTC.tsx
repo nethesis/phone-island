@@ -9,6 +9,7 @@ import Janus from '../lib/webrtc/janus.js'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { useWebRTCStore } from '../utils/useWebRTCStore'
 import { store } from '../store'
+// import busyRingtone from '../static/busy_ringtone'
 
 interface WebRTCProps {
   children: ReactNode
@@ -216,26 +217,21 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                         break
 
                       case 'hangup':
-                        // Stop ringtone playing
                         dispatch.player.stopAudio()
-
-                        if (
-                          result['code'] === 486 &&
-                          result['event'] === 'hangup' &&
-                          result['reason'] === 'Busy Here'
-                        ) {
-                          // @ts-ignore
-                          busyToneSound.play()
-                        }
+                        dispatch.currentCall.reset()
+                        sipcall.hangup()
+                        // if (
+                        //   result['code'] === 486 &&
+                        //   result['event'] === 'hangup' &&
+                        //   result['reason'] === 'Busy Here'
+                        // ) {
+                        //   dispatch.player.updateAudioSource({
+                        //     src: busyRingtone,
+                        //   })
+                        //   dispatch.player.playAudio()
+                        // }
                         // @ts-ignore
                         Janus.log('Call hung up (' + result['code'] + ' ' + result['reason'] + ')!')
-                        // @ts-ignore
-                        if (incoming != null) {
-                          // @ts-ignore
-                          incoming = null
-                        }
-                        sipcall.hangup()
-
                         // lastActivity = new Date().getTime()
                         // stopScreenSharingI()
                         break
@@ -246,14 +242,14 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                   }
                 },
                 onlocalstream: function (stream) {
-                  // const localVideoElement = store.getState().player.localVideo
+                  const localVideoElement = store.getState().player.localVideo
 
                   // @ts-ignore
                   Janus.debug(' ::: Got a local stream :::')
                   // @ts-ignore
                   Janus.debug(stream)
                   // @ts-ignore
-                  // Janus.attachMediaStream(localVideoElement, stream)
+                  Janus.attachMediaStream(localVideoElement, stream)
                   /* IS VIDEO ENABLED ? */
                   // var videoTracks = stream.getVideoTracks()
                   /* */

@@ -4,7 +4,7 @@
 import { useWebRTCStore } from '../../utils/useWebRTCStore'
 import Janus from './janus'
 
-export const register = (sipExten: string, sipSecret: string) => {
+export function register(sipExten: string, sipSecret: string) {
   const { sipcall } = useWebRTCStore()
   if (sipcall) {
     sipcall.send({
@@ -21,7 +21,7 @@ export const register = (sipExten: string, sipSecret: string) => {
   }
 }
 
-export const answer = () => {
+export function answer() {
   const { sipcall, jsepGlobal } = useWebRTCStore()
   sipcall.createAnswer({
     jsep: jsepGlobal,
@@ -51,7 +51,7 @@ export const answer = () => {
   })
 }
 
-export const decline = () => {
+export function decline() {
   const { sipcall } = useWebRTCStore()
   sipcall.send({
     message: {
@@ -60,7 +60,7 @@ export const decline = () => {
   })
 }
 
-export const hangup = () => {
+export function hangup() {
   const { sipcall } = useWebRTCStore()
   sipcall.send({
     message: {
@@ -69,7 +69,7 @@ export const hangup = () => {
   })
 }
 
-export const unregister = () => {
+export function unregister() {
   const { sipcall } = useWebRTCStore()
   sipcall.send({
     message: {
@@ -78,7 +78,7 @@ export const unregister = () => {
   })
 }
 
-export const handleRemote = function (jsep) {
+export function handleRemote(jsep) {
   const { sipcall } = useWebRTCStore()
   sipcall.handleRemoteJsep({
     jsep: jsep,
@@ -91,5 +91,35 @@ export const handleRemote = function (jsep) {
       })
       sipcall.hangup()
     },
+  })
+}
+
+export function call(sipURI: string, mediaObj: object) {
+  return new Promise((resolve, reject) => {
+    const { sipcall } = useWebRTCStore()
+    sipcall.createOffer({
+      media: mediaObj,
+      success: function (jsep: any) {
+        // @ts-ignore
+        Janus.debug('Got SDP!')
+        // @ts-ignore
+        Janus.debug(jsep)
+        sipcall.send({
+          message: {
+            request: 'call',
+            uri: sipURI,
+          },
+          jsep: jsep,
+        })
+        resolve(true)
+      },
+      error: function (error) {
+        // @ts-ignore
+        Janus.error('ebRTC error...', error)
+        // @ts-ignore
+        Janus.error('WebRTC error call on createOffer: ', error)
+        reject(false)
+      },
+    })
   })
 }
