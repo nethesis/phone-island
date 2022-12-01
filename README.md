@@ -1,6 +1,32 @@
 # NethVoice CTI Phone Island
 A fully standalone component for managing calls, video calls, screen sharing and more...
 
+## Structure
+```mermaid
+flowchart LR
+    Views[Island] --> Call(Call)
+    Views[Island] --> Play(Play)
+    Views[Island] --> Chat(Chat)
+
+    Call --> CC{{Simple Call}} --- 1CAComp>Audio Component]
+    Call --> CCC{{Conference Call}} --- 2CAComp>Audio Component]
+
+    Call --> CVC{{Video Call}}
+    CVC{{Video Call}} --- 3CAComp>Audio Component]
+    CVC{{Video Call}} --- 3CVComp>Video Component]
+    CVC{{Video Call}} --- 5CVComp>ScreenSharing component]
+
+    Call --> CVS{{Video Sources Call}}
+    CVS{{Video Sources Call}} --- 4CAComp>Audio Component]
+    CVS{{Video Sources Call}} --- 4CVComp>Video component]
+
+    Play --> PA{{Play Voicemail}} --- 6PComp>Play Component]
+    Play --> PR{{Play Registration}} --- 6PComp>Play Component]
+
+    Chat --> CS{{Single Chat}} --- 7CComp>Chat Component]
+    Chat --> CG{{Group Chat}} --- 7CComp>Chat Component]
+```
+
 ## Builds
 Available as component on `npm`
 
@@ -74,4 +100,3 @@ As you can see the app/component can be built in two ways.
 
 - The component library built with Rollup
 - The widget files built with Parcel
-
