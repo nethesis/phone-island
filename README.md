@@ -2,7 +2,7 @@
 A fully standalone component for managing calls, video calls, screen sharing and more...
 
 ## Preview
-### Close
+### Closed
 ![pi-close](https://user-images.githubusercontent.com/6152486/205046804-98037726-7b2a-408b-b247-7053f0fc08e0.png)
 
 ### Open
