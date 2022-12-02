@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
-import React from 'react'
-import { App } from '../App'
+import React, { useEffect } from 'react'
+import { PhoneIsland } from '../App'
+import { useEventDispatch } from '../utils'
 
 const meta = {
   title: 'App Widget',
-  component: App,
+  component: PhoneIsland,
   argTypes: {},
   parameters: {
     controls: { expanded: true },
@@ -16,21 +17,26 @@ const meta = {
 
 export default meta as Meta
 
-// On user login
-// /me
-// /login // Token no expire
+// Uses the configuration token from .env
+const config = process.env.CONFIG_TOKEN
 
-const HOST_NAME: string = 'nv-seb'
-const USERNAME: string = 'foo1'
-const AUTH_TOKEN: string = '791ff10b8666939426eb1b5507e983558f0e5806'
-const SIP_EXTEN: string = '211'
-const SIP_SECRET: string = '0081a9189671e8c3d1ad8b025f92403da'
+const Template: Story<any> = (args) => {
+  const handleCallStart = () => {
+    useEventDispatch('phone-island-call-start', { number: 212 })
+  }
 
-const config = btoa(HOST_NAME + ':' + USERNAME + ':' + AUTH_TOKEN + ':' + SIP_EXTEN  + ':' + SIP_SECRET)
-
-console.log(config)
-
-const Template: Story<any> = (args) => <App dataConfig={config} {...args} />
+  return (
+    <>
+      <button
+        onClick={handleCallStart}
+        className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-sky-600 text-white border border-transparent hover:bg-sky-700 focus:ring-sky-500 focus:ring-offset-white rounded-md px-3 py-2 text-sm leading-4'
+      >
+        Call
+      </button>
+      <PhoneIsland dataConfig={config} always={false} {...args} />
+    </>
+  )
+}
 
 export const Default = Template.bind({})
 Default.args = {}

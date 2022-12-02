@@ -1,5 +1,5 @@
 {
-	"yarn": false,
+  "yarn": false,
   "tests": false,
   "2fa": false
 }
