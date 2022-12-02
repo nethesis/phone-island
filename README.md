@@ -13,7 +13,7 @@ A fully standalone component for managing calls, video calls, screen sharing and
 ```mermaid
 flowchart LR
     Views[Island] --> Call(Call)
-    Views[Island] --> Play(Play)
+    Views[Island] --> Play(Player)
     Views[Island] --> Chat(Chat)
 
     Call --> CC{{Simple Call}} --- 1CAComp>Audio Component]
@@ -28,8 +28,8 @@ flowchart LR
     CVS{{Video Sources Call}} --- 4CAComp>Audio Component]
     CVS{{Video Sources Call}} --- 4CVComp>Video component]
 
-    Play --> PA{{Play Voicemail}} --- 6PComp>Play Component]
-    Play --> PR{{Play Registration}} --- 6PComp>Play Component]
+    Play --> PA{{Player Voicemail}} --- 6PComp>Player Component]
+    Play --> PR{{Player Registration}} --- 6PComp>Player Component]
 
     Chat --> CS{{Single Chat}} --- 7CComp>Chat Component]
     Chat --> CG{{Group Chat}} --- 7CComp>Chat Component]
