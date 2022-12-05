@@ -3,4 +3,4 @@
 
 export * from './useEventListener'
 export * from './useIsomorphicLayoutEffect'
-export * from './useEventDispatch'
+export * from './eventDispatch'
