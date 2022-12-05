@@ -4,7 +4,7 @@
 import { Story, Meta } from '@storybook/react'
 import React, { useEffect } from 'react'
 import { PhoneIsland } from '../App'
-import { useEventDispatch } from '../utils'
+import { eventDispatch } from '../utils'
 
 const meta = {
   title: 'App Widget',
@@ -22,7 +22,7 @@ const config = process.env.CONFIG_TOKEN
 
 const Template: Story<any> = (args) => {
   const handleCallStart = () => {
-    useEventDispatch('phone-island-call-start', { number: 212 })
+    eventDispatch('phone-island-call-start', { number: 212 })
   }
 
   return (
