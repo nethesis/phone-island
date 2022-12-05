@@ -77,7 +77,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       socket.on('connect', () => {
         console.log('Socket on: ' + hostName + ' is connected !')
         socket.emit('login', {
-          accessKeyId: `${username}_phone-island`,
+          accessKeyId: `${username}`,
           token: authToken,
           uaType: 'desktop',
         })
