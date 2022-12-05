@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import './index.css'
 import { PhoneIsland } from './App'
 
@@ -14,10 +14,10 @@ widgetDivs.forEach((div) => {
   const config: string = div.getAttribute('data-config') || ''
   const always: boolean = div.getAttribute('always') === 'true' ? true : false
 
-  ReactDOM.render(
+  const root = createRoot(div)
+  root.render(
     <React.StrictMode>
       <PhoneIsland dataConfig={config} always={always} />
     </React.StrictMode>,
-    div,
   )
 })
