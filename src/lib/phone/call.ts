@@ -34,9 +34,15 @@ export function callSipURI(sipURI: string) {
       videoSend: false,
       videoRecv: false,
     })
+
+    console.log("CALLIIIIING");
+    console.log(calling);
+
     if (calling) {
       store.dispatch.player.updateAudioSource({ src: outgoingRingtone })
-      store.dispatch.player.playAudio()
+      store.dispatch.player.playAudio({
+        loop: true
+      })
       store.dispatch.currentCall.updateCurrentCall({
         outgoing: true,
       })

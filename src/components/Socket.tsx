@@ -30,6 +30,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             case 'ringing':
               dispatch.currentCall.updateCurrentCall({
                 displayName: getDisplayName(conv),
+                number: `${conv.counterpartNum}`,
                 incoming: true,
                 ringing: true,
               })
@@ -44,17 +45,22 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
+                // Accepted call
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
                   outgoing: false,
-                  displayName: `${conv.counterpartName}`,
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
+                  startTime: `${conv.startTime/1000}`,
                 })
               }
               // Handle outgoing call
               else if (conv && !conv.connected && conv.direction === 'out') {
+                // Start an outgoing call
                 dispatch.currentCall.updateCurrentCall({
                   outgoing: true,
-                  displayName: `${conv.counterpartName}`,
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
                 })
               }
             default:

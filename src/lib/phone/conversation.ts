@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 export interface ConvType {
-  [index: string]: string | number
+  counterpartNum: string | number
+  counterpartName: string | number
+  connected: boolean
+  startTime: number
+  direction: 'out' | 'in'
 }
 
 export function getDisplayName(conv: ConvType): string {
