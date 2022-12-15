@@ -9,6 +9,7 @@ import Janus from '../lib/webrtc/janus.js'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { useWebRTCStore } from '../utils/useWebRTCStore'
 import { store } from '../store'
+import { checkMediaPermissions } from '../lib/devices/devices'
 // import busyRingtone from '../static/busy_ringtone'
 
 interface WebRTCProps {
@@ -23,12 +24,12 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
 
   let registered = false
 
-  useEffect(() => {
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    })
+  // check audio and video permissions
+  React.useEffect(() => {
+		checkMediaPermissions();
+	}, []);
 
+  useEffect(() => {
     const setupDeps = () =>
       // @ts-ignore
       Janus.useDefaultDependencies({
@@ -73,24 +74,21 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                   // Register the extension to the server
                   register(sipExten, sipSecret)
                   if (pluginHandle) {
-                    console.log(
+                    Janus.log(
                       'SIP plugin attached! (' + pluginHandle.getPlugin() + ', id = ' + ')',
                     )
                   }
-                  // getSupportedDevices(function () {
-                  //   resolve()
-                  // })
                 },
                 error: function (error) {
-                  console.error('  -- Error attaching plugin...')
-                  console.error(error)
+                  Janus.error('  -- Error attaching plugin...')
+                  Janus.error(error)
                   // reject()
                 },
                 consentDialog: function (on) {
-                  console.log(`janus consentDialog (on: ${on})`)
+                  Janus.log(`janus consentDialog (on: ${on})`)
                 },
                 webrtcState: function (on) {
-                  console.log(
+                  Janus.log(
                     'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now',
                   )
                 },
@@ -98,19 +96,19 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                   const { sipcall } = useWebRTCStore()
 
                   if (sipcall) {
-                    console.log(
+                    Janus.log(
                       `ICE state of PeerConnection of handle has changed to "${newState}"`,
                     )
                   }
                 },
                 mediaState: function (medium, on) {
-                  console.log('Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
+                  Janus.log('Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
                 },
                 slowLink: function (uplink, count) {
                   if (uplink) {
-                    console.warn(`SLOW link: several missing packets from janus (${count})`)
+                    Janus.warn(`SLOW link: several missing packets from janus (${count})`)
                   } else {
-                    console.warn(`SLOW link: janus is not receiving all your packets (${count})`)
+                    Janus.warn(`SLOW link: janus is not receiving all your packets (${count})`)
                   }
                 },
                 onmessage: function (msg, jsep) {
@@ -275,15 +273,15 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                   Janus.attachMediaStream(remoteVideoElement, new MediaStream(videoTracks))
                 },
                 oncleanup: function () {
-                  console.log(' ::: janus Got a cleanup notification :::')
+                  Janus.log(' ::: janus Got a cleanup notification :::')
                 },
                 detached: function () {
-                  console.warn('SIP plugin handle detached from the plugin itself')
+                  Janus.warn('SIP plugin handle detached from the plugin itself')
                 },
               })
             },
             error: (err) => {
-              console.log('error', err)
+              Janus.log('error', err)
             },
           })
         },
