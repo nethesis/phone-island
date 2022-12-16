@@ -1,12 +1,15 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
+
 import {
   MediaPermissionsError,
   MediaPermissionsErrorType,
   requestMediaPermissions,
-} from 'mic-check';
-import Janus from '../webrtc/janus'
-import { func } from 'prop-types';
+} from 'mic-check'
+import JanusLib from '../webrtc/janus'
+import { JanusTypes } from '../webrtc/types'
+
+const Janus: JanusTypes = JanusLib
 
 export const getSupportedDevices = function (origCallback) {
   let supportedDevices = null
@@ -168,25 +171,30 @@ export const getSupportedDevices = function (origCallback) {
 
 export const checkMediaPermissions = function () {
   requestMediaPermissions()
-	.then(() => {
-		// can successfully access camera and microphone streams
-		// save permissions state on rematch to get access globally on the app
-	})
-	.catch((err: MediaPermissionsError) => {
-		const { type, name, message } = err;
-		if (type === MediaPermissionsErrorType.SystemPermissionDenied) {
-			// browser does not have permission to access camera or microphone
-      Janus.error("WebRTC: browser does not have permission to access camera or microphone");
-		} else if (type === MediaPermissionsErrorType.UserPermissionDenied) {
-			// user didn't allow app to access camera or microphone
-      Janus.error("WebRTC: user didn't allow app to access camera or microphone");
-		} else if (type === MediaPermissionsErrorType.CouldNotStartVideoSource) {
-			// camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)
-			// (mostly Windows specific problem)
-      Janus.error("WebRTC: camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)");
-		} else {
-			// not all error types are handled by this library
-      Janus.error("WebRTC: can't access audio or camere on this device. unknown error")
-		}
-	});
+    .then(() => {
+      // can successfully access camera and microphone streams
+      // save permissions state on rematch to get access globally on the app
+    })
+    .catch((err: MediaPermissionsError) => {
+      const { type, name, message } = err
+      if (type === MediaPermissionsErrorType.SystemPermissionDenied) {
+        // browser does not have permission to access camera or microphone
+        if (Janus.error)
+          Janus.error('WebRTC: browser does not have permission to access camera or microphone')
+      } else if (type === MediaPermissionsErrorType.UserPermissionDenied) {
+        // user didn't allow app to access camera or microphone
+        if (Janus.error) Janus.error("WebRTC: user didn't allow app to access camera or microphone")
+      } else if (type === MediaPermissionsErrorType.CouldNotStartVideoSource) {
+        // camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)
+        // (mostly Windows specific problem)
+        if (Janus.error)
+          Janus.error(
+            'WebRTC: camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)',
+          )
+      } else {
+        if (Janus.error)
+          // not all error types are handled by this library
+          Janus.error("WebRTC: can't access audio or camere on this device. unknown error")
+      }
+    })
 }
