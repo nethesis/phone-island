@@ -10,3 +10,12 @@
     @apply cursor-pointer;
   }
 }
+
+@layer components {
+  *,
+  ::before,
+  ::after {
+    border-width: 0;
+    border-style: solid;
+  }
+}

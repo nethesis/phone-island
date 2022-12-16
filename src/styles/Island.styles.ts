@@ -2,8 +2,10 @@ import styled, { css } from 'styled-components'
 
 interface StyledDynamicIslandProps {
   isOpen: boolean
+  incoming: boolean
   openedIslandPadding: number
   accepted: boolean
+  outgoing: boolean
 }
 
 export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
@@ -12,28 +14,29 @@ export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
   border-radius: 99px;
   background-color: #000;
   color: #fff;
-  width: 96px;
-  width: fit-content;
-  padding: ${({ isOpen, openedIslandPadding }) => (isOpen ? `${openedIslandPadding}px` : '8px 16px')};
+  padding: ${({ isOpen, openedIslandPadding }) =>
+    isOpen ? `${openedIslandPadding}px` : '8px 16px'};
   font-size: 0.75rem;
   display: grid;
   cursor: pointer;
-  ${({ isOpen, accepted }) =>
+  ${({ isOpen, accepted, incoming, outgoing }) =>
     isOpen && accepted
       ? css`
-          grid-template-rows: 72px 32px 48px;
+          grid-template-rows: 72px 1fr;
         `
       : isOpen &&
+        (incoming || outgoing) &&
         css`
-          grid-template-rows: 72px 48px;
+          grid-template-columns: 256px 114px;
         `}
 `
 interface StyledDynamicIslandTopContentProps {
   isOpen: boolean
 }
+
 export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
   display: grid;
-  grid-template-columns: ${({ isOpen }) => (isOpen ? '48px 1fr 12px' : '12px 1fr 12px')};
+  grid-template-columns: ${({ isOpen }) => (isOpen ? '52px 1fr 12px' : '12px 1fr 12px')};
   grid-gap: 16px;
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;

@@ -33,7 +33,7 @@ const Template: Story<any> = (args) => {
       >
         Call
       </button>
-      <PhoneIsland dataConfig={config} always={true} {...args} />
+      <PhoneIsland dataConfig={config} always={false} {...args} />
     </>
   )
 }

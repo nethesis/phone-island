@@ -48,6 +48,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 // Accepted call
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
+                  incoming: false,
                   outgoing: false,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
@@ -94,6 +95,9 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       })
 
       socket.on('extenUpdate', (res) => {
+
+        // ADD DISPATCH phone-island-conversations phone-island-main-presence
+
         if (res.username === username) {
           handleCalls(res)
         }

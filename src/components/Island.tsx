@@ -22,14 +22,19 @@ import {
   faForward,
   faCompactDisc,
   faPhone,
+  faMicrophone,
+  faRightLeft,
+  faChevronDown,
+  faChevronUp,
 } from '@fortawesome/free-solid-svg-icons'
-import { motion, useDragControls, useTransform } from 'framer-motion/dist/framer-motion'
+import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
 import { hangupCurrentCall, answerIncomingCall } from '../lib/phone/call'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
 import { useLocalStorage } from '../utils/useLocalStorage'
 
 import { getTranslateValues } from '../utils/getTranslate'
+import { Button } from './Button'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
 const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
@@ -52,41 +57,16 @@ interface PhoneIslandStorageTypes {
 
 const OPENED_ISLAND_PADDING = 24
 const OPENED_ISLAND_WIDTH = 300
+const INCOMING_ISLAND_WITH = 370
 const ISLAND_STARTING_POSITION = {
   x: 0,
   y: 0,
 }
 
-const variants = {
-  open: {
-    width: `${OPENED_ISLAND_WIDTH}px`,
-    height: 'auto',
-    borderRadius: '20px',
-  },
-  closed: {
-    width: '96px',
-    height: '12px',
-    borderRadius: '99px',
-  },
-}
-
-const iconVariants = {
-  open: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '12px',
-    margin: '0 auto',
-  },
-  closed: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '4px',
-  },
-}
-
 export const Island = ({ always }: IslandProps) => {
   const [isOpen, setIsOpen] = useState(true)
   const { incoming, accepted, outgoing, displayName, number, startTime } = useSelector(
+    // ADD ACCEPTED
     (state: RootState) => state.currentCall,
   )
   const controls = useDragControls()
@@ -190,6 +170,37 @@ export const Island = ({ always }: IslandProps) => {
     delay: 250,
   })
 
+  const [variants, setVariant] = useState<any>({})
+
+  useEffect(() => {
+    setVariant({
+      open: {
+        width: `${accepted ? OPENED_ISLAND_WIDTH : INCOMING_ISLAND_WITH}px`,
+        height: 'auto',
+        borderRadius: '20px',
+      },
+      closed: {
+        width: '96px',
+        height: '12px',
+        borderRadius: '99px',
+      },
+    })
+  }, [accepted])
+
+  const iconVariants = {
+    open: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
+      margin: '0 auto',
+    },
+    closed: {
+      width: '12px',
+      height: '12px',
+      borderRadius: '4px',
+    },
+  }
+
   return (
     <div
       ref={islandContainerRef}
@@ -198,11 +209,13 @@ export const Island = ({ always }: IslandProps) => {
       {(incoming || outgoing || accepted || always) && (
         <StyledDynamicIslandMotion
           className='font-sans absolute pointer-events-auto'
+          incoming={incoming}
           isOpen={isOpen}
           openedIslandPadding={OPENED_ISLAND_PADDING}
           animate={isOpen ? 'open' : 'closed'}
           variants={variants}
           accepted={accepted}
+          outgoing={outgoing}
           drag
           onPointerDown={startDrag}
           onDragStart={dragStarted}
@@ -220,16 +233,42 @@ export const Island = ({ always }: IslandProps) => {
           {...longPressEvent}
         >
           <StyledDynamicIslandTopContent isOpen={isOpen}>
-            <StyledMusicAlbumArtThumbMotion
-              animate={isOpen ? 'open' : 'closed'}
-              variants={iconVariants}
-              src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
-            />
+            <div className='relative'>
+              {incoming && (
+                <motion.div
+                  style={{
+                    animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                  }}
+                  animate={isOpen ? 'open' : 'closed'}
+                  variants={iconVariants}
+                  className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping`}
+                ></motion.div>
+              )}
+              <StyledMusicAlbumArtThumbMotion
+                className='z-10'
+                animate={isOpen ? 'open' : 'closed'}
+                variants={iconVariants}
+                src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
+              />
+            </div>
             <div>
               {isOpen && (
                 <StyledArtistDetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <StyledSongName>{displayName && displayName}</StyledSongName>
-                  <StyledArtistName>{number && number}</StyledArtistName>
+                  <StyledArtistName>
+                    {accepted ? (
+                      <Moment
+                        date={startTime}
+                        interval={1000}
+                        format='hh:mm:ss'
+                        trim='mid'
+                        unix
+                        durationFromNow
+                      />
+                    ) : (
+                      <>{number && number}</>
+                    )}
+                  </StyledArtistName>
                 </StyledArtistDetailsMotion>
               )}
             </div>
@@ -251,22 +290,8 @@ export const Island = ({ always }: IslandProps) => {
               />
             </StyledMusicIconMotion> */}
           </StyledDynamicIslandTopContent>
-          {accepted && isOpen && (
-            <>
-              <div className='text-white justify-center items-center w-full text-center'>
-                <Moment
-                  date={startTime}
-                  interval={1000}
-                  format='hh:mm:ss'
-                  trim
-                  unix
-                  durationFromNow
-                />
-              </div>
-            </>
-          )}
           {isOpen && (
-            <>
+            <div className='grid gap-y-5'>
               {/* <StyledPlayBarWrapper>
                 <span>2:30</span>
                 <StyledPlayBar />
@@ -282,25 +307,38 @@ export const Island = ({ always }: IslandProps) => {
                   <FontAwesomeIcon size='2x' icon={faCompactDisc} />
                 </div>
               </StyledSongControlsWrappers> */}
-              <div className={`flex ${isAnswerVisible() ? 'justify-between' : 'justify-around'}`}>
-                <button
-                  onClick={handleHangup}
-                  data-stop-propagation={true}
-                  className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-full p-2.5 text-sm leading-4 no-propagation'
-                >
-                  <FontAwesomeIcon className='rotate-135 no-propagation' size='2x' icon={faPhone} />
-                </button>
+              {accepted && (
+                <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faPause} />
+                  </Button>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                  </Button>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faRightLeft} />
+                  </Button>
+                  <Button variant='neutral'>
+                    <FontAwesomeIcon size='xl' icon={faChevronDown} />
+                  </Button>
+                </div>
+              )}
+              <motion.div
+                className={`grid ${
+                  isAnswerVisible() ? 'grid-cols-2' : accepted ? 'grid-cols-1 justify-items-center' : 'grid-cols-1 justify-items-end'
+                } gap-3.5`}
+                animate={{ opacity: 1 }}
+              >
+                <Button onClick={handleHangup} variant='red'>
+                  <FontAwesomeIcon className='rotate-135' size='2x' icon={faPhone} />
+                </Button>
                 {isAnswerVisible() && (
-                  <button
-                    onClick={handleAnswer}
-                    data-stop-propagation={true}
-                    className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-full p-2.5 text-sm leading-4 z-1000 no-propagation'
-                  >
+                  <Button onClick={handleAnswer} variant='green'>
                     <FontAwesomeIcon size='2x' icon={faPhone} />
-                  </button>
+                  </Button>
                 )}
-              </div>
-            </>
+              </motion.div>
+            </div>
           )}
         </StyledDynamicIslandMotion>
       )}
