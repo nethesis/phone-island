@@ -1,3 +1,6 @@
+// Copyright (C) 2022 Nethesis S.r.l.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { FC, ReactNode, ComponentPropsWithRef } from 'react'
 
 interface ButtonProps extends ComponentPropsWithRef<'button'> {

@@ -33,6 +33,8 @@ import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
 import { useLocalStorage } from '../utils/useLocalStorage'
 
+import { AudioBars } from './AudioBars'
+
 import { getTranslateValues } from '../utils/getTranslate'
 import { Button } from './Button'
 
@@ -68,6 +70,11 @@ export const Island = ({ always }: IslandProps) => {
   const { incoming, accepted, outgoing, displayName, number, startTime } = useSelector(
     // ADD ACCEPTED
     (state: RootState) => state.currentCall,
+  )
+
+  const { audio } = useSelector(
+    // ADD ACCEPTED
+    (state: RootState) => state.player,
   )
   const controls = useDragControls()
 
@@ -201,11 +208,28 @@ export const Island = ({ always }: IslandProps) => {
     },
   }
 
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
+
+  useEffect(() => {
+    const audioStreamListener = audio?.addEventListener('play', (event) => {
+      // @ts-ignore
+      console.log('audio.captureStream()')
+      // @ts-ignore
+      setAudioStream(audio.captureStream())
+    })
+
+    return audioStreamListener
+  }, [audio])
+
   return (
     <div
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center'
     >
+      {/* <div className='bg-black h-72 w-72 flex justify-center '>
+        <AudioBars audioStream={audioStream} />
+      </div> */}
+
       {(incoming || outgoing || accepted || always) && (
         <StyledDynamicIslandMotion
           className='font-sans absolute pointer-events-auto'
@@ -272,6 +296,7 @@ export const Island = ({ always }: IslandProps) => {
                 </StyledArtistDetailsMotion>
               )}
             </div>
+            {accepted && <AudioBars audioStream={audioStream} />}
             {/* <StyledMusicIconMotion animate={{ opacity: isOpen ? [0, 1] : 1 }}>
               <StyledMusicIconBarMotion
                 initial={{ height: '0' }}
@@ -325,7 +350,11 @@ export const Island = ({ always }: IslandProps) => {
               )}
               <motion.div
                 className={`grid ${
-                  isAnswerVisible() ? 'grid-cols-2' : accepted ? 'grid-cols-1 justify-items-center' : 'grid-cols-1 justify-items-end'
+                  isAnswerVisible()
+                    ? 'grid-cols-2'
+                    : accepted
+                    ? 'grid-cols-1 justify-items-center'
+                    : 'grid-cols-1 justify-items-end'
                 } gap-3.5`}
                 animate={{ opacity: 1 }}
               >
