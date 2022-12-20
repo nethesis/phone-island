@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { PhoneIsland } from '../App'
-import { eventDispatch } from '../utils'
+import { eventDispatch, useEventListener } from '../utils'
 
 const meta = {
   title: 'App Widget',
@@ -24,6 +24,14 @@ const Template: Story<any> = (args) => {
   const handleCallStart = () => {
     eventDispatch('phone-island-call-start', { number: 212 })
   }
+
+  useEventListener('phone-island-main-presence', (data) => {
+    console.info('userMainPresenceUpdate', data)
+  })
+
+  useEventListener('phone-island-conversations', (data) => {
+    console.info('extenUpdate', data)
+  })
 
   return (
     <>

@@ -7,6 +7,7 @@ import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import incomingRingtone from '../static/incoming_ringtone'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
+import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
 
 interface SocketProps {
   children: ReactNode
@@ -94,10 +95,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         console.log('auth_ok')
       })
 
+      socket.on('userMainPresenceUpdate', (res) => {
+        // Pass data to dispatchMainPresence
+        dispatchMainPresence(res)
+      })
+
       socket.on('extenUpdate', (res) => {
+        // Call the dispatchConversations
+        dispatchConversations(res)
 
-        // ADD DISPATCH phone-island-conversations phone-island-main-presence
-
+        // Handle only the events of the user
         if (res.username === username) {
           handleCalls(res)
         }

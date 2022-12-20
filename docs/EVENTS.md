@@ -40,11 +40,75 @@ As you can see, the helper function can be used in the following way:
 
 eventDispatch(`<event-name>`, `<data-object>`)
 
-## Available Events
+## Listened Events
 
 - `phone-island-call-start` The event to start a call
   ```json
   {
     "number": "200" // string - The number to be called
+  }
+  ```
+
+## Dispated Events
+
+- `phone-island-main-presence` The event with userMainPresenceUpdate message from the WebSocket
+
+  ```json
+  {
+    "foo1": {
+      // string - The updated username
+      "mainPresence": "ringing" // string - The mainPresence status
+    }
+  }
+  ```
+
+- `phone-island-conversations` The event with extenUpdate message from the WebSocket
+  ```json
+  {
+    "foo1": {
+      // string - The updated username
+      "conversations": {
+        "PJSIP/91212-00001153>PJSIP/211-00001154": { // object - The conversations
+          "id": "PJSIP/91212-00001153>PJSIP/211-00001154",
+          "owner": "211",
+          "chDest": {
+            "type": "dest",
+            "channel": "PJSIP/211-00001154",
+            "callerNum": "211",
+            "startTime": 1671557974000,
+            "callerName": "foo 1",
+            "bridgedNum": "212",
+            "bridgedName": "foo 2",
+            "inConference": false,
+            "channelStatus": "ringing",
+            "bridgedChannel": "PJSIP/91212-00001153"
+          },
+          "linkedId": "1671557974.4928",
+          "uniqueId": "1671557974.4929",
+          "chSource": {
+            "type": "source",
+            "channel": "PJSIP/91212-00001153",
+            "callerNum": "212",
+            "startTime": 1671557974000,
+            "callerName": "foo 2",
+            "bridgedNum": "211",
+            "bridgedName": "foo 1",
+            "inConference": false,
+            "channelStatus": "ring",
+            "bridgedChannel": "PJSIP/211-00001154"
+          },
+          "duration": 1,
+          "startTime": 1671557974000,
+          "connected": false,
+          "recording": "false",
+          "direction": "in",
+          "inConference": false,
+          "throughQueue": false,
+          "throughTrunk": false,
+          "counterpartNum": "212",
+          "counterpartName": "foo 2"
+        }
+      }
+    }
   }
   ```
