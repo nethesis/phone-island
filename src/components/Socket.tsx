@@ -53,7 +53,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   outgoing: false,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
-                  startTime: `${conv.startTime/1000}`,
+                  startTime: `${conv.startTime / 1000}`,
                 })
               }
               // Handle outgoing call

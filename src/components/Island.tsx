@@ -1,3 +1,6 @@
+// Copyright (C) 2022 Nethesis S.r.l.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import React, { useState, useRef, useEffect } from 'react'
 import {
   StyledAlbumArtThumb,
@@ -262,7 +265,7 @@ export const Island = ({ always }: IslandProps) => {
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                   animate={isOpen ? 'open' : 'closed'}
                   variants={iconVariants}

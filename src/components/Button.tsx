@@ -24,7 +24,11 @@ export const Button: FC<ButtonProps> = ({ children, variant, ...props }) => {
   }
 
   return (
-    <button data-stop-propagation={true} className={classNames(styles.base, variant && styles.variant[variant])} {...props}>
+    <button
+      data-stop-propagation={true}
+      className={classNames(styles.base, variant && styles.variant[variant])}
+      {...props}
+    >
       {children}
     </button>
   )

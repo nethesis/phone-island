@@ -68,7 +68,8 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "foo1": {
       // string - The updated username
       "conversations": {
-        "PJSIP/91212-00001153>PJSIP/211-00001154": { // object - The conversations
+        "PJSIP/91212-00001153>PJSIP/211-00001154": {
+          // object - The conversations
           "id": "PJSIP/91212-00001153>PJSIP/211-00001154",
           "owner": "211",
           "chDest": {
