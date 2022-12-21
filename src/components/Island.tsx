@@ -60,9 +60,6 @@ interface PhoneIslandStorageTypes {
   position: PositionTypes
 }
 
-const OPENED_ISLAND_PADDING = 24
-const OPENED_ISLAND_WIDTH = 300
-const INCOMING_ISLAND_WITH = 418
 const ISLAND_STARTING_POSITION = {
   x: 0,
   y: 0,
@@ -180,22 +177,23 @@ export const Island = ({ always }: IslandProps) => {
     delay: 250,
   })
 
-  const [variants, setVariant] = useState<any>({})
-
-  useEffect(() => {
-    setVariant({
-      open: {
-        width: `${accepted && OPENED_ISLAND_WIDTH + 'px'}`,
-        height: 'auto',
-        borderRadius: '20px',
-      },
-      closed: {
-        width: '96px',
-        height: '12px',
-        borderRadius: '99px',
-      },
-    })
-  }, [accepted])
+  const variants = {
+    openIncoming: {
+      width: '370px',
+      height: '48px',
+      borderRadius: '20px',
+    },
+    openAccepted: {
+      width: '300px',
+      height: '188px',
+      borderRadius: '20px',
+    },
+    closed: {
+      width: '96px',
+      height: '12px',
+      borderRadius: '99px',
+    },
+  }
 
   const iconVariants = {
     open: {
@@ -238,8 +236,13 @@ export const Island = ({ always }: IslandProps) => {
           className='font-sans absolute pointer-events-auto'
           incoming={incoming}
           isOpen={isOpen}
-          openedIslandPadding={OPENED_ISLAND_PADDING}
-          animate={isOpen ? 'open' : 'closed'}
+          animate={
+            isOpen && incoming && !accepted
+              ? 'openIncoming'
+              : isOpen && accepted
+              ? 'openAccepted'
+              : 'closed'
+          }
           variants={variants}
           accepted={accepted}
           outgoing={outgoing}
@@ -253,13 +256,16 @@ export const Island = ({ always }: IslandProps) => {
             x: position?.x || ISLAND_STARTING_POSITION.x,
             y: position?.y || ISLAND_STARTING_POSITION.y,
           }}
+          style={{
+            padding: isOpen ? '24px' : '8px 16px',
+          }}
           dragControls={controls}
           dragConstraints={islandContainerRef}
           onDragEnd={onDragEnd}
           ref={islandRef}
           {...longPressEvent}
         >
-          <StyledDynamicIslandTopContent isOpen={isOpen}>
+          <StyledDynamicIslandTopContent isOpen={isOpen} incoming={incoming} accepted={accepted}>
             <div className='relative w-12 h-12'>
               {incoming && (
                 <motion.div

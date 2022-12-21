@@ -17,8 +17,6 @@ export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
   border-radius: 99px;
   background-color: #000;
   color: #fff;
-  padding: ${({ isOpen, openedIslandPadding }) =>
-    isOpen ? `${openedIslandPadding}px` : '8px 16px'};
   font-size: 0.75rem;
   display: grid;
   cursor: pointer;
@@ -35,12 +33,15 @@ export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
 `
 interface StyledDynamicIslandTopContentProps {
   isOpen: boolean
+  incoming: boolean
+  accepted: boolean
 }
 
 export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
   display: grid;
-  grid-template-columns: ${({ isOpen }) => (isOpen ? '52px 1fr' : '12px 1fr 12px')};
-  grid-gap: 16px;
+  grid-template-columns: ${({ isOpen, incoming, accepted }) =>
+    isOpen && incoming ? '48px 1fr' : isOpen && accepted ? '48px 1fr 48px' : '12px 1fr 12px'};
+  grid-gap: 20px;
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;
   width: 100%;
