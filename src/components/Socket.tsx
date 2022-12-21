@@ -7,6 +7,7 @@ import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import incomingRingtone from '../static/incoming_ringtone'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
+import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
 
 interface SocketProps {
   children: ReactNode
@@ -30,6 +31,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             case 'ringing':
               dispatch.currentCall.updateCurrentCall({
                 displayName: getDisplayName(conv),
+                number: `${conv.counterpartNum}`,
                 incoming: true,
                 ringing: true,
               })
@@ -44,17 +46,23 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
+                // Accepted call
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
+                  incoming: false,
                   outgoing: false,
-                  displayName: `${conv.counterpartName}`,
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
+                  startTime: `${conv.startTime / 1000}`,
                 })
               }
               // Handle outgoing call
               else if (conv && !conv.connected && conv.direction === 'out') {
+                // Start an outgoing call
                 dispatch.currentCall.updateCurrentCall({
                   outgoing: true,
-                  displayName: `${conv.counterpartName}`,
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
                 })
               }
             default:
@@ -87,7 +95,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         console.log('auth_ok')
       })
 
+      socket.on('userMainPresenceUpdate', (res) => {
+        // Pass data to dispatchMainPresence
+        dispatchMainPresence(res)
+      })
+
       socket.on('extenUpdate', (res) => {
+        // Call the dispatchConversations
+        dispatchConversations(res)
+
+        // Handle only the events of the user
         if (res.username === username) {
           handleCalls(res)
         }

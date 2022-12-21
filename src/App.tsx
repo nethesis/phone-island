@@ -13,7 +13,7 @@ interface PhoneIslandProps {
 }
 
 export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }) => {
-  const CONFIG: string[] = Base64.atob(dataConfig || "").split(':')
+  const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
   const AUTH_TOKEN: string = CONFIG[2]

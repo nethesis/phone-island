@@ -23,7 +23,7 @@ export const useEventListener = (eventName, handler, element = window) => {
       if (!isSupported) return
       // Create event listener that calls handler function stored in ref
       // @ts-ignore
-      const eventListener = (event) => savedHandler.current(event)
+      const eventListener = (event) => savedHandler.current(event.detail)
       // Add event listener
       element.addEventListener(eventName, eventListener)
       // Remove event listener on cleanup

@@ -15,7 +15,7 @@ export const CallEvents: FC = () => {
    * Add event listner for call
    */
   useEventListener('phone-island-call-start', (data) => {
-    const callURI = 'sip:' + data.detail.number + '@' + BASE_HOST_URL
+    const callURI = 'sip:' + data.number + '@' + BASE_HOST_URL
     callSipURI(callURI)
   })
   return sipcall && <></>

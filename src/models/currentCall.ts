@@ -6,18 +6,22 @@ import type { RootModel } from '.'
 
 interface CurrentCallTypes {
   displayName?: string
+  number?: string
   incoming?: boolean
   ringing?: boolean
   accepted?: boolean
   outgoing?: boolean
+  startTime?: string
 }
 
 const defaultState = {
   displayName: '',
+  number: '',
   incoming: false,
   ringing: false,
   accepted: false,
   outgoing: false,
+  startTime: '',
 }
 
 export const currentCall = createModel<RootModel>()({

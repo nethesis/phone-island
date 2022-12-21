@@ -1,56 +1,385 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import {
+  StyledAlbumArtThumb,
+  StyledArtistDetails,
+  StyledArtistName,
+  StyledDynamicIsland,
+  StyledDynamicIslandTopContent,
+  StyledMusicIcon,
+  StyledMusicIconBar,
+  StyledPlayBar,
+  StyledPlayBarWrapper,
+  StyledSongControls,
+  StyledSongControlsWrappers,
+  StyledSongName,
+} from '../styles/Island.styles'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faBackward,
+  faPause,
+  faForward,
+  faCompactDisc,
+  faPhone,
+  faMicrophone,
+  faRightLeft,
+  faChevronDown,
+  faChevronUp,
+} from '@fortawesome/free-solid-svg-icons'
+import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
 import { hangupCurrentCall, answerIncomingCall } from '../lib/phone/call'
+import { useLongPress } from '../utils/useLongPress'
+import Moment from 'react-moment'
+import { useLocalStorage } from '../utils/useLocalStorage'
+
+import { AudioBars } from './AudioBars'
+
+import { getTranslateValues } from '../utils/getTranslate'
+import { Button } from './Button'
+
+const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
+const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
+const StyledMusicAlbumArtThumbMotion = motion(StyledAlbumArtThumb)
+const StyledMusicIconMotion = motion(StyledMusicIcon)
+const StyledArtistDetailsMotion = motion(StyledArtistDetails)
 
 interface IslandProps {
-  always: boolean
+  always?: boolean
+}
+
+interface PositionTypes {
+  x: number
+  y: number
+}
+
+interface PhoneIslandStorageTypes {
+  position: PositionTypes
+}
+
+const OPENED_ISLAND_PADDING = 24
+const OPENED_ISLAND_WIDTH = 300
+const INCOMING_ISLAND_WITH = 370
+const ISLAND_STARTING_POSITION = {
+  x: 0,
+  y: 0,
 }
 
 export const Island = ({ always }: IslandProps) => {
-  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
+  const [isOpen, setIsOpen] = useState(true)
+  const { incoming, accepted, outgoing, displayName, number, startTime } = useSelector(
+    // ADD ACCEPTED
+    (state: RootState) => state.currentCall,
+  )
 
-  const DisplayName = () => {
-    const { displayName } = useSelector((state: RootState) => state.currentCall)
-    return <span>{displayName ? displayName : '-'}</span>
+  const { audio } = useSelector(
+    // ADD ACCEPTED
+    (state: RootState) => state.player,
+  )
+  const controls = useDragControls()
+
+  const [phoneIslandStorage, setPhoneIslandStorage] =
+    useLocalStorage<PhoneIslandStorageTypes | null>('phone-island', null)
+
+  const islandRef = useRef<any>(null)
+
+  const islandContainerRef = useRef<any>(null)
+
+  const [position, setPosition] = useState<PositionTypes | null>(
+    phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
+  )
+
+  const [moved, setMoved] = useState<boolean>(false)
+
+  function isAnswerVisible() {
+    return !outgoing && !accepted
   }
 
+  function startDrag(event) {
+    controls.start(event)
+  }
+
+  function handleAnswer(event) {
+    answerIncomingCall()
+  }
+
+  function handleHangup(event) {
+    event.stopPropagation()
+    hangupCurrentCall()
+  }
+
+  const onLongPress = () => {
+    console.log('long press trigger')
+  }
+
+  const islandClick = () => {
+    setIsOpen(!isOpen)
+  }
+
+  function innerXPosition(x) {
+    // Get horizontal constraints
+    const xConstraintPosition =
+      islandContainerRef.current.offsetWidth / 2 - islandRef.current.offsetWidth / 2
+
+    // Return the X position inside the constraints
+    return x > 0 && x > xConstraintPosition
+      ? xConstraintPosition
+      : x < 0 && x < -xConstraintPosition
+      ? -xConstraintPosition
+      : x
+  }
+
+  function innerYPosition(y) {
+    // Get vertical constraints
+    const yConstraintPosition =
+      islandContainerRef.current.offsetHeight / 2 - islandRef.current.offsetHeight / 2
+
+    // Return the Y position inside the constraints
+    return y > 0 && y > yConstraintPosition
+      ? yConstraintPosition
+      : y < 0 && y < -yConstraintPosition
+      ? -yConstraintPosition
+      : y
+  }
+
+  const onDragEnd = () => {
+    // Get initial translation values
+    let { x, y }: any = getTranslateValues(islandRef.current)
+
+    // Round position
+    x = innerXPosition(Math.round(x))
+    y = innerYPosition(Math.round(y))
+
+    // Save the new position to localstorage
+    setPhoneIslandStorage({
+      position: {
+        x,
+        y,
+      },
+    })
+    // Set position to variable
+    setPosition({
+      x,
+      y,
+    })
+  }
+
+  function resetMoved() {
+    setMoved(false)
+  }
+
+  function dragStarted() {
+    setMoved(true)
+  }
+
+  const longPressEvent = useLongPress(onLongPress, islandClick, moved, resetMoved, {
+    shouldPreventDefault: true,
+    delay: 250,
+  })
+
+  const [variants, setVariant] = useState<any>({})
+
+  useEffect(() => {
+    setVariant({
+      open: {
+        width: `${accepted ? OPENED_ISLAND_WIDTH : INCOMING_ISLAND_WITH}px`,
+        height: 'auto',
+        borderRadius: '20px',
+      },
+      closed: {
+        width: '96px',
+        height: '12px',
+        borderRadius: '99px',
+      },
+    })
+  }, [accepted])
+
+  const iconVariants = {
+    open: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
+      margin: '0 auto',
+    },
+    closed: {
+      width: '12px',
+      height: '12px',
+      borderRadius: '4px',
+    },
+  }
+
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
+
+  useEffect(() => {
+    const audioStreamListener = audio?.addEventListener('play', (event) => {
+      // @ts-ignore
+      console.log('audio.captureStream()')
+      // @ts-ignore
+      setAudioStream(audio.captureStream())
+    })
+
+    return audioStreamListener
+  }, [audio])
+
   return (
-    <>
-      {(incoming || outgoing || accepted || always) && ( // add calling
-        <>
-          <div className='bg-black px-10 py-8 rounded-3xl flex flex-col gap-5 text-white w-fit absolute bottom-6 left-48 font-sans'>
-            <div className='flex items-center'>
-              <DisplayName />
-              {accepted && (
-                <span className='ml-5 w-3 h-3 bg-red-600 rounded-full animate-ping'></span>
-              )}{' '}
-            </div>
-            <div className='flex gap-3'>
-              {!outgoing && !accepted && (
-                <button
-                  onClick={answerIncomingCall}
-                  className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-green-600 text-white border border-transparent hover:bg-green-700 focus:ring-green-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-                >
-                  Answer
-                </button>
+    <div
+      ref={islandContainerRef}
+      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center'
+    >
+      {/* <div className='bg-black h-72 w-72 flex justify-center '>
+        <AudioBars audioStream={audioStream} />
+      </div> */}
+
+      {(incoming || outgoing || accepted || always) && (
+        <StyledDynamicIslandMotion
+          className='font-sans absolute pointer-events-auto'
+          incoming={incoming}
+          isOpen={isOpen}
+          openedIslandPadding={OPENED_ISLAND_PADDING}
+          animate={isOpen ? 'open' : 'closed'}
+          variants={variants}
+          accepted={accepted}
+          outgoing={outgoing}
+          drag
+          onPointerDown={startDrag}
+          onDragStart={dragStarted}
+          dragTransition={{
+            power: 0,
+          }}
+          initial={{
+            x: position?.x || ISLAND_STARTING_POSITION.x,
+            y: position?.y || ISLAND_STARTING_POSITION.y,
+          }}
+          dragControls={controls}
+          dragConstraints={islandContainerRef}
+          onDragEnd={onDragEnd}
+          ref={islandRef}
+          {...longPressEvent}
+        >
+          <StyledDynamicIslandTopContent isOpen={isOpen}>
+            <div className='relative w-12 h-12'>
+              {incoming && (
+                <motion.div
+                  style={{
+                    animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                    borderRadius: '4px',
+                  }}
+                  animate={isOpen ? 'open' : 'closed'}
+                  variants={iconVariants}
+                  className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
+                ></motion.div>
               )}
-              <button
-                onClick={hangupCurrentCall}
-                className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-red-600 text-white border border-transparent hover:bg-red-700 focus:ring-red-500 focus:ring-offset-black rounded-md px-3 py-2 text-sm leading-4'
-              >
-                Decline
-              </button>
+              <StyledMusicAlbumArtThumbMotion
+                className='z-10 h-12 w-12'
+                animate={isOpen ? 'open' : 'closed'}
+                variants={iconVariants}
+                src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
+              />
             </div>
-          </div>
-        </>
+            <div>
+              {isOpen && (
+                <StyledArtistDetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <StyledSongName>{displayName && displayName}</StyledSongName>
+                  <StyledArtistName>
+                    {accepted ? (
+                      <Moment
+                        date={startTime}
+                        interval={1000}
+                        format='hh:mm:ss'
+                        trim='mid'
+                        unix
+                        durationFromNow
+                      />
+                    ) : (
+                      <>{number && number}</>
+                    )}
+                  </StyledArtistName>
+                </StyledArtistDetailsMotion>
+              )}
+            </div>
+            {accepted && <AudioBars audioStream={audioStream} />}
+            {/* <StyledMusicIconMotion animate={{ opacity: isOpen ? [0, 1] : 1 }}>
+              <StyledMusicIconBarMotion
+                initial={{ height: '0' }}
+                animate={{ height: '100%' }}
+                transition={{ duration: 1, delay: 0.5, repeat: Infinity }}
+              />
+              <StyledMusicIconBarMotion
+                initial={{ height: '0' }}
+                animate={{ height: '100%' }}
+                transition={{ duration: 1, delay: 0.75, repeat: Infinity }}
+              />
+              <StyledMusicIconBarMotion
+                initial={{ height: '0' }}
+                animate={{ height: '75%' }}
+                transition={{ duration: 1, delay: 0.3, repeat: Infinity }}
+              />
+            </StyledMusicIconMotion> */}
+          </StyledDynamicIslandTopContent>
+          {isOpen && (
+            <div className='grid gap-y-5'>
+              {/* <StyledPlayBarWrapper>
+                <span>2:30</span>
+                <StyledPlayBar />
+                <span>-1:35</span>
+              </StyledPlayBarWrapper>
+              <StyledSongControlsWrappers>
+                <StyledSongControls>
+                  <FontAwesomeIcon size='2x' icon={faBackward} />
+                  <FontAwesomeIcon size='3x' icon={faPause} />
+                  <FontAwesomeIcon size='2x' icon={faForward} />
+                </StyledSongControls>
+                <div>
+                  <FontAwesomeIcon size='2x' icon={faCompactDisc} />
+                </div>
+              </StyledSongControlsWrappers> */}
+              {accepted && (
+                <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faPause} />
+                  </Button>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                  </Button>
+                  <Button variant='default'>
+                    <FontAwesomeIcon size='xl' icon={faRightLeft} />
+                  </Button>
+                  <Button variant='neutral'>
+                    <FontAwesomeIcon size='xl' icon={faChevronDown} />
+                  </Button>
+                </div>
+              )}
+              <motion.div
+                className={`grid ${
+                  isAnswerVisible()
+                    ? 'grid-cols-2'
+                    : accepted
+                    ? 'grid-cols-1 justify-items-center'
+                    : 'grid-cols-1 justify-items-end'
+                } gap-3.5`}
+                animate={{ opacity: 1 }}
+              >
+                <Button onClick={handleHangup} variant='red'>
+                  <FontAwesomeIcon className='rotate-135' size='2x' icon={faPhone} />
+                </Button>
+                {isAnswerVisible() && (
+                  <Button onClick={handleAnswer} variant='green'>
+                    <FontAwesomeIcon size='2x' icon={faPhone} />
+                  </Button>
+                )}
+              </motion.div>
+            </div>
+          )}
+        </StyledDynamicIslandMotion>
       )}
       <audio id='audio' className='hidden' autoPlay></audio>
       <video id='localVideo' className='hidden' muted={true} autoPlay></video>
       <video id='remoteVideo' className='hidden' autoPlay></video>
-    </>
+    </div>
   )
 }
+
+Island.displayName = 'Island'
