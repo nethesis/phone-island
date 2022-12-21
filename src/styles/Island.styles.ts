@@ -39,7 +39,7 @@ interface StyledDynamicIslandTopContentProps {
 
 export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
   display: grid;
-  grid-template-columns: ${({ isOpen }) => (isOpen ? '52px 1fr 48px' : '12px 1fr 12px')};
+  grid-template-columns: ${({ isOpen }) => (isOpen ? '52px 1fr' : '12px 1fr 12px')};
   grid-gap: 16px;
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;

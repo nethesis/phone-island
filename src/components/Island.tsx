@@ -62,7 +62,7 @@ interface PhoneIslandStorageTypes {
 
 const OPENED_ISLAND_PADDING = 24
 const OPENED_ISLAND_WIDTH = 300
-const INCOMING_ISLAND_WITH = 370
+const INCOMING_ISLAND_WITH = 418
 const ISLAND_STARTING_POSITION = {
   x: 0,
   y: 0,
@@ -185,7 +185,7 @@ export const Island = ({ always }: IslandProps) => {
   useEffect(() => {
     setVariant({
       open: {
-        width: `${accepted ? OPENED_ISLAND_WIDTH : INCOMING_ISLAND_WITH}px`,
+        width: `${accepted && OPENED_ISLAND_WIDTH + 'px'}`,
         height: 'auto',
         borderRadius: '20px',
       },
