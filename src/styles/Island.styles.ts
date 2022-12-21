@@ -61,8 +61,6 @@ export const StyledMusicIconBar = styled.div`
 `
 
 export const StyledAlbumArtThumb = styled.img`
-  width: 12px;
-  height: 12px;
   border-radius: 4px;
   object-fit: cover;
 `

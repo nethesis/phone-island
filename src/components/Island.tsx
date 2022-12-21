@@ -257,19 +257,20 @@ export const Island = ({ always }: IslandProps) => {
           {...longPressEvent}
         >
           <StyledDynamicIslandTopContent isOpen={isOpen}>
-            <div className='relative'>
+            <div className='relative w-12 h-12'>
               {incoming && (
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+                    borderRadius: '4px'
                   }}
                   animate={isOpen ? 'open' : 'closed'}
                   variants={iconVariants}
-                  className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping`}
+                  className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
                 ></motion.div>
               )}
               <StyledMusicAlbumArtThumbMotion
-                className='z-10'
+                className='z-10 h-12 w-12'
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
                 src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
