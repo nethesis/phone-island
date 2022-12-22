@@ -179,19 +179,19 @@ export const Island = ({ always }: IslandProps) => {
 
   const variants = {
     openIncoming: {
-      width: '370px',
-      height: '48px',
+      width: '418px',
+      height: '96px',
       borderRadius: '20px',
     },
     openAccepted: {
-      width: '300px',
-      height: '188px',
+      width: '348px',
+      height: '236px',
       borderRadius: '20px',
     },
     closed: {
-      width: '96px',
-      height: '12px',
-      borderRadius: '99px',
+      width: '156px',
+      height: '36px',
+      borderRadius: '999px',
     },
   }
 
@@ -203,8 +203,8 @@ export const Island = ({ always }: IslandProps) => {
       margin: '0 auto',
     },
     closed: {
-      width: '12px',
-      height: '12px',
+      width: '20px',
+      height: '20px',
       borderRadius: '4px',
     },
   }
@@ -225,7 +225,7 @@ export const Island = ({ always }: IslandProps) => {
   return (
     <div
       ref={islandContainerRef}
-      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center'
+      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container'
     >
       {/* <div className='bg-black h-72 w-72 flex justify-center '>
         <AudioBars audioStream={audioStream} />
@@ -235,17 +235,17 @@ export const Island = ({ always }: IslandProps) => {
         <StyledDynamicIslandMotion
           className='font-sans absolute pointer-events-auto'
           incoming={incoming}
+          accepted={accepted}
+          outgoing={outgoing}
           isOpen={isOpen}
           animate={
-            isOpen && incoming && !accepted
+            isOpen && (incoming || outgoing) && !accepted
               ? 'openIncoming'
               : isOpen && accepted
               ? 'openAccepted'
               : 'closed'
           }
           variants={variants}
-          accepted={accepted}
-          outgoing={outgoing}
           drag
           onPointerDown={startDrag}
           onDragStart={dragStarted}
@@ -265,9 +265,14 @@ export const Island = ({ always }: IslandProps) => {
           ref={islandRef}
           {...longPressEvent}
         >
-          <StyledDynamicIslandTopContent isOpen={isOpen} incoming={incoming} accepted={accepted}>
+          <StyledDynamicIslandTopContent
+            isOpen={isOpen}
+            incoming={incoming}
+            accepted={accepted}
+            outgoing={outgoing}
+          >
             <div className='relative w-12 h-12'>
-              {incoming && (
+              {(incoming || outgoing) && (
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',

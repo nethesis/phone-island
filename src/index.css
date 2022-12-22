@@ -12,10 +12,12 @@
 }
 
 @layer components {
-  *,
-  ::before,
-  ::after {
+  .phone-island-container *,
+  .phone-island-container ::before,
+  .phone-island-container ::after {
+    box-sizing: border-box;
     border-width: 0;
     border-style: solid;
+    border-color: rgb(229 231 235 / 1);
   }
 }

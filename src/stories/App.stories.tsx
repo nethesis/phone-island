@@ -7,7 +7,7 @@ import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 
 const meta = {
-  title: 'App Widget',
+  title: 'Default',
   component: PhoneIsland,
   argTypes: {},
   parameters: {
