@@ -212,14 +212,20 @@ export const Island = ({ always }: IslandProps) => {
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
 
   useEffect(() => {
-    const audioStreamListener = audio?.addEventListener('play', (event) => {
-      // @ts-ignore
-      console.log('audio.captureStream()')
-      // @ts-ignore
-      setAudioStream(audio.captureStream())
+    const audioStreamListener = audio?.addEventListener('play', () => {
+      if (navigator.userAgent.indexOf('Firefox') > -1) {
+        // @ts-ignore
+        setAudioStream(audio.mozCaptureStream())
+      } else {
+        // @ts-ignore
+        setAudioStream(audio.captureStream())
+      }
     })
 
-    return audioStreamListener
+    return () => {
+      // @ts-ignore
+      audio?.removeEventListener('play', audioStreamListener)
+    }
   }, [audio])
 
   return (

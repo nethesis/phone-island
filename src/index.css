@@ -9,15 +9,9 @@
   button {
     @apply cursor-pointer;
   }
-}
-
-@layer components {
   .phone-island-container *,
   .phone-island-container ::before,
   .phone-island-container ::after {
-    box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-    border-color: rgb(229 231 235 / 1);
+    @apply box-border border-0 border-solid border-gray-800;
   }
 }
