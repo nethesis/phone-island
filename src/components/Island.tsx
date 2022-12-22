@@ -231,7 +231,7 @@ export const Island = ({ always }: IslandProps) => {
   return (
     <div
       ref={islandContainerRef}
-      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container'
+      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
       {/* <div className='bg-black h-72 w-72 flex justify-center '>
         <AudioBars audioStream={audioStream} />

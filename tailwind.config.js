@@ -6,6 +6,9 @@ module.exports = {
       rotate: {
         135: '135deg',
       },
+      zIndex: {
+        1000: '1000',
+      },
     },
   },
   variants: {
