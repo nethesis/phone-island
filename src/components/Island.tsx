@@ -191,7 +191,7 @@ export const Island = ({ always }: IslandProps) => {
     closed: {
       width: '156px',
       height: '36px',
-      borderRadius: '999px',
+      borderRadius: '99px',
     },
   }
 
