@@ -5,9 +5,13 @@ import { useEffect, useRef } from 'react'
 import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect'
 
 // Event listener hook
-export const useEventListener = (eventName, handler, element = window) => {
+export const useEventListener = (
+  eventName: string,
+  handler: (data: any) => void,
+  element = window,
+) => {
   // Create a ref that stores handler
-  const savedHandler = useRef()
+  const savedHandler = useRef<typeof handler>()
   // Update ref.current value if handler changes.
   // This allows our effect below to always get latest handler ...
   // ... without us needing to pass it in effect deps array ...
