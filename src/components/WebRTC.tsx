@@ -51,9 +51,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
       destroyed: [],
     }
 
-    // Put it into a store in the next step
-    let currentAudio: HTMLAudioElement | null = null
-
     const initWebRTC = () => {
       Janus.init({
         debug: 'all',
@@ -263,7 +260,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     /* */
                   },
                   onremotestream: function (stream) {
-                    const audioElement = store.getState().player.audio
+                    const audioElement = store.getState().player.remoteAudio
                     const remoteVideoElement = store.getState().player.remoteVideo
 
                     if (Janus.debug) {

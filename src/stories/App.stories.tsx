@@ -26,11 +26,11 @@ const Template: Story<any> = (args) => {
   }
 
   useEventListener('phone-island-main-presence', (data) => {
-    console.info('userMainPresenceUpdate', data)
+    // Manege the mainPresence data
   })
 
   useEventListener('phone-island-conversations', (data) => {
-    console.info('extenUpdate', data)
+    // Manage the conversations data
   })
 
   return (

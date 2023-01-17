@@ -16,7 +16,7 @@ import {
   StyledSongControlsWrappers,
   StyledSongName,
 } from '../styles/Island.styles'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -47,6 +47,8 @@ const StyledMusicAlbumArtThumbMotion = motion(StyledAlbumArtThumb)
 const StyledMusicIconMotion = motion(StyledMusicIcon)
 const StyledArtistDetailsMotion = motion(StyledArtistDetails)
 
+import { useIsomorphicLayoutEffect } from '../utils'
+
 interface IslandProps {
   always?: boolean
 }
@@ -72,7 +74,7 @@ export const Island = ({ always }: IslandProps) => {
     (state: RootState) => state.currentCall,
   )
 
-  const { audio } = useSelector(
+  const { localAudio: storeLocalAudio } = useSelector(
     // ADD ACCEPTED
     (state: RootState) => state.player,
   )
@@ -90,6 +92,8 @@ export const Island = ({ always }: IslandProps) => {
   )
 
   const [moved, setMoved] = useState<boolean>(false)
+
+  const dispatch = useDispatch()
 
   function isAnswerVisible() {
     return !outgoing && !accepted
@@ -212,7 +216,7 @@ export const Island = ({ always }: IslandProps) => {
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
 
   useEffect(() => {
-    const audioStreamListener = audio?.addEventListener('play', () => {
+    const audioStreamListener = storeLocalAudio?.addEventListener('play', () => {
       if (navigator.userAgent.indexOf('Firefox') > -1) {
         // @ts-ignore
         setAudioStream(audio.mozCaptureStream())
@@ -224,9 +228,23 @@ export const Island = ({ always }: IslandProps) => {
 
     return () => {
       // @ts-ignore
-      audio?.removeEventListener('play', audioStreamListener)
+      storeLocalAudio?.removeEventListener('play', audioStreamListener)
     }
-  }, [audio])
+  }, [storeLocalAudio])
+
+  const localAudio = useRef<HTMLAudioElement>(null)
+  const remoteAudio = useRef<HTMLAudioElement>(null)
+  const localVideo = useRef<HTMLVideoElement>(null)
+  const remoteVideo = useRef<HTMLVideoElement>(null)
+
+  useIsomorphicLayoutEffect(() => {
+    dispatch.player.updatePlayer({
+      localAudio: localAudio.current,
+      localVideo: localVideo.current,
+      remoteVideo: remoteVideo.current,
+      remoteAudio: remoteAudio.current,
+    })
+  }, [])
 
   return (
     <div
@@ -392,9 +410,12 @@ export const Island = ({ always }: IslandProps) => {
           )}
         </StyledDynamicIslandMotion>
       )}
-      <audio id='audio' className='hidden' autoPlay></audio>
-      <video id='localVideo' className='hidden' muted={true} autoPlay></video>
-      <video id='remoteVideo' className='hidden' autoPlay></video>
+      <div className='hidden'>
+        <audio autoPlay ref={localAudio}></audio>
+        <audio autoPlay ref={remoteAudio}></audio>
+        <video muted={true} autoPlay ref={localVideo}></video>
+        <video autoPlay ref={remoteVideo}></video>
+      </div>
     </div>
   )
 }

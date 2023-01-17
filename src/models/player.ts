@@ -9,7 +9,8 @@ interface UpdateAudioSourceTypes {
 }
 
 interface PlayerTypes {
-  audio: HTMLAudioElement | null
+  localAudio: HTMLAudioElement | null
+  remoteAudio: HTMLAudioElement | null
   localVideo: HTMLVideoElement | null
   remoteVideo: HTMLVideoElement | null
 }
@@ -19,7 +20,8 @@ interface PlayAudioTypes {
 }
 
 const defaultState: PlayerTypes = {
-  audio: null,
+  localAudio: null,
+  remoteAudio: null,
   localVideo: null,
   remoteVideo: null,
 }
@@ -33,22 +35,22 @@ export const player = createModel<RootModel>()({
         ...payload,
       }
     },
-    updateAudioSource: (state, payload: UpdateAudioSourceTypes) => {
-      if (state.audio) {
-        state.audio.src = `data:audio/ogg;base64, ${payload.src}`
+    updateLocalAudio: (state, payload: UpdateAudioSourceTypes) => {
+      if (state.localAudio) {
+        state.localAudio.src = `data:audio/ogg;base64, ${payload.src}`
       }
       return state
     },
-    playAudio: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
-      if (state.audio) {
-        if (payload && payload.loop) state.audio.loop = true
-        state.audio.play()
+    playLocalAudio: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
+      if (state.localAudio) {
+        if (payload && payload.loop) state.localAudio.loop = true
+        state.localAudio.play()
       }
     },
     stopAudio: (state) => {
-      if (state.audio) {
-        state.audio.pause()
-        state.audio.currentTime = 0
+      if (state.localAudio) {
+        state.localAudio.pause()
+        // state.audio.currentTime = 0
       }
     },
     reset: () => {

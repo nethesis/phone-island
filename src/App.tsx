@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import { Socket } from './components'
 import { Base64 } from 'js-base64'
-import { useIsomorphicLayoutEffect } from './utils'
 import { Island } from './components'
 
 interface PhoneIslandProps {
@@ -19,17 +18,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
   const AUTH_TOKEN: string = CONFIG[2]
   const SIP_EXTEN: string = CONFIG[3]
   const SIP_SECRET: string = CONFIG[4]
-
-  useIsomorphicLayoutEffect(() => {
-    const audio: HTMLAudioElement | null = document.querySelector('#audio')
-    const localVideo: HTMLVideoElement | null = document.querySelector('#localVideo')
-    const remoteVideo: HTMLVideoElement | null = document.querySelector('#remoteVideo')
-    store.dispatch.player.updatePlayer({
-      audio,
-      localVideo,
-      remoteVideo,
-    })
-  }, [])
 
   return (
     <>

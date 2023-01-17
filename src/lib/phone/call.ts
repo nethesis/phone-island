@@ -3,9 +3,10 @@
 
 import { getSupportedDevices } from '../devices/devices'
 import outgoingRingtone from '../../static/outgoing_ringtone'
-import { store } from '../../store'
 import Janus from '../webrtc/janus'
 import { call, hangup, decline, answer } from '../webrtc/messages'
+import { updateLocalAudioSource } from './audio'
+import { store } from '../../store'
 
 /**
  * Starts a call
@@ -36,10 +37,15 @@ export function callSipURI(sipURI: string) {
     })
 
     if (calling) {
-      store.dispatch.player.updateAudioSource({ src: outgoingRingtone })
-      store.dispatch.player.playAudio({
-        loop: true,
-      })
+      // Update audio source
+      const audioSourceUpdated = await updateLocalAudioSource({ src: outgoingRingtone })
+      if (audioSourceUpdated) {
+        // Play audio when ready
+        store.dispatch.player.playLocalAudio({
+          loop: true,
+        })
+      }
+      // Update call info
       store.dispatch.currentCall.updateCurrentCall({
         outgoing: true,
       })

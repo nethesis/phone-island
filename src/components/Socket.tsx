@@ -1,12 +1,13 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useEffect, useState } from 'react'
+import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import incomingRingtone from '../static/incoming_ringtone'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
+import { updateLocalAudioSource } from '../lib/phone/audio'
 import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
 
 interface SocketProps {
@@ -35,13 +36,15 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 incoming: true,
                 ringing: true,
               })
-              dispatch.player.updateAudioSource({
+              // Update the audio source
+              updateLocalAudioSource({
                 src: incomingRingtone,
+              }).then(() => {
+                // Play the outgoing ringtone when ready
+                dispatch.player.playLocalAudio({
+                  loop: true,
+                })
               })
-              dispatch.player.playAudio({
-                loop: true,
-              })
-
               break
             // @ts-ignore
             case 'busy':
