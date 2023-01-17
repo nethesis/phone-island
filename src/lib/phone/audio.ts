@@ -8,8 +8,6 @@ import { store } from '../../store'
  */
 export async function updateLocalAudioSource(payload) {
   return new Promise((resolve, reject) => {
-    // Check if source is already loaded
-    console.error(store.getState().player.localAudio?.src === payload.src)
     // The can play through callback
     function canPlayCb() {
       store.getState().player.localAudio?.removeEventListener('canplaythrough', canPlayCb)
