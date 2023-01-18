@@ -33,8 +33,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               dispatch.currentCall.updateCurrentCall({
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
-                incoming: true,
-                ringing: true,
+                incoming: true
               })
               // Update the audio source
               updateLocalAudioSource({
