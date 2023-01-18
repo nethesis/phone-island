@@ -74,7 +74,7 @@ export const Island = ({ always }: IslandProps) => {
     (state: RootState) => state.currentCall,
   )
 
-  const { localAudio: storeLocalAudio } = useSelector(
+  const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
     // ADD ACCEPTED
     (state: RootState) => state.player,
   )
@@ -216,21 +216,22 @@ export const Island = ({ always }: IslandProps) => {
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
 
   useEffect(() => {
-    const audioStreamListener = storeLocalAudio?.addEventListener('play', () => {
-      if (navigator.userAgent.indexOf('Firefox') > -1) {
-        // @ts-ignore
-        setAudioStream(audio.mozCaptureStream())
-      } else {
-        // @ts-ignore
-        setAudioStream(audio.captureStream())
-      }
-    })
-
-    return () => {
-      // @ts-ignore
-      storeLocalAudio?.removeEventListener('play', audioStreamListener)
+    function audioStreamListener() {
+      storeRemoteAudio?.addEventListener('play', () => {
+        if (navigator.userAgent.indexOf('Firefox') > -1) {
+          // @ts-ignore
+          setAudioStream(storeRemoteAudio.mozCaptureStream())
+        } else {
+          // @ts-ignore
+          setAudioStream(storeRemoteAudio.captureStream())
+        }
+      })
     }
-  }, [storeLocalAudio])
+    audioStreamListener()
+    return () => {
+      storeRemoteAudio?.removeEventListener('play', audioStreamListener)
+    }
+  }, [storeRemoteAudio])
 
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)

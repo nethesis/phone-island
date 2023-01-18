@@ -260,7 +260,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     /* */
                   },
                   onremotestream: function (stream) {
-                    const audioElement = store.getState().player.remoteAudio
+                    const remoteAudioElement = store.getState().player.remoteAudio
                     const remoteVideoElement = store.getState().player.remoteVideo
 
                     if (Janus.debug) {
@@ -275,7 +275,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     store.dispatch.player.stopAudio()
 
                     if (Janus.attachMediaStream) {
-                      Janus.attachMediaStream(audioElement, new MediaStream(audioTracks))
+                      Janus.attachMediaStream(remoteAudioElement, new MediaStream(audioTracks))
                       Janus.attachMediaStream(remoteVideoElement, new MediaStream(videoTracks))
                     }
                   },
