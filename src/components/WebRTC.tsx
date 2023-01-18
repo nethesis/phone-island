@@ -194,6 +194,12 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
 
                         case 'incomingcall':
                           dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
+
+                          // Number and display name are updated inside socket
+                          dispatch.currentCall.updateCurrentCallCheck({
+                            incomingWebRTC: true
+                          })
+
                           if (Janus.log) Janus.log('Incoming call from ' + result['username'] + '!')
                           // lastActivity = new Date().getTime()
                           break

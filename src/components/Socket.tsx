@@ -3,12 +3,13 @@
 
 import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Dispatch } from '../store'
+import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import incomingRingtone from '../static/incoming_ringtone'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
 import { updateLocalAudioSource } from '../lib/phone/audio'
 import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
+import { useSelector } from 'react-redux'
 
 interface SocketProps {
   children: ReactNode
@@ -19,6 +20,20 @@ interface SocketProps {
 
 export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
+  const { incoming } = useSelector((state: RootState) => state.currentCall)
+
+  function waitResolution(cb: (resolve: () => void) => void) {
+    function resolve() {
+      clearInterval(interval)
+    }
+    let times = 0
+    let maxTimes = 5
+    const interval = setInterval(() => {
+      cb(resolve)
+      if (times === maxTimes) clearInterval(interval)
+      times++
+    }, 1000)
+  }
 
   useEffect(() => {
     const handleCalls = (res: any) => {
@@ -30,18 +45,25 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         if (status) {
           switch (status) {
             case 'ringing':
-              dispatch.currentCall.updateCurrentCall({
+              // The name and the number are updated here not in webrtc
+              dispatch.currentCall.updateCurrentCallCheck({
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
-                incoming: true
+                incomingSocket: true,
               })
+
               // Update the audio source
               updateLocalAudioSource({
                 src: incomingRingtone,
               }).then(() => {
                 // Play the outgoing ringtone when ready
-                dispatch.player.playLocalAudio({
-                  loop: true,
+                waitResolution((resolve) => {
+                  if (incoming) {
+                    dispatch.player.playLocalAudio({
+                      loop: true,
+                    })
+                    resolve()
+                  }
                 })
               })
               break

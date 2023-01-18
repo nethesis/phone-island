@@ -7,6 +7,8 @@ import type { RootModel } from '.'
 interface CurrentCallTypes {
   displayName?: string
   number?: string
+  incomingSocket?: boolean
+  incomingWebRTC?: boolean
   incoming?: boolean
   accepted?: boolean
   outgoing?: boolean
@@ -16,6 +18,8 @@ interface CurrentCallTypes {
 const defaultState = {
   displayName: '',
   number: '',
+  incomingSocket: false,
+  incomingWebRTC: false,
   incoming: false,
   accepted: false,
   outgoing: false,
@@ -35,4 +39,18 @@ export const currentCall = createModel<RootModel>()({
       return defaultState
     },
   },
+  effects: (dispatch) => ({
+    updateCurrentCallCheck: (payload: CurrentCallTypes, rootState) => {
+      // Check both Socket and WebRTC for incoming call confirmation
+      if (
+        (rootState.currentCall.incomingSocket && payload.incomingWebRTC) ||
+        (rootState.currentCall.incomingWebRTC && payload.incomingSocket)
+      ) {
+        payload.incoming = true
+      }
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+  }),
 })
