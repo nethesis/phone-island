@@ -5,19 +5,7 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import incomingRingtone from '../static/incoming_ringtone'
 import outgoingRingtone from '../static/outgoing_ringtone'
-
-interface CurrentCallTypes {
-  displayName?: string
-  number?: string
-  incomingSocket?: boolean
-  incomingWebRTC?: boolean
-  incoming?: boolean
-  accepted?: boolean
-  outgoingSocket?: boolean
-  outgoingWebRTC?: boolean
-  outgoing?: boolean
-  startTime?: string
-}
+import { dispatchOutgoingCallStarted } from '../events/index'
 
 const defaultState = {
   displayName: '',
@@ -72,6 +60,8 @@ export const currentCall = createModel<RootModel>()({
         payload.outgoing = true
         // Update local player and play audio
         dispatch.player.updateAndPlayLocalAudio(outgoingRingtone)
+        // Dispatch an event for outgoing call
+        dispatchOutgoingCallStarted(payload.displayName, payload.number)
       }
       // Update the current call values
       dispatch.currentCall.updateCurrentCall({
@@ -80,3 +70,16 @@ export const currentCall = createModel<RootModel>()({
     },
   }),
 })
+
+interface CurrentCallTypes {
+  displayName?: string
+  number?: string
+  incomingSocket?: boolean
+  incomingWebRTC?: boolean
+  incoming?: boolean
+  accepted?: boolean
+  outgoingSocket?: boolean
+  outgoingWebRTC?: boolean
+  outgoing?: boolean
+  startTime?: string
+}

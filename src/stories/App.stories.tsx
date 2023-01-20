@@ -33,6 +33,10 @@ const Template: Story<any> = (args) => {
     // Manage the conversations data
   })
 
+  useEventListener('phone-island-outgoing-call-started', (data) => {
+    // Manage the conversations data
+  })
+
   return (
     <>
       <button

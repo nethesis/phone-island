@@ -4,11 +4,6 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
-export interface WebRTCTypes {
-  sipcall?: any
-  jsepGlobal?: any
-}
-
 const defaultState = {
   sipcall: null,
   jsepGlobal: null,
@@ -25,3 +20,8 @@ export const webrtc = createModel<RootModel>()({
     },
   },
 })
+
+export interface WebRTCTypes {
+  sipcall?: any
+  jsepGlobal?: any
+}

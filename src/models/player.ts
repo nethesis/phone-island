@@ -5,21 +5,6 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import { updateLocalAudioSource } from '../lib/phone/audio'
 
-interface UpdateAudioSourceTypes {
-  src: string
-}
-
-interface PlayerTypes {
-  localAudio: HTMLAudioElement | null
-  remoteAudio: HTMLAudioElement | null
-  localVideo: HTMLVideoElement | null
-  remoteVideo: HTMLVideoElement | null
-}
-
-interface PlayAudioTypes {
-  loop?: boolean
-}
-
 const defaultState: PlayerTypes = {
   localAudio: null,
   remoteAudio: null,
@@ -76,3 +61,18 @@ export const player = createModel<RootModel>()({
     },
   }),
 })
+
+interface UpdateAudioSourceTypes {
+  src: string
+}
+
+interface PlayerTypes {
+  localAudio: HTMLAudioElement | null
+  remoteAudio: HTMLAudioElement | null
+  localVideo: HTMLVideoElement | null
+  remoteVideo: HTMLVideoElement | null
+}
+
+interface PlayAudioTypes {
+  loop?: boolean
+}

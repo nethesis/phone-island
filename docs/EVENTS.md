@@ -51,7 +51,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 ## Dispated Events
 
-- `phone-island-main-presence` The event with userMainPresenceUpdate message from the WebSocket
+- `phone-island-main-presence` Indicates that a message has arrived and dispatches the userMainPresenceUpdate data from the WebSocket
 
   ```json
   {
@@ -62,7 +62,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-conversations` The event with extenUpdate message from the WebSocket
+- `phone-island-conversations` Indicates that a message has arrived and dispatches the extenUpdate data from the WebSocket
   ```json
   {
     "foo1": {
@@ -111,5 +111,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
         }
       }
     }
+  }
+  ```
+
+- `phone-island-outgoing-call-started` Indicates that an outgoing call has started and dispatches the called name and number.
+  ```json
+  {
+    "name": "Foo 1", // string - The called name
+    "number": "211" // string - The called number
   }
   ```

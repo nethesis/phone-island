@@ -3,11 +3,10 @@
 
 import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Dispatch, RootState } from '../store'
+import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
-import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
-import { useSelector } from 'react-redux'
+import { dispatchMainPresence, dispatchConversations } from '../events'
 
 interface SocketProps {
   children: ReactNode
