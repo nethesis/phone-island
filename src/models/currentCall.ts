@@ -3,6 +3,8 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import incomingRingtone from '../static/incoming_ringtone'
+import outgoingRingtone from '../static/outgoing_ringtone'
 
 interface CurrentCallTypes {
   displayName?: string
@@ -11,6 +13,8 @@ interface CurrentCallTypes {
   incomingWebRTC?: boolean
   incoming?: boolean
   accepted?: boolean
+  outgoingSocket?: boolean
+  outgoingWebRTC?: boolean
   outgoing?: boolean
   startTime?: string
 }
@@ -22,6 +26,8 @@ const defaultState = {
   incomingWebRTC: false,
   incoming: false,
   accepted: false,
+  outgoingSocket: false,
+  outgoingWebRTC: false,
   outgoing: false,
   startTime: '',
 }
@@ -40,14 +46,34 @@ export const currentCall = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    updateCurrentCallCheck: (payload: CurrentCallTypes, rootState) => {
+    checkIncomingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
       // Check both Socket and WebRTC for incoming call confirmation
       if (
-        (rootState.currentCall.incomingSocket && payload.incomingWebRTC) ||
-        (rootState.currentCall.incomingWebRTC && payload.incomingSocket)
+        !rootState.currentCall.incoming &&
+        ((rootState.currentCall.incomingSocket && payload.incomingWebRTC) ||
+          (rootState.currentCall.incomingWebRTC && payload.incomingSocket))
       ) {
         payload.incoming = true
+        // Update local player and play the audio
+        dispatch.player.updateAndPlayLocalAudio(incomingRingtone)
       }
+      // Update the current call values
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+    checkOutgoingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+      // Check both Socket and WebRTC for incoming call confirmation
+      if (
+        !rootState.currentCall.outgoing &&
+        ((rootState.currentCall.outgoingSocket && payload.outgoingWebRTC) ||
+          (rootState.currentCall.outgoingWebRTC && payload.outgoingSocket))
+      ) {
+        payload.outgoing = true
+        // Update local player and play audio
+        dispatch.player.updateAndPlayLocalAudio(outgoingRingtone)
+      }
+      // Update the current call values
       dispatch.currentCall.updateCurrentCall({
         ...payload,
       })

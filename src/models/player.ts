@@ -3,6 +3,7 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import { updateLocalAudioSource } from '../lib/phone/audio'
 
 interface UpdateAudioSourceTypes {
   src: string
@@ -44,17 +45,34 @@ export const player = createModel<RootModel>()({
     playLocalAudio: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
       if (state.localAudio) {
         if (payload && payload.loop) state.localAudio.loop = true
+        // Check if is playing
+        if (!state.localAudio.paused) {
+          state.localAudio.pause()
+          state.localAudio.currentTime = 0
+        }
         state.localAudio.play()
       }
     },
     stopAudio: (state) => {
       if (state.localAudio) {
         state.localAudio.pause()
-        // state.audio.currentTime = 0
+        state.localAudio.currentTime = 0
       }
     },
     reset: () => {
       return defaultState
     },
   },
+  effects: (dispatch) => ({
+    updateAndPlayLocalAudio: async (audioSource) => {
+      // Update the audio source
+      await updateLocalAudioSource({
+        src: audioSource,
+      })
+      // Play the outgoing ringtone when ready
+      dispatch.player.playLocalAudio({
+        loop: true,
+      })
+    },
+  }),
 })

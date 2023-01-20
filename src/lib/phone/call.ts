@@ -18,7 +18,7 @@ export function callSipURI(sipURI: string) {
   getSupportedDevices(async () => {
     // @ts-ignore
     Janus.log('This is a SIP call')
-    const calling = await call(sipURI, {
+    await call(sipURI, {
       audio: {
         mandatory: {
           echoCancellation: false,
@@ -35,21 +35,6 @@ export function callSipURI(sipURI: string) {
       videoSend: false,
       videoRecv: false,
     })
-
-    if (calling) {
-      // Update audio source
-      const audioSourceUpdated = await updateLocalAudioSource({ src: outgoingRingtone })
-      if (audioSourceUpdated) {
-        // Play audio when ready
-        store.dispatch.player.playLocalAudio({
-          loop: true,
-        })
-      }
-      // Update call info
-      store.dispatch.currentCall.updateCurrentCall({
-        outgoing: true,
-      })
-    }
   })
 }
 

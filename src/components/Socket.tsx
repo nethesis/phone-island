@@ -5,9 +5,7 @@ import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
-import incomingRingtone from '../static/incoming_ringtone'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
-import { updateLocalAudioSource } from '../lib/phone/audio'
 import { dispatchMainPresence, dispatchConversations } from '../events/SocketEvents'
 import { useSelector } from 'react-redux'
 
@@ -20,20 +18,6 @@ interface SocketProps {
 
 export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
-  const { incoming } = useSelector((state: RootState) => state.currentCall)
-
-  function waitResolution(cb: (resolve: () => void) => void) {
-    function resolve() {
-      clearInterval(interval)
-    }
-    let times = 0
-    let maxTimes = 5
-    const interval = setInterval(() => {
-      cb(resolve)
-      if (times === maxTimes) clearInterval(interval)
-      times++
-    }, 1000)
-  }
 
   useEffect(() => {
     const handleCalls = (res: any) => {
@@ -46,31 +30,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
           switch (status) {
             case 'ringing':
               // The name and the number are updated here not in webrtc
-              dispatch.currentCall.updateCurrentCallCheck({
+              dispatch.currentCall.checkIncomingUpdateAndPlay({
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
                 incomingSocket: true,
-              })
-
-              // Update the audio source
-              updateLocalAudioSource({
-                src: incomingRingtone,
-              }).then(() => {
-                // Play the outgoing ringtone when ready
-                waitResolution((resolve) => {
-                  if (incoming) {
-                    dispatch.player.playLocalAudio({
-                      loop: true,
-                    })
-                    resolve()
-                  }
-                })
               })
               break
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
-                // Accepted call
+                // Set accepted call
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
                   incoming: false,
@@ -82,9 +51,9 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               }
               // Handle outgoing call
               else if (conv && !conv.connected && conv.direction === 'out') {
-                // Start an outgoing call
-                dispatch.currentCall.updateCurrentCall({
-                  outgoing: true,
+                // Update the current outgoing conversation
+                dispatch.currentCall.checkOutgoingUpdateAndPlay({
+                  outgoingSocket: true,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                 })

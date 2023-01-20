@@ -188,6 +188,12 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           break
 
                         case 'calling':
+
+                          // Number and display name are updated inside socket
+                          dispatch.currentCall.checkOutgoingUpdateAndPlay({
+                            outgoingWebRTC: true
+                          })
+
                           if (Janus.log) Janus.log('Waiting for the peer to answer...')
                           // lastActivity = new Date().getTime()
                           break
@@ -196,7 +202,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
 
                           // Number and display name are updated inside socket
-                          dispatch.currentCall.updateCurrentCallCheck({
+                          dispatch.currentCall.checkIncomingUpdateAndPlay({
                             incomingWebRTC: true
                           })
 

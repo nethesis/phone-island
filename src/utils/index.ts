@@ -4,3 +4,4 @@
 export * from './useEventListener'
 export * from './useIsomorphicLayoutEffect'
 export * from './eventDispatch'
+export * from './useWaitResolution'
