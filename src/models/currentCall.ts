@@ -6,6 +6,7 @@ import type { RootModel } from '.'
 import incomingRingtone from '../static/incoming_ringtone'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { dispatchOutgoingCallStarted } from '../events/index'
+import { confirmCallStatus } from '../lib/phone/call'
 
 const defaultState = {
   displayName: '',
@@ -13,6 +14,8 @@ const defaultState = {
   incomingSocket: false,
   incomingWebRTC: false,
   incoming: false,
+  acceptedSocket: false,
+  acceptedWebRTC: false,
   accepted: false,
   outgoingSocket: false,
   outgoingWebRTC: false,
@@ -34,13 +37,9 @@ export const currentCall = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    checkIncomingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+    checkIncomingUpdateAndPlay: (payload: CurrentCallTypes) => {
       // Check both Socket and WebRTC for incoming call confirmation
-      if (
-        !rootState.currentCall.incoming &&
-        ((rootState.currentCall.incomingSocket && payload.incomingWebRTC) ||
-          (rootState.currentCall.incomingWebRTC && payload.incomingSocket))
-      ) {
+      if (confirmCallStatus(payload, 'incoming')) {
         payload.incoming = true
         // Update local player and play the audio
         dispatch.player.updateAndPlayLocalAudio(incomingRingtone)
@@ -50,18 +49,25 @@ export const currentCall = createModel<RootModel>()({
         ...payload,
       })
     },
-    checkOutgoingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+    checkOutgoingUpdateAndPlay: (payload: CurrentCallTypes) => {
       // Check both Socket and WebRTC for incoming call confirmation
-      if (
-        !rootState.currentCall.outgoing &&
-        ((rootState.currentCall.outgoingSocket && payload.outgoingWebRTC) ||
-          (rootState.currentCall.outgoingWebRTC && payload.outgoingSocket))
-      ) {
+      if (confirmCallStatus(payload, 'outgoing')) {
         payload.outgoing = true
         // Update local player and play audio
         dispatch.player.updateAndPlayLocalAudio(outgoingRingtone)
         // Dispatch an event for outgoing call
         dispatchOutgoingCallStarted(payload.displayName, payload.number)
+      }
+      // Update the current call values
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+    checkAcceptedUpdateAndPlay: (payload: CurrentCallTypes) => {
+      // Check both Socket and WebRTC for incoming call confirmation
+      if (confirmCallStatus(payload, 'accepted')) {
+        payload.accepted = true
+        // TODO - add accepted event
       }
       // Update the current call values
       dispatch.currentCall.updateCurrentCall({
@@ -77,6 +83,8 @@ interface CurrentCallTypes {
   incomingSocket?: boolean
   incomingWebRTC?: boolean
   incoming?: boolean
+  acceptedSocket?: boolean
+  acceptedWebRTC?: boolean
   accepted?: boolean
   outgoingSocket?: boolean
   outgoingWebRTC?: boolean

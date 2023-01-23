@@ -3,7 +3,7 @@
 
 import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Dispatch } from '../store'
+import { Dispatch, store } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
 import { dispatchMainPresence, dispatchConversations } from '../events'
@@ -19,9 +19,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
   const dispatch = useDispatch<Dispatch>()
 
   useEffect(() => {
-    const handleCalls = (res: any) => {
-      // Initialize conversation
-      const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
+    const handleCalls = (res: any, conv) => {
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         const status: string = res.status
@@ -38,7 +36,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
-                // Set accepted call
+                // Set current call accepted
                 dispatch.currentCall.updateCurrentCall({
                   accepted: true,
                   incoming: false,
@@ -62,7 +60,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
           }
         }
       } else {
-        console.log(res)
+        console.error(res)
       }
     }
 
@@ -95,10 +93,19 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       socket.on('extenUpdate', (res) => {
         // Call the dispatchConversations
         dispatchConversations(res)
-
+        // Initialize conversation
+        const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
         // Handle only the events of the user
         if (res.username === username) {
-          handleCalls(res)
+          handleCalls(res, conv)
+        }
+        // Handle event when local PBX answers
+        const { number, outgoing, accepted } = store.getState().currentCall
+        if (!accepted && outgoing && number === res.exten && res.status === 'online') {
+          // Set call accepted
+          dispatch.currentCall.checkAcceptedUpdateAndPlay({
+            acceptedSocket: true,
+          })
         }
       })
     }

@@ -26,7 +26,7 @@ export const CallEvents: FC = () => {
 /**
  * Dispatch the phone-island-outgoing-call-started event
  */
-export function dispatchOutgoingCallStarted(name: string, number: 'string') {
+export function dispatchOutgoingCallStarted(name: string = '', number: string = '') {
   const data: OutgoingCallStartedTypes = {
     name,
     number,

@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { getSupportedDevices } from '../devices/devices'
-import outgoingRingtone from '../../static/outgoing_ringtone'
 import Janus from '../webrtc/janus'
 import { call, hangup, decline, answer } from '../webrtc/messages'
-import { updateLocalAudioSource } from './audio'
 import { store } from '../../store'
 
 /**
@@ -55,6 +53,18 @@ export function hangupCurrentCall() {
   } else {
     decline()
   }
-  store.dispatch.currentCall.reset()
   store.dispatch.player.stopAudio()
+  store.dispatch.currentCall.reset()
+}
+
+export function confirmCallStatus(payload, status) {
+  const { currentCall } = store.getState()
+  if (
+    !currentCall[status] &&
+    ((currentCall[`${status}Socket`] && payload[`${status}WebRTC`]) ||
+      (currentCall[`${status}WebRTC`] && payload[`${status}Socket`]))
+  ) {
+    return true
+  }
+  return false
 }

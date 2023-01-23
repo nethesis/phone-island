@@ -11,7 +11,7 @@ import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { useWebRTCStore } from '../utils/useWebRTCStore'
 import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
-// import busyRingtone from '../static/busy_ringtone'
+import { hangupCurrentCall } from '../lib/phone/call'
 
 interface WebRTCProps {
   children: ReactNode
@@ -188,10 +188,9 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           break
 
                         case 'calling':
-
                           // Number and display name are updated inside socket
                           dispatch.currentCall.checkOutgoingUpdateAndPlay({
-                            outgoingWebRTC: true
+                            outgoingWebRTC: true,
                           })
 
                           if (Janus.log) Janus.log('Waiting for the peer to answer...')
@@ -203,7 +202,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
 
                           // Number and display name are updated inside socket
                           dispatch.currentCall.checkIncomingUpdateAndPlay({
-                            incomingWebRTC: true
+                            incomingWebRTC: true,
                           })
 
                           if (Janus.log) Janus.log('Incoming call from ' + result['username'] + '!')
@@ -225,15 +224,18 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
 
                         case 'accepted':
                           if (Janus.log) Janus.log(result['username'] + ' accepted the call!')
-                          if (jsep !== null && jsep !== undefined) {
+                          if (jsep) {
                             handleRemote(jsep)
                           }
+                          // Set current call accepted
+                          dispatch.currentCall.checkAcceptedUpdateAndPlay({
+                            acceptedWebRTC: true,
+                          })
                           // lastActivity = new Date().getTime()
                           break
 
                         case 'hangup':
-                          dispatch.player.stopAudio()
-                          dispatch.currentCall.reset()
+                          hangupCurrentCall()
                           sipcall.hangup()
                           // if (
                           //   result['code'] === 486 &&
