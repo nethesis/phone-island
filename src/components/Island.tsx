@@ -297,7 +297,7 @@ export const Island = ({ always }: IslandProps) => {
             outgoing={outgoing}
           >
             <div className='relative w-12 h-12'>
-              {(incoming || outgoing) && (
+              {(incoming || (outgoing && !accepted)) && (
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
@@ -322,7 +322,7 @@ export const Island = ({ always }: IslandProps) => {
                   <StyledArtistName>
                     {accepted ? (
                       <Moment
-                        date={startTime}
+                        date={startTime || new Date().getTime() / 1000}
                         interval={1000}
                         format='hh:mm:ss'
                         trim='mid'

@@ -7,6 +7,7 @@ import { Dispatch, store } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
 import { dispatchMainPresence, dispatchConversations } from '../events'
+import type { ExtensionTypes, ExtensinTypeTypes } from '../services/user'
 
 interface SocketProps {
   children: ReactNode
@@ -98,14 +99,6 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         // Handle only the events of the user
         if (res.username === username) {
           handleCalls(res, conv)
-        }
-        // Handle event when local PBX answers
-        const { number, outgoing, accepted } = store.getState().currentCall
-        if (!accepted && outgoing && number === res.exten && res.status === 'online') {
-          // Set call accepted
-          dispatch.currentCall.checkAcceptedUpdateAndPlay({
-            acceptedSocket: true,
-          })
         }
       })
     }

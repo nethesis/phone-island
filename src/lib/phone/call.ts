@@ -56,15 +56,3 @@ export function hangupCurrentCall() {
   store.dispatch.player.stopAudio()
   store.dispatch.currentCall.reset()
 }
-
-export function confirmCallStatus(payload, status) {
-  const { currentCall } = store.getState()
-  if (
-    !currentCall[status] &&
-    ((currentCall[`${status}Socket`] && payload[`${status}WebRTC`]) ||
-      (currentCall[`${status}WebRTC`] && payload[`${status}Socket`]))
-  ) {
-    return true
-  }
-  return false
-}
