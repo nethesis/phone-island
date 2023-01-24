@@ -41,7 +41,7 @@ interface StyledDynamicIslandTopContentProps {
 export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
   display: grid;
   grid-template-columns: ${({ isOpen, incoming, accepted, outgoing }) =>
-    isOpen && (incoming || outgoing)
+    isOpen && !accepted && (incoming || outgoing)
       ? '48px 1fr'
       : isOpen && accepted
       ? '48px 1fr 48px'

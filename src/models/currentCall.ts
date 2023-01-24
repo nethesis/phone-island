@@ -42,7 +42,7 @@ export const currentCall = createModel<RootModel>()({
         (rootState.currentUser.default_device?.type === 'webrtc' &&
           (rootState.currentCall.incomingWebRTC || payload.incomingWebRTC)) ||
         (rootState.currentUser.default_device?.type === 'physical' &&
-          (rootState.currentCall.incomingSocket || payload.incomingWebRTC))
+          (rootState.currentCall.incomingSocket || payload.incomingSocket))
       ) {
         payload.incoming = true
 
