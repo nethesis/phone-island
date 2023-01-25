@@ -20,6 +20,7 @@ const defaultState = {
   outgoingWebRTC: false,
   outgoing: false,
   startTime: '',
+  muted: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -92,7 +93,7 @@ export const currentCall = createModel<RootModel>()({
   }),
 })
 
-interface CurrentCallTypes {
+export interface CurrentCallTypes {
   displayName?: string
   number?: string
   incomingSocket?: boolean
@@ -105,4 +106,5 @@ interface CurrentCallTypes {
   outgoingWebRTC?: boolean
   outgoing?: boolean
   startTime?: string
+  muted?: boolean
 }

@@ -1,17 +1,18 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useWebRTCStore } from '../../utils/useWebRTCStore'
+import { useWebRTCStore, useCurrentUserStore } from '../../utils'
 import Janus from './janus'
 
 export function register(sipExten: string, sipSecret: string) {
   const { sipcall } = useWebRTCStore()
+  const { name } = useCurrentUserStore()
   if (sipcall) {
     sipcall.send({
       message: {
         request: 'register',
         username: 'sip:' + sipExten + '@' + '127.0.0.1',
-        display_name: 'Foo 1',
+        display_name: name || '',
         secret: sipSecret,
         proxy: 'sip:' + '127.0.0.1' + ':5060',
         sips: false,
@@ -21,7 +22,7 @@ export function register(sipExten: string, sipSecret: string) {
   }
 }
 
-export function answer() {
+export function answerWebRTC() {
   const { sipcall, jsepGlobal } = useWebRTCStore()
   if (sipcall && jsepGlobal) {
     sipcall.createAnswer({
@@ -134,4 +135,28 @@ export function call(sipURI: string, mediaObj: object) {
       })
     }
   })
+}
+
+/**
+ * Mute current call so the counterpart can't hear the user's audio stream
+ * @returns The muted status
+ */
+export function muteWebRTC(): boolean {
+  // Initialize sipcall
+  const { sipcall } = useWebRTCStore()
+  // Uset the janus library functions to mute call
+  sipcall.muteAudio()
+  return sipcall.isAudioMuted()
+}
+
+/**
+ * Unmute current call so the counterpart can hear the user's audio stream
+ * @returns The muted status
+ */
+export function unmuteWebRTC(): boolean {
+  // Initialize sipcall
+  const { sipcall } = useWebRTCStore()
+  // Use the janus library functions to unmute call
+  sipcall.unmuteAudio()
+  return !sipcall.isAudioMuted()
 }

@@ -3,15 +3,16 @@
 
 import { getSupportedDevices } from '../devices/devices'
 import Janus from '../webrtc/janus'
-import { call, hangup, decline, answer } from '../webrtc/messages'
+import { call, hangup, decline, answerWebRTC, muteWebRTC, unmuteWebRTC } from '../webrtc/messages'
 import { store } from '../../store'
+import { useCurrentCallStore } from '../../utils'
+import { isWebRTC } from '../user/default_device'
 
 /**
  * Starts a call
  *
  * @param sipURI The sip uri string
  */
-
 export function callSipURI(sipURI: string) {
   getSupportedDevices(async () => {
     // @ts-ignore
@@ -40,14 +41,16 @@ export function callSipURI(sipURI: string) {
  * Answer incoming call
  */
 export function answerIncomingCall() {
-  answer()
+  if (isWebRTC()) {
+    answerWebRTC()
+  }
 }
 
 /**
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted } = store.getState().currentCall
+  const { outgoing, accepted } = useCurrentCallStore()
   if (outgoing || accepted) {
     hangup()
   } else {
@@ -55,4 +58,34 @@ export function hangupCurrentCall() {
   }
   store.dispatch.player.stopAudio()
   store.dispatch.currentCall.reset()
+}
+
+/**
+ * Mute the current call
+ */
+export function muteCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const muted = muteWebRTC()
+    if (muted) {
+      store.dispatch.currentCall.updateCurrentCall({
+        muted: true,
+      })
+    }
+  }
+}
+
+/**
+ * Unmute the current call
+ */
+export function unmuteCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const unmuted = unmuteWebRTC()
+    if (unmuted) {
+      store.dispatch.currentCall.updateCurrentCall({
+        muted: false,
+      })
+    }
+  }
 }

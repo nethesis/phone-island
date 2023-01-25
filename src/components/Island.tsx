@@ -34,12 +34,10 @@ import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer
 import { hangupCurrentCall, answerIncomingCall } from '../lib/phone/call'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
-import { useLocalStorage } from '../utils/useLocalStorage'
-
+import { useLocalStorage, getTranslateValues } from '../utils'
 import { AudioBars } from './AudioBars'
-
-import { getTranslateValues } from '../utils/getTranslate'
 import { Button } from './Button'
+import { muteCurrentCall, unmuteCurrentCall } from '../lib/phone/call'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
 const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
@@ -69,13 +67,12 @@ const ISLAND_STARTING_POSITION = {
 
 export const Island = ({ always }: IslandProps) => {
   const [isOpen, setIsOpen] = useState(true)
-  const { incoming, accepted, outgoing, displayName, number, startTime } = useSelector(
-    // ADD ACCEPTED
+  // Get the currentCall info
+  const { incoming, accepted, outgoing, displayName, number, startTime, muted } = useSelector(
     (state: RootState) => state.currentCall,
   )
 
   const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
-    // ADD ACCEPTED
     (state: RootState) => state.player,
   )
   const controls = useDragControls()
@@ -377,7 +374,11 @@ export const Island = ({ always }: IslandProps) => {
                   <Button variant='default'>
                     <FontAwesomeIcon size='xl' icon={faPause} />
                   </Button>
-                  <Button variant='default'>
+                  <Button
+                    variant='default'
+                    active={muted ? true : false}
+                    onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
+                  >
                     <FontAwesomeIcon size='xl' icon={faMicrophone} />
                   </Button>
                   <Button variant='default'>
