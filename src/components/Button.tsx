@@ -16,7 +16,7 @@ function classNames(...classes) {
 
 export const Button: FC<ButtonProps> = ({ children, variant, active = false, ...props }) => {
   const styles = {
-    base: 'flex content-center items-center justify-center font-medium tracking-wide transition duration-200 ease-in-out transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 text-white border border-transparent focus:ring-offset-black rounded-full text-sm leading-4 h-12 w-12 col-start-auto',
+    base: 'flex content-center items-center justify-center font-medium tracking-wide duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 text-white border border-transparent focus:ring-offset-black rounded-full text-sm leading-4 h-12 w-12 col-start-auto transition duration-200 ease-in-out',
     variant: {
       red: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
       green: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',

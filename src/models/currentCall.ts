@@ -21,6 +21,7 @@ const defaultState = {
   outgoing: false,
   startTime: '',
   muted: false,
+  paused: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -107,4 +108,5 @@ export interface CurrentCallTypes {
   outgoing?: boolean
   startTime?: string
   muted?: boolean
+  paused?: boolean
 }

@@ -26,18 +26,26 @@ import {
   faCompactDisc,
   faPhone,
   faMicrophone,
+  faMicrophoneSlash,
   faRightLeft,
   faChevronDown,
+  faPlay,
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
-import { hangupCurrentCall, answerIncomingCall } from '../lib/phone/call'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
 import { useLocalStorage, getTranslateValues } from '../utils'
 import { AudioBars } from './AudioBars'
 import { Button } from './Button'
-import { muteCurrentCall, unmuteCurrentCall } from '../lib/phone/call'
+import {
+  hangupCurrentCall,
+  answerIncomingCall,
+  muteCurrentCall,
+  unmuteCurrentCall,
+  pauseCurrentCall,
+  unpauseCurrentCall,
+} from '../lib/phone/call'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
 const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
@@ -68,9 +76,8 @@ const ISLAND_STARTING_POSITION = {
 export const Island = ({ always }: IslandProps) => {
   const [isOpen, setIsOpen] = useState(true)
   // Get the currentCall info
-  const { incoming, accepted, outgoing, displayName, number, startTime, muted } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const { incoming, accepted, outgoing, displayName, number, startTime, muted, paused } =
+    useSelector((state: RootState) => state.currentCall)
 
   const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
     (state: RootState) => state.player,
@@ -306,10 +313,9 @@ export const Island = ({ always }: IslandProps) => {
                 ></motion.div>
               )}
               <StyledMusicAlbumArtThumbMotion
-                className='z-10 h-12 w-12'
+                className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
-                src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
               />
             </div>
             <div>
@@ -371,15 +377,27 @@ export const Island = ({ always }: IslandProps) => {
               </StyledSongControlsWrappers> */}
               {accepted && (
                 <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
-                  <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faPause} />
+                  <Button
+                    variant='default'
+                    active={paused ? true : false}
+                    onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+                  >
+                    {paused ? (
+                      <FontAwesomeIcon size='xl' icon={faPlay} />
+                    ) : (
+                      <FontAwesomeIcon size='xl' icon={faPause} />
+                    )}
                   </Button>
                   <Button
                     variant='default'
                     active={muted ? true : false}
                     onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
                   >
-                    <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                    {muted ? (
+                      <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
+                    ) : (
+                      <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                    )}
                   </Button>
                   <Button variant='default'>
                     <FontAwesomeIcon size='xl' icon={faRightLeft} />

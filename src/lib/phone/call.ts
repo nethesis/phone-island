@@ -3,7 +3,16 @@
 
 import { getSupportedDevices } from '../devices/devices'
 import Janus from '../webrtc/janus'
-import { call, hangup, decline, answerWebRTC, muteWebRTC, unmuteWebRTC } from '../webrtc/messages'
+import {
+  call,
+  hangup,
+  decline,
+  answerWebRTC,
+  muteWebRTC,
+  unmuteWebRTC,
+  pauseWebRTC,
+  unpauseWebRTC,
+} from '../webrtc/messages'
 import { store } from '../../store'
 import { useCurrentCallStore } from '../../utils'
 import { isWebRTC } from '../user/default_device'
@@ -85,6 +94,36 @@ export function unmuteCurrentCall() {
     if (unmuted) {
       store.dispatch.currentCall.updateCurrentCall({
         muted: false,
+      })
+    }
+  }
+}
+
+/**
+ * Pause the current call
+ */
+export function pauseCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const paused = pauseWebRTC()
+    if (paused) {
+      store.dispatch.currentCall.updateCurrentCall({
+        paused: true,
+      })
+    }
+  }
+}
+
+/**
+ * Unpause the current call
+ */
+export function unpauseCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const unpaused = unpauseWebRTC()
+    if (unpaused) {
+      store.dispatch.currentCall.updateCurrentCall({
+        paused: false,
       })
     }
   }

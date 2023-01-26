@@ -138,7 +138,7 @@ export function call(sipURI: string, mediaObj: object) {
 }
 
 /**
- * Mute current call so the counterpart can't hear the user's audio stream
+ * Mute current call so the counterpart can't listen the current user
  * @returns The muted status
  */
 export function muteWebRTC(): boolean {
@@ -150,7 +150,7 @@ export function muteWebRTC(): boolean {
 }
 
 /**
- * Unmute current call so the counterpart can hear the user's audio stream
+ * Unmute current call so the counterpart can listen the current user
  * @returns The muted status
  */
 export function unmuteWebRTC(): boolean {
@@ -159,4 +159,46 @@ export function unmuteWebRTC(): boolean {
   // Use the janus library functions to unmute call
   sipcall.unmuteAudio()
   return !sipcall.isAudioMuted()
+}
+
+/**
+ * Pause current call so the counterpart listens the pause ringtone
+ * @returns The true if no errors occurs
+ */
+export function pauseWebRTC() {
+  // Initialize sipcall
+  const { sipcall } = useWebRTCStore()
+  // Send hold message
+  try {
+    sipcall.send({
+      message: {
+        request: 'hold',
+      },
+    })
+    return true
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
+/**
+ * Unpause the current call so the counterpart listens the current user
+ * @returns The true if no errors occurs
+ */
+export function unpauseWebRTC() {
+  // Initialize sipcall
+  const { sipcall } = useWebRTCStore()
+  // Send hold message
+  try {
+    sipcall.send({
+      message: {
+        request: 'unhold',
+      },
+    })
+    return true
+  } catch (err) {
+    console.error(err)
+    return false
+  }
 }
