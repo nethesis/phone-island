@@ -63,6 +63,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-conversations` Indicates that a message has arrived and dispatches the extenUpdate data from the WebSocket
+
   ```json
   {
     "foo1": {
