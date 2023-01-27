@@ -40,7 +40,7 @@
     "@swc/helpers": "^0.4.12",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/user-event": "^12.1.10",
-    "axios": "^1.2.3",
+    "axios": "^1.2.5",
     "framer-motion": "^7.6.19",
     "js-base64": "^3.7.3",
     "mic-check": "^1.1.0",
