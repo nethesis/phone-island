@@ -41,7 +41,7 @@ interface StyledDynamicIslandTopContentProps {
 export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
   display: grid;
   grid-template-columns: ${({ isOpen, incoming, accepted, outgoing }) =>
-    isOpen && (incoming || outgoing)
+    isOpen && !accepted && (incoming || outgoing)
       ? '48px 1fr'
       : isOpen && accepted
       ? '48px 1fr 48px'
@@ -69,8 +69,7 @@ export const StyledMusicIconBar = styled.div`
   background: linear-gradient(0deg, rgba(255, 0, 255, 1) 0%, rgba(255, 0, 255, 0.75) 100%);
 `
 
-export const StyledAlbumArtThumb = styled.img`
-  border-radius: 4px;
+export const StyledAlbumArtThumb = styled.div`
   object-fit: cover;
 `
 

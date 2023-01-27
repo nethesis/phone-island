@@ -5,6 +5,7 @@ import { store } from './store'
 import { Socket } from './components'
 import { Base64 } from 'js-base64'
 import { Island } from './components'
+import { RestAPI } from './components'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -23,11 +24,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
     <>
       <Provider store={store}>
         <WebRTC hostName={HOST_NAME} sipExten={SIP_EXTEN} sipSecret={SIP_SECRET}>
-          <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
-            <Events>
-              <Island always={always} />
-            </Events>
-          </Socket>
+          <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
+            <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
+              <Events>
+                <Island always={always} />
+              </Events>
+            </Socket>
+          </RestAPI>
         </WebRTC>
       </Provider>
     </>

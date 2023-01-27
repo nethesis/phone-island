@@ -3,25 +3,25 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-
-interface CurrentCallTypes {
-  displayName?: string
-  number?: string
-  incoming?: boolean
-  ringing?: boolean
-  accepted?: boolean
-  outgoing?: boolean
-  startTime?: string
-}
+import incomingRingtone from '../static/incoming_ringtone'
+import outgoingRingtone from '../static/outgoing_ringtone'
+import { dispatchOutgoingCallStarted } from '../events/index'
 
 const defaultState = {
   displayName: '',
   number: '',
+  incomingSocket: false,
+  incomingWebRTC: false,
   incoming: false,
-  ringing: false,
+  acceptedSocket: false,
+  acceptedWebRTC: false,
   accepted: false,
+  outgoingSocket: false,
+  outgoingWebRTC: false,
   outgoing: false,
   startTime: '',
+  muted: false,
+  paused: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -37,4 +37,76 @@ export const currentCall = createModel<RootModel>()({
       return defaultState
     },
   },
+  effects: (dispatch) => ({
+    checkIncomingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+      // Check call type and incoming confirmation source
+      if (
+        (rootState.currentUser.default_device?.type === 'webrtc' &&
+          (rootState.currentCall.incomingWebRTC || payload.incomingWebRTC)) ||
+        (rootState.currentUser.default_device?.type === 'physical' &&
+          (rootState.currentCall.incomingSocket || payload.incomingSocket))
+      ) {
+        payload.incoming = true
+
+        // Update local player and play the audio
+        dispatch.player.updateAndPlayLocalAudio(incomingRingtone)
+      }
+      // Update the current call values and set incoming
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+    checkOutgoingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+      // Check call type and outgoing confirmation source
+      if (
+        (rootState.currentUser.default_device?.type === 'webrtc' &&
+          (rootState.currentCall.outgoingWebRTC || payload.outgoingWebRTC)) ||
+        (rootState.currentUser.default_device?.type === 'physical' &&
+          (rootState.currentCall.outgoingSocket || payload.outgoingSocket))
+      ) {
+        payload.outgoing = true
+        // Update local player and play audio
+        dispatch.player.updateAndPlayLocalAudio(outgoingRingtone)
+        // Dispatch an event for outgoing call
+        dispatchOutgoingCallStarted(payload.displayName, payload.number)
+      }
+      // Update the current call values and set outgoing
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+    checkAcceptedUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+      // Check call type and accepted confirmation source
+      if (
+        (rootState.currentUser.default_device?.type === 'webrtc' &&
+          (rootState.currentCall.acceptedWebRTC || payload.acceptedWebRTC)) ||
+        (rootState.currentUser.default_device?.type === 'physical' &&
+          (rootState.currentCall.acceptedSocket || payload.acceptedSocket))
+      ) {
+        payload.accepted = true
+        // TODO - add accepted event
+      }
+      // Update the current call values
+      dispatch.currentCall.updateCurrentCall({
+        ...payload,
+      })
+    },
+  }),
 })
+
+export interface CurrentCallTypes {
+  displayName?: string
+  number?: string
+  incomingSocket?: boolean
+  incomingWebRTC?: boolean
+  incoming?: boolean
+  acceptedSocket?: boolean
+  acceptedWebRTC?: boolean
+  accepted?: boolean
+  outgoingSocket?: boolean
+  outgoingWebRTC?: boolean
+  outgoing?: boolean
+  startTime?: string
+  muted?: boolean
+  paused?: boolean
+}

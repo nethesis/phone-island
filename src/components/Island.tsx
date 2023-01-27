@@ -26,20 +26,26 @@ import {
   faCompactDisc,
   faPhone,
   faMicrophone,
+  faMicrophoneSlash,
   faRightLeft,
   faChevronDown,
+  faPlay,
   faChevronUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
-import { hangupCurrentCall, answerIncomingCall } from '../lib/phone/call'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
-import { useLocalStorage } from '../utils/useLocalStorage'
-
+import { useLocalStorage, getTranslateValues } from '../utils'
 import { AudioBars } from './AudioBars'
-
-import { getTranslateValues } from '../utils/getTranslate'
 import { Button } from './Button'
+import {
+  hangupCurrentCall,
+  answerIncomingCall,
+  muteCurrentCall,
+  unmuteCurrentCall,
+  pauseCurrentCall,
+  unpauseCurrentCall,
+} from '../lib/phone/call'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
 const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
@@ -69,13 +75,11 @@ const ISLAND_STARTING_POSITION = {
 
 export const Island = ({ always }: IslandProps) => {
   const [isOpen, setIsOpen] = useState(true)
-  const { incoming, accepted, outgoing, displayName, number, startTime } = useSelector(
-    // ADD ACCEPTED
-    (state: RootState) => state.currentCall,
-  )
+  // Get the currentCall info
+  const { incoming, accepted, outgoing, displayName, number, startTime, muted, paused } =
+    useSelector((state: RootState) => state.currentCall)
 
-  const { localAudio: storeLocalAudio } = useSelector(
-    // ADD ACCEPTED
+  const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
     (state: RootState) => state.player,
   )
   const controls = useDragControls()
@@ -216,21 +220,22 @@ export const Island = ({ always }: IslandProps) => {
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
 
   useEffect(() => {
-    const audioStreamListener = storeLocalAudio?.addEventListener('play', () => {
-      if (navigator.userAgent.indexOf('Firefox') > -1) {
-        // @ts-ignore
-        setAudioStream(audio.mozCaptureStream())
-      } else {
-        // @ts-ignore
-        setAudioStream(audio.captureStream())
-      }
-    })
-
-    return () => {
-      // @ts-ignore
-      storeLocalAudio?.removeEventListener('play', audioStreamListener)
+    function audioStreamListener() {
+      storeRemoteAudio?.addEventListener('play', () => {
+        if (navigator.userAgent.indexOf('Firefox') > -1) {
+          // @ts-ignore
+          setAudioStream(storeRemoteAudio.mozCaptureStream())
+        } else {
+          // @ts-ignore
+          setAudioStream(storeRemoteAudio.captureStream())
+        }
+      })
     }
-  }, [storeLocalAudio])
+    audioStreamListener()
+    return () => {
+      storeRemoteAudio?.removeEventListener('play', audioStreamListener)
+    }
+  }, [storeRemoteAudio])
 
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
@@ -296,7 +301,7 @@ export const Island = ({ always }: IslandProps) => {
             outgoing={outgoing}
           >
             <div className='relative w-12 h-12'>
-              {(incoming || outgoing) && (
+              {(incoming || (outgoing && !accepted)) && (
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
@@ -308,10 +313,9 @@ export const Island = ({ always }: IslandProps) => {
                 ></motion.div>
               )}
               <StyledMusicAlbumArtThumbMotion
-                className='z-10 h-12 w-12'
+                className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
-                src='https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80'
               />
             </div>
             <div>
@@ -321,7 +325,7 @@ export const Island = ({ always }: IslandProps) => {
                   <StyledArtistName>
                     {accepted ? (
                       <Moment
-                        date={startTime}
+                        date={startTime || new Date().getTime() / 1000}
                         interval={1000}
                         format='hh:mm:ss'
                         trim='mid'
@@ -373,11 +377,27 @@ export const Island = ({ always }: IslandProps) => {
               </StyledSongControlsWrappers> */}
               {accepted && (
                 <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
-                  <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faPause} />
+                  <Button
+                    variant='default'
+                    active={paused ? true : false}
+                    onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+                  >
+                    {paused ? (
+                      <FontAwesomeIcon size='xl' icon={faPlay} />
+                    ) : (
+                      <FontAwesomeIcon size='xl' icon={faPause} />
+                    )}
                   </Button>
-                  <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                  <Button
+                    variant='default'
+                    active={muted ? true : false}
+                    onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
+                  >
+                    {muted ? (
+                      <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
+                    ) : (
+                      <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                    )}
                   </Button>
                   <Button variant='default'>
                     <FontAwesomeIcon size='xl' icon={faRightLeft} />

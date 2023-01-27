@@ -3,16 +3,14 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import type { UserInfoTypes } from '../services/user'
 
-const defaultState = {
-  sipcall: null,
-  jsepGlobal: null,
-}
+const defaultState: UserInfoTypes = {}
 
-export const webrtc = createModel<RootModel>()({
+export const currentUser = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    updateWebRTC: (state, payload: WebRTCTypes) => {
+    updateCurrentUser: (state, payload: UserInfoTypes) => {
       return {
         ...state,
         ...payload,
@@ -20,8 +18,3 @@ export const webrtc = createModel<RootModel>()({
     },
   },
 })
-
-export interface WebRTCTypes {
-  sipcall?: any
-  jsepGlobal?: any
-}

@@ -2,23 +2,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { getSupportedDevices } from '../devices/devices'
-import outgoingRingtone from '../../static/outgoing_ringtone'
 import Janus from '../webrtc/janus'
-import { call, hangup, decline, answer } from '../webrtc/messages'
-import { updateLocalAudioSource } from './audio'
+import {
+  call,
+  hangup,
+  decline,
+  answerWebRTC,
+  muteWebRTC,
+  unmuteWebRTC,
+  pauseWebRTC,
+  unpauseWebRTC,
+} from '../webrtc/messages'
 import { store } from '../../store'
+import { useCurrentCallStore } from '../../utils'
+import { isWebRTC } from '../user/default_device'
 
 /**
  * Starts a call
  *
  * @param sipURI The sip uri string
  */
-
 export function callSipURI(sipURI: string) {
   getSupportedDevices(async () => {
     // @ts-ignore
     Janus.log('This is a SIP call')
-    const calling = await call(sipURI, {
+    await call(sipURI, {
       audio: {
         mandatory: {
           echoCancellation: false,
@@ -35,21 +43,6 @@ export function callSipURI(sipURI: string) {
       videoSend: false,
       videoRecv: false,
     })
-
-    if (calling) {
-      // Update audio source
-      const audioSourceUpdated = await updateLocalAudioSource({ src: outgoingRingtone })
-      if (audioSourceUpdated) {
-        // Play audio when ready
-        store.dispatch.player.playLocalAudio({
-          loop: true,
-        })
-      }
-      // Update call info
-      store.dispatch.currentCall.updateCurrentCall({
-        outgoing: true,
-      })
-    }
   })
 }
 
@@ -57,19 +50,81 @@ export function callSipURI(sipURI: string) {
  * Answer incoming call
  */
 export function answerIncomingCall() {
-  answer()
+  if (isWebRTC()) {
+    answerWebRTC()
+  }
 }
 
 /**
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted } = store.getState().currentCall
+  const { outgoing, accepted } = useCurrentCallStore()
   if (outgoing || accepted) {
     hangup()
   } else {
     decline()
   }
-  store.dispatch.currentCall.reset()
   store.dispatch.player.stopAudio()
+  store.dispatch.currentCall.reset()
+}
+
+/**
+ * Mute the current call
+ */
+export function muteCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const muted = muteWebRTC()
+    if (muted) {
+      store.dispatch.currentCall.updateCurrentCall({
+        muted: true,
+      })
+    }
+  }
+}
+
+/**
+ * Unmute the current call
+ */
+export function unmuteCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const unmuted = unmuteWebRTC()
+    if (unmuted) {
+      store.dispatch.currentCall.updateCurrentCall({
+        muted: false,
+      })
+    }
+  }
+}
+
+/**
+ * Pause the current call
+ */
+export function pauseCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const paused = pauseWebRTC()
+    if (paused) {
+      store.dispatch.currentCall.updateCurrentCall({
+        paused: true,
+      })
+    }
+  }
+}
+
+/**
+ * Unpause the current call
+ */
+export function unpauseCurrentCall() {
+  // Check the current user default device
+  if (isWebRTC()) {
+    const unpaused = unpauseWebRTC()
+    if (unpaused) {
+      store.dispatch.currentCall.updateCurrentCall({
+        paused: false,
+      })
+    }
+  }
 }
