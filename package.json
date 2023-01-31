@@ -35,6 +35,11 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@nethesis/nethesis-duotone-svg-icons": "github:nethesis/nethesis-icons#duotone",
+    "@nethesis/nethesis-light-svg-icons": "github:nethesis/nethesis-icons#light",
+    "@nethesis/nethesis-regular-svg-icons": "github:nethesis/nethesis-icons#regular",
+    "@nethesis/nethesis-solid-svg-icons": "github:nethesis/nethesis-icons#solid",
+    "@nethesis/nethesis-thin-svg-icons": "github:nethesis/nethesis-icons#thin",
     "@rematch/core": "^2.2.0",
     "@rematch/immer": "^2.1.3",
     "@swc/helpers": "^0.4.12",

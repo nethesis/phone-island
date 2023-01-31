@@ -27,11 +27,10 @@ import {
   faPhone,
   faMicrophone,
   faMicrophoneSlash,
-  faRightLeft,
   faChevronDown,
   faPlay,
   faChevronUp,
-} from '@fortawesome/free-solid-svg-icons'
+} from '@nethesis/nethesis-solid-svg-icons'
 import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
@@ -46,6 +45,12 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
 } from '../lib/phone/call'
+import {
+  faPause as faPauseRegular,
+  faMicrophone as faMicrophoneRegular,
+  faRightLeft as faRightLeftRegualar,
+  faChevronDown as faChevronDownRegular,
+} from '@nethesis/nethesis-regular-svg-icons'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
 const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
@@ -385,7 +390,7 @@ export const Island = ({ always }: IslandProps) => {
                     {paused ? (
                       <FontAwesomeIcon size='xl' icon={faPlay} />
                     ) : (
-                      <FontAwesomeIcon size='xl' icon={faPause} />
+                      <FontAwesomeIcon size='xl' icon={faPauseRegular} />
                     )}
                   </Button>
                   <Button
@@ -396,14 +401,14 @@ export const Island = ({ always }: IslandProps) => {
                     {muted ? (
                       <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
                     ) : (
-                      <FontAwesomeIcon size='xl' icon={faMicrophone} />
+                      <FontAwesomeIcon size='xl' icon={faMicrophoneRegular} />
                     )}
                   </Button>
                   <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faRightLeft} />
+                    <FontAwesomeIcon size='xl' icon={faRightLeftRegualar} />
                   </Button>
                   <Button variant='neutral'>
-                    <FontAwesomeIcon size='xl' icon={faChevronDown} />
+                    <FontAwesomeIcon size='xl' icon={faChevronDownRegular} />
                   </Button>
                 </div>
               )}
@@ -418,11 +423,11 @@ export const Island = ({ always }: IslandProps) => {
                 animate={{ opacity: 1 }}
               >
                 <Button onClick={handleHangup} variant='red'>
-                  <FontAwesomeIcon className='rotate-135' size='2x' icon={faPhone} />
+                  <FontAwesomeIcon className='rotate-135 w-6 h-6' icon={faPhone} />
                 </Button>
                 {isAnswerVisible() && (
                   <Button onClick={handleAnswer} variant='green'>
-                    <FontAwesomeIcon size='2x' icon={faPhone} />
+                    <FontAwesomeIcon className='w-6 h-6' icon={faPhone} />
                   </Button>
                 )}
               </motion.div>
