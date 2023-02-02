@@ -1,21 +1,24 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import axios, { type AxiosResponse, isAxiosError } from 'axios'
+import { store } from '../store'
 
 /**
  * Get current user info
  */
 export async function getCurrentUserInfo(): Promise<UserInfoTypes | undefined> {
   try {
-    const res: AxiosResponse = await axios.get('/user/me')
-    return res.data
-  } catch (err) {
-    if (isAxiosError(err)) {
-      console.error(err.message)
-    } else {
-      console.error(err)
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/user/me`, {
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
     }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
   }
 }
 

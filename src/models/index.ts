@@ -3,12 +3,14 @@ import { player } from './player'
 import { webrtc } from './webrtc'
 import { currentCall } from './currentCall'
 import { currentUser } from './currentUser'
+import { fetchDefaults } from './fetchDefaults'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
   webrtc: typeof webrtc
   currentCall: typeof currentCall
   currentUser: typeof currentUser
+  fetchDefaults: typeof fetchDefaults
 }
 
 export const models: RootModel = {
@@ -16,4 +18,5 @@ export const models: RootModel = {
   webrtc,
   currentCall,
   currentUser,
+  fetchDefaults
 }

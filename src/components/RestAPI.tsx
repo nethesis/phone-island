@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, type FC, useEffect } from 'react'
-import axios from 'axios'
 import { getCurrentUserInfo } from '../services/user'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { Dispatch } from '../store'
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<Dispatch>()
 
   useEffect(() => {
     // Initialize axios
-    axios.defaults.baseURL = `https://${hostName}/webrest`
-    axios.defaults.headers.common['Authorization'] = `${username}:${authToken}`
-    axios.defaults.headers.post['Content-Type'] = 'application/json'
+    dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/webrest`)
+    dispatch.fetchDefaults.updateFetchHeaders({
+      Authorization: `${username}:${authToken}`,
+    })
 
     async function initUserInfo() {
       const userInfo = await getCurrentUserInfo()
