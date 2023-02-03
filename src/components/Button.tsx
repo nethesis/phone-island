@@ -20,12 +20,17 @@ export const Button: FC<ButtonProps> = ({ children, variant, active = false, ...
     variant: {
       red: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
       green: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
-      default: 'bg-gray-700 hover:bg-gray-500 focus:ring-gray-500',
+      default: 'hover:bg-gray-500 focus:ring-gray-500',
       neutral:
         'bg-transparent hover:bg-gray-500 hover:border-gray-500 border border-gray-700 focus:ring-0',
     },
-    active: {
-      default: 'bg-gray-500',
+    background: {
+      base: {
+        default: 'bg-gray-700',
+      },
+      active: {
+        default: 'bg-gray-500',
+      },
     },
   }
 
@@ -35,7 +40,9 @@ export const Button: FC<ButtonProps> = ({ children, variant, active = false, ...
         <button
           data-stop-propagation={true}
           className={classNames(
-            active && styles.active[variant],
+            active && styles.background.active[variant]
+              ? styles.background.active[variant]
+              : styles.background.base[variant] && styles.background.base[variant],
             styles.base,
             variant && styles.variant[variant],
           )}
