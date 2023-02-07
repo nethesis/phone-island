@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - fix_nethesis-icons
 
 jobs:
   cdn-publish:
