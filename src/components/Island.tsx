@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, type FC } from 'react'
 import {
   StyledAvatar,
   StyledDetails,
@@ -42,6 +42,7 @@ import {
 const PhoneIslandMotion = motion(StyledPhoneIsland)
 const AvatarMotion = motion(StyledAvatar)
 const DetailsMotion = motion(StyledDetails)
+const NameMotion = motion(StyledName)
 
 import { useIsomorphicLayoutEffect } from '../utils'
 
@@ -198,7 +199,6 @@ export const Island = ({ always }: IslandProps) => {
       width: '48px',
       height: '48px',
       borderRadius: '12px',
-      margin: '0 auto',
     },
     closed: {
       width: '20px',
@@ -240,6 +240,23 @@ export const Island = ({ always }: IslandProps) => {
       remoteAudio: remoteAudio.current,
     })
   }, [])
+
+  const Timer: FC = () => (
+    <StyledTimer isOpen={isOpen}>
+      {accepted ? (
+        <Moment
+          date={startTime || new Date().getTime() / 1000}
+          interval={1000}
+          format='h:mm:ss'
+          trim={false}
+          unix
+          durationFromNow
+        />
+      ) : (
+        <>{number && number}</>
+      )}
+    </StyledTimer>
+  )
 
   return (
     <div
@@ -286,8 +303,13 @@ export const Island = ({ always }: IslandProps) => {
             accepted={accepted}
             outgoing={outgoing}
           >
-            <div className='relative w-12 h-12'>
+            <motion.div
+              className='relative'
+              animate={isOpen ? 'open' : 'closed'}
+              variants={iconVariants}
+            >
               {(incoming || (outgoing && !accepted)) && (
+                // The background pulse effect
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
@@ -303,28 +325,18 @@ export const Island = ({ always }: IslandProps) => {
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
               />
-            </div>
-            <div>
-              {isOpen && (
-                <DetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <StyledName>{displayName && displayName}</StyledName>
-                  <StyledTimer>
-                    {accepted ? (
-                      <Moment
-                        date={startTime || new Date().getTime() / 1000}
-                        interval={1000}
-                        format='hh:mm:ss'
-                        trim='mid'
-                        unix
-                        durationFromNow
-                      />
-                    ) : (
-                      <>{number && number}</>
-                    )}
-                  </StyledTimer>
-                </DetailsMotion>
-              )}
-            </div>
+            </motion.div>
+            {isOpen && (
+              <DetailsMotion>
+                <NameMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {displayName && displayName}
+                </NameMotion>
+                {/* The timer when expanded */}
+                <Timer />
+              </DetailsMotion>
+            )}
+            {/* The timer when collapsed */}
+            {!isOpen && <Timer />}
             {accepted && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <AudioBars audioStream={audioStream} />

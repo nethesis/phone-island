@@ -64,11 +64,17 @@ export const StyledDetails = styled.div`
   justify-content: center;
   grid-template-rows: repeat(2, 1fr);
 `
-export const StyledTimer = styled.div`
-  font-size: 1rem;
+
+interface StyledTimerProps {
+  isOpen: boolean
+}
+
+export const StyledTimer = styled.div<StyledTimerProps>`
+  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1rem')}};
   font-weight: 200;
   color: #fff;
   letter-spacing: 0.5px;
+  max-width: fit-content;
 `
 
 export const StyledName = styled.div`
