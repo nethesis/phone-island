@@ -3,22 +3,18 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
-  StyledAlbumArtThumb,
-  StyledArtistDetails,
-  StyledArtistName,
-  StyledDynamicIsland,
-  StyledDynamicIslandTopContent,
-  StyledSongName,
+  StyledAvatar,
+  StyledDetails,
+  StyledTimer,
+  StyledPhoneIsland,
+  StyledTopContent,
+  StyledName,
 } from '../styles/Island.styles'
 
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faPhone,
-  faMicrophoneSlash,
-  faPlay,
-} from '@nethesis/nethesis-solid-svg-icons'
+import { faPhone, faMicrophoneSlash, faPlay } from '@nethesis/nethesis-solid-svg-icons'
 
 import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import { useLongPress } from '../utils/useLongPress'
@@ -43,9 +39,9 @@ import {
   faChevronDown as faChevronDownRegular,
 } from '@nethesis/nethesis-regular-svg-icons'
 
-const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
-const StyledMusicAlbumArtThumbMotion = motion(StyledAlbumArtThumb)
-const StyledArtistDetailsMotion = motion(StyledArtistDetails)
+const PhoneIslandMotion = motion(StyledPhoneIsland)
+const AvatarMotion = motion(StyledAvatar)
+const DetailsMotion = motion(StyledDetails)
 
 import { useIsomorphicLayoutEffect } from '../utils'
 
@@ -251,7 +247,7 @@ export const Island = ({ always }: IslandProps) => {
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
       {(incoming || outgoing || accepted || always) && (
-        <StyledDynamicIslandMotion
+        <PhoneIslandMotion
           className='font-sans absolute pointer-events-auto overflow-hidden'
           incoming={incoming}
           accepted={accepted}
@@ -284,7 +280,7 @@ export const Island = ({ always }: IslandProps) => {
           ref={islandRef}
           {...longPressEvent}
         >
-          <StyledDynamicIslandTopContent
+          <StyledTopContent
             isOpen={isOpen}
             incoming={incoming}
             accepted={accepted}
@@ -302,7 +298,7 @@ export const Island = ({ always }: IslandProps) => {
                   className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
                 ></motion.div>
               )}
-              <StyledMusicAlbumArtThumbMotion
+              <AvatarMotion
                 className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
@@ -310,9 +306,9 @@ export const Island = ({ always }: IslandProps) => {
             </div>
             <div>
               {isOpen && (
-                <StyledArtistDetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <StyledSongName>{displayName && displayName}</StyledSongName>
-                  <StyledArtistName>
+                <DetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <StyledName>{displayName && displayName}</StyledName>
+                  <StyledTimer>
                     {accepted ? (
                       <Moment
                         date={startTime || new Date().getTime() / 1000}
@@ -325,8 +321,8 @@ export const Island = ({ always }: IslandProps) => {
                     ) : (
                       <>{number && number}</>
                     )}
-                  </StyledArtistName>
-                </StyledArtistDetailsMotion>
+                  </StyledTimer>
+                </DetailsMotion>
               )}
             </div>
             {accepted && (
@@ -334,7 +330,7 @@ export const Island = ({ always }: IslandProps) => {
                 <AudioBars audioStream={audioStream} />
               </motion.div>
             )}
-          </StyledDynamicIslandTopContent>
+          </StyledTopContent>
           {isOpen && (
             <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               {accepted && (
@@ -390,7 +386,7 @@ export const Island = ({ always }: IslandProps) => {
               </motion.div>
             </motion.div>
           )}
-        </StyledDynamicIslandMotion>
+        </PhoneIslandMotion>
       )}
       <div className='hidden'>
         <audio autoPlay ref={localAudio}></audio>

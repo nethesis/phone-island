@@ -3,7 +3,7 @@
 
 import styled, { css } from 'styled-components'
 
-interface StyledDynamicIslandProps {
+interface StyledPhoneIslandProps {
   isOpen: boolean
   incoming: boolean
   openedIslandPadding: number
@@ -11,7 +11,7 @@ interface StyledDynamicIslandProps {
   outgoing: boolean
 }
 
-export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
+export const StyledPhoneIsland = styled.div<StyledPhoneIslandProps>`
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   position: absolute;
   border-radius: 99px;
@@ -31,14 +31,14 @@ export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
           grid-template-columns: 256px 114px;
         `}
 `
-interface StyledDynamicIslandTopContentProps {
+interface StyledTopContentProps {
   isOpen: boolean
   incoming: boolean
   accepted: boolean
   outgoing: boolean
 }
 
-export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
+export const StyledTopContent = styled.div<StyledTopContentProps>`
   display: grid;
   grid-template-columns: ${({ isOpen, incoming, accepted, outgoing }) =>
     isOpen && !accepted && (incoming || outgoing)
@@ -52,11 +52,11 @@ export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopCo
   width: 100%;
 `
 
-export const StyledAlbumArtThumb = styled.div`
+export const StyledAvatar = styled.div`
   object-fit: cover;
 `
 
-export const StyledArtistDetails = styled.div`
+export const StyledDetails = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   grid-gap: 4px;
@@ -64,14 +64,14 @@ export const StyledArtistDetails = styled.div`
   justify-content: center;
   grid-template-rows: repeat(2, 1fr);
 `
-export const StyledArtistName = styled.div`
+export const StyledTimer = styled.div`
   font-size: 1rem;
   font-weight: 200;
   color: #fff;
   letter-spacing: 0.5px;
 `
 
-export const StyledSongName = styled.div`
+export const StyledName = styled.div`
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
