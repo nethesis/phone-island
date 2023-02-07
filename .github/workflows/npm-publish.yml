@@ -23,7 +23,7 @@ jobs:
           sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
           sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
           cat package.json | grep nethesis
-          npm ci
+          npm i
       - run: npm run build:widget
       - name: 'Commit and publish to cdn'
         uses: EndBug/add-and-commit@v9
