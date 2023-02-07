@@ -20,9 +20,9 @@ jobs:
       - run: |
           # Insert correct token on nethesis-icons private repo
           apt update && apt install -y git
-          sed -i "s#github:nethesis#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
-          sed -i "s#github:nethesis#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
-          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis/nethesis-icons#g" package-lock.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis/nethesis-icons#g" package-lock.json
           npm ci
       - run: npm run build:widget
       - name: 'Commit and publish to cdn'
