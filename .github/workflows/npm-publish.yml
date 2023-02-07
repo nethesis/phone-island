@@ -20,7 +20,9 @@ jobs:
           persist-credentials: false
       - name: Reconfigure git to use HTTP authentication and install dependencies
         run: |
-          git config --global url.https://${{ secrets.ICONS_PRO_TOKEN }}@github.com/.insteadOf ssh://git@github.com/
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_PRO_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_PRO_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_PRO_TOKEN }}:x-oauth-basic@github.com/nethesis/nethesis-icons#g" package-lock.json
           npm ci
       - run: npm run build:widget
       - name: 'Commit and publish to cdn'
