@@ -267,7 +267,7 @@ export const Island = ({ always }: IslandProps) => {
 
       {(incoming || outgoing || accepted || always) && (
         <StyledDynamicIslandMotion
-          className='font-sans absolute pointer-events-auto'
+          className='font-sans absolute pointer-events-auto overflow-hidden'
           incoming={incoming}
           accepted={accepted}
           outgoing={outgoing}
@@ -344,7 +344,11 @@ export const Island = ({ always }: IslandProps) => {
                 </StyledArtistDetailsMotion>
               )}
             </div>
-            {accepted && <AudioBars audioStream={audioStream} />}
+            {accepted && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <AudioBars audioStream={audioStream} />
+              </motion.div>
+            )}
             {/* <StyledMusicIconMotion animate={{ opacity: isOpen ? [0, 1] : 1 }}>
               <StyledMusicIconBarMotion
                 initial={{ height: '0' }}
@@ -364,7 +368,7 @@ export const Island = ({ always }: IslandProps) => {
             </StyledMusicIconMotion> */}
           </StyledDynamicIslandTopContent>
           {isOpen && (
-            <div className='grid gap-y-5'>
+            <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               {/* <StyledPlayBarWrapper>
                 <span>2:30</span>
                 <StyledPlayBar />
@@ -431,7 +435,7 @@ export const Island = ({ always }: IslandProps) => {
                   </Button>
                 )}
               </motion.div>
-            </div>
+            </motion.div>
           )}
         </StyledDynamicIslandMotion>
       )}

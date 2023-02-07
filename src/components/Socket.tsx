@@ -60,8 +60,6 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               break
           }
         }
-      } else {
-        console.error(res)
       }
     }
 
