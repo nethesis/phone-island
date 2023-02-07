@@ -19,9 +19,9 @@ jobs:
           ref: ${{ github.ref }}
       - run: |
           # Insert correct token on nethesis-icons private repo
-          sed -i "s#github:nethesis#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package.json
-          sed -i "s#github:nethesis#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package-lock.json
-          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
           npm ci
       - run: npm run build:widget
       - name: 'Commit and publish to cdn'
@@ -56,9 +56,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: |
           # Insert correct token on nethesis-icons private repo
-          sed -i "s#github:nethesis#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package.json
-          sed -i "s#github:nethesis#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package-lock.json
-          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${ICONS_TOKEN}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
           npm ci
       - run: npm run build
       - run: npm run release
