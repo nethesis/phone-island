@@ -52,23 +52,6 @@ export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopCo
   width: 100%;
 `
 
-export const StyledMusicIcon = styled.div`
-  width: 12px;
-  height: 12px;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-`
-
-export const StyledMusicIconBar = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(0deg, rgba(255, 0, 255, 1) 0%, rgba(255, 0, 255, 0.75) 100%);
-`
-
 export const StyledAlbumArtThumb = styled.div`
   object-fit: cover;
 `
@@ -92,52 +75,4 @@ export const StyledSongName = styled.div`
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
-`
-
-export const StyledPlayBarWrapper = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-gap: 16px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;
-  font-size: 0.75rem;
-`
-export const StyledPlayBar = styled.div`
-  width: 100%;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 99px;
-  position: relative;
-  &:after {
-    content: '';
-    width: 70%;
-    height: 100%;
-    background-color: #fff;
-    border-radius: 99px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
-`
-
-export const StyledSongControlsWrappers = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 16px;
-  align-items: center;
-  &:last-child {
-    text-align: right;
-  }
-`
-export const StyledSongControls = styled.div`
-  display: grid;
-  grid-gap: 32px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;
-  grid-template-columns: 32px auto 32px;
 `

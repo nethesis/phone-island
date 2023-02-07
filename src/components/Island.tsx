@@ -8,35 +8,25 @@ import {
   StyledArtistName,
   StyledDynamicIsland,
   StyledDynamicIslandTopContent,
-  StyledMusicIcon,
-  StyledMusicIconBar,
-  StyledPlayBar,
-  StyledPlayBarWrapper,
-  StyledSongControls,
-  StyledSongControlsWrappers,
   StyledSongName,
 } from '../styles/Island.styles'
+
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faBackward,
-  faPause,
-  faForward,
-  faCompactDisc,
   faPhone,
-  faMicrophone,
   faMicrophoneSlash,
-  faChevronDown,
   faPlay,
-  faChevronUp,
 } from '@nethesis/nethesis-solid-svg-icons'
-import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
+
+import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
 import { useLocalStorage, getTranslateValues } from '../utils'
 import { AudioBars } from './AudioBars'
 import { Button } from './Button'
+
 import {
   hangupCurrentCall,
   answerIncomingCall,
@@ -45,6 +35,7 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
 } from '../lib/phone/call'
+
 import {
   faPause as faPauseRegular,
   faMicrophone as faMicrophoneRegular,
@@ -53,9 +44,7 @@ import {
 } from '@nethesis/nethesis-regular-svg-icons'
 
 const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
-const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
 const StyledMusicAlbumArtThumbMotion = motion(StyledAlbumArtThumb)
-const StyledMusicIconMotion = motion(StyledMusicIcon)
 const StyledArtistDetailsMotion = motion(StyledArtistDetails)
 
 import { useIsomorphicLayoutEffect } from '../utils'
@@ -261,10 +250,6 @@ export const Island = ({ always }: IslandProps) => {
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
-      {/* <div className='bg-black h-72 w-72 flex justify-center '>
-        <AudioBars audioStream={audioStream} />
-      </div> */}
-
       {(incoming || outgoing || accepted || always) && (
         <StyledDynamicIslandMotion
           className='font-sans absolute pointer-events-auto overflow-hidden'
@@ -349,41 +334,9 @@ export const Island = ({ always }: IslandProps) => {
                 <AudioBars audioStream={audioStream} />
               </motion.div>
             )}
-            {/* <StyledMusicIconMotion animate={{ opacity: isOpen ? [0, 1] : 1 }}>
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '100%' }}
-                transition={{ duration: 1, delay: 0.5, repeat: Infinity }}
-              />
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '100%' }}
-                transition={{ duration: 1, delay: 0.75, repeat: Infinity }}
-              />
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '75%' }}
-                transition={{ duration: 1, delay: 0.3, repeat: Infinity }}
-              />
-            </StyledMusicIconMotion> */}
           </StyledDynamicIslandTopContent>
           {isOpen && (
             <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {/* <StyledPlayBarWrapper>
-                <span>2:30</span>
-                <StyledPlayBar />
-                <span>-1:35</span>
-              </StyledPlayBarWrapper>
-              <StyledSongControlsWrappers>
-                <StyledSongControls>
-                  <FontAwesomeIcon size='2x' icon={faBackward} />
-                  <FontAwesomeIcon size='3x' icon={faPause} />
-                  <FontAwesomeIcon size='2x' icon={faForward} />
-                </StyledSongControls>
-                <div>
-                  <FontAwesomeIcon size='2x' icon={faCompactDisc} />
-                </div>
-              </StyledSongControlsWrappers> */}
               {accepted && (
                 <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
                   <Button
