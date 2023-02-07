@@ -30,6 +30,8 @@ jobs:
           author_email: NethBot@users.noreply.github.com
           message: 'widget: release for jsDelivr'
           add: 'dist-widget/ --force'
+        env:
+          GITHUB_TOKEN: ${{ secrets.ICONS_TOKEN }}
 
   npm-publish:
     needs: cdn-publish
