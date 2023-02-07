@@ -24,14 +24,13 @@ jobs:
           npm ci
       - run: npm run build:widget
       - name: 'Commit and publish to cdn'
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v6
         with:
           author_name: NethBot
           author_email: NethBot@users.noreply.github.com
           message: 'widget: release for jsDelivr'
           add: 'dist-widget/ --force'
-        env:
-          GITHUB_TOKEN: ${{ secrets.ICONS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   npm-publish:
     needs: cdn-publish
