@@ -21,9 +21,9 @@ jobs:
           # Insert correct token on nethesis-icons private repo
           echo "before"
           cat package.json | grep nethesis
-          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
-          sed -i "s#github:nethesis#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
-          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.ICONS_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package.json
+          sed -i "s#github:nethesis#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
+          sed -i "s#git+ssh://git@github.com/nethesis/nethesis-icons#git+https://${{ secrets.TEST_TOKEN }}:x-oauth-basic@github.com/nethesis#g" package-lock.json
           echo "after"
           cat package.json | grep nethesis
           npm ci
