@@ -59,7 +59,6 @@ export const StyledAvatar = styled.div`
 export const StyledDetails = styled.div`
   display: grid;
   grid-template-columns: 1fr;
-  grid-gap: 4px;
   align-items: center;
   justify-content: center;
   grid-template-rows: repeat(2, 1fr);

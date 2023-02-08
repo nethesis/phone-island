@@ -1,26 +1,18 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 
 // Swapping values around for a better visual effect
 const DATA_MAP = {
-  0: 8,
-  1: 7,
-  2: 6,
-  3: 5,
-  4: 4,
-  5: 3,
-  6: 2,
-  7: 1,
-  8: 1,
-  9: 2,
-  10: 3,
-  11: 4,
-  12: 5,
-  13: 6,
-  14: 7,
-  15: 8,
+  0: 4,
+  1: 3,
+  2: 2,
+  3: 1,
+  4: 1,
+  5: 2,
+  6: 3,
+  7: 4,
 }
 
 interface AudioBarsProps {
@@ -38,61 +30,72 @@ export const AudioBars = React.memo<AudioBarsProps>(({ audioStream }) => {
   // The container element ref
   const containerElement = useRef<HTMLDivElement | null>(null)
 
-  const connectStream = (audioStream: MediaStream) => {
-    // Initialize and audio context
-    const audioContext = new AudioContext()
-    // Create and audio contest analyser
-    const analyser = audioContext.createAnalyser()
-    const source = audioContext.createMediaStreamSource(audioStream)
-    // Connect the analyser to the audio source
-    source.connect(analyser)
-    // The smooth constant
-    analyser.smoothingTimeConstant = 0.8
-    // The fftzize to be applied on the stream
-    analyser.fftSize = 32
+  const connectStream = useCallback(
+    (audioStream: MediaStream) => {
+      // Initialize and audio context
+      // @ts-ignore
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
 
-    // The function that renders the frames
-    const renderFrame = () => {
-      requestIdleCallback(() => {
-        // Find the frequency
-        const frequencyData = new Uint8Array(analyser.frequencyBinCount)
-        analyser.getByteFrequencyData(frequencyData)
-        const values = Object.values(frequencyData)
-        const barsElements = containerElement.current?.children
-        for (let i = 0; i < Object.keys(DATA_MAP).length; ++i) {
-          const value = values[DATA_MAP[i]] / 255
-          // @ts-ignore
-          const elmStyles = barsElements && barsElements[i].style
-          if (elmStyles) {
-            // Set styles to every bar
-            elmStyles.transform = `scaleY( ${value * 6} )`
-            elmStyles.opacity = `0.85`
+      // Create and audio contest analyser
+      const analyser = audioContext.createAnalyser()
+      const source = audioContext.createMediaStreamSource(audioStream)
+
+      // Connect the analyser to the audio source
+      source.connect(analyser)
+
+      // Set smooth constant
+      analyser.smoothingTimeConstant = 0.8
+
+      // The fftzize to be applied on the stream
+      analyser.fftSize = 32
+
+      // The function that renders the frames
+      const renderFrame = () => {
+        requestIdleCallback(() => {
+          // Find the frequency
+          const frequencyData = new Uint8Array(analyser.frequencyBinCount)
+          analyser.getByteFrequencyData(frequencyData)
+          const values = Object.values(frequencyData)
+
+          // Select the bars array
+          const bars = containerElement.current?.children
+
+          // Change styles to every bar
+          for (let i = 0; i < Object.keys(DATA_MAP).length; ++i) {
+            const value = values[DATA_MAP[i]] / 255
+            // @ts-ignore
+            const barStyles = bars && bars[i].style
+            if (barStyles) {
+              // Set height to every bar
+              barStyles.height = `${100 * value}%`
+            }
           }
-        }
-        requestAnimationFrame(renderFrame)
-      })
-    }
-    requestAnimationFrame(renderFrame)
-  }
+          requestAnimationFrame(renderFrame)
+        })
+      }
+
+      // Render the frames using requestAnimationFrame API
+      requestAnimationFrame(renderFrame)
+    },
+    [audioStream],
+  )
 
   useEffect(() => {
-    if (audioStream !== null) {
+    if (audioStream) {
       // Initialize audio bars
       connectStream(audioStream)
     }
   }, [audioStream])
 
   return (
-    <>
+    <div className='h-12 w-12 flex justify-center items-center'>
       <div
-        className='flex justify-center items-center gap-0.5 h-12 w-12 -mt-1.5'
+        className='h-8 w-fit flex justify-center items-center gap-1 overflow-hidden'
         ref={containerElement}
       >
         {audioStream &&
-          Object.keys(DATA_MAP).map((key) => (
-            <div key={key} className='w-1 h-1 bg-emerald-600 inline-block'></div>
-          ))}
+          Object.keys(DATA_MAP).map((key) => <div key={key} className='bg-emerald-600 w-0.5 opacity-90'></div>)}
       </div>
-    </>
+    </div>
   )
 })
