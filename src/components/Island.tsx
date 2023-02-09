@@ -241,11 +241,24 @@ export const Island = ({ always }: IslandProps) => {
     })
   }, [])
 
+  // Set timer negative differences
+  const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
+
+  useEffect(() => {
+    // Handle
+    if (startTime) {
+      const difference = new Date().getTime() / 1000 - Number(startTime)
+      if (difference < 0) {
+        setTimerNegativeDifference(difference)
+      }
+    }
+  }, [startTime])
+
   const Timer: FC = () => (
     <StyledTimer isOpen={isOpen}>
       {accepted ? (
         <Moment
-          date={startTime || new Date().getTime() / 1000}
+          date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
           interval={1000}
           format='h:mm:ss'
           trim={false}
