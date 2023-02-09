@@ -94,7 +94,7 @@ export const AudioBars = React.memo<AudioBarsProps>(({ audioStream }) => {
         ref={containerElement}
       >
         {audioStream &&
-          Object.keys(DATA_MAP).map((key) => <div key={key} className='bg-emerald-600 w-0.5 opacity-90'></div>)}
+          Object.keys(DATA_MAP).map((key) => <div key={key} className='bg-emerald-600 w-0.5 rounded-sm'></div>)}
       </div>
     </div>
   )
