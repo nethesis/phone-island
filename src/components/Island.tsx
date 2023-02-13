@@ -188,8 +188,8 @@ export const Island = ({ always }: IslandProps) => {
       borderRadius: '20px',
     },
     closed: {
-      width: '156px',
-      height: '36px',
+      width: '168px',
+      height: '40px',
       borderRadius: '99px',
     },
   }
@@ -201,9 +201,9 @@ export const Island = ({ always }: IslandProps) => {
       borderRadius: '12px',
     },
     closed: {
-      width: '20px',
-      height: '20px',
-      borderRadius: '4px',
+      width: '24px',
+      height: '24px',
+      borderRadius: '6px',
     },
   }
 
@@ -352,7 +352,7 @@ export const Island = ({ always }: IslandProps) => {
             {!isOpen && <Timer />}
             {accepted && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <AudioBars audioStream={audioStream} />
+                <AudioBars audioStream={audioStream} size={isOpen ? 'large' : 'small'} />
               </motion.div>
             )}
           </StyledTopContent>

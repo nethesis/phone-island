@@ -45,8 +45,8 @@ export const StyledTopContent = styled.div<StyledTopContentProps>`
       ? '48px 1fr'
       : isOpen && accepted
       ? '48px 1fr 48px'
-      : '12px 1fr 12px'};
-  grid-gap: 20px;
+      : '24px 1fr 24px'};
+  grid-gap: ${({isOpen}) => isOpen ? '20px' : '12px'};
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;
   width: 100%;
@@ -69,7 +69,7 @@ interface StyledTimerProps {
 }
 
 export const StyledTimer = styled.div<StyledTimerProps>`
-  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1rem')}};
+  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
   font-weight: 200;
   color: #fff;
   letter-spacing: 0.5px;
