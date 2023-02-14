@@ -69,6 +69,8 @@ npm install
 Run Storybook
 
 ```
+touch .env.development.local
+echo "CONFIG_TOKEN=$(echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>" | base64 -w0)" > .env.development.local
 npm run dev
 ```
 
