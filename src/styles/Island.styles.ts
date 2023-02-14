@@ -3,7 +3,7 @@
 
 import styled, { css } from 'styled-components'
 
-interface StyledDynamicIslandProps {
+interface StyledPhoneIslandProps {
   isOpen: boolean
   incoming: boolean
   openedIslandPadding: number
@@ -11,7 +11,7 @@ interface StyledDynamicIslandProps {
   outgoing: boolean
 }
 
-export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
+export const StyledPhoneIsland = styled.div<StyledPhoneIslandProps>`
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   position: absolute;
   border-radius: 99px;
@@ -25,119 +25,70 @@ export const StyledDynamicIsland = styled.div<StyledDynamicIslandProps>`
       ? css`
           grid-template-rows: 72px 1fr;
         `
-      : isOpen &&
-        (incoming || outgoing) &&
-        css`
+      : isOpen && incoming
+      ? css`
           grid-template-columns: 256px 114px;
+        `
+      : isOpen &&
+        outgoing &&
+        css`
+          grid-template-columns: 1fr 84px;
         `}
 `
-interface StyledDynamicIslandTopContentProps {
+interface StyledTopContentProps {
   isOpen: boolean
   incoming: boolean
   accepted: boolean
   outgoing: boolean
 }
 
-export const StyledDynamicIslandTopContent = styled.div<StyledDynamicIslandTopContentProps>`
+export const StyledTopContent = styled.div<StyledTopContentProps>`
   display: grid;
   grid-template-columns: ${({ isOpen, incoming, accepted, outgoing }) =>
-    isOpen && !accepted && (incoming || outgoing)
+    isOpen && !accepted && outgoing
       ? '48px 1fr'
+      : isOpen && !accepted && incoming
+      ? '48px 1fr 1px'
       : isOpen && accepted
-      ? '48px 1fr 48px'
-      : '12px 1fr 12px'};
-  grid-gap: 20px;
+      ? '48px 164px 48px'
+      : !isOpen && !accepted
+      ? '24px 102px'
+      : '24px 66px 24px'};
+  grid-gap: ${({ isOpen }) => (isOpen ? '20px' : '12px')};
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;
   width: 100%;
 `
 
-export const StyledMusicIcon = styled.div`
-  width: 12px;
-  height: 12px;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-`
-
-export const StyledMusicIconBar = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(0deg, rgba(255, 0, 255, 1) 0%, rgba(255, 0, 255, 0.75) 100%);
-`
-
-export const StyledAlbumArtThumb = styled.div`
+export const StyledAvatar = styled.div`
   object-fit: cover;
 `
 
-export const StyledArtistDetails = styled.div`
+interface StyledDetailsProps {
+  numberExists: boolean
+}
+
+export const StyledDetails = styled.div<StyledDetailsProps>`
   display: grid;
+  align-self: center;
   grid-template-columns: 1fr;
-  grid-gap: 4px;
-  align-items: center;
-  justify-content: center;
   grid-template-rows: repeat(2, 1fr);
 `
-export const StyledArtistName = styled.div`
-  font-size: 1rem;
+
+interface StyledTimerProps {
+  isOpen: boolean
+}
+
+export const StyledTimer = styled.div<StyledTimerProps>`
+  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
   font-weight: 200;
   color: #fff;
   letter-spacing: 0.5px;
+  max-width: fit-content;
 `
 
-export const StyledSongName = styled.div`
+export const StyledName = styled.div`
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
-`
-
-export const StyledPlayBarWrapper = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-gap: 16px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;
-  font-size: 0.75rem;
-`
-export const StyledPlayBar = styled.div`
-  width: 100%;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 99px;
-  position: relative;
-  &:after {
-    content: '';
-    width: 70%;
-    height: 100%;
-    background-color: #fff;
-    border-radius: 99px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
-`
-
-export const StyledSongControlsWrappers = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 16px;
-  align-items: center;
-  &:last-child {
-    text-align: right;
-  }
-`
-export const StyledSongControls = styled.div`
-  display: grid;
-  grid-gap: 32px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  color: #fff;
-  grid-template-columns: 32px auto 32px;
 `

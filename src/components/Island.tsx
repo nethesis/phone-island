@@ -1,42 +1,28 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect, type FC } from 'react'
 import {
-  StyledAlbumArtThumb,
-  StyledArtistDetails,
-  StyledArtistName,
-  StyledDynamicIsland,
-  StyledDynamicIslandTopContent,
-  StyledMusicIcon,
-  StyledMusicIconBar,
-  StyledPlayBar,
-  StyledPlayBarWrapper,
-  StyledSongControls,
-  StyledSongControlsWrappers,
-  StyledSongName,
+  StyledAvatar,
+  StyledDetails,
+  StyledTimer,
+  StyledPhoneIsland,
+  StyledTopContent,
+  StyledName,
 } from '../styles/Island.styles'
+
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faBackward,
-  faPause,
-  faForward,
-  faCompactDisc,
-  faPhone,
-  faMicrophone,
-  faMicrophoneSlash,
-  faChevronDown,
-  faPlay,
-  faChevronUp,
-} from '@nethesis/nethesis-solid-svg-icons'
-import { motion, useDragControls, useAnimation } from 'framer-motion/dist/framer-motion'
+import { faPhone, faMicrophoneSlash, faPlay } from '@nethesis/nethesis-solid-svg-icons'
+
+import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import { useLongPress } from '../utils/useLongPress'
 import Moment from 'react-moment'
 import { useLocalStorage, getTranslateValues } from '../utils'
 import { AudioBars } from './AudioBars'
 import { Button } from './Button'
+
 import {
   hangupCurrentCall,
   answerIncomingCall,
@@ -45,6 +31,7 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
 } from '../lib/phone/call'
+
 import {
   faPause as faPauseRegular,
   faMicrophone as faMicrophoneRegular,
@@ -52,11 +39,10 @@ import {
   faChevronDown as faChevronDownRegular,
 } from '@nethesis/nethesis-regular-svg-icons'
 
-const StyledDynamicIslandMotion = motion(StyledDynamicIsland)
-const StyledMusicIconBarMotion = motion(StyledMusicIconBar)
-const StyledMusicAlbumArtThumbMotion = motion(StyledAlbumArtThumb)
-const StyledMusicIconMotion = motion(StyledMusicIcon)
-const StyledArtistDetailsMotion = motion(StyledArtistDetails)
+const PhoneIslandMotion = motion(StyledPhoneIsland)
+const AvatarMotion = motion(StyledAvatar)
+const DetailsMotion = motion(StyledDetails)
+const NameMotion = motion(StyledName)
 
 import { useIsomorphicLayoutEffect } from '../utils'
 
@@ -202,8 +188,8 @@ export const Island = ({ always }: IslandProps) => {
       borderRadius: '20px',
     },
     closed: {
-      width: '156px',
-      height: '36px',
+      width: '168px',
+      height: '40px',
       borderRadius: '99px',
     },
   }
@@ -213,12 +199,11 @@ export const Island = ({ always }: IslandProps) => {
       width: '48px',
       height: '48px',
       borderRadius: '12px',
-      margin: '0 auto',
     },
     closed: {
-      width: '20px',
-      height: '20px',
-      borderRadius: '4px',
+      width: '24px',
+      height: '24px',
+      borderRadius: '6px',
     },
   }
 
@@ -256,18 +241,75 @@ export const Island = ({ always }: IslandProps) => {
     })
   }, [])
 
+  // Set timer negative differences
+  const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
+
+  useEffect(() => {
+    // Handle
+    if (startTime) {
+      const difference = new Date().getTime() / 1000 - Number(startTime)
+      if (difference < 0) {
+        setTimerNegativeDifference(difference)
+      }
+    }
+  }, [startTime])
+
+  const NumberToTimer: FC = () => (
+    <StyledTimer isOpen={isOpen}>
+      {accepted && startTime && timerNegativeDifference ? (
+        <Moment
+          date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
+          interval={1000}
+          format='h:mm:ss'
+          trim={false}
+          unix
+          durationFromNow
+        />
+      ) : (
+        <>{number && number !== '<unknown>' && number}</>
+      )}
+    </StyledTimer>
+  )
+
+  interface DisplayNameProps {
+    displayName: string
+  }
+
+  const DisplayName: FC<DisplayNameProps> = ({ displayName }) => {
+    const [animateText, setAnimateText] = useState<boolean>(false)
+    const nameContainer = useRef<null | HTMLDivElement>(null)
+    const nameText = useRef<null | HTMLDivElement>(null)
+
+    useLayoutEffect(() => {
+      if (
+        nameContainer.current &&
+        nameText.current &&
+        nameText.current.clientWidth > nameContainer.current.clientWidth
+      ) {
+        setAnimateText(true)
+      }
+    })
+
+    return (
+      <NameMotion
+        ref={nameContainer}
+        className={`whitespace-nowrap  overflow-hidden ${animateText && 'animated-text'}`}
+      >
+        <div className='w-fit' ref={nameText}>
+          {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}
+        </div>
+      </NameMotion>
+    )
+  }
+
   return (
     <div
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
-      {/* <div className='bg-black h-72 w-72 flex justify-center '>
-        <AudioBars audioStream={audioStream} />
-      </div> */}
-
       {(incoming || outgoing || accepted || always) && (
-        <StyledDynamicIslandMotion
-          className='font-sans absolute pointer-events-auto'
+        <PhoneIslandMotion
+          className='font-sans absolute pointer-events-auto overflow-hidden'
           incoming={incoming}
           accepted={accepted}
           outgoing={outgoing}
@@ -299,14 +341,19 @@ export const Island = ({ always }: IslandProps) => {
           ref={islandRef}
           {...longPressEvent}
         >
-          <StyledDynamicIslandTopContent
+          <StyledTopContent
             isOpen={isOpen}
             incoming={incoming}
             accepted={accepted}
             outgoing={outgoing}
           >
-            <div className='relative w-12 h-12'>
+            <motion.div
+              className='relative'
+              animate={isOpen ? 'open' : 'closed'}
+              variants={iconVariants}
+            >
               {(incoming || (outgoing && !accepted)) && (
+                // The background pulse effect
                 <motion.div
                   style={{
                     animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
@@ -317,69 +364,31 @@ export const Island = ({ always }: IslandProps) => {
                   className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
                 ></motion.div>
               )}
-              <StyledMusicAlbumArtThumbMotion
+              <AvatarMotion
                 className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
               />
-            </div>
-            <div>
-              {isOpen && (
-                <StyledArtistDetailsMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <StyledSongName>{displayName && displayName}</StyledSongName>
-                  <StyledArtistName>
-                    {accepted ? (
-                      <Moment
-                        date={startTime || new Date().getTime() / 1000}
-                        interval={1000}
-                        format='hh:mm:ss'
-                        trim='mid'
-                        unix
-                        durationFromNow
-                      />
-                    ) : (
-                      <>{number && number}</>
-                    )}
-                  </StyledArtistName>
-                </StyledArtistDetailsMotion>
-              )}
-            </div>
-            {accepted && <AudioBars audioStream={audioStream} />}
-            {/* <StyledMusicIconMotion animate={{ opacity: isOpen ? [0, 1] : 1 }}>
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '100%' }}
-                transition={{ duration: 1, delay: 0.5, repeat: Infinity }}
-              />
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '100%' }}
-                transition={{ duration: 1, delay: 0.75, repeat: Infinity }}
-              />
-              <StyledMusicIconBarMotion
-                initial={{ height: '0' }}
-                animate={{ height: '75%' }}
-                transition={{ duration: 1, delay: 0.3, repeat: Infinity }}
-              />
-            </StyledMusicIconMotion> */}
-          </StyledDynamicIslandTopContent>
+            </motion.div>
+            {isOpen && (
+              <DetailsMotion>
+                <DisplayName displayName={displayName} />
+                {/* The timer when expanded */}
+                <NumberToTimer />
+              </DetailsMotion>
+            )}
+            {/* The display name when collepsed */}
+            {!isOpen && !accepted && <DisplayName displayName={displayName} />}
+            {/* The timer when collapsed */}
+            {!isOpen && accepted && <NumberToTimer />}
+            {accepted && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <AudioBars audioStream={audioStream} size={isOpen ? 'large' : 'small'} />
+              </motion.div>
+            )}
+          </StyledTopContent>
           {isOpen && (
-            <div className='grid gap-y-5'>
-              {/* <StyledPlayBarWrapper>
-                <span>2:30</span>
-                <StyledPlayBar />
-                <span>-1:35</span>
-              </StyledPlayBarWrapper>
-              <StyledSongControlsWrappers>
-                <StyledSongControls>
-                  <FontAwesomeIcon size='2x' icon={faBackward} />
-                  <FontAwesomeIcon size='3x' icon={faPause} />
-                  <FontAwesomeIcon size='2x' icon={faForward} />
-                </StyledSongControls>
-                <div>
-                  <FontAwesomeIcon size='2x' icon={faCompactDisc} />
-                </div>
-              </StyledSongControlsWrappers> */}
+            <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               {accepted && (
                 <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
                   <Button
@@ -431,9 +440,9 @@ export const Island = ({ always }: IslandProps) => {
                   </Button>
                 )}
               </motion.div>
-            </div>
+            </motion.div>
           )}
-        </StyledDynamicIslandMotion>
+        </PhoneIslandMotion>
       )}
       <div className='hidden'>
         <audio autoPlay ref={localAudio}></audio>
