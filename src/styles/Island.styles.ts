@@ -72,7 +72,7 @@ export const StyledDetails = styled.div<StyledDetailsProps>`
   display: grid;
   align-self: center;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 24px);
 `
 
 interface StyledTimerProps {
