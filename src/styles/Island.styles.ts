@@ -81,6 +81,7 @@ interface StyledTimerProps {
 
 export const StyledTimer = styled.div<StyledTimerProps>`
   font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
+  max-height: 24px;
   font-weight: 200;
   color: #fff;
   letter-spacing: 0.5px;
