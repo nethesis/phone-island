@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useEffect, type FC } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect, type FC } from 'react'
 import {
   StyledAvatar,
   StyledDetails,
@@ -254,9 +254,9 @@ export const Island = ({ always }: IslandProps) => {
     }
   }, [startTime])
 
-  const Timer: FC = () => (
+  const NumberToTimer: FC = () => (
     <StyledTimer isOpen={isOpen}>
-      {accepted ? (
+      {accepted && startTime && timerNegativeDifference ? (
         <Moment
           date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
           interval={1000}
@@ -266,10 +266,41 @@ export const Island = ({ always }: IslandProps) => {
           durationFromNow
         />
       ) : (
-        <>{number && number}</>
+        <>{number && number !== '<unknown>' && number}</>
       )}
     </StyledTimer>
   )
+
+  interface DisplayNameProps {
+    displayName: string
+  }
+
+  const DisplayName: FC<DisplayNameProps> = ({ displayName }) => {
+    const [animateText, setAnimateText] = useState<boolean>(false)
+    const nameContainer = useRef<null | HTMLDivElement>(null)
+    const nameText = useRef<null | HTMLDivElement>(null)
+
+    useLayoutEffect(() => {
+      if (
+        nameContainer.current &&
+        nameText.current &&
+        nameText.current.clientWidth > nameContainer.current.clientWidth
+      ) {
+        setAnimateText(true)
+      }
+    })
+
+    return (
+      <NameMotion
+        ref={nameContainer}
+        className={`whitespace-nowrap  overflow-hidden ${animateText && 'animated-text'}`}
+      >
+        <div className='w-fit' ref={nameText}>
+          {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}
+        </div>
+      </NameMotion>
+    )
+  }
 
   return (
     <div
@@ -341,15 +372,15 @@ export const Island = ({ always }: IslandProps) => {
             </motion.div>
             {isOpen && (
               <DetailsMotion>
-                <NameMotion initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  {displayName && displayName}
-                </NameMotion>
+                <DisplayName displayName={displayName} />
                 {/* The timer when expanded */}
-                <Timer />
+                <NumberToTimer />
               </DetailsMotion>
             )}
+            {/* The display name when collepsed */}
+            {!isOpen && !accepted && <DisplayName displayName={displayName} />}
             {/* The timer when collapsed */}
-            {!isOpen && <Timer />}
+            {!isOpen && accepted && <NumberToTimer />}
             {accepted && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <AudioBars audioStream={audioStream} size={isOpen ? 'large' : 'small'} />

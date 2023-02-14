@@ -25,10 +25,14 @@ export const StyledPhoneIsland = styled.div<StyledPhoneIslandProps>`
       ? css`
           grid-template-rows: 72px 1fr;
         `
-      : isOpen &&
-        (incoming || outgoing) &&
-        css`
+      : isOpen && incoming
+      ? css`
           grid-template-columns: 256px 114px;
+        `
+      : isOpen &&
+        outgoing &&
+        css`
+          grid-template-columns: 1fr 84px;
         `}
 `
 interface StyledTopContentProps {
@@ -41,12 +45,16 @@ interface StyledTopContentProps {
 export const StyledTopContent = styled.div<StyledTopContentProps>`
   display: grid;
   grid-template-columns: ${({ isOpen, incoming, accepted, outgoing }) =>
-    isOpen && !accepted && (incoming || outgoing)
+    isOpen && !accepted && outgoing
       ? '48px 1fr'
+      : isOpen && !accepted && incoming
+      ? '48px 1fr 1px'
       : isOpen && accepted
-      ? '48px 1fr 48px'
-      : '24px 1fr 24px'};
-  grid-gap: ${({isOpen}) => isOpen ? '20px' : '12px'};
+      ? '48px 164px 48px'
+      : !isOpen && !accepted
+      ? '24px 102px'
+      : '24px 66px 24px'};
+  grid-gap: ${({ isOpen }) => (isOpen ? '20px' : '12px')};
   align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   justify-content: center;
   width: 100%;
@@ -56,11 +64,14 @@ export const StyledAvatar = styled.div`
   object-fit: cover;
 `
 
-export const StyledDetails = styled.div`
+interface StyledDetailsProps {
+  numberExists: boolean
+}
+
+export const StyledDetails = styled.div<StyledDetailsProps>`
   display: grid;
+  align-self: center;
   grid-template-columns: 1fr;
-  align-items: center;
-  justify-content: center;
   grid-template-rows: repeat(2, 1fr);
 `
 
