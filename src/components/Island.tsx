@@ -12,7 +12,7 @@ import {
 } from '../styles/Island.styles'
 
 import { useSelector, useDispatch } from 'react-redux'
-import { RootState } from '../store'
+import { RootState, Dispatch } from '../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone, faMicrophoneSlash, faPlay } from '@nethesis/nethesis-solid-svg-icons'
 
@@ -36,8 +36,10 @@ import {
   faPause as faPauseRegular,
   faMicrophone as faMicrophoneRegular,
   faRightLeft as faRightLeftRegualar,
-  faChevronDown as faChevronDownRegular,
-} from '@nethesis/nethesis-regular-svg-icons'
+} from '@nethesis/nethesis-light-svg-icons'
+
+import PhoneKeyboardLight from '../static/icons/PhoneKeyboardLight'
+import PhoneKeyboardSolid from '../static/icons/PhoneKeyboardSolid'
 
 const PhoneIslandMotion = motion(StyledPhoneIsland)
 const AvatarMotion = motion(StyledAvatar)
@@ -73,6 +75,9 @@ export const Island = ({ always }: IslandProps) => {
   const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
     (state: RootState) => state.player,
   )
+
+  const { view } = useSelector((state: RootState) => state.island)
+
   const controls = useDragControls()
 
   const [phoneIslandStorage, setPhoneIslandStorage] =
@@ -88,7 +93,7 @@ export const Island = ({ always }: IslandProps) => {
 
   const [moved, setMoved] = useState<boolean>(false)
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<Dispatch>()
 
   function isAnswerVisible() {
     return !outgoing && !accepted
@@ -284,7 +289,7 @@ export const Island = ({ always }: IslandProps) => {
       if (
         nameContainer.current &&
         nameText.current &&
-        (nameText.current.clientWidth - nameContainer.current.clientWidth) > 5
+        nameText.current.clientWidth - nameContainer.current.clientWidth > 5
       ) {
         setAnimateText(true)
       }
@@ -300,6 +305,12 @@ export const Island = ({ always }: IslandProps) => {
         </div>
       </NameMotion>
     )
+  }
+
+  function openKeyboard() {
+    dispatch.island.updateIsland({
+      view: view !== 'keyboard' ? 'keyboard' : 'call',
+    })
   }
 
   return (
@@ -416,8 +427,8 @@ export const Island = ({ always }: IslandProps) => {
                   <Button variant='default'>
                     <FontAwesomeIcon size='xl' icon={faRightLeftRegualar} />
                   </Button>
-                  <Button variant='neutral'>
-                    <FontAwesomeIcon size='xl' icon={faChevronDownRegular} />
+                  <Button variant='default' onClick={openKeyboard}>
+                    {view === 'keyboard' ? <PhoneKeyboardSolid /> : <PhoneKeyboardLight />}
                   </Button>
                 </div>
               )}
