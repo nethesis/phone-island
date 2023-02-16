@@ -284,18 +284,18 @@ export const Island = ({ always }: IslandProps) => {
       if (
         nameContainer.current &&
         nameText.current &&
-        nameText.current.clientWidth > nameContainer.current.clientWidth
+        (nameText.current.clientWidth - nameContainer.current.clientWidth) > 5
       ) {
         setAnimateText(true)
       }
     })
 
     return (
-      <NameMotion
-        ref={nameContainer}
-        className={`whitespace-nowrap  overflow-hidden ${animateText && 'animated-text'}`}
-      >
-        <div className='w-fit' ref={nameText}>
+      <NameMotion ref={nameContainer} className='whitespace-nowrap  overflow-hidden'>
+        <div
+          className={`w-fit relative inline-block ${animateText && 'animate-animated-text'}`}
+          ref={nameText}
+        >
           {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}
         </div>
       </NameMotion>
