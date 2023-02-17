@@ -170,7 +170,7 @@ export const getSupportedDevices = function (origCallback) {
 }
 
 export const checkMediaPermissions = function () {
-  requestMediaPermissions({audio: true, video: false})
+  requestMediaPermissions({ audio: true, video: false })
     .then(() => {
       // can successfully access camera and microphone streams
       // save permissions state on rematch to get access globally on the app

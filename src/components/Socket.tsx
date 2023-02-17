@@ -3,11 +3,11 @@
 
 import React, { type ReactNode, FC, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Dispatch, store } from '../store'
+import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, type ConvType } from '../lib/phone/conversation'
 import { dispatchMainPresence, dispatchConversations } from '../events'
-import type { ExtensionTypes, ExtensinTypeTypes } from '../services/user'
+import { store } from '../store'
 
 interface SocketProps {
   children: ReactNode
@@ -25,6 +25,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       if (Object.keys(conv).length > 0) {
         const status: string = res.status
         if (status) {
+          const { extensions } = store.getState().users
           switch (status) {
             case 'ringing':
               // The name and the number are updated here not in webrtc
@@ -32,6 +33,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
                 incomingSocket: true,
+                username: `${extensions && extensions[conv.counterpartNum].username}` || '',
               })
               break
             // @ts-ignore
@@ -45,6 +47,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   startTime: `${conv.startTime / 1000}`,
+                  username: `${extensions && extensions[conv.counterpartNum].username}` || '',
                 })
               }
               // Handle outgoing call
@@ -54,6 +57,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   outgoingSocket: true,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
+                  username: `${extensions && extensions[conv.counterpartNum].username}` || '',
                 })
               }
             default:

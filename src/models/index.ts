@@ -1,3 +1,6 @@
+// Copyright (C) 2022 Nethesis S.r.l.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { Models } from '@rematch/core'
 import { player } from './player'
 import { webrtc } from './webrtc'
@@ -5,6 +8,8 @@ import { currentCall } from './currentCall'
 import { currentUser } from './currentUser'
 import { fetchDefaults } from './fetchDefaults'
 import { island } from './island'
+import { avatars } from './avatars'
+import { users } from './users'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -13,6 +18,8 @@ export interface RootModel extends Models<RootModel> {
   currentUser: typeof currentUser
   fetchDefaults: typeof fetchDefaults
   island: typeof island
+  avatars: typeof avatars
+  users: typeof users
 }
 
 export const models: RootModel = {
@@ -21,5 +28,7 @@ export const models: RootModel = {
   currentCall,
   currentUser,
   fetchDefaults,
-  island
+  island,
+  avatars,
+  users,
 }

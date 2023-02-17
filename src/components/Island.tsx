@@ -69,7 +69,7 @@ const ISLAND_STARTING_POSITION = {
 export const Island = ({ always }: IslandProps) => {
   const [isOpen, setIsOpen] = useState(true)
   // Get the currentCall info
-  const { incoming, accepted, outgoing, displayName, number, startTime, muted, paused } =
+  const { incoming, accepted, outgoing, displayName, number, startTime, muted, paused, username } =
     useSelector((state: RootState) => state.currentCall)
 
   const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
@@ -77,6 +77,7 @@ export const Island = ({ always }: IslandProps) => {
   )
 
   const { view } = useSelector((state: RootState) => state.island)
+  const { avatars } = useSelector((state: RootState) => state.avatars)
 
   const controls = useDragControls()
 
@@ -377,6 +378,11 @@ export const Island = ({ always }: IslandProps) => {
               )}
               <AvatarMotion
                 className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
+                style={{
+                  backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                }}
                 animate={isOpen ? 'open' : 'closed'}
                 variants={iconVariants}
               />
