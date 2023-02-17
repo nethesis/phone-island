@@ -5,6 +5,7 @@ import { currentCall } from './currentCall'
 import { currentUser } from './currentUser'
 import { fetchDefaults } from './fetchDefaults'
 import { island } from './island'
+import { avatars } from './avatars'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -13,6 +14,7 @@ export interface RootModel extends Models<RootModel> {
   currentUser: typeof currentUser
   fetchDefaults: typeof fetchDefaults
   island: typeof island
+  avatars: typeof avatars
 }
 
 export const models: RootModel = {
@@ -21,5 +23,6 @@ export const models: RootModel = {
   currentCall,
   currentUser,
   fetchDefaults,
-  island
+  island,
+  avatars,
 }

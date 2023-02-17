@@ -77,6 +77,7 @@ export const Island = ({ always }: IslandProps) => {
   )
 
   const { view } = useSelector((state: RootState) => state.island)
+  const { avatars } = useSelector((state: RootState) => state.avatars)
 
   const controls = useDragControls()
 

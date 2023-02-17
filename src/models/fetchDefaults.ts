@@ -9,6 +9,7 @@ const defaultState: FetchTypes = {
   headers: {
     Accept: 'application/json, text/plain, */*',
   },
+  fetchReady: false
 }
 
 export const fetchDefaults = createModel<RootModel>()({
@@ -29,7 +30,13 @@ export const fetchDefaults = createModel<RootModel>()({
         },
       }
     },
-  },
+    setFetchReady: (state) => {
+      return {
+        ...state,
+        fetchReady: true
+      }
+    }
+  }
 })
 
 interface HeadersTypes {
@@ -39,4 +46,5 @@ interface HeadersTypes {
 interface FetchTypes {
   baseURL?: string
   headers?: HeadersTypes
+  fetchReady?: boolean
 }

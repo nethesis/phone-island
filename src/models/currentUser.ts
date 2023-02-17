@@ -3,7 +3,7 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import type { UserInfoTypes } from '../services/user'
+import type { UserInfoTypes } from '../types'
 
 const defaultState: UserInfoTypes = {}
 

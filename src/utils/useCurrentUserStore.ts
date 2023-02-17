@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { store } from '../store'
-import type { UserInfoTypes } from '../services/user'
+import type { UserInfoTypes } from '../types'
 
 /**
  * Custom hook returning the currentUser store
