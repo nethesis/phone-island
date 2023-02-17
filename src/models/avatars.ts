@@ -5,12 +5,8 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import type { AvatarsTypes } from '../types'
 
-export interface AvatarsStoreTypes {
-  avatars: AvatarsTypes | null
-}
-
 const defaultState: AvatarsStoreTypes = {
-  avatars: null
+  avatars: null,
 }
 
 export const avatars = createModel<RootModel>()({
@@ -19,8 +15,12 @@ export const avatars = createModel<RootModel>()({
     updateAvatars: (state, payload: AvatarsTypes) => {
       return {
         ...state,
-        ...payload,
+        avatars: payload,
       }
     },
   },
 })
+
+export interface AvatarsStoreTypes {
+  avatars: AvatarsTypes | null
+}

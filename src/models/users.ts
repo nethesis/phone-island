@@ -3,17 +3,24 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import type { AvatarsTypes } from '../types'
+import type { ExtensionsTypes } from '../types'
 
-const defaultState = {
+const defaultState: UsersTypes = {
   extensions: null,
-  endpoints: null
+  endpoints: null,
 }
 
-export const extensions = createModel<RootModel>()({
+export const users = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    updateExtensions: (state, payload: AvatarsTypes) => {
+    updateExtensions: (state, payload: ExtensionsTypes) => {
+      return {
+        ...state,
+        extensions: payload,
+      }
+    },
+    updateEndpoints: (state, payload: any) => {
+      // !TODO adds the type for endpoints
       return {
         ...state,
         ...payload,
@@ -21,3 +28,8 @@ export const extensions = createModel<RootModel>()({
     },
   },
 })
+
+interface UsersTypes {
+  extensions: ExtensionsTypes | null
+  endpoints: any
+}

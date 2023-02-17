@@ -9,6 +9,7 @@ import { dispatchOutgoingCallStarted } from '../events/index'
 
 const defaultState = {
   displayName: '',
+  username: '',
   number: '',
   incomingSocket: false,
   incomingWebRTC: false,
@@ -96,6 +97,7 @@ export const currentCall = createModel<RootModel>()({
 
 export interface CurrentCallTypes {
   displayName?: string
+  username?: string
   number?: string
   incomingSocket?: boolean
   incomingWebRTC?: boolean

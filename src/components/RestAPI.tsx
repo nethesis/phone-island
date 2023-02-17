@@ -6,6 +6,7 @@ import { getCurrentUserInfo } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
+import { getAllExtensions } from '../services/extensions'
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -26,13 +27,16 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
     // Get users info and set to store
     async function initCurrentUser() {
       const userInfo = await getCurrentUserInfo()
-      if (userInfo != undefined) {
+      if (userInfo) {
         dispatch.currentUser.updateCurrentUser(userInfo)
       }
     }
     // Get all extensions info and set to store
     async function initExtensions() {
-      // !TODO get the extensions and save it in to the store
+      const extensions = await getAllExtensions()
+      if (extensions) {
+        dispatch.users.updateExtensions(extensions)
+      }
     }
     if (fetchReady) {
       initCurrentUser()
