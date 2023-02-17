@@ -5,7 +5,7 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
 interface IslandTypes {
-  view?:  'call' | 'keyboard' | 'player'
+  view?: 'call' | 'keyboard' | 'player'
 }
 
 const defaultState: IslandTypes = {}

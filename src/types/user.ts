@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { AvatarsTypes } from "./avatars"
+import { AvatarsTypes } from './avatars'
 
 export interface UserCachesTypes {
   operatorsAvatars: AvatarsTypes
