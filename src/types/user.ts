@@ -1,19 +1,17 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export interface AvatarsTypes {
-  [key: string]: string
-}
+import { AvatarsTypes } from "./avatars"
 
 export interface UserCachesTypes {
   operatorsAvatars: AvatarsTypes
 }
 
-export type ExtensinTypeTypes = 'webrtc' | 'physical'
+export type ExtensionTypeTypes = 'webrtc' | 'physical'
 
-export interface ExtensionTypes {
+export interface UserExtensionTypes {
   id: string
-  type: ExtensinTypeTypes
+  type: ExtensionTypeTypes
   secret: string
   username: string
   description: string
@@ -75,7 +73,7 @@ export interface UserInfoTypes {
       id: string
       server: string
     }[]
-    extension: ExtensionTypes[]
+    extension: UserExtensionTypes[]
     cellphone: {
       id?: string
     }[]
@@ -96,6 +94,6 @@ export interface UserInfoTypes {
     macro_permissions: MacroPermissionTypes
     outbound_routes_permissions: RoutesPermissionsTypes[]
   }
-  default_device?: ExtensionTypes
+  default_device?: UserExtensionTypes
   settings?: SettingTypes
 }

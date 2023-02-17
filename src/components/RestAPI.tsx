@@ -24,14 +24,19 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
 
   useEffect(() => {
     // Get users info and set to store
-    async function initUserInfo() {
+    async function initCurrentUser() {
       const userInfo = await getCurrentUserInfo()
       if (userInfo != undefined) {
         dispatch.currentUser.updateCurrentUser(userInfo)
       }
     }
+    // Get all extensions info and set to store
+    async function initExtensions() {
+      // !TODO get the extensions and save it in to the store
+    }
     if (fetchReady) {
-      initUserInfo()
+      initCurrentUser()
+      initExtensions()
     }
   }, [fetchReady])
 

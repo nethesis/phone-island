@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { eventDispatch } from '../utils'
+import type {
+  MainPresenceTypes,
+  MainPresenceEventTypes,
+  ExtensionTypes,
+  ConversationsEventType,
+} from '../types'
 
 /**
  * The dispatch function for the userMainPresenceUpdate event
@@ -22,86 +28,11 @@ export function dispatchMainPresence(event: MainPresenceTypes) {
  *
  * @param event The extenUpdate event from socket
  */
-export function dispatchConversations(event: ExtenUpdateTypes) {
+export function dispatchConversations(event: ExtensionTypes) {
   const data: ConversationsEventType = {
     [event.username]: {
       conversations: event.conversations,
     },
   }
   eventDispatch('phone-island-conversations', data)
-}
-
-interface MainPresenceEventTypes {
-  [username: string]: {
-    mainPresence: string
-  }
-}
-
-interface ConversationsEventType {
-  [username: string]: {
-    conversations: {
-      [id: string]: ConversationsTypes
-    }
-  }
-}
-
-interface MainPresenceTypes {
-  mainPresence: {
-    status: string
-    username: string
-  }
-}
-
-interface ConversationsTypes {
-  id: string
-  owner: string
-  chDest: string | null
-  linkedId: string
-  uniqueId: string
-  chSource: {
-    type: 'source'
-    channel: string
-    callerNum: string
-    startTime: number
-    callerName: string
-    bridgedNum: string
-    bridgedName: string
-    inConference: boolean
-    channelStatus: 'up' | 'down'
-    bridgedChannel: string
-  }
-  duration: number
-  startTime: number
-  connected: false
-  recording: 'false' | 'true'
-  direction: 'out' | 'in'
-  inConference: false
-  throughQueue: false
-  throughTrunk: false
-  counterpartNum: string
-  counterpartName: string
-}
-
-interface ExtenUpdateTypes {
-  ip: string
-  cf: string
-  mac: string
-  cfb: string
-  cfu: string
-  dnd: false
-  cfVm: string
-  port: string
-  name: string
-  cfbVm: string
-  cfuVm: string
-  exten: string
-  codecs: string[]
-  status: string
-  context: 'cti-profile-4'
-  chanType: string
-  username: string
-  sipuseragent: string
-  conversations: {
-    [id: string]: ConversationsTypes
-  }
 }
