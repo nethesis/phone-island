@@ -273,24 +273,39 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     // var videoTracks = stream.getVideoTracks()
                     /* */
                   },
-                  onremotestream: function (stream) {
+                  onremotestream: function (stream: MediaStream) {
+                    if (Janus.debug) {
+                      Janus.debug(' ::: Got a remote stream :::')
+                    }
+                    // Stop the local audio element ringing
+                    store.dispatch.player.stopAudio()
+
+                    // Get remote audio and video elements
                     const remoteAudioElement = store.getState().player.remoteAudio
                     const remoteVideoElement = store.getState().player.remoteVideo
 
-                    if (Janus.debug) {
-                      Janus.debug(' ::: Got a remote stream :::')
-                      Janus.debug(stream)
-                    }
-
-                    // retrieve stream track
-                    const audioTracks = stream.getAudioTracks()
-                    const videoTracks = stream.getVideoTracks()
-
-                    store.dispatch.player.stopAudio()
+                    // Get audio and video from stream
+                    const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
+                    const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
 
                     if (Janus.attachMediaStream) {
-                      Janus.attachMediaStream(remoteAudioElement, new MediaStream(audioTracks))
-                      Janus.attachMediaStream(remoteVideoElement, new MediaStream(videoTracks))
+                      // Initialize the new media stream for remote audio
+                      if (audioTracks && audioTracks.length > 0) {
+                        const audioStream: MediaStream = new MediaStream(audioTracks)
+                        Janus.attachMediaStream(remoteAudioElement, audioStream)
+
+                        // Save the new audio stream to the store
+                        store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
+                      } else {
+                        console.warn("No audio tracks on remote stream")
+                      }
+                      // Initialize the new media stream for remote video
+                      if (videoTracks && videoTracks.length > 0) {
+                        const videoStream: MediaStream = new MediaStream(videoTracks)
+                        Janus.attachMediaStream(remoteVideoElement, videoStream)
+                      } else {
+                        console.warn("No video tracks on remote stream")
+                      }
                     }
                   },
                   oncleanup: function () {
