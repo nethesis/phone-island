@@ -4,20 +4,31 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
-interface IslandTypes {
-  view?: 'call' | 'keyboard' | 'player'
+const defaultState: IslandTypes = {
+  isOpen: true,
 }
-
-const defaultState: IslandTypes = {}
 
 export const island = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    updateIsland: (state, payload: IslandTypes) => {
+    setIslandView: (state, payload: IslandViewType) => {
       return {
         ...state,
-        ...payload,
+        view: payload,
+      }
+    },
+    toggleIsOpen: (state) => {
+      return {
+        ...state,
+        isOpen: !state.isOpen,
       }
     },
   },
 })
+
+type IslandViewType = 'call' | 'keyboard' | 'player'
+
+interface IslandTypes {
+  view?: IslandViewType
+  isOpen: boolean
+}
