@@ -7,6 +7,7 @@ import type { RootModel } from '.'
 const defaultState = {
   sipcall: null,
   jsepGlobal: null,
+  remoteAudioStream: null,
 }
 
 export const webrtc = createModel<RootModel>()({
@@ -18,10 +19,17 @@ export const webrtc = createModel<RootModel>()({
         ...payload,
       }
     },
+    updateRemoteAudioStream: (state, payload: any) => {
+      return {
+        ...state,
+        remoteAudioStream: payload,
+      }
+    },
   },
 })
 
 export interface WebRTCTypes {
   sipcall?: any
   jsepGlobal?: any
+  remoteAudioStream?: any
 }
