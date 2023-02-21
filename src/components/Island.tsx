@@ -11,6 +11,9 @@ import { useIsomorphicLayoutEffect } from '../utils'
 import CallView from './CallView'
 import { useDragControls } from 'framer-motion/dist/framer-motion'
 
+/**
+ * The island starting position
+ */
 const ISLAND_STARTING_POSITION = {
   x: 0,
   y: 0,
@@ -27,36 +30,54 @@ export const Island = ({ always }: IslandProps) => {
   // Get isOpen from island store
   const { isOpen } = useSelector((state: RootState) => state.island)
 
+  // Initialize Island drag controls
   const controls = useDragControls()
 
+  // Initialize Island storage
   const [phoneIslandStorage, setPhoneIslandStorage] =
     useLocalStorage<PhoneIslandStorageTypes | null>('phone-island', null)
 
+  // The Island reference
   const islandRef = useRef<any>(null)
 
+  // The Container reference
   const islandContainerRef = useRef<any>(null)
 
+  // Initialize position or get from storage
   const [position, setPosition] = useState<PositionTypes | null>(
     phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
   )
 
+  // Initialize the moved property
   const [moved, setMoved] = useState<boolean>(false)
 
   const dispatch = useDispatch<Dispatch>()
 
-  function startDrag(event) {
+  /**
+   * Handles the drag started event
+   */
+  function handleStartDrag(event) {
     controls.start(event)
   }
 
-  const onLongPress = () => {
+  /**
+   * Handles log press event
+   */
+  const handleLongPress = () => {
     console.log('long press trigger')
   }
 
-  const islandClick = () => {
+  /**
+   * Handle Island click
+   */
+  const handleIslandClick = () => {
     dispatch.island.toggleIsOpen()
   }
 
-  function innerXPosition(x) {
+  /**
+   * Retrieve the position on x axis
+   */
+  function innerXPosition(x: number) {
     // Get horizontal constraints
     const xConstraintPosition =
       islandContainerRef.current.offsetWidth / 2 - islandRef.current.offsetWidth / 2
@@ -69,7 +90,10 @@ export const Island = ({ always }: IslandProps) => {
       : x
   }
 
-  function innerYPosition(y) {
+  /**
+   * Retrieve the position on y axis
+   */
+  function innerYPosition(y: number) {
     // Get vertical constraints
     const yConstraintPosition =
       islandContainerRef.current.offsetHeight / 2 - islandRef.current.offsetHeight / 2
@@ -82,7 +106,10 @@ export const Island = ({ always }: IslandProps) => {
       : y
   }
 
-  const onDragEnd = () => {
+  /**
+   * Handles drag end event
+   */
+  const handleDragEnd = () => {
     // Get initial translation values
     let { x, y }: any = getTranslateValues(islandRef.current)
     // Round position
@@ -102,15 +129,24 @@ export const Island = ({ always }: IslandProps) => {
     })
   }
 
+  /**
+   * Sets moved property to false
+   */
   function resetMoved() {
     setMoved(false)
   }
 
-  function dragStarted() {
+  /**
+   * Handles drag started event
+   */
+  function handleDragStarted() {
     setMoved(true)
   }
 
-  const longPressEvent = useLongPress(onLongPress, islandClick, moved, resetMoved, {
+  /**
+   * Initialize the long press object
+   */
+  const longPressEvent = useLongPress(handleLongPress, handleIslandClick, moved, resetMoved, {
     shouldPreventDefault: true,
     delay: 250,
   })
@@ -168,8 +204,8 @@ export const Island = ({ always }: IslandProps) => {
           }
           variants={variants}
           drag
-          onPointerDown={startDrag}
-          onDragStart={dragStarted}
+          onPointerDown={handleStartDrag}
+          onDragStart={handleDragStarted}
           dragTransition={{
             power: 0,
           }}
@@ -182,7 +218,7 @@ export const Island = ({ always }: IslandProps) => {
           }}
           dragControls={controls}
           dragConstraints={islandContainerRef}
-          onDragEnd={onDragEnd}
+          onDragEnd={handleDragEnd}
           ref={islandRef}
           {...longPressEvent}
         >
