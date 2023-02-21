@@ -11,7 +11,7 @@ const Timer: FC = () => {
   // Set timer negative differences
   const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
   // Get multiple values from the currentCall store
-  const { accepted, startTime, number } = useSelector((state: RootState) => state.currentCall)
+  const { startTime } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from the island store
   const { isOpen } = useSelector((state: RootState) => state.island)
 
@@ -26,7 +26,7 @@ const Timer: FC = () => {
 
   return (
     <StyledTimer isOpen={isOpen}>
-      {accepted && startTime && timerNegativeDifference ? (
+      {startTime && timerNegativeDifference && (
         <Moment
           date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
           interval={1000}
@@ -35,8 +35,6 @@ const Timer: FC = () => {
           unix
           durationFromNow
         />
-      ) : (
-        <>{number && number !== '<unknown>' && number}</>
       )}
     </StyledTimer>
   )
