@@ -60,15 +60,20 @@ export const StyledTimer = styled.div<StyledTimerProps>`
   max-width: fit-content;
 `
 
+export const StyledNumber = styled.div<StyledNumberProps>`
+  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
+  max-height: 24px;
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.5px;
+  max-width: fit-content;
+`
+
 export const StyledName = styled.div`
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
 `
-
-interface StyledPhoneIslandProps {
-  isOpen: boolean
-}
 
 interface StyledCallViewProps {
   isOpen: boolean
@@ -90,5 +95,9 @@ interface StyledDetailsProps {
 }
 
 interface StyledTimerProps {
+  isOpen: boolean
+}
+
+interface StyledNumberProps {
   isOpen: boolean
 }

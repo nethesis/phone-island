@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
-import {
-  StyledDetails,
-  StyledCallView,
-  StyledTopContent,
-} from '../../styles/Island.styles'
+import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Island.styles'
 import { motion } from 'framer-motion/dist/framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
@@ -14,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
+import Number from './Number'
 import DisplayName from './DisplayName'
 import { AudioBars } from '../'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
@@ -30,12 +27,9 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
 /**
  * The CallView component
  */
-
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall store
-  const { incoming, accepted, outgoing } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen and view from island store
   const { isOpen } = useSelector((state: RootState) => state.island)
 
@@ -50,7 +44,7 @@ const CallView: FC<CallViewProps> = () => {
           <DetailsMotion>
             <DisplayName />
             {/* The timer when expanded */}
-            <Timer />
+            {accepted ? <Timer /> : <Number />}
           </DetailsMotion>
         )}
         {/* The display name when collepsed */}
