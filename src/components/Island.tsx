@@ -1,35 +1,28 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useEffect, type FC } from 'react'
+import React, { useState, useRef, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../store'
 import { useLongPress } from '../utils/useLongPress'
 import { motion } from 'framer-motion/dist/framer-motion'
-import { useLocalStorage, getTranslateValues } from '../utils'
+import { useLocalStorage, styleTransformValues } from '../utils'
 import { useIsomorphicLayoutEffect } from '../utils'
 import CallView from './CallView'
 import { useDragControls } from 'framer-motion/dist/framer-motion'
+import { xPosition, yPosition } from '../lib/island/island'
 
 /**
- * The island starting position
+ * Provides the Island logic
+ *
+ * @param always Sets the Island ever visible
+ *
  */
-const ISLAND_STARTING_POSITION = {
-  x: 0,
-  y: 0,
-}
-
-/**
- * The Island component that provides the views and logic
- */
-export const Island = ({ always }: IslandProps) => {
+export const Island: FC<IslandProps> = ({ always }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing } =
-    useSelector((state: RootState) => state.currentCall)
-
+  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from island store
-  const { isOpen } = useSelector((state: RootState) => state.island)
-
+  const { isOpen, startPosition } = useSelector((state: RootState) => state.island)
   // Initialize Island drag controls
   const controls = useDragControls()
 
@@ -39,7 +32,6 @@ export const Island = ({ always }: IslandProps) => {
 
   // The Island reference
   const islandRef = useRef<any>(null)
-
   // The Container reference
   const islandContainerRef = useRef<any>(null)
 
@@ -50,71 +42,28 @@ export const Island = ({ always }: IslandProps) => {
 
   // Initialize the moved property
   const [moved, setMoved] = useState<boolean>(false)
-
+  // Initialize useDispatch
   const dispatch = useDispatch<Dispatch>()
 
-  /**
-   * Handles the drag started event
-   */
+  // Handles the drag started event
   function handleStartDrag(event) {
     controls.start(event)
   }
+  // Handles log press event
+  const handleLongPress = () => {}
 
-  /**
-   * Handles log press event
-   */
-  const handleLongPress = () => {
-    console.log('long press trigger')
-  }
-
-  /**
-   * Handle Island click
-   */
+  // Handle Island click
   const handleIslandClick = () => {
     dispatch.island.toggleIsOpen()
   }
 
-  /**
-   * Retrieve the position on x axis
-   */
-  function innerXPosition(x: number) {
-    // Get horizontal constraints
-    const xConstraintPosition =
-      islandContainerRef.current.offsetWidth / 2 - islandRef.current.offsetWidth / 2
-
-    // Return the X position inside the constraints
-    return x > 0 && x > xConstraintPosition
-      ? xConstraintPosition
-      : x < 0 && x < -xConstraintPosition
-      ? -xConstraintPosition
-      : x
-  }
-
-  /**
-   * Retrieve the position on y axis
-   */
-  function innerYPosition(y: number) {
-    // Get vertical constraints
-    const yConstraintPosition =
-      islandContainerRef.current.offsetHeight / 2 - islandRef.current.offsetHeight / 2
-
-    // Return the Y position inside the constraints
-    return y > 0 && y > yConstraintPosition
-      ? yConstraintPosition
-      : y < 0 && y < -yConstraintPosition
-      ? -yConstraintPosition
-      : y
-  }
-
-  /**
-   * Handles drag end event
-   */
+  // Handles drag end event
   const handleDragEnd = () => {
-    // Get initial translation values
-    let { x, y }: any = getTranslateValues(islandRef.current)
+    // Get initial transform values
+    let { x, y }: any = styleTransformValues(islandRef.current)
     // Round position
-    x = innerXPosition(Math.round(x))
-    y = innerYPosition(Math.round(y))
+    x = xPosition(Math.round(x), islandRef.current, islandContainerRef.current)
+    y = yPosition(Math.round(y), islandRef.current, islandContainerRef.current)
     // Save the new position to localstorage
     setPhoneIslandStorage({
       position: {
@@ -129,43 +78,40 @@ export const Island = ({ always }: IslandProps) => {
     })
   }
 
-  /**
-   * Sets moved property to false
-   */
-  function resetMoved() {
-    setMoved(false)
-  }
-
-  /**
-   * Handles drag started event
-   */
+  // Handles drag started event
   function handleDragStarted() {
     setMoved(true)
   }
 
-  /**
-   * Initialize the long press object
-   */
-  const longPressEvent = useLongPress(handleLongPress, handleIslandClick, moved, resetMoved, {
-    shouldPreventDefault: true,
-    delay: 250,
-  })
+  // Initialize the longPressEvent object
+  const longPressEvent = useLongPress(
+    handleLongPress,
+    handleIslandClick,
+    moved,
+    () => setMoved(false),
+    {
+      shouldPreventDefault: true,
+      delay: 250,
+    },
+  )
 
-  const variants = {
-    openIncoming: {
-      width: '418px',
-      height: '96px',
-      borderRadius: '20px',
-    },
-    openAccepted: {
-      width: '348px',
-      height: '236px',
-      borderRadius: '20px',
-    },
-    closed: {
-      width: '168px',
-      height: '40px',
-      borderRadius: '99px',
+  const motionVariants = {
+    callView: {
+      openIncoming: {
+        width: '418px',
+        height: '96px',
+        borderRadius: '20px',
+      },
+      openAccepted: {
+        width: '348px',
+        height: '236px',
+        borderRadius: '20px',
+      },
+      closed: {
+        width: '168px',
+        height: '40px',
+        borderRadius: '99px',
+      },
     },
   }
 
@@ -202,7 +148,7 @@ export const Island = ({ always }: IslandProps) => {
               ? 'openAccepted'
               : 'closed'
           }
-          variants={variants}
+          variants={motionVariants.callView}
           drag
           onPointerDown={handleStartDrag}
           onDragStart={handleDragStarted}
@@ -210,8 +156,8 @@ export const Island = ({ always }: IslandProps) => {
             power: 0,
           }}
           initial={{
-            x: position?.x || ISLAND_STARTING_POSITION.x,
-            y: position?.y || ISLAND_STARTING_POSITION.y,
+            x: position?.x || startPosition.x,
+            y: position?.y || startPosition.y,
           }}
           style={{
             padding: isOpen ? '24px' : '8px 16px',
@@ -222,6 +168,7 @@ export const Island = ({ always }: IslandProps) => {
           ref={islandRef}
           {...longPressEvent}
         >
+          {/* The views logic */}
           <CallView />
         </motion.div>
       )}

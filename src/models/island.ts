@@ -5,7 +5,12 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
 const defaultState: IslandTypes = {
+  view: null,
   isOpen: true,
+  startPosition: {
+    x: 0,
+    y: 0,
+  },
 }
 
 export const island = createModel<RootModel>()({
@@ -29,6 +34,10 @@ export const island = createModel<RootModel>()({
 type IslandViewType = 'call' | 'keyboard' | 'player'
 
 interface IslandTypes {
-  view?: IslandViewType
+  view?: IslandViewType | null
   isOpen: boolean
+  startPosition: {
+    x: number
+    y:  number
+  }
 }
