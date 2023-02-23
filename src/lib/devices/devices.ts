@@ -7,7 +7,7 @@ import {
   requestMediaPermissions,
 } from 'mic-check'
 import JanusLib from '../webrtc/janus'
-import { JanusTypes } from '../webrtc/types'
+import { JanusTypes } from '../../types'
 
 const Janus: JanusTypes = JanusLib
 

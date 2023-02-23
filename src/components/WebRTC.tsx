@@ -6,9 +6,8 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
-import type { JanusTypes } from '../lib/webrtc/types'
+import type { JanusTypes } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
-import { useWebRTCStore } from '../utils/useWebRTCStore'
 import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
@@ -98,7 +97,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       )
                   },
                   iceState: function (newState) {
-                    const { sipcall } = useWebRTCStore()
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
 
                     if (sipcall) {
                       if (Janus.log)
@@ -123,7 +122,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     }
                   },
                   onmessage: function (msg, jsep) {
-                    const { sipcall } = useWebRTCStore()
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
 
                     if (Janus.debug) {
                       Janus.debug(' ::: Got a message :::')
@@ -136,7 +135,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                         if (Janus.log) Janus.log('User is not registered')
                       } else {
                         // Reset status
-                        sipcall.hangup()
+                        sipcall && sipcall.hangup()
                       }
                       for (var evt in evtObservers['error']) {
                         // evtObservers['error'][evt](msg, jsep)
@@ -297,14 +296,14 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                         // Save the new audio stream to the store
                         store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
                       } else {
-                        console.warn("No audio tracks on remote stream")
+                        console.warn('No audio tracks on remote stream')
                       }
                       // Initialize the new media stream for remote video
                       if (videoTracks && videoTracks.length > 0) {
                         const videoStream: MediaStream = new MediaStream(videoTracks)
                         Janus.attachMediaStream(remoteVideoElement, videoStream)
                       } else {
-                        console.warn("No video tracks on remote stream")
+                        console.warn('No video tracks on remote stream')
                       }
                     }
                   },

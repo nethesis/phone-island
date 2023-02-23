@@ -14,7 +14,6 @@ import {
   unpauseWebRTC,
 } from '../webrtc/messages'
 import { store } from '../../store'
-import { useCurrentCallStore } from '../../utils'
 import { isWebRTC } from '../user/default_device'
 
 /**
@@ -59,7 +58,7 @@ export function answerIncomingCall() {
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted } = useCurrentCallStore()
+  const { outgoing, accepted } = store.getState().currentCall
   if (outgoing || accepted) {
     hangup()
   } else {

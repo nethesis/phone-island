@@ -4,21 +4,45 @@
 import React, { useState, useRef, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../store'
-import { useLongPress } from '../utils/useLongPress'
-import { motion } from 'framer-motion/dist/framer-motion'
-import { useLocalStorage, styleTransformValues } from '../utils'
-import { useIsomorphicLayoutEffect } from '../utils'
+import {
+  useLongPress,
+  useIsomorphicLayoutEffect,
+  useLocalStorage,
+  styleTransformValues,
+} from '../utils'
+import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import CallView from './CallView'
-import { useDragControls } from 'framer-motion/dist/framer-motion'
 import { xPosition, yPosition } from '../lib/island/island'
+import { ErrorGuard } from './ErrorGuard'
+
+// The variables for the component animations
+const motionVariants = {
+  callView: {
+    openIncoming: {
+      width: '418px',
+      height: '96px',
+      borderRadius: '20px',
+    },
+    openAccepted: {
+      width: '348px',
+      height: '236px',
+      borderRadius: '20px',
+    },
+    closed: {
+      width: '168px',
+      height: '40px',
+      borderRadius: '99px',
+    },
+  },
+}
 
 /**
  * Provides the Island logic
  *
- * @param always Sets the Island ever visible
+ * @param showAlways Sets the Island ever visible
  *
  */
-export const Island: FC<IslandProps> = ({ always }) => {
+export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from island store
@@ -95,26 +119,6 @@ export const Island: FC<IslandProps> = ({ always }) => {
     },
   )
 
-  const motionVariants = {
-    callView: {
-      openIncoming: {
-        width: '418px',
-        height: '96px',
-        borderRadius: '20px',
-      },
-      openAccepted: {
-        width: '348px',
-        height: '236px',
-        borderRadius: '20px',
-      },
-      closed: {
-        width: '168px',
-        height: '40px',
-        borderRadius: '99px',
-      },
-    },
-  }
-
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -134,13 +138,9 @@ export const Island: FC<IslandProps> = ({ always }) => {
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
-      {(incoming || outgoing || accepted || always) && (
+      {(incoming || outgoing || accepted || showAlways) && (
         <motion.div
           className='font-sans absolute pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
-          incoming={incoming}
-          accepted={accepted}
-          outgoing={outgoing}
-          isOpen={isOpen}
           animate={
             isOpen && (incoming || outgoing) && !accepted
               ? 'openIncoming'
@@ -169,7 +169,9 @@ export const Island: FC<IslandProps> = ({ always }) => {
           {...longPressEvent}
         >
           {/* The views logic */}
-          <CallView />
+          <ErrorGuard>
+            <CallView />
+          </ErrorGuard>
         </motion.div>
       )}
       <div className='hidden'>
@@ -185,7 +187,7 @@ export const Island: FC<IslandProps> = ({ always }) => {
 Island.displayName = 'Island'
 
 interface IslandProps {
-  always?: boolean
+  showAlways?: boolean
 }
 
 interface PositionTypes {

@@ -12,12 +12,12 @@ const widgetDivs = document.querySelectorAll('.phone-island')
 // Inject our React App into each element
 widgetDivs.forEach((div) => {
   const config: string = div.getAttribute('data-config') || ''
-  const always: boolean = div.getAttribute('always') === 'true' ? true : false
+  const showAlways: boolean = div.getAttribute('showAlways') === 'true' ? true : false
 
   const root = createRoot(div)
   root.render(
     <React.StrictMode>
-      <PhoneIsland dataConfig={config} always={always} />
+      <PhoneIsland dataConfig={config} showAlways={showAlways} />
     </React.StrictMode>,
   )
 })

@@ -9,7 +9,7 @@
  * @param element The target element
  */
 
-export const eventDispatch = (name: string, data: any, element: HTMLElement | Window = window) => {
+export function eventDispatch(name: string, data: any, element: HTMLElement | Window = window) {
   typeof element !== 'undefined'
     ? element.dispatchEvent(new CustomEvent(name, { detail: data }))
     : console.error(new Error('EventDispatch error: element is not defined'))
