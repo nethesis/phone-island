@@ -6,6 +6,7 @@
  * @param {HTMLElement} element
  * @returns {Object}
  */
+
 export function styleTransformValues(element) {
   const style = window.getComputedStyle(element)
   const matrix = style['transform']

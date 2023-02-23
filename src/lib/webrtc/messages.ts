@@ -1,12 +1,12 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { useWebRTCStore, useCurrentUserStore } from '../../utils'
 import Janus from './janus'
+import { store } from '../../store'
 
 export function register(sipExten: string, sipSecret: string) {
-  const { sipcall } = useWebRTCStore()
-  const { name } = useCurrentUserStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
+  const { name } = store.getState().currentUser
   if (sipcall) {
     sipcall.send({
       message: {
@@ -23,7 +23,7 @@ export function register(sipExten: string, sipSecret: string) {
 }
 
 export function answerWebRTC() {
-  const { sipcall, jsepGlobal } = useWebRTCStore()
+  const { sipcall, jsepGlobal } : { sipcall: any, jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
     sipcall.createAnswer({
       jsep: jsepGlobal,
@@ -55,7 +55,7 @@ export function answerWebRTC() {
 }
 
 export function decline() {
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.send({
       message: {
@@ -66,7 +66,7 @@ export function decline() {
 }
 
 export function hangup() {
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.send({
       message: {
@@ -77,7 +77,7 @@ export function hangup() {
 }
 
 export function unregister() {
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.send({
       message: {
@@ -88,7 +88,7 @@ export function unregister() {
 }
 
 export function handleRemote(jsep) {
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.handleRemoteJsep({
       jsep: jsep,
@@ -107,7 +107,7 @@ export function handleRemote(jsep) {
 
 export function call(sipURI: string, mediaObj: object) {
   return new Promise((resolve, reject) => {
-    const { sipcall } = useWebRTCStore()
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
     if (sipURI && mediaObj) {
       sipcall.createOffer({
         media: mediaObj,
@@ -143,7 +143,7 @@ export function call(sipURI: string, mediaObj: object) {
  */
 export function muteWebRTC(): boolean {
   // Initialize sipcall
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   // Uset the janus library functions to mute call
   sipcall.muteAudio()
   return sipcall.isAudioMuted()
@@ -155,7 +155,7 @@ export function muteWebRTC(): boolean {
  */
 export function unmuteWebRTC(): boolean {
   // Initialize sipcall
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   // Use the janus library functions to unmute call
   sipcall.unmuteAudio()
   return !sipcall.isAudioMuted()
@@ -167,7 +167,7 @@ export function unmuteWebRTC(): boolean {
  */
 export function pauseWebRTC() {
   // Initialize sipcall
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   // Send hold message
   try {
     sipcall.send({
@@ -188,7 +188,7 @@ export function pauseWebRTC() {
  */
 export function unpauseWebRTC() {
   // Initialize sipcall
-  const { sipcall } = useWebRTCStore()
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
   // Send hold message
   try {
     sipcall.send({
