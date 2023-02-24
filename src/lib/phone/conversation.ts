@@ -1,15 +1,9 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export interface ConvType {
-  counterpartNum: string | number
-  counterpartName: string | number
-  connected: boolean
-  startTime: number
-  direction: 'out' | 'in'
-}
+import { ConversationsTypes } from '../../types'
 
-export function getDisplayName(conv: ConvType): string {
+export function getDisplayName(conv: ConversationsTypes): string {
   let dispName = ''
   if (
     conv &&
