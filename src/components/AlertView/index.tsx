@@ -16,9 +16,14 @@ const AlertView: FC = () => {
     <div className='flex flex-col gap-4 mb-6'>
       {/* Show alerts */}
       {Object.values(alerts.data).map(
-        (alert) =>
+        (alert, index) =>
           alert.active && (
-            <Alert type='alert' color={alert.success ? 'green' : alert.break ? 'red' : 'orange'} message={alert.message} />
+            <Alert
+              key={index}
+              type='alert'
+              color={alert.success ? 'green' : alert.break ? 'red' : 'orange'}
+              message={alert.message}
+            />
           ),
       )}
     </div>

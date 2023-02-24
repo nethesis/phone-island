@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, type ReactNode } from 'react'
+import React, { useEffect, type FC, type ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 import AlertView from './AlertView'
@@ -17,6 +17,10 @@ export const ErrorGuard: FC<ErrorGuard> = ({ children }) => {
   const { activeAlertsCount, breakActiveAlertsCount } = useSelector(
     (state: RootState) => state.alerts.status,
   )
+
+  useEffect(() => {
+    console.warn("activeAlertsCount", activeAlertsCount)
+  }, [activeAlertsCount])
 
   return (
     <>

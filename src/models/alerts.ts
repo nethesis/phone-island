@@ -46,7 +46,7 @@ const defaultState: AlertsTypes = {
   },
   status: {
     activeAlertsCount: 0,
-    breakActiveAlertsCount: 0
+    breakActiveAlertsCount: 0,
   },
 }
 
@@ -54,35 +54,52 @@ export const alerts = createModel<RootModel>()({
   state: defaultState,
   reducers: {
     setAlert: (state, payload: AlertsKeys) => {
-      return {
-        data: {
-          ...state.data,
-          [payload]: {
-            ...state.data[payload],
-            active: false,
+      if (!state.data[payload].active) {
+        const newActiveAlertsCount = state.status.activeAlertsCount + 1
+        const newBreakActiveAlertsCount = state.data[payload].break
+          ? state.status.breakActiveAlertsCount + 1
+          : state.status.breakActiveAlertsCount
+
+        return {
+          ...state,
+          data: {
+            ...state.data,
+            [payload]: {
+              ...state.data[payload],
+              active: true,
+            },
           },
-        },
-        status: {
-          ...state.status,
-          activeAlertsCount: state.status.activeAlertsCount++,
-          breakActiveAlertsCount: state.data[payload].break ? state.status.breakActiveAlertsCount++ : state.status.breakActiveAlertsCount
-        },
+          status: {
+            ...state.status,
+            activeAlertsCount: newActiveAlertsCount,
+            breakActiveAlertsCount: newBreakActiveAlertsCount,
+          },
+        }
       }
     },
     removeAlert: (state, payload: AlertsKeys) => {
-      return {
-        data: {
-          ...state.data,
-          [payload]: {
-            ...state.data[payload],
-            active: false,
-            activeAlertsCount: state.status.activeAlertsCount--,
-            breakActiveAlertsCount: state.data[payload].break ? state.status.breakActiveAlertsCount++ : state.status.breakActiveAlertsCount
+      if (state.data[payload].active) {
+        const newActiveAlertsCount = state.status.activeAlertsCount - 1
+        const newBreakActiveAlertsCount = state.data[payload].break
+          ? state.status.breakActiveAlertsCount - 1
+          : state.status.breakActiveAlertsCount
+
+        return {
+          data: {
+            ...state.data,
+            [payload]: {
+              ...state.data[payload],
+              active: false,
+              activeAlertsCount: newActiveAlertsCount,
+              breakActiveAlertsCount: newBreakActiveAlertsCount,
+            },
           },
-        },
-        status: {
-          ...state.status,
-        },
+          status: {
+            ...state.status,
+            activeAlertsCount: newActiveAlertsCount,
+            breakActiveAlertsCount: newBreakActiveAlertsCount,
+          },
+        }
       }
     },
   },
