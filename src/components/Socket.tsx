@@ -121,11 +121,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
           'ping',
           withTimeout(
             () => {
+              // Remove socket_down alert
+              dispatch.alerts.removeAlert('socket_down')
+              // Calculate and log latency
               const latency = Date.now() - start
               console.debug(`Socket latency: ${latency}ms`)
               console.debug('Socket is reachable!')
             },
             () => {
+              // Set socket_down alert
+              dispatch.alerts.setAlert('socket_down')
               console.debug('Socket is unreachable!')
             },
             2000,
