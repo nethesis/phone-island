@@ -54,6 +54,6 @@ export const Default = Template.bind({})
 Default.args = {}
 
 // Useful to test component unmount
-export function Empty (){
+export function Empty() {
   return <>Use this to disconnection, unregister, reconnection and more.</>
 }

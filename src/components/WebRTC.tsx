@@ -11,6 +11,7 @@ import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
+import { webrtcCheck } from '../lib/webrtc/connection'
 
 interface WebRTCProps {
   children: ReactNode
@@ -25,6 +26,9 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
   const dispatch = useDispatch<Dispatch>()
 
   let registered = false
+
+  // Initialize janus check interval id
+  const janusCheckInterval = useRef<any>(null)
 
   // check audio and video permissions
   useEffect(() => {
@@ -50,7 +54,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
       destroyed: [],
     }
 
-    const initWebRTC = () => {
+    function initWebRTC() {
       Janus.init({
         debug: 'all',
         dependencies: setupDeps(),
@@ -164,7 +168,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.error(
                               'Registration failed: ' + result['code'] + ' ' + result['reason'],
                             )
-                          return
                           break
 
                         case 'unregistered':
@@ -179,7 +182,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           if (!registered) {
                             registered = true
                           }
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'registering':
@@ -193,7 +197,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           })
 
                           if (Janus.log) Janus.log('Waiting for the peer to answer...')
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'incomingcall':
@@ -205,7 +210,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           })
 
                           if (Janus.log) Janus.log('Incoming call from ' + result['username'] + '!')
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'progress':
@@ -218,7 +224,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           if (jsep !== null && jsep !== undefined) {
                             handleRemote(jsep)
                           }
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'accepted':
@@ -230,7 +237,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           dispatch.currentCall.checkAcceptedUpdateAndPlay({
                             acceptedWebRTC: true,
                           })
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'hangup':
@@ -250,7 +258,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.log(
                               'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
                             )
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           // stopScreenSharingI()
                           break
 
@@ -324,10 +333,32 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
       })
     }
 
+    // Initializes the webrtc check interval
+    function startWebrtcCheck() {
+      const { CHECK_INTERVAL_TIME } = store.getState().webrtc
+      if (!janusCheckInterval.current) {
+        // Initialize the interval that check the webrtc
+        janusCheckInterval.current = setInterval(
+          () =>
+            webrtcCheck(() => {
+              // Do the register as callback of webrtc check
+              register(sipExten, sipSecret)
+            }),
+          CHECK_INTERVAL_TIME,
+        )
+      }
+    }
+
+    // Start webrtc initialization and handlers
     initWebRTC()
+    // Start the check of webrtc activity
+    startWebrtcCheck()
 
     return () => {
+      // Unregister from janus
       unregister()
+      // Stop Janus check interval
+      clearInterval(janusCheckInterval.current)
     }
   }, [])
 

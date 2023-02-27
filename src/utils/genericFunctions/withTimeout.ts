@@ -3,7 +3,7 @@
 
 /**
  * Handles a function to be called before a timeout
- * 
+ *
  * @param onSuccess The function to execute before timeout
  * @param onTimeout The function to execute when timeout it reached
  * @param timeout The timeout
