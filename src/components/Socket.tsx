@@ -9,7 +9,7 @@ import { getDisplayName } from '../lib/phone/conversation'
 import { dispatchMainPresence, dispatchConversations } from '../events'
 import { store } from '../store'
 import { withTimeout } from '../utils'
-import { type ConversationsTypes } from '../types'
+import type { ConversationsTypes, ExtensionTypes } from '../types'
 
 interface SocketProps {
   children: ReactNode
@@ -26,7 +26,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
   useEffect(() => {
     /**
      * Manages event and data for the currentUser
-     * 
+     *
      * @param res The data from the socket
      * @param conv The conversation data
      */
@@ -158,8 +158,10 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         dispatchMainPresence(res)
       })
 
-      socket.current.on('extenUpdate', (res) => {
-        // Call the dispatchConversations
+      socket.current.on('extenUpdate', (res: ExtensionTypes) => {
+        // Update extensions and conversations in users store
+        dispatch.users.updateExtension(res)
+        // Dispatch conversations event
         dispatchConversations(res)
         // Initialize conversation
         const conv: ConversationsTypes = res.conversations[Object.keys(res.conversations)[0]] || {}

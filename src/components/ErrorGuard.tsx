@@ -19,7 +19,7 @@ export const ErrorGuard: FC<ErrorGuard> = ({ children }) => {
   )
 
   useEffect(() => {
-    console.warn("activeAlertsCount", activeAlertsCount)
+    console.warn('activeAlertsCount', activeAlertsCount)
   }, [activeAlertsCount])
 
   return (

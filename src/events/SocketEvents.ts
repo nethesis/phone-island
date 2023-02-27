@@ -34,5 +34,6 @@ export function dispatchConversations(event: ExtensionTypes) {
       conversations: event.conversations,
     },
   }
+  // Dispatch the event on window for external handlers
   eventDispatch('phone-island-conversations', data)
 }

@@ -38,6 +38,6 @@ interface IslandTypes {
   isOpen: boolean
   startPosition: {
     x: number
-    y:  number
+    y: number
   }
 }

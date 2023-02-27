@@ -3,7 +3,7 @@
 
 /**
  * Joins multiple string with classes in one string
- * 
+ *
  * @param classes An array of classes
  * @returns A unique string of classes
  */

@@ -23,7 +23,7 @@ export function register(sipExten: string, sipSecret: string) {
 }
 
 export function answerWebRTC() {
-  const { sipcall, jsepGlobal } : { sipcall: any, jsepGlobal: any } = store.getState().webrtc
+  const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
     sipcall.createAnswer({
       jsep: jsepGlobal,
