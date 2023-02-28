@@ -119,6 +119,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     },
   )
 
+  const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -126,6 +127,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
+      audioPlayer: audioPlayer.current,
       localAudio: localAudio.current,
       localVideo: localVideo.current,
       remoteVideo: remoteVideo.current,
@@ -175,7 +177,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         </motion.div>
       )}
       <div className='hidden'>
-        <audio ref={localAudio}></audio>
+        <audio ref={audioPlayer}></audio>
+        <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
         <video muted={true} autoPlay ref={localVideo}></video>
         <video autoPlay ref={remoteVideo}></video>

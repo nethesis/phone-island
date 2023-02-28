@@ -64,7 +64,7 @@ export function hangupCurrentCall() {
   } else {
     decline()
   }
-  store.dispatch.player.stopAudio()
+  store.dispatch.player.stopAudioPlayer()
   store.dispatch.currentCall.reset()
 }
 

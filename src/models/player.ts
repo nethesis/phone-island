@@ -3,9 +3,10 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import { updateLocalAudioSource } from '../lib/phone/audio'
+import { updateAudioPlayerSource } from '../lib/phone/audio'
 
 const defaultState: PlayerTypes = {
+  audioPlayer: null,
   localAudio: null,
   remoteAudio: null,
   localVideo: null,
@@ -21,27 +22,27 @@ export const player = createModel<RootModel>()({
         ...payload,
       }
     },
-    updateLocalAudio: (state, payload: UpdateAudioSourceTypes) => {
-      if (state.localAudio) {
-        state.localAudio.src = `data:audio/ogg;base64, ${payload.src}`
+    updateAudioPlayer: (state, payload: UpdateAudioSourceTypes) => {
+      if (state.audioPlayer) {
+        state.audioPlayer.src = `data:audio/ogg;base64, ${payload.src}`
       }
       return state
     },
-    playLocalAudio: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
-      if (state.localAudio) {
-        if (payload && payload.loop) state.localAudio.loop = true
+    playAudioPlayer: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
+      if (state.audioPlayer) {
+        if (payload && payload.loop) state.audioPlayer.loop = true
         // Check if is playing
-        if (!state.localAudio.paused) {
-          state.localAudio.pause()
-          state.localAudio.currentTime = 0
+        if (!state.audioPlayer.paused) {
+          state.audioPlayer.pause()
+          state.audioPlayer.currentTime = 0
         }
-        state.localAudio.play()
+        state.audioPlayer.play()
       }
     },
-    stopAudio: (state) => {
-      if (state.localAudio) {
-        state.localAudio.pause()
-        state.localAudio.currentTime = 0
+    stopAudioPlayer: (state) => {
+      if (state.audioPlayer) {
+        state.audioPlayer.pause()
+        state.audioPlayer.currentTime = 0
       }
     },
     reset: () => {
@@ -49,13 +50,13 @@ export const player = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    updateAndPlayLocalAudio: async (audioSource) => {
+    updateAndPlayAudioPlayer: async (audioSource) => {
       // Update the audio source
-      await updateLocalAudioSource({
+      await updateAudioPlayerSource({
         src: audioSource,
       })
       // Play the outgoing ringtone when ready
-      dispatch.player.playLocalAudio({
+      dispatch.player.playAudioPlayer({
         loop: true,
       })
     },
@@ -67,6 +68,7 @@ interface UpdateAudioSourceTypes {
 }
 
 interface PlayerTypes {
+  audioPlayer: HTMLAudioElement | null
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null
   localVideo: HTMLVideoElement | null

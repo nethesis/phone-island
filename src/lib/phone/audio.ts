@@ -6,18 +6,18 @@ import { store } from '../../store'
 /**
  * Manages the audio update action
  */
-export async function updateLocalAudioSource(payload) {
+export async function updateAudioPlayerSource(payload) {
   return new Promise((resolve, reject) => {
     // The can play through callback
     function canPlayCb() {
-      store.getState().player.localAudio?.removeEventListener('canplaythrough', canPlayCb)
+      store.getState().player.audioPlayer?.removeEventListener('canplaythrough', canPlayCb)
       resolve(true)
     }
     try {
       // Add event listener of can play through
-      store.getState().player.localAudio?.addEventListener('canplaythrough', canPlayCb)
-      // Update the audio source
-      store.dispatch.player.updateLocalAudio(payload)
+      store.getState().player.audioPlayer?.addEventListener('canplaythrough', canPlayCb)
+      // Update the audio player source
+      store.dispatch.player.updateAudioPlayer(payload)
     } catch (err) {
       console.error(err)
       reject(err)
