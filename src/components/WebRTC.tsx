@@ -286,7 +286,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       Janus.debug(' ::: Got a remote stream :::')
                     }
                     // Stop the local audio element ringing
-                    store.dispatch.player.stopAudio()
+                    store.dispatch.player.stopAudioPlayer()
 
                     // Get remote audio and video elements
                     const remoteAudioElement = store.getState().player.remoteAudio
