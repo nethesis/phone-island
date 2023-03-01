@@ -18,10 +18,6 @@ export const ErrorGuard: FC<ErrorGuard> = ({ children }) => {
     (state: RootState) => state.alerts.status,
   )
 
-  useEffect(() => {
-    console.warn('activeAlertsCount', activeAlertsCount)
-  }, [activeAlertsCount])
-
   return (
     <>
       {activeAlertsCount > 0 && <AlertView />}

@@ -45,7 +45,7 @@ const Template: Story<any> = (args) => {
       >
         Call
       </button>
-      <PhoneIsland dataConfig={config} always={false} {...args} />
+      <PhoneIsland dataConfig={config} showAlways={false} {...args} />
     </>
   )
 }
