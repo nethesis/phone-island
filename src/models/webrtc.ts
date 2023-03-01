@@ -11,6 +11,8 @@ const defaultState = {
   jsepGlobal: null,
   remoteAudioStream: null,
   lastActivity: null,
+  registered: false,
+  destroyed: false
 }
 
 export const webrtc = createModel<RootModel>()({
@@ -44,4 +46,6 @@ export interface WebRTCTypes {
   jsepGlobal?: any
   remoteAudioStream?: any
   lastActivity?: any
+  registered?: boolean
+  destroyed?: boolean
 }
