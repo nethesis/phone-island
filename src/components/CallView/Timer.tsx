@@ -25,18 +25,20 @@ const Timer: FC = () => {
   }, [startTime])
 
   return (
-    <StyledTimer isOpen={isOpen}>
-      {startTime && timerNegativeDifference && (
-        <Moment
-          date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
-          interval={1000}
-          format='h:mm:ss'
-          trim={false}
-          unix
-          durationFromNow
-        />
+    <>
+      {startTime != null && (
+        <StyledTimer isOpen={isOpen}>
+          <Moment
+            date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
+            interval={1000}
+            format='h:mm:ss'
+            trim={false}
+            unix
+            durationFromNow
+          />
+        </StyledTimer>
       )}
-    </StyledTimer>
+    </>
   )
 }
 

@@ -4,7 +4,11 @@
 import React, { type FC } from 'react'
 import { classNames } from '../../utils/'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTriangleExclamation, faCircleCheck } from '@nethesis/nethesis-solid-svg-icons'
+import {
+  faTriangleExclamation,
+  faCircleCheck,
+  faCircleXmark,
+} from '@nethesis/nethesis-solid-svg-icons'
 
 const classes = {
   base: 'border-4 rounded-2xl p-6 flex gap-5 items-center',
@@ -19,8 +23,10 @@ const Alert: FC<AlertProps> = ({ color, message }) => {
       <div className='w-12 h-12 rounded-xl bg-gray-300 shrink-0 flex justify-center items-center'>
         {color === 'green' ? (
           <FontAwesomeIcon icon={faCircleCheck} size='xl' className='text-black' />
-        ) : (
+        ) : color === 'orange' ? (
           <FontAwesomeIcon icon={faTriangleExclamation} size='xl' className='text-black' />
+        ) : (
+          <FontAwesomeIcon icon={faCircleXmark} size='xl' className='text-black' />
         )}
       </div>
       <div className='text-base font-bold'>{message}</div>

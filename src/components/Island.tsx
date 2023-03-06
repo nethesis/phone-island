@@ -13,28 +13,7 @@ import {
 import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import CallView from './CallView'
 import { xPosition, yPosition } from '../lib/island/island'
-import { ErrorGuard } from './ErrorGuard'
-
-// The variables for the component animations
-const motionVariants = {
-  callView: {
-    openIncoming: {
-      width: '418px',
-      height: '96px',
-      borderRadius: '20px',
-    },
-    openAccepted: {
-      width: '348px',
-      height: '236px',
-      borderRadius: '20px',
-    },
-    closed: {
-      width: '168px',
-      height: '40px',
-      borderRadius: '99px',
-    },
-  },
-}
+import { AlertGuard } from './AlertGuard'
 
 /**
  * Provides the Island logic
@@ -47,6 +26,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from island store
   const { isOpen, startPosition } = useSelector((state: RootState) => state.island)
+  // Get activeAlertsCount from island store
+  const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
+  // Get variants from animations store
+  const { variants } = useSelector((state: RootState) => state.animations)
+
   // Initialize Island drag controls
   const controls = useDragControls()
 
@@ -140,17 +124,24 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
-      {(incoming || outgoing || accepted || showAlways) && (
+      {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
         <motion.div
           className='font-sans absolute pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
           animate={
             isOpen && (incoming || outgoing) && !accepted
-              ? 'openIncoming'
+              ? // The call is incoming or outgoing
+                activeAlertsCount > 0
+                ? variants.callView.expandedIncomingWithAlerts
+                : variants.callView.expandedIncoming
               : isOpen && accepted
-              ? 'openAccepted'
-              : 'closed'
+              ? // The call is accepted and the island is expanded
+                activeAlertsCount > 0
+                ? variants.callView.expandedAcceptedWithAlerts
+                : variants.callView.expandedAccepted
+              : activeAlertsCount > 0
+              ? variants.expandedWithAlerts
+              : variants.callView.collapsed
           }
-          variants={motionVariants.callView}
           drag
           onPointerDown={handleStartDrag}
           onDragStart={handleDragStarted}
@@ -161,9 +152,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             x: position?.x || startPosition.x,
             y: position?.y || startPosition.y,
           }}
-          style={{
-            padding: isOpen ? '24px' : '8px 16px',
-          }}
           dragControls={controls}
           dragConstraints={islandContainerRef}
           onDragEnd={handleDragEnd}
@@ -171,9 +159,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
           {...longPressEvent}
         >
           {/* The views logic */}
-          <ErrorGuard>
+          <AlertGuard>
             <CallView />
-          </ErrorGuard>
+          </AlertGuard>
         </motion.div>
       )}
       <div className='hidden'>

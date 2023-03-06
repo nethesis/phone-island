@@ -12,6 +12,7 @@ import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
+import { isWebrtcTotallyFree } from '../lib/webrtc/extension'
 
 interface WebRTCProps {
   children: ReactNode
@@ -128,7 +129,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       }
                       return
                     }
-
                     // Manage events
                     var result = msg['result']
                     if (
@@ -324,7 +324,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
       })
     }
 
-    // Initializes the webrtc check interval
+    // Initializes the webrtc registration check interval
     function startWebrtcCheck() {
       const { CHECK_INTERVAL_TIME } = store.getState().webrtc
       if (!janusCheckInterval.current) {

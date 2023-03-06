@@ -13,10 +13,15 @@ import AlertView from './AlertView'
  * @returns
  */
 
-export const ErrorGuard: FC<ErrorGuard> = ({ children }) => {
+export const AlertGuard: FC<AlertGuard> = ({ children }) => {
+  // Get alert status from alerts store
   const { activeAlertsCount, breakActiveAlertsCount } = useSelector(
     (state: RootState) => state.alerts.status,
   )
+  // Get isOpen form island store
+  const { isOpen } = useSelector((state: RootState) => state.island)
+  // Get currentCall statuses from currentCall store
+  const { incoming, accepted } = useSelector((state: RootState) => state.currentCall)
 
   return (
     <>
@@ -26,6 +31,6 @@ export const ErrorGuard: FC<ErrorGuard> = ({ children }) => {
   )
 }
 
-interface ErrorGuard {
+interface AlertGuard {
   children: ReactNode
 }
