@@ -6,10 +6,20 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName } from '../lib/phone/conversation'
-import { dispatchMainPresence, dispatchConversations } from '../events'
+import {
+  dispatchMainPresence,
+  dispatchConversations,
+  dispatchQueueUpdate,
+  dispatchQueueMemberUpdate,
+} from '../events'
 import { store } from '../store'
 import { withTimeout } from '../utils'
-import type { ConversationsTypes, ExtensionTypes } from '../types'
+import type {
+  ConversationsTypes,
+  ExtensionTypes,
+  QueuesUpdateTypes,
+  QueueUpdateMemberTypes,
+} from '../types'
 
 interface SocketProps {
   children: ReactNode
@@ -169,6 +179,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         if (res.username === username) {
           handleUserEvents(res, conv)
         }
+      })
+
+      socket.current.on('queueUpdate', (res: QueuesUpdateTypes) => {
+        // Dispatch queueUpdate event
+        dispatchQueueUpdate(res)
+      })
+
+      socket.current.on('queueMemberUpdate', (res: QueueUpdateMemberTypes) => {
+        // Dispatch queueMemberUpdate event
+        dispatchQueueMemberUpdate(res)
       })
     }
 
