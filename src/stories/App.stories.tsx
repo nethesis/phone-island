@@ -37,6 +37,16 @@ const Template: Story<any> = (args) => {
     // Manage the conversations data
   })
 
+  useEventListener('phone-island-queue-update', (data) => {
+    // Manage the queue update data
+    console.warn(data)
+  })
+
+  useEventListener('phone-island-queue-member-update', (data) => {
+    // Manage the queue member update data
+    console.warn(data)
+  })
+
   return (
     <>
       <button
