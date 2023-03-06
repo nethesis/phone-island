@@ -37,3 +37,5 @@ export function dispatchConversations(event: ExtensionTypes) {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-conversations', data)
 }
+
+// phone-island-queue-update

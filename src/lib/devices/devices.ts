@@ -8,93 +8,26 @@ import {
 } from 'mic-check'
 import JanusLib from '../webrtc/janus'
 import { JanusTypes } from '../../types'
+import { store } from '../../store'
 
 const Janus: JanusTypes = JanusLib
 
-export const getSupportedDevices = function (origCallback) {
-  let supportedDevices = null
+export const getSupportedDevices = function (origCallback: () => void) {
+  let hasMicrophone = false
+  let hasSpeakers = false
+  let hasWebcam = false
+  let isMicrophoneAlreadyCaptured = false
+  let isWebcamAlreadyCaptured = false
 
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true,
-  })
+  function checkDeviceSupport(callback: () => void) {
+    const mediaDevices: MediaDeviceInfo[] = []
 
-  if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-    // Firefox 38+ seems having support of enumerateDevicesx
-    // @ts-ignore
-    navigator.enumerateDevices = function (callback) {
-      navigator.mediaDevices.enumerateDevices().then(callback)
-    }
-  }
+    navigator.mediaDevices.enumerateDevices().then((devices: MediaDeviceInfo[]) => {
+      devices.forEach(function (device: MediaDeviceInfo) {
+        let skip = false
 
-  var MediaDevices = []
-  var isHTTPs = location.protocol === 'https:'
-  var canEnumerate = false
-
-  if (typeof MediaStreamTrack !== 'undefined' && 'getSources' in MediaStreamTrack) {
-    canEnumerate = true
-  } else if (navigator.mediaDevices && !!navigator.mediaDevices.enumerateDevices) {
-    canEnumerate = true
-  }
-
-  var hasMicrophone = false
-  var hasSpeakers = false
-  var hasWebcam = false
-
-  var isMicrophoneAlreadyCaptured = false
-  var isWebcamAlreadyCaptured = false
-
-  function checkDeviceSupport(callback) {
-    if (!canEnumerate) {
-      return
-    }
-
-    if (
-      // @ts-ignore
-      !navigator.enumerateDevices &&
-      window.MediaStreamTrack &&
-      // @ts-ignore
-      window.MediaStreamTrack.getSources
-    ) {
-      // @ts-ignore
-      navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack)
-    }
-    // @ts-ignore
-    if (!navigator.enumerateDevices && navigator.enumerateDevices) {
-      // @ts-ignore
-      navigator.enumerateDevices = navigator.enumerateDevices.bind(navigator)
-    }
-    // @ts-ignore
-    if (!navigator.enumerateDevices) {
-      if (callback) {
-        callback()
-      }
-      return
-    }
-
-    MediaDevices = []
-    // @ts-ignore
-    navigator.enumerateDevices(function (devices) {
-      devices.forEach(function (_device) {
-        var device = {}
-        for (var d in _device) {
-          device[d] = _device[d]
-        }
-        // @ts-ignore
-        if (device.kind === 'audio') {
-          // @ts-ignore
-          device.kind = 'audioinput'
-        }
-        // @ts-ignore
-        if (device.kind === 'video') {
-          // @ts-ignore
-          device.kind = 'videoinput'
-        }
-
-        var skip
-        MediaDevices.forEach(function (d) {
-          // @ts-ignore
-          if (d.id === device.id && d.kind === device.kind) {
+        mediaDevices.forEach(function (d: MediaDeviceInfo) {
+          if (d.deviceId === device.deviceId && d.kind === device.kind) {
             skip = true
           }
         })
@@ -102,50 +35,27 @@ export const getSupportedDevices = function (origCallback) {
         if (skip) {
           return
         }
-        // @ts-ignore
-        if (!device.deviceId) {
-          // @ts-ignore
-          device.deviceId = device.id
+
+        if (device.kind === 'videoinput' && !isWebcamAlreadyCaptured) {
+          isWebcamAlreadyCaptured = true
         }
-        // @ts-ignore
-        if (!device.id) {
-          // @ts-ignore
-          device.id = device.deviceId
+        if (device.kind === 'audioinput' && !isMicrophoneAlreadyCaptured) {
+          isMicrophoneAlreadyCaptured = true
         }
-        // @ts-ignore
-        if (!device.label) {
-          // @ts-ignore
-          device.label = 'Please invoke getUserMedia once.'
-          if (!isHTTPs) {
-            // @ts-ignore
-            device.label = 'HTTPs is required to get label of this ' + device.kind + ' device.'
-          }
-        } else {
-          // @ts-ignore
-          if (device.kind === 'videoinput' && !isWebcamAlreadyCaptured) {
-            isWebcamAlreadyCaptured = true
-          }
-          // @ts-ignore
-          if (device.kind === 'audioinput' && !isMicrophoneAlreadyCaptured) {
-            isMicrophoneAlreadyCaptured = true
-          }
-        }
-        // @ts-ignore
+
         if (device.kind === 'audioinput') {
           hasMicrophone = true
         }
-        // @ts-ignore
+
         if (device.kind === 'audiooutput') {
           hasSpeakers = true
         }
-        // @ts-ignore
+
         if (device.kind === 'videoinput') {
           hasWebcam = true
         }
 
-        // there is no 'videoouput' in the spec.
-        // @ts-ignore
-        MediaDevices.push(device)
+        mediaDevices.push(device)
       })
 
       if (callback) {
@@ -156,15 +66,14 @@ export const getSupportedDevices = function (origCallback) {
 
   // check for microphone/camera support!
   checkDeviceSupport(function () {
-    // @ts-ignore
-    supportedDevices = {
+    const supportedDevices: any = {
       audio: hasMicrophone,
       audioCap: isMicrophoneAlreadyCaptured,
       video: hasWebcam,
       videoCap: isWebcamAlreadyCaptured,
     }
-    // @ts-ignore
-    // janus.log('supportedDevices=', supportedDevices)
+
+    Janus.log && Janus.log('supportedDevices=', supportedDevices)
     origCallback()
   })
 }
@@ -172,28 +81,32 @@ export const getSupportedDevices = function (origCallback) {
 export const checkMediaPermissions = function () {
   requestMediaPermissions({ audio: true, video: false })
     .then(() => {
-      // can successfully access camera and microphone streams
-      // save permissions state on rematch to get access globally on the app
+      // Can successfully access camera and microphone streams
+      // Save permissions state on rematch to get access globally on the app
     })
     .catch((err: MediaPermissionsError) => {
       const { type, name, message } = err
       if (type === MediaPermissionsErrorType.SystemPermissionDenied) {
         // browser does not have permission to access camera or microphone
+        store.dispatch.alerts.setAlert('browser_permissions')
         if (Janus.error)
           Janus.error('WebRTC: browser does not have permission to access camera or microphone')
       } else if (type === MediaPermissionsErrorType.UserPermissionDenied) {
-        // user didn't allow app to access camera or microphone
+        // User didn't allow app to access camera or microphone
+        store.dispatch.alerts.setAlert('user_permissions')
         if (Janus.error) Janus.error("WebRTC: user didn't allow app to access camera or microphone")
       } else if (type === MediaPermissionsErrorType.CouldNotStartVideoSource) {
-        // camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)
+        // Camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)
         // (mostly Windows specific problem)
+        store.dispatch.alerts.setAlert('busy_camera')
         if (Janus.error)
           Janus.error(
             'WebRTC: camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)',
           )
       } else {
+        // Not all error types are handled by this library
+        store.dispatch.alerts.setAlert('unknown_media_permissions')
         if (Janus.error)
-          // not all error types are handled by this library
           Janus.error("WebRTC: can't access audio or camere on this device. unknown error")
       }
     })

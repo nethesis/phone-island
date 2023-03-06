@@ -25,7 +25,7 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
 }
 
 /**
- * The CallView component
+ * The main view to manage calls, the starting point for calls actions flows
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall store
