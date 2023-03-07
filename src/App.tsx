@@ -1,18 +1,15 @@
-import React, { FC } from 'react'
-import { Events, WebRTC } from './components'
+import React, { type FC } from 'react'
+import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store } from './store'
-import { Socket } from './components'
 import { Base64 } from 'js-base64'
-import { Island } from './components'
-import { RestAPI } from './components'
 
 interface PhoneIslandProps {
   dataConfig: string
-  always?: boolean
+  showAlways?: boolean
 }
 
-export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }) => {
+export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = false }) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
@@ -27,7 +24,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, always = false }
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
               <Events>
-                <Island always={always} />
+                <Island showAlways={showAlways} />
               </Events>
             </Socket>
           </RestAPI>

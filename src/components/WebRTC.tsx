@@ -6,12 +6,13 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
-import type { JanusTypes } from '../lib/webrtc/types'
+import type { JanusTypes } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
-import { useWebRTCStore } from '../utils/useWebRTCStore'
 import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
+import { webrtcCheck } from '../lib/webrtc/connection'
+import { isWebrtcTotallyFree } from '../lib/webrtc/extension'
 
 interface WebRTCProps {
   children: ReactNode
@@ -25,7 +26,8 @@ const Janus: JanusTypes = JanusLib
 export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, children }) => {
   const dispatch = useDispatch<Dispatch>()
 
-  let registered = false
+  // Initialize janus check interval id
+  const janusCheckInterval = useRef<any>(null)
 
   // check audio and video permissions
   useEffect(() => {
@@ -38,20 +40,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
         adapter,
       })
 
-    var evtObservers = {
-      registration_failed: [],
-      registered: [],
-      calling: [],
-      incomingcall: [],
-      accepted: [],
-      hangup: [],
-      gateway_down: [],
-      error: [],
-      progress: [],
-      destroyed: [],
-    }
-
-    const initWebRTC = () => {
+    function initWebRTC() {
       Janus.init({
         debug: 'all',
         dependencies: setupDeps(),
@@ -66,20 +55,19 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                   opaqueId: 'sebastian' + '_' + new Date().getTime(),
                   success: function (pluginHandle) {
                     // Set sipcall to the store
-                    dispatch.webrtc.updateWebRTC({
-                      sipcall: pluginHandle,
-                    })
-                    // Register the extension to the server
-                    register(sipExten, sipSecret)
                     if (pluginHandle) {
-                      if (Janus.log)
-                        Janus.log(
-                          'SIP plugin attached! (' + pluginHandle.getPlugin() + ', id = ' + ')',
-                        )
+                      dispatch.webrtc.updateWebRTC({
+                        sipcall: pluginHandle,
+                      })
+                      // Register the extension to the server
+                      register(sipExten, sipSecret)
+                      if (pluginHandle) {
+                        if (Janus.log)
+                          Janus.log(
+                            'SIP plugin attached! (' + pluginHandle.getPlugin() + ', id = ' + ')',
+                          )
+                      }
                     }
-                    // getSupportedDevices(function () {
-                    // resolve()
-                    // })
                   },
                   error: function (error) {
                     if (Janus.error) {
@@ -98,7 +86,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       )
                   },
                   iceState: function (newState) {
-                    const { sipcall } = useWebRTCStore()
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
 
                     if (sipcall) {
                       if (Janus.log)
@@ -123,26 +111,25 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     }
                   },
                   onmessage: function (msg, jsep) {
-                    const { sipcall } = useWebRTCStore()
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
 
                     if (Janus.debug) {
                       Janus.debug(' ::: Got a message :::')
                       Janus.debug(JSON.stringify(msg))
                     }
 
+                    // Handle errors in message
                     var error = msg['error']
                     if (error != null && error != undefined) {
-                      if (!registered) {
+                      if (!store.getState().webrtc.registered) {
                         if (Janus.log) Janus.log('User is not registered')
                       } else {
                         // Reset status
-                        sipcall.hangup()
-                      }
-                      for (var evt in evtObservers['error']) {
-                        // evtObservers['error'][evt](msg, jsep)
+                        sipcall && sipcall.hangup()
                       }
                       return
                     }
+                    // Manage events
                     var result = msg['result']
                     if (
                       result !== null &&
@@ -153,11 +140,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       // get event
                       var event = result['event']
 
-                      // call all evt registered
-                      for (var evt in evtObservers[event]) {
-                        evtObservers[event][evt](msg, jsep)
-                      }
-
                       //switch event
                       switch (event) {
                         case 'registration_failed':
@@ -165,7 +147,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.error(
                               'Registration failed: ' + result['code'] + ' ' + result['reason'],
                             )
-                          return
                           break
 
                         case 'unregistered':
@@ -177,10 +158,13 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                         case 'registered':
                           if (Janus.log)
                             Janus.log('Successfully registered as ' + result['username'] + '!')
-                          if (!registered) {
-                            registered = true
+                          if (!store.getState().webrtc.registered) {
+                            store.dispatch.webrtc.updateWebRTC({
+                              registered: true,
+                            })
                           }
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'registering':
@@ -194,7 +178,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           })
 
                           if (Janus.log) Janus.log('Waiting for the peer to answer...')
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'incomingcall':
@@ -206,7 +191,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           })
 
                           if (Janus.log) Janus.log('Incoming call from ' + result['username'] + '!')
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'progress':
@@ -219,7 +205,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           if (jsep !== null && jsep !== undefined) {
                             handleRemote(jsep)
                           }
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'accepted':
@@ -231,7 +218,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           dispatch.currentCall.checkAcceptedUpdateAndPlay({
                             acceptedWebRTC: true,
                           })
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 
                         case 'hangup':
@@ -251,7 +239,8 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.log(
                               'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
                             )
-                          // lastActivity = new Date().getTime()
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                           // stopScreenSharingI()
                           break
 
@@ -273,24 +262,39 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     // var videoTracks = stream.getVideoTracks()
                     /* */
                   },
-                  onremotestream: function (stream) {
+                  onremotestream: function (stream: MediaStream) {
+                    if (Janus.debug) {
+                      Janus.debug(' ::: Got a remote stream :::')
+                    }
+                    // Stop the local audio element ringing
+                    store.dispatch.player.stopAudioPlayer()
+
+                    // Get remote audio and video elements
                     const remoteAudioElement = store.getState().player.remoteAudio
                     const remoteVideoElement = store.getState().player.remoteVideo
 
-                    if (Janus.debug) {
-                      Janus.debug(' ::: Got a remote stream :::')
-                      Janus.debug(stream)
-                    }
-
-                    // retrieve stream track
-                    const audioTracks = stream.getAudioTracks()
-                    const videoTracks = stream.getVideoTracks()
-
-                    store.dispatch.player.stopAudio()
+                    // Get audio and video from stream
+                    const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
+                    const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
 
                     if (Janus.attachMediaStream) {
-                      Janus.attachMediaStream(remoteAudioElement, new MediaStream(audioTracks))
-                      Janus.attachMediaStream(remoteVideoElement, new MediaStream(videoTracks))
+                      // Initialize the new media stream for remote audio
+                      if (audioTracks && audioTracks.length > 0) {
+                        const audioStream: MediaStream = new MediaStream(audioTracks)
+                        Janus.attachMediaStream(remoteAudioElement, audioStream)
+
+                        // Save the new audio stream to the store
+                        store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
+                      } else {
+                        console.warn('No audio tracks on remote stream')
+                      }
+                      // Initialize the new media stream for remote video
+                      if (videoTracks && videoTracks.length > 0) {
+                        const videoStream: MediaStream = new MediaStream(videoTracks)
+                        Janus.attachMediaStream(remoteVideoElement, videoStream)
+                      } else {
+                        console.warn('No video tracks on remote stream')
+                      }
                     }
                   },
                   oncleanup: function () {
@@ -302,18 +306,50 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                 })
               }
             },
-            error: (err) => {
+            error: (err: any) => {
               if (Janus.log) Janus.log('error', err)
+              // Activate webrtc connection alert
+              dispatch.alerts.setAlert('webrtc_down')
+            },
+            destroyed: () => {
+              // Set webrtc destroyed status
+              dispatch.webrtc.updateWebRTC({
+                destroyed: true,
+              })
+              // Activate webrtc connection alert
+              dispatch.alerts.setAlert('webrtc_down')
             },
           })
         },
       })
     }
 
+    // Initializes the webrtc registration check interval
+    function startWebrtcCheck() {
+      const { CHECK_INTERVAL_TIME } = store.getState().webrtc
+      if (!janusCheckInterval.current) {
+        // Initialize the interval that check the webrtc
+        janusCheckInterval.current = setInterval(
+          () =>
+            webrtcCheck(() => {
+              // Do the register as callback of webrtc check
+              register(sipExten, sipSecret)
+            }),
+          CHECK_INTERVAL_TIME,
+        )
+      }
+    }
+
+    // Start webrtc initialization and handlers
     initWebRTC()
+    // Start the check of webrtc activity
+    startWebrtcCheck()
 
     return () => {
+      // Unregister from janus
       unregister()
+      // Stop Janus check interval
+      clearInterval(janusCheckInterval.current)
     }
   }, [])
 

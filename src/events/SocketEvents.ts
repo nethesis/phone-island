@@ -7,6 +7,10 @@ import type {
   MainPresenceEventTypes,
   ExtensionTypes,
   ConversationsEventType,
+  QueuesUpdateTypes,
+  QueuesEventType,
+  QueueUpdateMemberTypes,
+  QueuesMemberEventType
 } from '../types'
 
 /**
@@ -34,5 +38,32 @@ export function dispatchConversations(event: ExtensionTypes) {
       conversations: event.conversations,
     },
   }
+  // Dispatch the event on window for external handlers
   eventDispatch('phone-island-conversations', data)
+}
+
+/**
+ * The dispatch function for the queueUpdate event
+ *
+ * @param event The queueUpdate event from socket
+ */
+export function dispatchQueueUpdate(event: QueuesUpdateTypes) {
+  const data: QueuesEventType = {
+    [event.queue]: event,
+  }
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-queue-update', data)
+}
+
+/**
+ * The dispatch function for the queueMemberUpdate event
+ *
+ * @param event The queueMemberUpdate event from socket
+ */
+export function dispatchQueueMemberUpdate(event: QueueUpdateMemberTypes) {
+  const data: QueuesMemberEventType = {
+    [event.member]: event,
+  }
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-queue-member-update', data)
 }

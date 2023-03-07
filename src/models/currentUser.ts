@@ -5,7 +5,9 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import type { UserInfoTypes } from '../types'
 
-const defaultState: UserInfoTypes = {}
+const defaultState: CurrentUserTypes = {
+  currentUserReady: false,
+}
 
 export const currentUser = createModel<RootModel>()({
   state: defaultState,
@@ -16,5 +18,15 @@ export const currentUser = createModel<RootModel>()({
         ...payload,
       }
     },
+    setCurrentUserReady: (state, payload: boolean) => {
+      return {
+        ...state,
+        currentUserReady: payload,
+      }
+    },
   },
 })
+
+interface CurrentUserTypes extends UserInfoTypes {
+  currentUserReady: boolean
+}

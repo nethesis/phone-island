@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { FC, ReactNode, ComponentPropsWithRef } from 'react'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { classNames } from '../utils'
 
 interface ButtonProps extends ComponentPropsWithRef<'button'> {
   children: ReactNode
   variant: 'red' | 'green' | 'default' | 'neutral'
   active?: boolean
-}
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
 }
 
 export const Button: FC<ButtonProps> = ({ children, variant, active = false, ...props }) => {
@@ -36,21 +32,19 @@ export const Button: FC<ButtonProps> = ({ children, variant, active = false, ...
 
   return (
     <>
-      <motion.div>
-        <button
-          data-stop-propagation={true}
-          className={classNames(
-            active && styles.background.active[variant]
-              ? styles.background.active[variant]
-              : styles.background.base[variant] && styles.background.base[variant],
-            styles.base,
-            variant && styles.variant[variant],
-          )}
-          {...props}
-        >
-          {children}
-        </button>
-      </motion.div>
+      <button
+        data-stop-propagation={true}
+        className={classNames(
+          active && styles.background.active[variant]
+            ? styles.background.active[variant]
+            : styles.background.base[variant] && styles.background.base[variant],
+          styles.base,
+          variant && styles.variant[variant],
+        )}
+        {...props}
+      >
+        {children}
+      </button>
     </>
   )
 }

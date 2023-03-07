@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import JanusLib from './janus'
+import JanusLib from '../lib/webrtc/janus'
 
 type JanusLibTypes = typeof JanusLib
 

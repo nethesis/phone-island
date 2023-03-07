@@ -5,8 +5,14 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
 const defaultState = {
+  INACTIVE_DEADLINE_TIME: 1000 * 60 * 45,
+  CHECK_INTERVAL_TIME: 1000 * 60 * 50,
   sipcall: null,
   jsepGlobal: null,
+  remoteAudioStream: null,
+  lastActivity: null,
+  registered: false,
+  destroyed: false
 }
 
 export const webrtc = createModel<RootModel>()({
@@ -18,10 +24,28 @@ export const webrtc = createModel<RootModel>()({
         ...payload,
       }
     },
+    updateRemoteAudioStream: (state, payload: any) => {
+      return {
+        ...state,
+        remoteAudioStream: payload,
+      }
+    },
+    updateLastActivity: (state, payload: any) => {
+      return {
+        ...state,
+        lastActivity: payload,
+      }
+    },
   },
 })
 
 export interface WebRTCTypes {
+  INACTIVE_DEADLINE_TIME?: number
+  CHECK_INTERVAL_TIME?: number
   sipcall?: any
   jsepGlobal?: any
+  remoteAudioStream?: any
+  lastActivity?: any
+  registered?: boolean
+  destroyed?: boolean
 }

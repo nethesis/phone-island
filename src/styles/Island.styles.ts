@@ -3,23 +3,9 @@
 
 import styled, { css } from 'styled-components'
 
-interface StyledPhoneIslandProps {
-  isOpen: boolean
-  incoming: boolean
-  openedIslandPadding: number
-  accepted: boolean
-  outgoing: boolean
-}
-
-export const StyledPhoneIsland = styled.div<StyledPhoneIslandProps>`
-  align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
-  position: absolute;
-  border-radius: 99px;
-  background-color: #000;
-  color: #fff;
-  font-size: 0.75rem;
+export const StyledCallView = styled.div<StyledCallViewProps>`
   display: grid;
-  cursor: pointer;
+  align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
   ${({ isOpen, accepted, incoming, outgoing }) =>
     isOpen && accepted
       ? css`
@@ -35,12 +21,6 @@ export const StyledPhoneIsland = styled.div<StyledPhoneIslandProps>`
           grid-template-columns: 1fr 84px;
         `}
 `
-interface StyledTopContentProps {
-  isOpen: boolean
-  incoming: boolean
-  accepted: boolean
-  outgoing: boolean
-}
 
 export const StyledTopContent = styled.div<StyledTopContentProps>`
   display: grid;
@@ -64,10 +44,6 @@ export const StyledAvatar = styled.div`
   object-fit: cover;
 `
 
-interface StyledDetailsProps {
-  numberExists: boolean
-}
-
 export const StyledDetails = styled.div<StyledDetailsProps>`
   display: grid;
   align-self: center;
@@ -75,11 +51,16 @@ export const StyledDetails = styled.div<StyledDetailsProps>`
   grid-template-rows: repeat(2, 24px);
 `
 
-interface StyledTimerProps {
-  isOpen: boolean
-}
-
 export const StyledTimer = styled.div<StyledTimerProps>`
+  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
+  max-height: 24px;
+  font-weight: 200;
+  color: #fff;
+  letter-spacing: 0.5px;
+  max-width: fit-content;
+`
+
+export const StyledNumber = styled.div<StyledNumberProps>`
   font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
   max-height: 24px;
   font-weight: 200;
@@ -93,3 +74,30 @@ export const StyledName = styled.div`
   font-weight: 700;
   color: #fff;
 `
+
+interface StyledCallViewProps {
+  isOpen: boolean
+  incoming: boolean
+  openedIslandPadding: number
+  accepted: boolean
+  outgoing: boolean
+}
+
+interface StyledTopContentProps {
+  isOpen: boolean
+  incoming: boolean
+  accepted: boolean
+  outgoing: boolean
+}
+
+interface StyledDetailsProps {
+  numberExists: boolean
+}
+
+interface StyledTimerProps {
+  isOpen: boolean
+}
+
+interface StyledNumberProps {
+  isOpen: boolean
+}

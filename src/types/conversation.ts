@@ -12,21 +12,10 @@ export interface ConversationsEventType {
 export interface ConversationsTypes {
   id: string
   owner: string
-  chDest: string | null
+  chDest: ChTypes | null
   linkedId: string
   uniqueId: string
-  chSource: {
-    type: 'source'
-    channel: string
-    callerNum: string
-    startTime: number
-    callerName: string
-    bridgedNum: string
-    bridgedName: string
-    inConference: boolean
-    channelStatus: 'up' | 'down'
-    bridgedChannel: string
-  }
+  chSource: ChTypes | null
   duration: number
   startTime: number
   connected: false
@@ -37,4 +26,17 @@ export interface ConversationsTypes {
   throughTrunk: false
   counterpartNum: string
   counterpartName: string
+}
+
+interface ChTypes {
+  type: 'source' | 'destination'
+  channel: string
+  callerNum: string
+  startTime: number
+  callerName: string
+  bridgedNum: string
+  bridgedName: string
+  inConference: boolean
+  channelStatus: 'up' | 'down'
+  bridgedChannel: string
 }

@@ -1,160 +1,77 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useEffect, useLayoutEffect, type FC } from 'react'
-import {
-  StyledAvatar,
-  StyledDetails,
-  StyledTimer,
-  StyledPhoneIsland,
-  StyledTopContent,
-  StyledName,
-} from '../styles/Island.styles'
-
+import React, { useState, useRef, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../store'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone, faMicrophoneSlash, faPlay } from '@nethesis/nethesis-solid-svg-icons'
-
+import {
+  useLongPress,
+  useIsomorphicLayoutEffect,
+  useLocalStorage,
+  styleTransformValues,
+} from '../utils'
 import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
-import { useLongPress } from '../utils/useLongPress'
-import Moment from 'react-moment'
-import { useLocalStorage, getTranslateValues } from '../utils'
-import { AudioBars } from './AudioBars'
-import { Button } from './Button'
+import CallView from './CallView'
+import { xPosition, yPosition } from '../lib/island/island'
+import { AlertGuard } from './AlertGuard'
 
-import {
-  hangupCurrentCall,
-  answerIncomingCall,
-  muteCurrentCall,
-  unmuteCurrentCall,
-  pauseCurrentCall,
-  unpauseCurrentCall,
-} from '../lib/phone/call'
-
-import {
-  faPause as faPauseRegular,
-  faMicrophone as faMicrophoneRegular,
-  faRightLeft as faRightLeftRegualar,
-} from '@nethesis/nethesis-light-svg-icons'
-
-import PhoneKeyboardLight from '../static/icons/PhoneKeyboardLight'
-import PhoneKeyboardSolid from '../static/icons/PhoneKeyboardSolid'
-
-const PhoneIslandMotion = motion(StyledPhoneIsland)
-const AvatarMotion = motion(StyledAvatar)
-const DetailsMotion = motion(StyledDetails)
-const NameMotion = motion(StyledName)
-
-import { useIsomorphicLayoutEffect } from '../utils'
-
-interface IslandProps {
-  always?: boolean
-}
-
-interface PositionTypes {
-  x: number
-  y: number
-}
-
-interface PhoneIslandStorageTypes {
-  position: PositionTypes
-}
-
-const ISLAND_STARTING_POSITION = {
-  x: 0,
-  y: 0,
-}
-
-export const Island = ({ always }: IslandProps) => {
-  const [isOpen, setIsOpen] = useState(true)
+/**
+ * Provides the Island logic
+ *
+ * @param showAlways Sets the Island ever visible
+ *
+ */
+export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing, displayName, number, startTime, muted, paused, username } =
-    useSelector((state: RootState) => state.currentCall)
+  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
+  // Get isOpen from island store
+  const { isOpen, startPosition } = useSelector((state: RootState) => state.island)
+  // Get activeAlertsCount from island store
+  const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
+  // Get variants from animations store
+  const { variants } = useSelector((state: RootState) => state.animations)
 
-  const { localAudio: storeLocalAudio, remoteAudio: storeRemoteAudio } = useSelector(
-    (state: RootState) => state.player,
-  )
-
-  const { view } = useSelector((state: RootState) => state.island)
-  const { avatars } = useSelector((state: RootState) => state.avatars)
-
+  // Initialize Island drag controls
   const controls = useDragControls()
 
+  // Initialize Island storage
   const [phoneIslandStorage, setPhoneIslandStorage] =
     useLocalStorage<PhoneIslandStorageTypes | null>('phone-island', null)
 
+  // The Island reference
   const islandRef = useRef<any>(null)
-
+  // The Container reference
   const islandContainerRef = useRef<any>(null)
 
+  // Initialize position or get from storage
   const [position, setPosition] = useState<PositionTypes | null>(
     phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
   )
 
+  // Initialize the moved property
   const [moved, setMoved] = useState<boolean>(false)
-
+  // Initialize useDispatch
   const dispatch = useDispatch<Dispatch>()
 
-  function isAnswerVisible() {
-    return !outgoing && !accepted
-  }
-
-  function startDrag(event) {
+  // Handles the drag started event
+  function handleStartDrag(event) {
     controls.start(event)
   }
+  // Handles log press event
+  const handleLongPress = () => {}
 
-  function handleAnswer(event) {
-    answerIncomingCall()
+  // Handle Island click
+  const handleIslandClick = () => {
+    dispatch.island.toggleIsOpen()
   }
 
-  function handleHangup(event) {
-    event.stopPropagation()
-    hangupCurrentCall()
-  }
-
-  const onLongPress = () => {
-    console.log('long press trigger')
-  }
-
-  const islandClick = () => {
-    setIsOpen(!isOpen)
-  }
-
-  function innerXPosition(x) {
-    // Get horizontal constraints
-    const xConstraintPosition =
-      islandContainerRef.current.offsetWidth / 2 - islandRef.current.offsetWidth / 2
-
-    // Return the X position inside the constraints
-    return x > 0 && x > xConstraintPosition
-      ? xConstraintPosition
-      : x < 0 && x < -xConstraintPosition
-      ? -xConstraintPosition
-      : x
-  }
-
-  function innerYPosition(y) {
-    // Get vertical constraints
-    const yConstraintPosition =
-      islandContainerRef.current.offsetHeight / 2 - islandRef.current.offsetHeight / 2
-
-    // Return the Y position inside the constraints
-    return y > 0 && y > yConstraintPosition
-      ? yConstraintPosition
-      : y < 0 && y < -yConstraintPosition
-      ? -yConstraintPosition
-      : y
-  }
-
-  const onDragEnd = () => {
-    // Get initial translation values
-    let { x, y }: any = getTranslateValues(islandRef.current)
-
+  // Handles drag end event
+  const handleDragEnd = () => {
+    // Get initial transform values
+    let { x, y }: any = styleTransformValues(islandRef.current)
     // Round position
-    x = innerXPosition(Math.round(x))
-    y = innerYPosition(Math.round(y))
-
+    x = xPosition(Math.round(x), islandRef.current, islandContainerRef.current)
+    y = yPosition(Math.round(y), islandRef.current, islandContainerRef.current)
     // Save the new position to localstorage
     setPhoneIslandStorage({
       position: {
@@ -169,70 +86,24 @@ export const Island = ({ always }: IslandProps) => {
     })
   }
 
-  function resetMoved() {
-    setMoved(false)
-  }
-
-  function dragStarted() {
+  // Handles drag started event
+  function handleDragStarted() {
     setMoved(true)
   }
 
-  const longPressEvent = useLongPress(onLongPress, islandClick, moved, resetMoved, {
-    shouldPreventDefault: true,
-    delay: 250,
-  })
-
-  const variants = {
-    openIncoming: {
-      width: '418px',
-      height: '96px',
-      borderRadius: '20px',
+  // Initialize the longPressEvent object
+  const longPressEvent = useLongPress(
+    handleLongPress,
+    handleIslandClick,
+    moved,
+    () => setMoved(false),
+    {
+      shouldPreventDefault: true,
+      delay: 250,
     },
-    openAccepted: {
-      width: '348px',
-      height: '236px',
-      borderRadius: '20px',
-    },
-    closed: {
-      width: '168px',
-      height: '40px',
-      borderRadius: '99px',
-    },
-  }
+  )
 
-  const iconVariants = {
-    open: {
-      width: '48px',
-      height: '48px',
-      borderRadius: '12px',
-    },
-    closed: {
-      width: '24px',
-      height: '24px',
-      borderRadius: '6px',
-    },
-  }
-
-  const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
-
-  useEffect(() => {
-    function audioStreamListener() {
-      storeRemoteAudio?.addEventListener('play', () => {
-        if (navigator.userAgent.indexOf('Firefox') > -1) {
-          // @ts-ignore
-          setAudioStream(storeRemoteAudio.mozCaptureStream())
-        } else {
-          // @ts-ignore
-          setAudioStream(storeRemoteAudio.captureStream())
-        }
-      })
-    }
-    audioStreamListener()
-    return () => {
-      storeRemoteAudio?.removeEventListener('play', audioStreamListener)
-    }
-  }, [storeRemoteAudio])
-
+  const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -240,6 +111,7 @@ export const Island = ({ always }: IslandProps) => {
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
+      audioPlayer: audioPlayer.current,
       localAudio: localAudio.current,
       localVideo: localVideo.current,
       remoteVideo: remoteVideo.current,
@@ -247,222 +119,54 @@ export const Island = ({ always }: IslandProps) => {
     })
   }, [])
 
-  // Set timer negative differences
-  const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
-
-  useEffect(() => {
-    // Handle
-    if (startTime) {
-      const difference = new Date().getTime() / 1000 - Number(startTime)
-      if (difference < 0) {
-        setTimerNegativeDifference(difference)
-      }
-    }
-  }, [startTime])
-
-  const NumberToTimer: FC = () => (
-    <StyledTimer isOpen={isOpen}>
-      {accepted && startTime && timerNegativeDifference ? (
-        <Moment
-          date={Number(startTime) + timerNegativeDifference || new Date().getTime() / 1000}
-          interval={1000}
-          format='h:mm:ss'
-          trim={false}
-          unix
-          durationFromNow
-        />
-      ) : (
-        <>{number && number !== '<unknown>' && number}</>
-      )}
-    </StyledTimer>
-  )
-
-  interface DisplayNameProps {
-    displayName: string
-  }
-
-  const DisplayName: FC<DisplayNameProps> = ({ displayName }) => {
-    const [animateText, setAnimateText] = useState<boolean>(false)
-    const nameContainer = useRef<null | HTMLDivElement>(null)
-    const nameText = useRef<null | HTMLDivElement>(null)
-
-    useLayoutEffect(() => {
-      if (
-        nameContainer.current &&
-        nameText.current &&
-        nameText.current.clientWidth - nameContainer.current.clientWidth > 5
-      ) {
-        setAnimateText(true)
-      }
-    })
-
-    return (
-      <NameMotion ref={nameContainer} className='whitespace-nowrap  overflow-hidden'>
-        <div
-          className={`w-fit relative inline-block ${animateText && 'animate-animated-text'}`}
-          ref={nameText}
-        >
-          {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}
-        </div>
-      </NameMotion>
-    )
-  }
-
-  function openKeyboard() {
-    dispatch.island.updateIsland({
-      view: view !== 'keyboard' ? 'keyboard' : 'call',
-    })
-  }
-
   return (
     <div
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
-      {(incoming || outgoing || accepted || always) && (
-        <PhoneIslandMotion
-          className='font-sans absolute pointer-events-auto overflow-hidden'
-          incoming={incoming}
-          accepted={accepted}
-          outgoing={outgoing}
-          isOpen={isOpen}
+      {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
+        <motion.div
+          className='font-sans absolute pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
           animate={
             isOpen && (incoming || outgoing) && !accepted
-              ? 'openIncoming'
+              ? // The call is incoming or outgoing
+                activeAlertsCount > 0
+                ? variants.callView.expandedIncomingWithAlerts
+                : variants.callView.expandedIncoming
               : isOpen && accepted
-              ? 'openAccepted'
-              : 'closed'
+              ? // The call is accepted and the island is expanded
+                activeAlertsCount > 0
+                ? variants.callView.expandedAcceptedWithAlerts
+                : variants.callView.expandedAccepted
+              : activeAlertsCount > 0
+              ? variants.expandedWithAlerts
+              : variants.callView.collapsed
           }
-          variants={variants}
           drag
-          onPointerDown={startDrag}
-          onDragStart={dragStarted}
+          onPointerDown={handleStartDrag}
+          onDragStart={handleDragStarted}
           dragTransition={{
             power: 0,
           }}
           initial={{
-            x: position?.x || ISLAND_STARTING_POSITION.x,
-            y: position?.y || ISLAND_STARTING_POSITION.y,
-          }}
-          style={{
-            padding: isOpen ? '24px' : '8px 16px',
+            x: position?.x || startPosition.x,
+            y: position?.y || startPosition.y,
           }}
           dragControls={controls}
           dragConstraints={islandContainerRef}
-          onDragEnd={onDragEnd}
+          onDragEnd={handleDragEnd}
           ref={islandRef}
           {...longPressEvent}
         >
-          <StyledTopContent
-            isOpen={isOpen}
-            incoming={incoming}
-            accepted={accepted}
-            outgoing={outgoing}
-          >
-            <motion.div
-              className='relative'
-              animate={isOpen ? 'open' : 'closed'}
-              variants={iconVariants}
-            >
-              {(incoming || (outgoing && !accepted)) && (
-                // The background pulse effect
-                <motion.div
-                  style={{
-                    animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
-                    borderRadius: '4px',
-                  }}
-                  animate={isOpen ? 'open' : 'closed'}
-                  variants={iconVariants}
-                  className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
-                ></motion.div>
-              )}
-              <AvatarMotion
-                className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
-                style={{
-                  backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: 'contain',
-                }}
-                animate={isOpen ? 'open' : 'closed'}
-                variants={iconVariants}
-              />
-            </motion.div>
-            {isOpen && (
-              <DetailsMotion>
-                <DisplayName displayName={displayName} />
-                {/* The timer when expanded */}
-                <NumberToTimer />
-              </DetailsMotion>
-            )}
-            {/* The display name when collepsed */}
-            {!isOpen && !accepted && <DisplayName displayName={displayName} />}
-            {/* The timer when collapsed */}
-            {!isOpen && accepted && <NumberToTimer />}
-            {accepted && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <AudioBars audioStream={audioStream} size={isOpen ? 'large' : 'small'} />
-              </motion.div>
-            )}
-          </StyledTopContent>
-          {isOpen && (
-            <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {accepted && (
-                <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
-                  <Button
-                    variant='default'
-                    active={paused ? true : false}
-                    onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
-                  >
-                    {paused ? (
-                      <FontAwesomeIcon size='xl' icon={faPlay} />
-                    ) : (
-                      <FontAwesomeIcon size='xl' icon={faPauseRegular} />
-                    )}
-                  </Button>
-                  <Button
-                    variant='default'
-                    active={muted ? true : false}
-                    onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
-                  >
-                    {muted ? (
-                      <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
-                    ) : (
-                      <FontAwesomeIcon size='xl' icon={faMicrophoneRegular} />
-                    )}
-                  </Button>
-                  <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faRightLeftRegualar} />
-                  </Button>
-                  <Button variant='default' onClick={openKeyboard}>
-                    {view === 'keyboard' ? <PhoneKeyboardSolid /> : <PhoneKeyboardLight />}
-                  </Button>
-                </div>
-              )}
-              <motion.div
-                className={`grid ${
-                  isAnswerVisible()
-                    ? 'grid-cols-2'
-                    : accepted
-                    ? 'grid-cols-1 justify-items-center'
-                    : 'grid-cols-1 justify-items-end'
-                } gap-3.5`}
-                animate={{ opacity: 1 }}
-              >
-                <Button onClick={handleHangup} variant='red'>
-                  <FontAwesomeIcon className='rotate-135 w-6 h-6' icon={faPhone} />
-                </Button>
-                {isAnswerVisible() && (
-                  <Button onClick={handleAnswer} variant='green'>
-                    <FontAwesomeIcon className='w-6 h-6' icon={faPhone} />
-                  </Button>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </PhoneIslandMotion>
+          {/* The views logic */}
+          <AlertGuard>
+            <CallView />
+          </AlertGuard>
+        </motion.div>
       )}
       <div className='hidden'>
-        <audio autoPlay ref={localAudio}></audio>
+        <audio ref={audioPlayer}></audio>
+        <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
         <video muted={true} autoPlay ref={localVideo}></video>
         <video autoPlay ref={remoteVideo}></video>
@@ -472,3 +176,16 @@ export const Island = ({ always }: IslandProps) => {
 }
 
 Island.displayName = 'Island'
+
+interface IslandProps {
+  showAlways?: boolean
+}
+
+interface PositionTypes {
+  x: number
+  y: number
+}
+
+interface PhoneIslandStorageTypes {
+  position: PositionTypes
+}

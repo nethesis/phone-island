@@ -1,13 +1,25 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useEffect } from 'react'
+import React, { type ReactNode, FC, useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
-import { getDisplayName, type ConvType } from '../lib/phone/conversation'
-import { dispatchMainPresence, dispatchConversations } from '../events'
+import { getDisplayName } from '../lib/phone/conversation'
+import {
+  dispatchMainPresence,
+  dispatchConversations,
+  dispatchQueueUpdate,
+  dispatchQueueMemberUpdate,
+} from '../events'
 import { store } from '../store'
+import { withTimeout } from '../utils'
+import type {
+  ConversationsTypes,
+  ExtensionTypes,
+  QueuesUpdateTypes,
+  QueueUpdateMemberTypes,
+} from '../types'
 
 interface SocketProps {
   children: ReactNode
@@ -18,9 +30,17 @@ interface SocketProps {
 
 export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
+  const connectionCheckInterval = useRef<any>()
+  const socket = useRef<any>()
 
   useEffect(() => {
-    const handleCalls = (res: any, conv) => {
+    /**
+     * Manages event and data for the currentUser
+     *
+     * @param res The data from the socket
+     * @param conv The conversation data
+     */
+    const handleUserEvents = (res: any, conv: ConversationsTypes) => {
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         const status: string = res.status
@@ -67,45 +87,119 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       }
     }
 
-    const initWsConnection = () => {
-      const socket = io(hostName, {
+    /**
+     * Initialize socket connection and listeners
+     */
+    const initSocketConnection = () => {
+      socket.current = io(hostName, {
         upgrade: false,
         transports: ['websocket'],
         reconnection: true,
         reconnectionDelay: 2000,
       })
 
-      socket.on('connect', () => {
-        console.log('Socket on: ' + hostName + ' is connected !')
-        socket.emit('login', {
+      // Handle socket errors
+      socket.current.on('connect', () => {
+        console.debug(`Socket connected sid: ${socket.current.id}`)
+      })
+      socket.current.on('disconnect', (reason) => {
+        console.log(`Socket disconnect - reason: ${reason}`)
+      })
+      socket.current.io.on('error', (err) => {
+        console.debug(`Socket error: `, err)
+      })
+      socket.current.on('connect_error', (err) => {
+        console.debug(`Socket connect_error: `, err)
+      })
+      socket.current.io.on('reconnect', (attempt) => {
+        console.debug(`Socket reconnect attemp ${attempt} (sid: ${socket.current.id})`)
+      })
+      socket.current.io.on('reconnect_attempt', (attempt) => {
+        console.debug(`Socket reconnect_attempt ${attempt}`)
+      })
+      socket.current.io.on('reconnect_error', (err) => {
+        console.debug(`Socket reconnect_error: `, err)
+      })
+      socket.current.io.on('reconnect_failed', () => {
+        console.debug(`Socket reconnect_failed`)
+      })
+
+      // Checks if socket is reachable every 5 seconds
+      connectionCheckInterval.current = setInterval(() => {
+        const start = Date.now()
+        socket.current.volatile.emit(
+          'ping',
+          withTimeout(
+            () => {
+              // Remove socket_down alert
+              dispatch.alerts.removeAlert('socket_down')
+              // Calculate and log latency
+              const latency = Date.now() - start
+              console.debug(`Socket latency: ${latency}ms`)
+              console.debug('Socket is reachable!')
+            },
+            () => {
+              // Set socket_down alert
+              dispatch.alerts.setAlert('socket_down')
+              console.debug('Socket is unreachable!')
+            },
+            2000,
+          ),
+        )
+      }, 5000)
+
+      // Handle connection message
+      socket.current.on('connect', () => {
+        console.log('Socket on: ' + hostName + ' is connected!')
+        socket.current.emit('login', {
           accessKeyId: `${username}`,
           token: authToken,
           uaType: 'desktop',
         })
       })
 
-      socket.on('authe_ok', () => {
-        console.log('auth_ok')
+      // Handle authentication success message
+      socket.current.on('authe_ok', () => {
+        console.log('Socket authentication success!')
       })
 
-      socket.on('userMainPresenceUpdate', (res) => {
+      socket.current.on('userMainPresenceUpdate', (res) => {
         // Pass data to dispatchMainPresence
         dispatchMainPresence(res)
       })
 
-      socket.on('extenUpdate', (res) => {
-        // Call the dispatchConversations
+      socket.current.on('extenUpdate', (res: ExtensionTypes) => {
+        // Update extensions and conversations in users store
+        dispatch.users.updateExtension(res)
+        // Dispatch conversations event
         dispatchConversations(res)
         // Initialize conversation
-        const conv: ConvType = res.conversations[Object.keys(res.conversations)[0]] || {}
+        const conv: ConversationsTypes = res.conversations[Object.keys(res.conversations)[0]] || {}
         // Handle only the events of the user
         if (res.username === username) {
-          handleCalls(res, conv)
+          handleUserEvents(res, conv)
         }
+      })
+
+      socket.current.on('queueUpdate', (res: QueuesUpdateTypes) => {
+        // Dispatch queueUpdate event
+        dispatchQueueUpdate(res)
+      })
+
+      socket.current.on('queueMemberUpdate', (res: QueueUpdateMemberTypes) => {
+        // Dispatch queueMemberUpdate event
+        dispatchQueueMemberUpdate(res)
       })
     }
 
-    initWsConnection()
+    initSocketConnection()
+
+    // Stop the check socket interval
+    // Close the socket connection
+    return () => {
+      clearInterval(connectionCheckInterval.current)
+      socket.current.close()
+    }
   }, [])
 
   return <>{children}</>

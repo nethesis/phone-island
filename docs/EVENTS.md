@@ -116,9 +116,71 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-outgoing-call-started` Indicates that an outgoing call has started and dispatches the called name and number.
+
   ```json
   {
     "name": "Foo 1", // string - The called name
     "number": "211" // string - The called number
+  }
+  ```
+
+- `phone-island-queue-update` Indicates that the informations of a queue are changed.
+
+  ```json
+  {
+    "name": "QueueOne",
+    "queue": "401",
+    "members": {
+      "211": {
+        "type": "static",
+        "name": "foo 1",
+        "queue": "401",
+        "member": "211",
+        "paused": false,
+        "loggedIn": true,
+        "callsTakenCount": 0,
+        "lastCallTimestamp": 0,
+        "lastPausedInReason": "",
+        "lastPausedInTimestamp": 0,
+        "lastPausedOutTimestamp": 0
+      },
+      "214": {
+        "type": "static",
+        "name": "foo 4",
+        "queue": "401",
+        "member": "214",
+        "paused": false,
+        "loggedIn": true,
+        "callsTakenCount": 0,
+        "lastCallTimestamp": 0,
+        "lastPausedInReason": "",
+        "lastPausedInTimestamp": 0,
+        "lastPausedOutTimestamp": 0
+      }
+    },
+    "avgHoldTime": "0",
+    "avgTalkTime": "0",
+    "waitingCallers": {},
+    "completedCallsCount": "0",
+    "abandonedCallsCount": "0",
+    "serviceLevelTimePeriod": "60",
+    "serviceLevelPercentage": "0.0"
+  }
+  ```
+
+- `phone-island-queue-member-update` Indicates that the informations of a member of a queue are changed.
+  ```json
+  {
+    "type": "static",
+    "name": "foo 2",
+    "queue": "302",
+    "member": "212",
+    "paused": false,
+    "loggedIn": true,
+    "callsTakenCount": 0,
+    "lastCallTimestamp": 0,
+    "lastPausedInReason": "",
+    "lastPausedInTimestamp": 1678122068625,
+    "lastPausedOutTimestamp": 1678122291524
   }
   ```

@@ -37,6 +37,16 @@ const Template: Story<any> = (args) => {
     // Manage the conversations data
   })
 
+  useEventListener('phone-island-queue-update', (data) => {
+    // Manage the queue update data
+    console.warn(data)
+  })
+
+  useEventListener('phone-island-queue-member-update', (data) => {
+    // Manage the queue member update data
+    console.warn(data)
+  })
+
   return (
     <>
       <button
@@ -45,10 +55,15 @@ const Template: Story<any> = (args) => {
       >
         Call
       </button>
-      <PhoneIsland dataConfig={config} always={false} {...args} />
+      <PhoneIsland dataConfig={config} showAlways={false} {...args} />
     </>
   )
 }
 
 export const Default = Template.bind({})
 Default.args = {}
+
+// Useful to test component unmount
+export function Empty() {
+  return <>Use this to disconnection, unregister, reconnection and more.</>
+}
