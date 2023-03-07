@@ -40,7 +40,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
      * @param res The data from the socket
      * @param conv The conversation data
      */
-    const handleUserEvents = (res: any, conv: ConversationsTypes) => {
+    const handleCurrentUserEvents = (res: any, conv: ConversationsTypes) => {
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         const status: string = res.status
@@ -53,7 +53,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
                 incomingSocket: true,
-                username: `${extensions && extensions[conv.counterpartNum].username}` || '',
+                username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
               })
               break
             // @ts-ignore
@@ -67,7 +67,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   startTime: `${conv.startTime / 1000}`,
-                  username: `${extensions && extensions[conv.counterpartNum].username}` || '',
+                  username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
                 })
               }
               // Handle outgoing call
@@ -77,7 +77,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   outgoingSocket: true,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
-                  username: `${extensions && extensions[conv.counterpartNum].username}` || '',
+                  username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
                 })
               }
             default:
@@ -177,7 +177,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         const conv: ConversationsTypes = res.conversations[Object.keys(res.conversations)[0]] || {}
         // Handle only the events of the user
         if (res.username === username) {
-          handleUserEvents(res, conv)
+          handleCurrentUserEvents(res, conv)
         }
       })
 
