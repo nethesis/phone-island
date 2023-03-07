@@ -49,7 +49,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-## Dispated Events
+## Dispatched Events
 
 - `phone-island-main-presence` Indicates that a message has arrived and dispatches the userMainPresenceUpdate data from the WebSocket
 
