@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   mode: 'jit',
@@ -23,6 +25,9 @@ module.exports = {
       },
       animation: {
         'animated-text': '3s linear 0s infinite alternate move',
+      },
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
     },
   },
