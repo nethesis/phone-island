@@ -23,6 +23,7 @@ const defaultState = {
   startTime: '',
   muted: false,
   paused: false,
+  keyboardValue: '',
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -32,6 +33,12 @@ export const currentCall = createModel<RootModel>()({
       return {
         ...state,
         ...payload,
+      }
+    },
+    updateKeyboardValue: (state, payload: string) => {
+      return {
+        ...state,
+        keyboardValue: payload,
       }
     },
     reset: () => {
