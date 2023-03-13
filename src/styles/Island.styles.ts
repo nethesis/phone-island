@@ -52,7 +52,8 @@ export const StyledDetails = styled.div<StyledDetailsProps>`
 `
 
 export const StyledTimer = styled.div<StyledTimerProps>`
-  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
+  ${({ isOpen, size }) =>
+    size === 'large' ? (isOpen ? 'font-size: 1.25rem' : 'font-size: 1.2rem') : 'font-size: 1rem'};
   max-height: 24px;
   font-weight: 200;
   color: #fff;
@@ -76,11 +77,11 @@ export const StyledName = styled.div`
 `
 
 interface StyledCallViewProps {
-  isOpen: boolean
-  incoming: boolean
-  openedIslandPadding: number
-  accepted: boolean
-  outgoing: boolean
+  isOpen?: boolean
+  incoming?: boolean
+  openedIslandPadding?: number
+  accepted?: boolean
+  outgoing?: boolean
 }
 
 interface StyledTopContentProps {
@@ -91,11 +92,12 @@ interface StyledTopContentProps {
 }
 
 interface StyledDetailsProps {
-  numberExists: boolean
+  numberExists?: boolean
 }
 
 interface StyledTimerProps {
   isOpen: boolean
+  size: 'small' | 'large'
 }
 
 interface StyledNumberProps {

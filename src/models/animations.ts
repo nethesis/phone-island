@@ -49,6 +49,15 @@ const defaultState: AnimationsTypes = {
         padding: COLLAPSED_PADDING,
       },
     },
+    // The animation variant for keyboardView
+    keyboardView: {
+      expanded: {
+        width: '338px',
+        height: '462px',
+        borderRadius: BORDER_RADIUS_EXPANDED,
+        padding: EXPANDED_PADDING,
+      },
+    },
     // When theare aren't calls but there are alerts
     expandedWithAlerts: {
       width: '418px',

@@ -3,7 +3,6 @@
 
 import React, { type FC } from 'react'
 import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Island.styles'
-import { motion } from 'framer-motion/dist/framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,9 +15,6 @@ import { AudioBars } from '../'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import Avatar from './Avatar'
 import Actions from './Actions'
-
-const CallViewMotion = motion(StyledCallView)
-const DetailsMotion = motion(StyledDetails)
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -37,30 +33,28 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   return (
-    <CallViewMotion incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
+    <StyledCallView incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
       <StyledTopContent isOpen={isOpen} incoming={incoming} accepted={accepted} outgoing={outgoing}>
         <Avatar />
         {isOpen && (
-          <DetailsMotion>
+          <StyledDetails>
             <DisplayName />
             {/* The timer when expanded */}
             {accepted ? <Timer /> : <Number />}
-          </DetailsMotion>
+          </StyledDetails>
         )}
         {/* The display name when collepsed */}
         {!isOpen && !accepted && <DisplayName />}
         {/* The timer when collapsed */}
         {!isOpen && accepted && <Timer />}
         {accepted && remoteAudioStream && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <AudioBars audioStream={remoteAudioStream} size={isOpen ? 'large' : 'small'} />
-          </motion.div>
+          <AudioBars audioStream={remoteAudioStream} size={isOpen ? 'large' : 'small'} />
         )}
       </StyledTopContent>
       {isOpen && (
-        <motion.div className='grid gap-y-5' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className='grid gap-y-5'>
           {accepted && <Actions />}
-          <motion.div
+          <div
             className={`grid ${
               isAnswerVisible(outgoing, accepted)
                 ? 'grid-cols-2'
@@ -68,7 +62,6 @@ const CallView: FC<CallViewProps> = () => {
                 ? 'grid-cols-1 justify-items-center'
                 : 'grid-cols-1 justify-items-end'
             } gap-3.5`}
-            animate={{ opacity: 1 }}
           >
             {/* The button to hangup the currentCall */}
             <Button onClick={hangupCurrentCall} variant='red'>
@@ -80,10 +73,10 @@ const CallView: FC<CallViewProps> = () => {
                 <FontAwesomeIcon className='w-6 h-6' icon={faPhone} />
               </Button>
             )}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </CallViewMotion>
+    </StyledCallView>
   )
 }
 

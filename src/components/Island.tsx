@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, type FC } from 'react'
+import React, { useState, useRef, useEffect, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../store'
 import {
@@ -12,8 +12,11 @@ import {
 } from '../utils'
 import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import CallView from './CallView'
+import KeyboardView from './KeyboardView'
 import { xPosition, yPosition } from '../lib/island/island'
 import { AlertGuard } from './AlertGuard'
+import BackCall from './CallView/BackCall'
+import ViewsTransition from './ViewsTransition'
 
 /**
  * Provides the Island logic
@@ -25,7 +28,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from island store
-  const { isOpen, startPosition } = useSelector((state: RootState) => state.island)
+  const { isOpen, startPosition, view } = useSelector((state: RootState) => state.island)
   // Get activeAlertsCount from island store
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
   // Get variants from animations store
@@ -119,50 +122,89 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     })
   }, [])
 
+  // Handle and apply view switch logic
+  useEffect(() => {
+    if (incoming || outgoing) {
+      dispatch.island.setIslandView('call')
+    }
+  }, [incoming, outgoing])
+
+  const [currentView, setCurrentView] = useState<any>('')
+
+  useEffect(() => {
+    setTimeout(() => {
+      setCurrentView(view)
+    }, 200)
+  }, [view])
+
   return (
     <div
       ref={islandContainerRef}
       className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
     >
       {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
-        <motion.div
-          className='font-sans absolute pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
-          animate={
-            isOpen && (incoming || outgoing) && !accepted
-              ? // The call is incoming or outgoing
-                activeAlertsCount > 0
-                ? variants.callView.expandedIncomingWithAlerts
-                : variants.callView.expandedIncoming
-              : isOpen && accepted
-              ? // The call is accepted and the island is expanded
-                activeAlertsCount > 0
-                ? variants.callView.expandedAcceptedWithAlerts
-                : variants.callView.expandedAccepted
-              : activeAlertsCount > 0
-              ? variants.expandedWithAlerts
-              : variants.callView.collapsed
-          }
-          drag
-          onPointerDown={handleStartDrag}
-          onDragStart={handleDragStarted}
-          dragTransition={{
-            power: 0,
-          }}
-          initial={{
-            x: position?.x || startPosition.x,
-            y: position?.y || startPosition.y,
-          }}
-          dragControls={controls}
-          dragConstraints={islandContainerRef}
-          onDragEnd={handleDragEnd}
-          ref={islandRef}
-          {...longPressEvent}
-        >
-          {/* The views logic */}
-          <AlertGuard>
-            <CallView />
-          </AlertGuard>
-        </motion.div>
+        <>
+          <motion.div
+            drag
+            onPointerDown={handleStartDrag}
+            onDragStart={handleDragStarted}
+            dragTransition={{
+              power: 0,
+            }}
+            initial={{
+              x: position?.x || startPosition.x,
+              y: position?.y || startPosition.y,
+            }}
+            dragControls={controls}
+            dragConstraints={islandContainerRef}
+            onDragEnd={handleDragEnd}
+            ref={islandRef}
+            {...longPressEvent}
+            className='absolute'
+          >
+            {/* Add background call visibility logic */}
+            <BackCall isVisible={view === 'keyboard'} />
+            <motion.div
+              className='font-sans pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
+              animate={
+                view === 'call'
+                  ? isOpen && (incoming || outgoing) && !accepted
+                    ? // The call is incoming or outgoing
+                      activeAlertsCount > 0
+                      ? variants.callView.expandedIncomingWithAlerts
+                      : variants.callView.expandedIncoming
+                    : isOpen && accepted
+                    ? // The call is accepted and the island is expanded
+                      activeAlertsCount > 0
+                      ? variants.callView.expandedAcceptedWithAlerts
+                      : variants.callView.expandedAccepted
+                    : activeAlertsCount > 0
+                    ? variants.expandedWithAlerts
+                    : variants.callView.collapsed
+                  : view === 'keyboard'
+                  ? isOpen && activeAlertsCount > 0
+                    ? variants.keyboardView.expandedWithAlerts
+                    : variants.keyboardView.expanded
+                  : ''
+              }
+            >
+              {/* The views logic */}
+              <AlertGuard>
+                {currentView === 'call' ? (
+                  <ViewsTransition forView='call'>
+                    <CallView />
+                  </ViewsTransition>
+                ) : currentView === 'keyboard' ? (
+                  <ViewsTransition forView='keyboard'>
+                    <KeyboardView />
+                  </ViewsTransition>
+                ) : (
+                  <></>
+                )}
+              </AlertGuard>
+            </motion.div>
+          </motion.div>
+        </>
       )}
       <div className='hidden'>
         <audio ref={audioPlayer}></audio>
