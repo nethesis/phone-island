@@ -33,6 +33,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
   // Get variants from animations store
   const { variants } = useSelector((state: RootState) => state.animations)
+  // Get audioPlayerLoop value from player store
+  const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
 
   // Initialize Island drag controls
   const controls = useDragControls()
@@ -207,7 +209,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         </>
       )}
       <div className='hidden'>
-        <audio ref={audioPlayer}></audio>
+        <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
         <video muted={true} autoPlay ref={localVideo}></video>

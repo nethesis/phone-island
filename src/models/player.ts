@@ -7,6 +7,7 @@ import { updateAudioPlayerSource } from '../lib/phone/audio'
 
 const defaultState: PlayerTypes = {
   audioPlayer: null,
+  audioPlayerLoop: false,
   localAudio: null,
   remoteAudio: null,
   localVideo: null,
@@ -28,9 +29,8 @@ export const player = createModel<RootModel>()({
       }
       return state
     },
-    playAudioPlayer: (state, payload: PlayAudioTypes | undefined = { loop: false }) => {
+    playAudioPlayer: (state) => {
       if (state.audioPlayer) {
-        if (payload && payload.loop) state.audioPlayer.loop = true
         // Check if is playing
         if (!state.audioPlayer.paused) {
           state.audioPlayer.pause()
@@ -45,20 +45,24 @@ export const player = createModel<RootModel>()({
         state.audioPlayer.currentTime = 0
       }
     },
+    setAudioPlayerLoop: (state, payload: boolean) => ({
+      ...state,
+      audioPlayerLoop: payload,
+    }),
     reset: () => {
       return defaultState
     },
   },
   effects: (dispatch) => ({
-    updateAndPlayAudioPlayer: async (audioSource) => {
+    // This function is recommended for playing audio
+    updateAndPlayAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
+      dispatch.player.setAudioPlayerLoop(loop)
       // Update the audio source
       await updateAudioPlayerSource({
-        src: audioSource,
+        src: src,
       })
       // Play the outgoing ringtone when ready
-      dispatch.player.playAudioPlayer({
-        loop: true,
-      })
+      dispatch.player.playAudioPlayer()
     },
   }),
 })
@@ -69,12 +73,9 @@ interface UpdateAudioSourceTypes {
 
 interface PlayerTypes {
   audioPlayer: HTMLAudioElement | null
+  audioPlayerLoop?: boolean
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null
   localVideo: HTMLVideoElement | null
   remoteVideo: HTMLVideoElement | null
-}
-
-interface PlayAudioTypes {
-  loop?: boolean
 }
