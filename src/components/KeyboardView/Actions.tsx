@@ -14,7 +14,7 @@ const Actions: FC<ActionsTypes> = ({ keyCallback }) => {
       {keys.map((key) => (
         <Button
           key={key + 1}
-          onClick={() => keyCallback(key)}
+          onClick={() => keyCallback(key + 1)}
           variant='default'
           className={'text-2xl'}
         >

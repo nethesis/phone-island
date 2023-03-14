@@ -57,7 +57,7 @@ export const currentCall = createModel<RootModel>()({
         payload.incoming = true
 
         // Update local player and play the audio
-        dispatch.player.updateAndPlayAudioPlayer(incomingRingtone)
+        dispatch.player.updateAndPlayAudioPlayer({ src: incomingRingtone, loop: true })
       }
       // Update the current call values and set incoming
       dispatch.currentCall.updateCurrentCall({
@@ -74,7 +74,7 @@ export const currentCall = createModel<RootModel>()({
       ) {
         payload.outgoing = true
         // Update local player and play audio
-        dispatch.player.updateAndPlayAudioPlayer(outgoingRingtone)
+        dispatch.player.updateAndPlayAudioPlayer({ src: outgoingRingtone, loop: true })
         // Dispatch an event for outgoing call
         dispatchOutgoingCallStarted(payload.displayName, payload.number)
       }

@@ -3,6 +3,7 @@
 
 import Janus from './janus'
 import { store } from '../../store'
+import adapter from 'webrtc-adapter'
 
 export function register(sipExten: string, sipSecret: string) {
   const { sipcall }: { sipcall: any } = store.getState().webrtc
@@ -105,6 +106,13 @@ export function handleRemote(jsep) {
   }
 }
 
+/**
+ * Starts a call to a sipuri
+ *
+ * @param sipURI The sipuri to be called
+ * @param mediaObj The object containing the media constrains
+ * @returns
+ */
 export function call(sipURI: string, mediaObj: object) {
   return new Promise((resolve, reject) => {
     const { sipcall }: { sipcall: any } = store.getState().webrtc
@@ -200,5 +208,27 @@ export function unpauseWebRTC() {
   } catch (err) {
     console.error(err)
     return false
+  }
+}
+
+/**
+ * Send DTMF messages to Janus
+ */
+export function sendDTMF(key: string) {
+  // Initialize sipcall
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
+  if (adapter.browserDetails.browser === 'chrome') {
+    sipcall.dtmf({
+      dtmf: {
+        tones: key,
+      },
+    })
+  } else {
+    sipcall.send({
+      message: {
+        request: 'dtmf_info',
+        digit: key,
+      },
+    })
   }
 }
