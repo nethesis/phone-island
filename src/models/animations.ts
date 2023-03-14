@@ -57,6 +57,12 @@ const defaultState: AnimationsTypes = {
         borderRadius: BORDER_RADIUS_EXPANDED,
         padding: EXPANDED_PADDING,
       },
+      collapsed: {
+        width: '168px',
+        height: '40px',
+        borderRadius: BORDER_RADIUS_COLLAPSED,
+        padding: COLLAPSED_PADDING,
+      }
     },
     // When theare aren't calls but there are alerts
     expandedWithAlerts: {

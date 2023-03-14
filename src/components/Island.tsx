@@ -186,7 +186,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                   : view === 'keyboard'
                   ? isOpen && activeAlertsCount > 0
                     ? variants.keyboardView.expandedWithAlerts
-                    : variants.keyboardView.expanded
+                    : isOpen && activeAlertsCount === 0
+                    ? variants.keyboardView.expanded
+                    : !isOpen
+                    ? variants.keyboardView.collapsed
+                    : ''
                   : ''
               }
             >
