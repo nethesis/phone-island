@@ -12,7 +12,6 @@ import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
-import { isWebrtcTotallyFree } from '../lib/webrtc/extension'
 
 interface WebRTCProps {
   children: ReactNode
@@ -250,14 +249,12 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                     }
                   },
                   onlocalstream: function (stream) {
-                    const localVideoElement = store.getState().player.localVideo
-
+                    // const localVideoElement = store.getState().player.localVideo
                     if (Janus.debug) {
                       Janus.debug(' ::: Got a local stream :::')
                       Janus.debug(stream)
                     }
-
-                    if (Janus.attachMediaStream) Janus.attachMediaStream(localVideoElement, stream)
+                    // if (Janus.attachMediaStream) Janus.attachMediaStream(localVideoElement, stream)
                     /* IS VIDEO ENABLED ? */
                     // var videoTracks = stream.getVideoTracks()
                     /* */
