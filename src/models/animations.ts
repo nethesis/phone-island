@@ -49,8 +49,8 @@ const defaultState: AnimationsTypes = {
         padding: COLLAPSED_PADDING,
       },
     },
-    // The animation variant for keyboardView
-    keyboardView: {
+    // The animation variant for keypadView
+    keypadView: {
       expanded: {
         width: '338px',
         height: '462px',

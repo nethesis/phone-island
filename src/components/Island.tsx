@@ -12,7 +12,7 @@ import {
 } from '../utils'
 import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
 import CallView from './CallView'
-import KeyboardView from './KeyboardView'
+import KeyboardView from './KeypadView'
 import { xPosition, yPosition } from '../lib/island/island'
 import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
@@ -165,7 +165,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             className='absolute'
           >
             {/* Add background call visibility logic */}
-            <BackCall isVisible={view === 'keyboard'} />
+            <BackCall isVisible={view === 'keypad'} />
             <motion.div
               className='font-sans pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
               animate={
@@ -183,13 +183,13 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                     : activeAlertsCount > 0
                     ? variants.expandedWithAlerts
                     : variants.callView.collapsed
-                  : view === 'keyboard'
+                  : view === 'keypad'
                   ? isOpen && activeAlertsCount > 0
-                    ? variants.keyboardView.expandedWithAlerts
+                    ? variants.keypadView.expandedWithAlerts
                     : isOpen && activeAlertsCount === 0
-                    ? variants.keyboardView.expanded
+                    ? variants.keypadView.expanded
                     : !isOpen
-                    ? variants.keyboardView.collapsed
+                    ? variants.keypadView.collapsed
                     : ''
                   : ''
               }
@@ -200,8 +200,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                   <ViewsTransition forView='call'>
                     <CallView />
                   </ViewsTransition>
-                ) : currentView === 'keyboard' ? (
-                  <ViewsTransition forView='keyboard'>
+                ) : currentView === 'keypad' ? (
+                  <ViewsTransition forView='keypad'>
                     <KeyboardView />
                   </ViewsTransition>
                 ) : (

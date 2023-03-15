@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
-import { Button } from '../'
+import { Button } from '..'
 
 const keys = Array.from(Array(9).keys())
 

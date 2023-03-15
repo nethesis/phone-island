@@ -13,8 +13,8 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
 } from '../../lib/phone/call'
-import PhoneKeyboardLight from '../../static/icons/PhoneKeyboardLight'
-import PhoneKeyboardSolid from '../../static/icons/PhoneKeyboardSolid'
+import PhoneKeypadLight from '../../static/icons/PhoneKeypadLight'
+import PhoneKeypadSolid from '../../static/icons/PhoneKeypadSolid'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMicrophoneSlash, faPlay } from '@nethesis/nethesis-solid-svg-icons'
@@ -30,8 +30,8 @@ const Actions: FC = () => {
 
   const dispatch = useDispatch<Dispatch>()
 
-  function openKeyboard() {
-    dispatch.island.setIslandView(view !== 'keyboard' ? 'keyboard' : 'call')
+  function openKeypad() {
+    dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
   }
 
   return (
@@ -61,8 +61,8 @@ const Actions: FC = () => {
       <Button variant='default'>
         <FontAwesomeIcon size='xl' icon={faRightLeftRegualar} />
       </Button>
-      <Button variant='default' onClick={openKeyboard}>
-        {view === 'keyboard' ? <PhoneKeyboardSolid /> : <PhoneKeyboardLight />}
+      <Button variant='default' onClick={openKeypad}>
+        {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
       </Button>
     </div>
   )
