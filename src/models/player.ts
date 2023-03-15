@@ -84,7 +84,7 @@ interface UpdateAudioSourceTypes {
 
 interface PlayerTypes {
   audioPlayer: HTMLAudioElement | null
-  audioPlayerPlaying: boolean
+  audioPlayerPlaying?: boolean
   audioPlayerLoop?: boolean
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null

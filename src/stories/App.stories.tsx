@@ -22,7 +22,7 @@ const config = process.env.CONFIG_TOKEN
 
 const Template: Story<any> = (args) => {
   const handleCallStart = () => {
-    eventDispatch('phone-island-call-start', { number: 212 })
+    eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER })
   }
 
   useEventListener('phone-island-main-presence', (data) => {

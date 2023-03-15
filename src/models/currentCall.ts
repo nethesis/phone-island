@@ -48,10 +48,8 @@ export const currentCall = createModel<RootModel>()({
     checkIncomingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
       // Check call type and incoming confirmation source
       if (
-        (rootState.currentUser.default_device?.type === 'webrtc' &&
-          (rootState.currentCall.incomingWebRTC || payload.incomingWebRTC)) ||
-        (rootState.currentUser.default_device?.type === 'physical' &&
-          (rootState.currentCall.incomingSocket || payload.incomingSocket))
+        (rootState.currentUser.default_device?.type === 'webrtc' && payload.incomingWebRTC) ||
+        (rootState.currentUser.default_device?.type === 'physical' && payload.incomingSocket)
       ) {
         payload.incoming = true
 
@@ -81,13 +79,11 @@ export const currentCall = createModel<RootModel>()({
     checkAcceptedUpdate: (payload: CurrentCallTypes, rootState) => {
       // Check call type and accepted confirmation source
       if (
-        (rootState.currentUser.default_device?.type === 'webrtc' &&
-          (rootState.currentCall.acceptedWebRTC || payload.acceptedWebRTC)) ||
-        (rootState.currentUser.default_device?.type === 'physical' &&
-          (rootState.currentCall.acceptedSocket || payload.acceptedSocket))
+        (rootState.currentUser.default_device?.type === 'webrtc' && payload.acceptedWebRTC) ||
+        (rootState.currentUser.default_device?.type === 'physical' && payload.acceptedSocket)
       ) {
         payload.accepted = true
-        // TODO - add accepted event
+        // TODO - dispatch accepted event
       }
       // Update the current call values
       dispatch.currentCall.updateCurrentCall({
