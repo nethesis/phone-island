@@ -7,6 +7,7 @@ import { updateAudioPlayerSource } from '../lib/phone/audio'
 
 const defaultState: PlayerTypes = {
   audioPlayer: null,
+  audioPlayerPlaying: false,
   audioPlayerLoop: false,
   localAudio: null,
   remoteAudio: null,
@@ -36,13 +37,23 @@ export const player = createModel<RootModel>()({
           state.audioPlayer.pause()
           state.audioPlayer.currentTime = 0
         }
+        // Play the audio
         state.audioPlayer.play()
+        return {
+          ...state,
+          audioPlayerPlaying: true,
+        }
       }
     },
     stopAudioPlayer: (state) => {
       if (state.audioPlayer) {
+        // Pause audio
         state.audioPlayer.pause()
         state.audioPlayer.currentTime = 0
+        return {
+          ...state,
+          audioPlayerPlaying: false,
+        }
       }
     },
     setAudioPlayerLoop: (state, payload: boolean) => ({
@@ -73,6 +84,7 @@ interface UpdateAudioSourceTypes {
 
 interface PlayerTypes {
   audioPlayer: HTMLAudioElement | null
+  audioPlayerPlaying: boolean
   audioPlayerLoop?: boolean
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null

@@ -4,7 +4,6 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import incomingRingtone from '../static/incoming_ringtone'
-import outgoingRingtone from '../static/outgoing_ringtone'
 import { dispatchOutgoingCallStarted } from '../events/index'
 
 const defaultState = {
@@ -64,17 +63,13 @@ export const currentCall = createModel<RootModel>()({
         ...payload,
       })
     },
-    checkOutgoingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+    checkOutgoingUpdate: (payload: CurrentCallTypes, rootState) => {
       // Check call type and outgoing confirmation source
       if (
-        (rootState.currentUser.default_device?.type === 'webrtc' &&
-          (rootState.currentCall.outgoingWebRTC || payload.outgoingWebRTC)) ||
-        (rootState.currentUser.default_device?.type === 'physical' &&
-          (rootState.currentCall.outgoingSocket || payload.outgoingSocket))
+        (rootState.currentUser.default_device?.type === 'webrtc' && payload.outgoingWebRTC) ||
+        (rootState.currentUser.default_device?.type === 'physical' && payload.outgoingSocket)
       ) {
         payload.outgoing = true
-        // Update local player and play audio
-        dispatch.player.updateAndPlayAudioPlayer({ src: outgoingRingtone, loop: true })
         // Dispatch an event for outgoing call
         dispatchOutgoingCallStarted(payload.displayName, payload.number)
       }

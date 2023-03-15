@@ -8,10 +8,11 @@ import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
 import type { JanusTypes } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
-import { store } from '../store'
+import { store, type RootState } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
+import outgoingRingtone from '../static/outgoing_ringtone'
 
 interface WebRTCProps {
   children: ReactNode
@@ -128,7 +129,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
 
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
-
                       }
                       return
                     }
@@ -174,13 +174,47 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           if (Janus.log) Janus.log('janus registering')
                           break
 
+                        // This event arrive on outgoing call start
                         case 'calling':
                           // Number and display name are updated inside socket
-                          dispatch.currentCall.checkOutgoingUpdateAndPlay({
+                          dispatch.currentCall.checkOutgoingUpdate({
                             outgoingWebRTC: true,
                           })
 
-                          if (Janus.log) Janus.log('Waiting for the peer to answer...')
+                          // Update webrtc last activity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
+                          break
+
+                        // After an outgoing call start on 180 code, it means
+                        // ...that the local outgoing ringtone must be player
+                        case 'ringing':
+                          const { audioPlayerPlaying } = store.getState().player
+
+                          // Check if the local audio is already playing and start playing
+                          if (!audioPlayerPlaying) {
+                            // Update audio player and start playing
+                            dispatch.player.updateAndPlayAudioPlayer({
+                              src: outgoingRingtone,
+                              loop: true,
+                            })
+                          }
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
+                          break
+
+                        // After an outgoing call start on 183 code, it means
+                        // ...that the outgoing ringtone arrives from the stream
+                        // ...playing the local outgoing ringtone isn't needed
+                        case 'progress':
+                          if (Janus.log)
+                            Janus.log(
+                              "There's early media from " +
+                                result['username'] +
+                                ', wairing for the call!',
+                            )
+                          if (jsep !== null && jsep !== undefined) {
+                            handleRemote(jsep)
+                          }
                           // Update webrtc lastActivity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
@@ -194,21 +228,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           })
 
                           if (Janus.log) Janus.log('Incoming call from ' + result['username'] + '!')
-                          // Update webrtc lastActivity time
-                          dispatch.webrtc.updateLastActivity(new Date().getTime())
-                          break
-
-                        case 'progress':
-                          if (Janus.log)
-                            Janus.log(
-                              "There's early media from " +
-                                result['username'] +
-                                ', wairing for the call!',
-                            )
-                          if (jsep !== null && jsep !== undefined) {
-                            handleRemote(jsep)
-                          }
-                          // Update webrtc lastActivity time
+                          // Update the webrtc last activity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
 

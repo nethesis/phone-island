@@ -53,7 +53,12 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
                 incomingSocket: true,
-                username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
+                username:
+                  `${
+                    extensions &&
+                    extensions[conv.counterpartNum] &&
+                    extensions[conv.counterpartNum].username
+                  }` || '',
               })
               break
             // @ts-ignore
@@ -67,17 +72,27 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   startTime: `${conv.startTime / 1000}`,
-                  username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
+                  username:
+                    `${
+                      extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
+                    }` || '',
                 })
               }
               // Handle outgoing call
               else if (conv && !conv.connected && conv.direction === 'out') {
                 // Update the current outgoing conversation
-                dispatch.currentCall.checkOutgoingUpdateAndPlay({
+                dispatch.currentCall.checkOutgoingUpdate({
                   outgoingSocket: true,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
-                  username: `${extensions && extensions[conv.counterpartNum] && extensions[conv.counterpartNum].username}` || '',
+                  username:
+                    `${
+                      extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
+                    }` || '',
                 })
               }
             default:
