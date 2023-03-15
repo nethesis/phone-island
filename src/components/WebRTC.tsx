@@ -125,6 +125,10 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       } else {
                         // Reset status
                         sipcall && sipcall.hangup()
+
+                        // Stop the local audio element ringing
+                        store.dispatch.player.stopAudioPlayer()
+
                       }
                       return
                     }
@@ -214,9 +218,13 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             handleRemote(jsep)
                           }
                           // Set current call accepted
-                          dispatch.currentCall.checkAcceptedUpdateAndPlay({
+                          dispatch.currentCall.checkAcceptedUpdate({
                             acceptedWebRTC: true,
                           })
+
+                          // Stop the local audio element ringing
+                          store.dispatch.player.stopAudioPlayer()
+
                           // Update webrtc lastActivity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           break
@@ -238,6 +246,10 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.log(
                               'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
                             )
+
+                          // Stop the local audio element ringing
+                          store.dispatch.player.stopAudioPlayer()
+
                           // Update webrtc lastActivity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           // stopScreenSharingI()
