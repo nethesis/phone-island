@@ -83,7 +83,7 @@ export const currentCall = createModel<RootModel>()({
         ...payload,
       })
     },
-    checkAcceptedUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+    checkAcceptedUpdate: (payload: CurrentCallTypes, rootState) => {
       // Check call type and accepted confirmation source
       if (
         (rootState.currentUser.default_device?.type === 'webrtc' &&
