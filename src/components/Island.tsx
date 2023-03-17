@@ -142,7 +142,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   return (
     <div
       ref={islandContainerRef}
-      className='absolute min-w-full min-h-full left-0 top-0 overflow-hidden pointer-events-none flex items-center justify-center content-center phone-island-container z-1000'
+      className='pi-absolute pi-min-w-full pi-min-h-full pi-left-0 pi-top-0 pi-overflow-hidden pi-pointer-events-none pi-flex pi-items-center pi-justify-center pi-content-center phone-island-container pi-z-1000'
     >
       {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
         <>
@@ -162,12 +162,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             onDragEnd={handleDragEnd}
             ref={islandRef}
             {...longPressEvent}
-            className='absolute'
+            className='pi-absolute'
           >
             {/* Add background call visibility logic */}
             <BackCall isVisible={view === 'keypad'} />
             <motion.div
-              className='font-sans pointer-events-auto overflow-hidden bg-black text-xs cursor-pointer text-white'
+              className='pi-font-sans pi-pointer-events-auto pi-overflow-hidden pi-bg-black pi-text-xs pi-cursor-pointer pi-text-white'
               animate={
                 view === 'call'
                   ? isOpen && (incoming || outgoing) && !accepted
@@ -212,7 +212,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
           </motion.div>
         </>
       )}
-      <div className='hidden'>
+      <div className='pi-hidden'>
         <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>

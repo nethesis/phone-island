@@ -27,9 +27,9 @@ const DisplayName: FC<DisplayNameProps> = () => {
   })
 
   return (
-    <NameMotion ref={nameContainer} className='whitespace-nowrap  overflow-hidden'>
+    <NameMotion ref={nameContainer} className='pi-whitespace-nowrap  pi-overflow-hidden'>
       <div
-        className={`w-fit relative inline-block ${animateText && 'animate-animated-text'}`}
+        className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animate-animated-text'}`}
         ref={nameText}
       >
         {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}

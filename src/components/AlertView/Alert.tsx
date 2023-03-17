@@ -11,25 +11,25 @@ import {
 } from '@nethesis/nethesis-solid-svg-icons'
 
 const classes = {
-  base: 'border-4 rounded-2xl p-6 flex gap-5 items-center',
-  red: 'border-red-600',
-  orange: 'border-orange-600',
-  green: 'border-green-600',
+  base: 'pi-border-4 pi-rounded-2xl pi-p-6 pi-flex pi-gap-5 pi-items-center',
+  red: 'pi-border-red-600',
+  orange: 'pi-border-orange-600',
+  green: 'pi-border-green-600',
 }
 
 const Alert: FC<AlertProps> = ({ color, message }) => {
   return (
     <div className={classNames(classes.base, classes[color])}>
-      <div className='w-12 h-12 rounded-xl bg-gray-300 shrink-0 flex justify-center items-center'>
+      <div className='pi-w-12 pi-h-12 pi-rounded-xl pi-bg-gray-300 pi-shrink-0 pi-flex pi-justify-center pi-items-center'>
         {color === 'green' ? (
-          <FontAwesomeIcon icon={faCircleCheck} size='xl' className='text-black' />
+          <FontAwesomeIcon icon={faCircleCheck} size='xl' className='pi-text-black' />
         ) : color === 'orange' ? (
-          <FontAwesomeIcon icon={faTriangleExclamation} size='xl' className='text-black' />
+          <FontAwesomeIcon icon={faTriangleExclamation} size='xl' className='pi-text-black' />
         ) : (
-          <FontAwesomeIcon icon={faCircleXmark} size='xl' className='text-black' />
+          <FontAwesomeIcon icon={faCircleXmark} size='xl' className='pi-text-black' />
         )}
       </div>
-      <div className='text-base font-bold'>{message}</div>
+      <div className='pi-text-base pi-font-bold'>{message}</div>
     </div>
   )
 }

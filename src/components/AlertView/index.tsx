@@ -13,7 +13,7 @@ const AlertView: FC = () => {
   const alerts = useSelector((state: RootState) => state.alerts)
 
   return (
-    <div className='flex flex-col gap-4 mb-6 overflow-y-auto' style={{
+    <div className='pi-flex pi-flex-col pi-gap-4 pi-mb-6 pi-overflow-y-auto' style={{
       maxHeight: '6.5rem'
     }}>
       {/* Show alerts */}

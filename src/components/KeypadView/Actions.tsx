@@ -10,13 +10,13 @@ const bottomKeys = ['*', '0', '#']
 
 const Actions: FC<ActionsTypes> = ({ keyCallback }) => {
   return (
-    <div className='grid grid-cols-3 auto-cols-max gap-y-6 justify-items-center place-items-center justify-center px-3'>
+    <div className='pi-grid pi-grid-cols-3 pi-auto-cols-max pi-gap-y-6 pi-justify-items-center pi-place-items-center pi-justify-center pi-px-3'>
       {keys.map((key) => (
         <Button
           key={key + 1}
           onClick={() => keyCallback(key + 1)}
           variant='default'
-          className={'text-2xl'}
+          className={'pi-text-2xl'}
         >
           {key + 1}
         </Button>
@@ -26,7 +26,7 @@ const Actions: FC<ActionsTypes> = ({ keyCallback }) => {
           key={bottomKey + 1}
           onClick={() => keyCallback(bottomKey)}
           variant='default'
-          className={'text-2xl'}
+          className={'pi-text-2xl'}
         >
           {bottomKey}
         </Button>

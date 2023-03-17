@@ -51,8 +51,8 @@ const KeypadView: FC<KeypadViewTypes> = () => {
   return (
     <>
       {isOpen ? (
-        <div className='flex flex-col gap-7'>
-          <div className='flex gap-4'>
+        <div className='pi-flex pi-flex-col pi-gap-7'>
+          <div className='pi-flex pi-gap-4'>
             <Button variant='transparent' onClick={backToCallView}>
               <FontAwesomeIcon size='xl' icon={faArrowLeft} />
             </Button>
@@ -61,19 +61,19 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               readOnly
               value={keypadValue}
               autoFocus
-              className='w-full rounded-xl bg-black border border-gray-300 text-white font-sans font-light text-xl text-center px-2'
+              className='pi-w-full pi-rounded-xl pi-bg-black pi-border pi-border-gray-300 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2'
             />
           </div>
           <Actions keyCallback={sendKey} />
-          <div className='flex justify-center'>
+          <div className='pi-flex pi-justify-center'>
             {/* The button to hangup the currentCall */}
             <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='rotate-135 w-6 h-6' icon={faPhone} />
+              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
             </Button>
           </div>
         </div>
       ) : (
-        <div className='font-medium text-base'>Keypad</div>
+        <div className='pi-font-medium pi-text-base'>Keypad</div>
       )}
     </>
   )

@@ -35,7 +35,7 @@ const Actions: FC = () => {
   }
 
   return (
-    <div className='grid grid-cols-4 auto-cols-max gap-y-5 justify-items-center place-items-center justify-center'>
+    <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
       <Button
         variant='default'
         active={paused ? true : false}

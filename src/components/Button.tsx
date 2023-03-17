@@ -10,23 +10,29 @@ interface ButtonProps extends ComponentPropsWithRef<'button'> {
   active?: boolean
 }
 
-export const Button: FC<ButtonProps> = ({ children, variant, active = false, className = '', ...props }) => {
-  const styles = {
-    base: 'flex font-sans font-light content-center items-center justify-center tracking-wide duration-200 transform outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 text-white border border-transparent focus:ring-offset-black rounded-full text-sm leading-4 h-12 w-12 col-start-auto transition-color shrink-0',
+export const Button: FC<ButtonProps> = ({
+  children,
+  variant,
+  active = false,
+  className = '',
+  ...props
+}) => {
+  const classes = {
+    base: 'pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-text-white pi-border pi-border-transparent focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0',
     variant: {
-      red: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
-      green: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
-      default: 'hover:bg-gray-500 focus:ring-gray-500',
+      red: 'pi-bg-red-600 hover:pi-bg-red-700 focus:pi-ring-red-500',
+      green: 'pi-bg-green-600 hover:pi-bg-green-700 focus:pi-ring-green-500',
+      default: 'hover:pi-bg-gray-500 focus:pi-ring-gray-500',
       neutral:
-        'bg-transparent hover:bg-gray-500 hover:border-gray-500 border border-gray-700 focus:ring-0',
-      transparent: 'bg-transparent hover:bg-gray-500 focus:ring-gray-500',
+        'pi-bg-transparent hover:pi-bg-gray-500 hover:pi-border-gray-500 pi-border pi-border-gray-700 focus:pi-ring-0',
+      transparent: 'pi-bg-transparent hover:pi-bg-gray-500 focus:pi-ring-gray-500',
     },
     background: {
       base: {
-        default: 'bg-gray-700',
+        default: 'pi-bg-gray-700',
       },
       active: {
-        default: 'bg-gray-500',
+        default: 'pi-bg-gray-500',
       },
     },
   }
@@ -36,12 +42,12 @@ export const Button: FC<ButtonProps> = ({ children, variant, active = false, cla
       <button
         data-stop-propagation={true}
         className={classNames(
-          active && styles.background.active[variant]
-            ? styles.background.active[variant]
-            : styles.background.base[variant] && styles.background.base[variant],
-          styles.base,
-          variant && styles.variant[variant],
-          className && className
+          active && classes.background.active[variant]
+            ? classes.background.active[variant]
+            : classes.background.base[variant] && classes.background.base[variant],
+          classes.base,
+          variant && classes.variant[variant],
+          className && className,
         )}
         {...props}
       >

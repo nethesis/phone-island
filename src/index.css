@@ -9,11 +9,11 @@
 
 @layer base {
   button {
-    @apply cursor-pointer;
+    @apply pi-cursor-pointer;
   }
   .phone-island-container *,
   .phone-island-container ::before,
   .phone-island-container ::after {
-    @apply box-border border-0 border-solid border-gray-800;
+    @apply pi-box-border pi-border-0 pi-border-solid pi-border-gray-800;
   }
 }

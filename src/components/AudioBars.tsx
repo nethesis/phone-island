@@ -148,19 +148,19 @@ export const AudioBars = React.memo<AudioBarsProps>(({ audioStream, size = 'larg
 
   return (
     <div
-      className={`${size === 'small' ? 'h-6 w-6' : 'h-12 w-12'} flex justify-center items-center`}
+      className={`${size === 'small' ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'} pi-flex pi-justify-center pi-items-center`}
     >
       {/* The bars container  */}
       <div
         className={`${
-          size === 'small' ? 'h-6' : 'h-8'
-        } w-fit flex justify-center items-center gap-1 overflow-hidden`}
+          size === 'small' ? 'pi-h-6' : 'pi-h-8'
+        } pi-w-fit pi-flex pi-justify-center pi-items-center pi-gap-1 pi-overflow-hidden`}
         ref={containerElement}
       >
         {/* Every single bar */}
         {audioStream &&
           Object.keys(dataMap).map((key) => (
-            <span key={key} className='bg-emerald-600 w-0.5 rounded-sm'></span>
+            <span key={key} className='pi-bg-emerald-600 pi-w-0.5 pi-rounded-sm'></span>
           ))}
       </div>
     </div>

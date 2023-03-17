@@ -14,7 +14,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className='absolute w-full bg-gray-500 flex justify-between text-white -mt-10 -z-10 font-sans px-6 pt-3'
+          className='pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-white -pi-mt-10 -pi-z-10 pi-font-sans pi-px-6 pi-pt-3'
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}
           initial={{ y: 60 }}
           animate={{ y: 0 }}
@@ -26,7 +26,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
           }}
           transition={{ duration: 0.3 }}
         >
-          <div className='font-bold'>{displayName}</div>
+          <div className='pi-font-bold'>{displayName}</div>
           <div className=''>
             <Timer size='small' />
           </div>

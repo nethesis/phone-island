@@ -52,25 +52,25 @@ const CallView: FC<CallViewProps> = () => {
         )}
       </StyledTopContent>
       {isOpen && (
-        <div className='grid gap-y-5'>
+        <div className='pi-grid pi-gap-y-5'>
           {accepted && <Actions />}
           <div
-            className={`grid ${
+            className={`pi-grid ${
               isAnswerVisible(outgoing, accepted)
-                ? 'grid-cols-2'
+                ? 'pi-grid-cols-2'
                 : accepted
-                ? 'grid-cols-1 justify-items-center'
-                : 'grid-cols-1 justify-items-end'
-            } gap-3.5`}
+                ? 'pi-grid-cols-1 pi-justify-items-center'
+                : 'pi-grid-cols-1 pi-justify-items-end'
+            } pi-gap-3.5`}
           >
             {/* The button to hangup the currentCall */}
             <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='rotate-135 w-6 h-6' icon={faPhone} />
+              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
             </Button>
             {/* The button to answer the incoming call */}
             {isAnswerVisible(outgoing, accepted) && (
               <Button onClick={answerIncomingCall} variant='green'>
-                <FontAwesomeIcon className='w-6 h-6' icon={faPhone} />
+                <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
               </Button>
             )}
           </div>

@@ -38,4 +38,5 @@ module.exports = {
   corePlugins: {
     preflight: false,
   },
+  prefix: 'pi-',
 }

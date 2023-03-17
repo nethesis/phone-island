@@ -36,7 +36,7 @@ const Avatar: FC = () => {
   const { incoming, outgoing, accepted } = useSelector((state: RootState) => state.currentCall)
 
   return (
-    <motion.div className='relative' animate={isOpen ? 'open' : 'closed'} variants={iconVariants}>
+    <motion.div className='pi-relative' animate={isOpen ? 'open' : 'closed'} variants={iconVariants}>
       {(incoming || (outgoing && !accepted)) && (
         // The background pulse effect
         <motion.div
@@ -46,11 +46,11 @@ const Avatar: FC = () => {
           }}
           animate={isOpen ? 'open' : 'closed'}
           variants={iconVariants}
-          className={`rounded-xl bg-white absolute opacity-60 -z-10 top-0 left-0 animate-ping h-12 w-12`}
+          className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 -pi-z-10 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
         ></motion.div>
       )}
       <AvatarMotion
-        className='z-10 h-12 w-12 bg-gray-300 rounded-sm'
+        className='pi-z-10 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm'
         style={{
           backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
           backgroundRepeat: 'no-repeat',

@@ -51,7 +51,7 @@ const Template: Story<any> = (args) => {
     <>
       <button
         onClick={handleCallStart}
-        className='flex content-center items-center justify-center font-medium tracking-wide transition-colors duration-200 transform focus:outline-none focus:ring-2 focus:z-20 focus:ring-offset-2 disabled:opacity-75 bg-sky-600 text-white border border-transparent hover:bg-sky-700 focus:ring-sky-500 focus:ring-offset-white rounded-md px-3 py-2 text-sm leading-4'
+        className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'
       >
         Call
       </button>
