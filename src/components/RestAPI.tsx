@@ -11,7 +11,6 @@ import { getAllExtensions } from '../services/extensions'
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
   const { fetchReady } = useSelector((state: RootState) => state.fetchDefaults)
-  const { currentUserReady } = useSelector((state: RootState) => state.currentUser)
 
   useEffect(() => {
     if (username && authToken && hostName) {

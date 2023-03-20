@@ -61,7 +61,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               readOnly
               value={keypadValue}
               autoFocus
-              className='pi-w-full pi-rounded-xl pi-bg-black pi-border pi-border-gray-300 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2'
+              className='pi-w-full pi-rounded-2xl pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0'
             />
           </div>
           <Actions keyCallback={sendKey} />
