@@ -17,6 +17,7 @@ import { xPosition, yPosition } from '../lib/island/island'
 import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
 import ViewsTransition from './ViewsTransition'
+import { TransferListView } from './TransferView'
 
 /**
  * Provides the Island logic
@@ -165,7 +166,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             className='pi-absolute'
           >
             {/* Add background call visibility logic */}
-            <BackCall isVisible={view === 'keypad'} />
+            <BackCall
+              isVisible={
+                view === 'keypad' || view === 'transfer_list' || view === 'transfer_actions'
+              }
+            />
             <motion.div
               className='pi-font-sans pi-pointer-events-auto pi-overflow-hidden pi-bg-black pi-text-xs pi-cursor-pointer pi-text-white'
               animate={
@@ -191,6 +196,14 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                     : !isOpen
                     ? variants.keypadView.collapsed
                     : ''
+                  : view === 'transfer_list'
+                  ? isOpen && activeAlertsCount > 0
+                    ? variants.transferListView.expandedWithAlerts
+                    : isOpen && activeAlertsCount === 0
+                    ? variants.transferListView.expanded
+                    : !isOpen
+                    ? variants.transferListView.collapsed
+                    : ''
                   : ''
               }
             >
@@ -203,6 +216,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'keypad' ? (
                   <ViewsTransition forView='keypad'>
                     <KeyboardView />
+                  </ViewsTransition>
+                ) : currentView === 'transfer_list' ? (
+                  <ViewsTransition forView='transfer_list'>
+                    <TransferListView />
                   </ViewsTransition>
                 ) : (
                   <></>

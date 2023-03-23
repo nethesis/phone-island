@@ -29,7 +29,7 @@ const defaultState: AlertsTypes = {
     },
     socket_down: {
       active: false,
-      break: true,
+      break: false,
       message: 'Server connection is down.',
     },
     // Warning alerts
