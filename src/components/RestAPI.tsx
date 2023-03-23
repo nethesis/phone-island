@@ -6,7 +6,8 @@ import { getCurrentUserInfo } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
-import { getAllExtensions } from '../services/extensions'
+import { getAllExtensions } from '../services/astproxy'
+import { getAllUsersEndpoints } from '../services/user'
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -39,9 +40,18 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
         dispatch.users.updateExtensions(extensions)
       }
     }
+    // Get all users and endpoints info and set to store
+    async function initUsersEndpoints() {
+      const usersEndpoints = await getAllUsersEndpoints()
+      if (usersEndpoints) {
+        dispatch.users.updateEndpoints(usersEndpoints)
+      }
+    }
+    // Call the needed APIs on startup
     if (fetchReady) {
       initCurrentUser()
       initExtensions()
+      initUsersEndpoints()
     }
   }, [fetchReady])
 
@@ -50,7 +60,7 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
     if (username && fetchReady) {
       retrieveAvatars(username)
     }
-  }, [fetchReady])
+  }, [fetchReady, username])
 
   return <>{fetchReady && children}</>
 }

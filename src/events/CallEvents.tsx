@@ -3,11 +3,9 @@
 
 import React, { FC } from 'react'
 import { useEventListener, eventDispatch } from '../utils'
-import { callSipURI } from '../lib/phone/call'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
-
-const BASE_HOST_URL: string = '127.0.0.1'
+import { callNumber } from '../lib/phone/call'
 
 export const CallEvents: FC = () => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
@@ -15,8 +13,7 @@ export const CallEvents: FC = () => {
    * Event listner for phone-island-call-start event
    */
   useEventListener('phone-island-call-start', (data) => {
-    const callURI = 'sip:' + data.number + '@' + BASE_HOST_URL
-    callSipURI(callURI)
+    callNumber(data.number)
   })
   return sipcall && <></>
 }

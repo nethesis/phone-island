@@ -4,6 +4,7 @@
 export type * from './user'
 export type * from './avatars'
 export type * from './extensions'
+export type * from './endpoints'
 export type * from './conversation'
 export type * from './socket'
 export type * from './webrtc'

@@ -1,6 +1,8 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { store } from '../../store'
+
 /**
  * Retrieve the position on x axis
  */
@@ -27,4 +29,11 @@ export function yPosition(y: number, islandElement: HTMLElement, containerElemen
     : y < 0 && y < -yConstraintPosition
     ? -yConstraintPosition
     : y
+}
+
+/**
+ * Sets callview as the current view
+ */
+export function backToCallView() {
+  store.dispatch.island.setIslandView('call')
 }

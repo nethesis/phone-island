@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { AvatarsTypes } from './avatars'
+import { EndpointsTypes } from './endpoints'
 
 export interface UserCachesTypes {
   operatorsAvatars: AvatarsTypes
@@ -64,27 +65,7 @@ export interface UserInfoTypes {
   username?: string
   mainPresence?: string
   presence?: string
-  endpoints?: {
-    email: {
-      id?: string
-      description?: string
-    }[]
-    jabber: {
-      id: string
-      server: string
-    }[]
-    extension: UserExtensionTypes[]
-    cellphone: {
-      id?: string
-    }[]
-    voicemail: {
-      id?: string
-    }[]
-    mainextension: {
-      id: string
-      description: string
-    }[]
-  }
+  endpoints?: EndpointsTypes
   presenceOnBusy?: string
   presenceOnUnavailable?: string
   recallOnBusy?: string

@@ -34,6 +34,10 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
   }
 
+  function transfer() {
+    dispatch.island.setIslandView(view !== 'transfer_list' ? 'transfer_list' : 'call')
+  }
+
   return (
     <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
       <Button
@@ -58,7 +62,7 @@ const Actions: FC = () => {
           <FontAwesomeIcon size='xl' icon={faMicrophoneRegular} />
         )}
       </Button>
-      <Button variant='default'>
+      <Button onClick={transfer} variant='default'>
         <FontAwesomeIcon size='xl' icon={faRightLeftRegualar} />
       </Button>
       <Button variant='default' onClick={openKeypad}>

@@ -17,9 +17,19 @@ import { store } from '../../store'
 import { isWebRTC } from '../user/default_device'
 
 /**
- * Starts a call
+ * Starts a call to a number
+ * @param number The number string
+ */
+export function callNumber(number: string) {
+  const BASE_HOST_URL: string = '127.0.0.1'
+  const sipURI = `sip:${number}@${BASE_HOST_URL}`
+  callSipURI(sipURI)
+}
+
+/**
+ * Starts a call to a SIP URI
  *
- * @param sipURI The sip uri string
+ * @param sipURI The SIP URI string
  */
 export function callSipURI(sipURI: string) {
   getSupportedDevices(async () => {

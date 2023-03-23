@@ -12,6 +12,7 @@ import { hangupCurrentCall } from '../../lib/phone/call'
 import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
 import dtmfAudios from '../../static/dtmf'
 import { sendDTMF } from '../../lib/webrtc/messages'
+import { backToCallView } from '../../lib/island/island'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -20,10 +21,6 @@ const KeypadView: FC<KeypadViewTypes> = () => {
   const { keypadValue } = useSelector((state: RootState) => state.currentCall)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const keypadValueRef = useRef<typeof keypadValue>(keypadValue)
-
-  function backToCallView() {
-    dispatch.island.setIslandView('call')
-  }
 
   function playDtmfAudio(key: string) {
     if (key === '*') key = 'star'
@@ -57,11 +54,12 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               <FontAwesomeIcon size='xl' icon={faArrowLeft} />
             </Button>
             <input
+              data-stop-propagation={true}
               type='text'
               readOnly
               value={keypadValue}
               autoFocus
-              className='pi-w-full pi-rounded-2xl pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0'
+              className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0'
             />
           </div>
           <Actions keyCallback={sendKey} />
