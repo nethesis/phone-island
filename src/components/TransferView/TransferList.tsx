@@ -16,7 +16,8 @@ import {
   faArrowLeft,
 } from '@nethesis/nethesis-light-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
-import { callNumber } from '../../lib/phone/call'
+import { blindTransfer, attendedTransfer } from '../../lib/phone/call'
+import { motion } from 'framer-motion/dist/cjs'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -57,16 +58,17 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     return Object.values(endpoints).filter(
       (userEndpoints: UserEndpointsTypes) =>
         userEndpoints.endpoints.extension.find((extension) =>
-          extension.id.startsWith(searchValue.current),
+          extension.id.toLowerCase().startsWith(searchValue.current.toLowerCase()),
         ) ||
-        userEndpoints.username.startsWith(searchValue.current) ||
-        userEndpoints.name.startsWith(searchValue.current),
+        userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+        userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()),
     )
   }
 
   const relativeRef = useRef<HTMLDivElement>(null)
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
+  const [userForBlindTransfer, setUserForBlindTransfer] = useState<string>('')
 
   useEffect(() => {
     // Handle users list scrolling
@@ -80,7 +82,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       if (
         relativeRef.current &&
         relativeRef.current?.offsetHeight + relativeRef.current?.scrollTop >=
-          relativeRef.current?.scrollHeight
+          relativeRef.current?.scrollHeight - 10
       ) {
         // Improve showing users
         setShowingUsers((state) => state + USERS_NUMBER_PER_PAGE)
@@ -94,6 +96,11 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     }
     return () => relativeRef.current?.removeEventListener('scroll', handleScroll)
   }, [isOpen])
+
+  // Reset user tto blind transfer value when search value changes
+  useEffect(() => {
+    setUserForBlindTransfer('')
+  }, [searchValue.current])
 
   return (
     <>
@@ -139,7 +146,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   <Button variant='default'>
                     <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
                   </Button>
-                  <Button onClick={() => callNumber(searchValue.current)} variant='default'>
+                  <Button onClick={() => blindTransfer(searchValue.current)} variant='default'>
                     <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                   </Button>
                 </div>
@@ -165,14 +172,15 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     </div>
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
-                    <Button variant='default'>
+                    <Button
+                      active={userEndpoints.username === userForBlindTransfer}
+                      onClick={() => setUserForBlindTransfer(userEndpoints.username)}
+                      variant='default'
+                    >
                       <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
                     </Button>
-
-                    {/* ! TODO check how advisory transfer starts in the previous version */}
-
                     <Button
-                      onClick={() => callNumber(userEndpoints.endpoints.mainextension[0].id)}
+                      onClick={() => attendedTransfer(userEndpoints.endpoints.mainextension[0].id)}
                       variant='default'
                     >
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
@@ -188,9 +196,31 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           </div>
           <div className='pi-flex pi-justify-center'>
             {/* The button to hangup the currentCall */}
-            <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
-            </Button>
+            <motion.div animate={userForBlindTransfer ? { width: '360px' } : { width: '48px' }}>
+              <Button
+                onClick={() =>
+                  userForBlindTransfer
+                    ? blindTransfer(
+                        (endpoints &&
+                          endpoints[userForBlindTransfer].endpoints.mainextension[0].id) ||
+                          '',
+                      )
+                    : hangupCurrentCall()
+                }
+                variant='red'
+                className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-w-full'
+              >
+                <FontAwesomeIcon className='pi-rotate-135 pi-h-6 pi-w-6' icon={faPhone} />
+                {userForBlindTransfer && (
+                  <motion.div
+                    style={{ height: '17px' }}
+                    className='pi-whitespace-nowrap pi-overflow-hidden'
+                  >
+                    Hangup and transfer
+                  </motion.div>
+                )}
+              </Button>
+            </motion.div>
           </div>
         </div>
       ) : (

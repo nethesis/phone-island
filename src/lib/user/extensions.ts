@@ -34,3 +34,22 @@ export function getExtensionData(id: string): ExtensionTypes | null {
   const { extensions } = store.getState().users
   return extensions && extensions[id] ? extensions[id] : null
 }
+
+/**
+ * Checks if all the extensions are free
+ */
+export function userTotallyFree() {
+  const { extensions } = store.getState().users
+  const { endpoints } = store.getState().currentUser
+  // Check all extensions for conversations
+  if (extensions && endpoints) {
+    for (const extension of endpoints.extension) {
+      if (extensions[extension.id] && extensions[extension.id].conversations) {
+        if (Object.keys(extensions[extension.id].conversations).length > 0) {
+          return false
+        }
+      }
+    }
+  }
+  return true
+}
