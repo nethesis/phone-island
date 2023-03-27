@@ -20,6 +20,7 @@ import type {
   QueuesUpdateTypes,
   QueueUpdateMemberTypes,
 } from '../types'
+// import { userTotallyFree } from '../lib/user/extensions'
 
 interface SocketProps {
   children: ReactNode
@@ -41,15 +42,18 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
      * @param conv The conversation data
      */
     const handleCurrentUserEvents = (res: any, conv: ConversationsTypes) => {
+      // Initialize status
+      const status: string = res.status
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
-        const status: string = res.status
+        // With conversation
         if (status) {
           const { extensions } = store.getState().users
           switch (status) {
             case 'ringing':
               // The name and the number are updated here not in webrtc
               dispatch.currentCall.checkIncomingUpdateAndPlay({
+                conversationId: conv.id,
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,
                 incomingSocket: true,
@@ -64,11 +68,9 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
-                // Set current call accepted
+                // Current call accepted
                 dispatch.currentCall.updateCurrentCall({
-                  accepted: true,
-                  incoming: false,
-                  outgoing: false,
+                  conversationId: conv.id,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   startTime: `${conv.startTime / 1000}`,
@@ -99,6 +101,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               break
           }
         }
+      } else {
+        // Without conversation for physical phone management
+        // if (status) {
+        // if (res.status == 'online' && userTotallyFree()) {
+        //     // Stop ringing sounds
+        //     dispatch.player.stopAudioPlayer()
+        //     // Reset current call info
+        //     dispatch.currentCall.reset()
+        // }
+        // }
       }
     }
 

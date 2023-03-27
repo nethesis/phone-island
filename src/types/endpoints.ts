@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { UserExtensionTypes } from "./user"
+import { UserExtensionTypes } from './user'
 
 export interface UsersEndpointsTypes {
   [key: string]: UserEndpointsTypes
@@ -9,14 +9,14 @@ export interface UsersEndpointsTypes {
 
 export interface UserEndpointsTypes {
   status: string | undefined
-  "name": string
-  "username": string
-  "mainPresence": string
-  "presence": string
-  "endpoints": EndpointsTypes
-  "presenceOnBusy": string
-  "presenceOnUnavailable": string
-  "recallOnBusy": string
+  name: string
+  username: string
+  mainPresence: string
+  presence: string
+  endpoints: EndpointsTypes
+  presenceOnBusy: string
+  presenceOnUnavailable: string
+  recallOnBusy: string
 }
 
 export interface EndpointsTypes {

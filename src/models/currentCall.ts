@@ -23,6 +23,7 @@ const defaultState = {
   muted: false,
   paused: false,
   keypadValue: '',
+  conversationId: '',
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -109,4 +110,5 @@ export interface CurrentCallTypes {
   startTime?: string
   muted?: boolean
   paused?: boolean
+  conversationId?: string
 }

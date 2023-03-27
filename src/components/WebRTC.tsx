@@ -266,10 +266,6 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                             Janus.log(
                               'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
                             )
-
-                          // Stop the local audio element ringing
-                          store.dispatch.player.stopAudioPlayer()
-
                           // Update webrtc lastActivity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           // stopScreenSharingI()
