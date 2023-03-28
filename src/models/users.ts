@@ -3,7 +3,12 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import type { ExtensionsTypes, ExtensionTypes, UsersEndpointsTypes } from '../types'
+import type {
+  ExtensionsTypes,
+  ExtensionTypes,
+  UsersEndpointsTypes,
+  UserEndpointsTypes,
+} from '../types'
 
 const defaultState: UsersTypes = {
   extensions: null,
@@ -19,13 +24,6 @@ export const users = createModel<RootModel>()({
         extensions: payload,
       }
     },
-    updateEndpoints: (state, payload: any) => {
-      // !TODO adds the type for endpoints
-      return {
-        ...state,
-        endpoints: payload,
-      }
-    },
     updateExtension: (state, payload: ExtensionTypes) => {
       return {
         ...state,
@@ -33,6 +31,37 @@ export const users = createModel<RootModel>()({
           ...state.extensions,
           [payload.exten]: payload,
         },
+      }
+    },
+    updateEndpoints: (state, payload: UsersEndpointsTypes) => {
+      return {
+        ...state,
+        endpoints: payload,
+      }
+    },
+    updateEndpoint: (state, payload: UserEndpointsTypes) => {
+      return {
+        ...state,
+        endpoints: {
+          ...state.endpoints,
+          [payload.username]: payload,
+        },
+      }
+    },
+    updateEndpointMainPresence: (state, payload: { username: string; status: string }) => {
+      if (state.endpoints) {
+        const newEndpoint: UserEndpointsTypes = {
+          ...state.endpoints[payload.username],
+          mainPresence: payload.status,
+        }
+        // Return the state with the updated endpoint
+        return {
+          ...state,
+          endpoints: {
+            ...state.endpoints,
+            [payload.username]: newEndpoint,
+          },
+        }
       }
     },
   },

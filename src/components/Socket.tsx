@@ -19,6 +19,7 @@ import type {
   ExtensionTypes,
   QueuesUpdateTypes,
   QueueUpdateMemberTypes,
+  MainPresenceTypes,
 } from '../types'
 // import { userTotallyFree } from '../lib/user/extensions'
 
@@ -190,8 +191,10 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         console.log('Socket authentication success!')
       })
 
-      socket.current.on('userMainPresenceUpdate', (res) => {
-        // Pass data to dispatchMainPresence
+      socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
+        // Update endpoints store
+        store.dispatch.users.updateEndpointMainPresence({ ...res.mainPresence })
+        // Dispatch dispatchMainPresence Event
         dispatchMainPresence(res)
       })
 
