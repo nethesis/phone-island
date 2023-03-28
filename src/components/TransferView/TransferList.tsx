@@ -4,7 +4,7 @@
 import React, { type FC, useEffect, useState, FormEvent, useRef } from 'react'
 import { Button } from '../Button'
 import { RootState } from '../../store'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
 import { hangupCurrentCall } from '../../lib/phone/call'
@@ -18,6 +18,7 @@ import {
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { blindTransfer, attendedTransfer } from '../../lib/phone/call'
 import { motion } from 'framer-motion/dist/cjs'
+import { Dispatch } from '../../store'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -30,13 +31,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const [listUsers, setListUsers] = useState<UserEndpointsTypes[]>([])
   const searchValue = useRef<string>('')
   const [showCustomUser, setShowCustomUser] = useState<boolean>()
+  const relativeRef = useRef<HTMLDivElement>(null)
+  const [showGradient, setShowGradient] = useState<boolean>(false)
+  const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
+  const [userForBlindTransfer, setUserForBlindTransfer] = useState<string>('')
 
-  useEffect(() => {
-    if (endpoints && username) {
-      setListUsers(filterUsers(endpoints))
-      setLoaded(true)
-    }
-  }, [endpoints, username])
+  const dispatch = useDispatch<Dispatch>()
 
   function handleChange(event: FormEvent<HTMLInputElement>) {
     // Update search value
@@ -65,10 +65,31 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     )
   }
 
-  const relativeRef = useRef<HTMLDivElement>(null)
-  const [showGradient, setShowGradient] = useState<boolean>(false)
-  const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
-  const [userForBlindTransfer, setUserForBlindTransfer] = useState<string>('')
+  async function handleHangupAndTransfer() {
+    // Manage blind transfer and hangup
+    if (userForBlindTransfer) {
+      const transfered = await blindTransfer(
+        (endpoints && endpoints[userForBlindTransfer].endpoints.mainextension[0].id) || '',
+      )
+      if (transfered === true) {
+        dispatch.alerts.setAlert('call_transfered')
+        dispatch.island.setIslandView('call')
+        setTimeout(() => {
+          dispatch.alerts.removeAlert('call_transfered')
+        }, 4000)
+      }
+    } else {
+      hangupCurrentCall()
+    }
+  }
+
+  // Initialize users list
+  useEffect(() => {
+    if (endpoints && username) {
+      setListUsers(filterUsers(endpoints))
+      setLoaded(true)
+    }
+  }, [endpoints, username])
 
   useEffect(() => {
     // Handle users list scrolling
@@ -198,15 +219,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             {/* The button to hangup the currentCall */}
             <motion.div animate={userForBlindTransfer ? { width: '360px' } : { width: '48px' }}>
               <Button
-                onClick={() =>
-                  userForBlindTransfer
-                    ? blindTransfer(
-                        (endpoints &&
-                          endpoints[userForBlindTransfer].endpoints.mainextension[0].id) ||
-                          '',
-                      )
-                    : hangupCurrentCall()
-                }
+                onClick={handleHangupAndTransfer}
                 variant='red'
                 className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-w-full'
               >
