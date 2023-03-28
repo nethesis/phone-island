@@ -6,8 +6,6 @@ import { Button } from '../Button'
 import { RootState } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
-import { hangupCurrentCall } from '../../lib/phone/call'
 import { backToCallView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
 import {
@@ -17,8 +15,9 @@ import {
 } from '@nethesis/nethesis-light-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { blindTransfer, attendedTransfer } from '../../lib/phone/call'
-import { motion } from 'framer-motion/dist/cjs'
 import { Dispatch } from '../../store'
+import { getTimestampInSeconds } from '../../utils/genericFunctions/timestamp'
+import Hangup from '../Hangup'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -34,9 +33,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const relativeRef = useRef<HTMLDivElement>(null)
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
-  const [userForBlindTransfer, setUserForBlindTransfer] = useState<string>('')
-
+  const [transferDestination, setUserForBlindTransfer] = useState<string>('')
   const dispatch = useDispatch<Dispatch>()
+  const { displayName, number, startTime } = useSelector((state: RootState) => state.currentCall)
 
   function handleChange(event: FormEvent<HTMLInputElement>) {
     // Update search value
@@ -67,9 +66,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
 
   async function handleHangupAndTransfer() {
     // Manage blind transfer and hangup
-    if (userForBlindTransfer) {
+    if (transferDestination) {
       const transfered = await blindTransfer(
-        (endpoints && endpoints[userForBlindTransfer].endpoints.mainextension[0].id) || '',
+        (endpoints && endpoints[transferDestination].endpoints.mainextension[0].id) || '',
       )
       if (transfered === true) {
         dispatch.alerts.setAlert('call_transfered')
@@ -78,15 +77,24 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           dispatch.alerts.removeAlert('call_transfered')
         }, 4000)
       }
-    } else {
-      hangupCurrentCall()
     }
   }
 
-  async function handleAttendedTransfer(id: string) {
-    const transferring = await attendedTransfer(id)
+  async function handleAttendedTransfer(userEndpoints: UserEndpointsTypes) {
+    const transferring = await attendedTransfer(userEndpoints.endpoints.mainextension[0].id)
     if (transferring) {
       dispatch.island.setIslandView('call')
+      // Force current call to achieve the expected behavior
+      dispatch.currentCall.updateCurrentCall({
+        username: userEndpoints.username,
+        displayName: userEndpoints.name,
+        number: userEndpoints.endpoints.mainextension[0].id,
+        startTime: `${getTimestampInSeconds()}`,
+        transferring: true,
+        transferringName: displayName,
+        transferringNumber: number,
+        transferringStartTime: startTime,
+      })
     }
   }
 
@@ -106,7 +114,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           ? true
           : false,
       )
-      // Manage scroll arrived to bottom
+      // Manage scroll to bottom
       if (
         relativeRef.current &&
         relativeRef.current?.offsetHeight + relativeRef.current?.scrollTop >=
@@ -125,7 +133,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     return () => relativeRef.current?.removeEventListener('scroll', handleScroll)
   }, [isOpen])
 
-  // Reset user tto blind transfer value when search value changes
+  // Reset transfer destination value when search value changes
   useEffect(() => {
     setUserForBlindTransfer('')
   }, [searchValue.current])
@@ -201,16 +209,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
                     <Button
-                      active={userEndpoints.username === userForBlindTransfer}
+                      active={userEndpoints.username === transferDestination}
                       onClick={() => setUserForBlindTransfer(userEndpoints.username)}
                       variant='default'
                     >
                       <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
                     </Button>
-                    <Button
-                      onClick={() => handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)}
-                      variant='default'
-                    >
+                    <Button onClick={() => handleAttendedTransfer(userEndpoints)} variant='default'>
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
                   </div>
@@ -222,26 +227,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               </p>
             )}
           </div>
-          <div className='pi-flex pi-justify-center'>
-            {/* The button to hangup the currentCall */}
-            <motion.div animate={userForBlindTransfer ? { width: '360px' } : { width: '48px' }}>
-              <Button
-                onClick={handleHangupAndTransfer}
-                variant='red'
-                className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-w-full'
-              >
-                <FontAwesomeIcon className='pi-rotate-135 pi-h-6 pi-w-6' icon={faPhone} />
-                {userForBlindTransfer && (
-                  <motion.div
-                    style={{ height: '17px' }}
-                    className='pi-whitespace-nowrap pi-overflow-hidden'
-                  >
-                    Hangup and transfer
-                  </motion.div>
-                )}
-              </Button>
-            </motion.div>
-          </div>
+          <Hangup clickCallback={handleHangupAndTransfer} />
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>

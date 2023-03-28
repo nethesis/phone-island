@@ -7,11 +7,9 @@ import { RootState } from '../../store'
 import { StyledTimer } from '../../styles/Island.styles'
 import Moment from 'react-moment'
 
-const Timer: FC<TimerProps> = ({ size = 'large' }) => {
+const Timer: FC<TimerProps> = ({ size = 'large', startTime }) => {
   // Set timer negative differences
   const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
-  // Get multiple values from the currentCall store
-  const { startTime } = useSelector((state: RootState) => state.currentCall)
   // Get isOpen from the island store
   const { isOpen } = useSelector((state: RootState) => state.island)
 
@@ -46,4 +44,5 @@ export default Timer
 
 export interface TimerProps {
   size?: 'small' | 'large'
+  startTime: string
 }

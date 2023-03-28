@@ -24,6 +24,10 @@ const defaultState = {
   paused: false,
   keypadValue: '',
   conversationId: '',
+  transferring: false,
+  transferringName: '',
+  transferringNumber: '',
+  transferringStartTime: '',
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -39,6 +43,12 @@ export const currentCall = createModel<RootModel>()({
       return {
         ...state,
         keypadValue: payload,
+      }
+    },
+    updateTransferring: (state, payload: boolean) => {
+      return {
+        ...state,
+        transferring: payload,
       }
     },
     reset: () => {
@@ -111,4 +121,8 @@ export interface CurrentCallTypes {
   muted?: boolean
   paused?: boolean
   conversationId?: string
+  transferring?: boolean
+  transferringName?: string
+  transferringNumber?: string
+  transferringStartTime?: string
 }
