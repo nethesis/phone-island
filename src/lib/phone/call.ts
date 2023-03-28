@@ -15,7 +15,10 @@ import {
 } from '../webrtc/messages'
 import { store } from '../../store'
 import { isWebRTC } from '../user/default_device'
-import { blindTransfer as blindTransferRequest, attendedTransfer as attendedTransferRequest } from '../../services/astproxy'
+import {
+  blindTransfer as blindTransferRequest,
+  attendedTransfer as attendedTransferRequest,
+} from '../../services/astproxy'
 
 /**
  * Starts a call to a number
@@ -142,13 +145,13 @@ export function unpauseCurrentCall() {
 /**
  * Transfer the current call through a blind transfer
  */
-export function blindTransfer(number: string) {
+export async function blindTransfer(number: string) {
   // Retrieve current conversation info
   const { conversationId } = store.getState().currentCall
   const { default_device } = store.getState().currentUser
   // Transfer the call through blind transfer
   if (conversationId && default_device?.id && number) {
-    blindTransferRequest({
+    return await blindTransferRequest({
       convid: conversationId,
       to: number,
       endpointId: default_device.id,
@@ -159,13 +162,13 @@ export function blindTransfer(number: string) {
 /**
  * Transfer the current call through a attended transfer
  */
-export function attendedTransfer(number: string) {
+export async function attendedTransfer(number: string) {
   // Retrieve current conversation info
   const { conversationId } = store.getState().currentCall
   const { default_device } = store.getState().currentUser
   // Transfer the call through attended transfer
   if (conversationId && default_device?.id && number) {
-    attendedTransferRequest({
+    return await attendedTransferRequest({
       convid: conversationId,
       to: number,
       endpointId: default_device.id,
