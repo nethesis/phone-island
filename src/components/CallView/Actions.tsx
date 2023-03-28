@@ -35,7 +35,7 @@ const Actions: FC = () => {
   }
 
   function transfer() {
-    dispatch.island.setIslandView(view !== 'transfer_list' ? 'transfer_list' : 'call')
+    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
   }
 
   return (

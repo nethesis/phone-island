@@ -12,9 +12,10 @@ import Timer from './Timer'
 import Number from './Number'
 import DisplayName from './DisplayName'
 import { AudioBars } from '../'
-import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
+import { answerIncomingCall } from '../../lib/phone/call'
 import Avatar from './Avatar'
 import Actions from './Actions'
+import Hangup from '../Hangup'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -25,7 +26,9 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall store
-  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
+  const { incoming, accepted, outgoing, startTime } = useSelector(
+    (state: RootState) => state.currentCall,
+  )
   // Get isOpen and view from island store
   const { isOpen } = useSelector((state: RootState) => state.island)
 
@@ -40,13 +43,13 @@ const CallView: FC<CallViewProps> = () => {
           <StyledDetails>
             <DisplayName />
             {/* The timer when expanded */}
-            {accepted ? <Timer /> : <Number />}
+            {accepted ? <Timer startTime={startTime} /> : <Number />}
           </StyledDetails>
         )}
         {/* The display name when collepsed */}
         {!isOpen && !accepted && <DisplayName />}
         {/* The timer when collapsed */}
-        {!isOpen && accepted && <Timer />}
+        {!isOpen && accepted && <Timer startTime={startTime} />}
         {accepted && remoteAudioStream && (
           <AudioBars audioStream={remoteAudioStream} size={isOpen ? 'large' : 'small'} />
         )}
@@ -64,9 +67,13 @@ const CallView: FC<CallViewProps> = () => {
             } pi-gap-3.5`}
           >
             {/* The button to hangup the currentCall */}
-            <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
-            </Button>
+            {/* {incoming || outgoing ? (
+              <Button onClick={hangupCurrentCall} variant='red'>
+                <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
+              </Button>
+            ) : ( */}
+              <Hangup />
+            {/* )} */}
             {/* The button to answer the incoming call */}
             {isAnswerVisible(outgoing, accepted) && (
               <Button onClick={answerIncomingCall} variant='green'>

@@ -5,10 +5,11 @@ import React, { FC } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import Timer from './Timer'
-import { motion, AnimatePresence } from 'framer-motion/dist/cjs'
+import { motion, AnimatePresence } from 'framer-motion/dist/framer-motion'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
-  const { displayName } = useSelector((state: RootState) => state.currentCall)
+  const { displayName, transferring, transferringName, startTime, transferringStartTime } =
+    useSelector((state: RootState) => state.currentCall)
 
   return (
     <AnimatePresence>
@@ -26,9 +27,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
           }}
           transition={{ duration: 0.3 }}
         >
-          <div className='pi-font-bold'>{displayName}</div>
+          <div className='pi-font-bold'>{transferring ? transferringName : displayName}</div>
           <div className=''>
-            <Timer size='small' />
+            <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
           </div>
         </motion.div>
       )}

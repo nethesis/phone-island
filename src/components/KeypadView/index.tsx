@@ -8,11 +8,10 @@ import { Dispatch, RootState } from '../../store'
 import { faArrowLeft } from '@nethesis/nethesis-light-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Actions from './Actions'
-import { hangupCurrentCall } from '../../lib/phone/call'
-import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
 import dtmfAudios from '../../static/dtmf'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { backToCallView } from '../../lib/island/island'
+import Hangup from '../Hangup'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -65,9 +64,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
           <Actions keyCallback={sendKey} />
           <div className='pi-flex pi-justify-center'>
             {/* The button to hangup the currentCall */}
-            <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
-            </Button>
+            <Hangup />
           </div>
         </div>
       ) : (

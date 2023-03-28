@@ -31,7 +31,7 @@ export const island = createModel<RootModel>()({
   },
 })
 
-type IslandViewType = 'call' | 'keypad' | 'player' | 'transfer_list' | 'transfer_actions'
+type IslandViewType = 'call' | 'keypad' | 'player' | 'transfer'
 
 interface IslandTypes {
   view?: IslandViewType | null

@@ -27,7 +27,9 @@ import { TransferListView } from './TransferView'
  */
 export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
+  const { incoming, accepted, outgoing, transferring, transferringName, displayName } = useSelector(
+    (state: RootState) => state.currentCall,
+  )
   // Get isOpen from island store
   const { isOpen, startPosition, view } = useSelector((state: RootState) => state.island)
   // Get activeAlertsCount from island store
@@ -134,11 +136,19 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   const [currentView, setCurrentView] = useState<any>('')
 
+  // Handle island view change
   useEffect(() => {
     setTimeout(() => {
       setCurrentView(view)
     }, 200)
   }, [view])
+
+  // Set transferring to false when names are equal
+  useEffect(() => {
+    if (transferringName === displayName) {
+      dispatch.currentCall.updateTransferring(false)
+    }
+  }, [transferringName, displayName])
 
   return (
     <div
@@ -168,7 +178,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             {/* Add background call visibility logic */}
             <BackCall
               isVisible={
-                view === 'keypad' || view === 'transfer_list' || view === 'transfer_actions'
+                view === 'keypad' ||
+                view === 'transfer' ||
+                transferring
               }
             />
             <motion.div
@@ -196,7 +208,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                     : !isOpen
                     ? variants.keypadView.collapsed
                     : ''
-                  : view === 'transfer_list'
+                  : view === 'transfer'
                   ? isOpen && activeAlertsCount > 0
                     ? variants.transferListView.expandedWithAlerts
                     : isOpen && activeAlertsCount === 0
@@ -217,8 +229,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                   <ViewsTransition forView='keypad'>
                     <KeyboardView />
                   </ViewsTransition>
-                ) : currentView === 'transfer_list' ? (
-                  <ViewsTransition forView='transfer_list'>
+                ) : currentView === 'transfer' ? (
+                  <ViewsTransition forView='transfer'>
                     <TransferListView />
                   </ViewsTransition>
                 ) : (

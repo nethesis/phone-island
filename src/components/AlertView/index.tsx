@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import Alert from './Alert'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { motion } from 'framer-motion/dist/cjs'
+import { motion } from 'framer-motion/dist/framer-motion'
 
 /**
  * Shows user alerts
