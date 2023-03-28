@@ -83,6 +83,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     }
   }
 
+  async function handleAttendedTransfer(id: string) {
+    const transferring = await attendedTransfer(id)
+    if (transferring) {
+      dispatch.island.setIslandView('call')
+    }
+  }
+
   // Initialize users list
   useEffect(() => {
     if (endpoints && username) {
@@ -201,7 +208,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
                     </Button>
                     <Button
-                      onClick={() => attendedTransfer(userEndpoints.endpoints.mainextension[0].id)}
+                      onClick={() => handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)}
                       variant='default'
                     >
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
