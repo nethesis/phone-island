@@ -176,30 +176,32 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             className='pi-absolute'
           >
             {/* Add background call visibility logic */}
-            <BackCall
-              isVisible={
-                view === 'keypad' ||
-                view === 'transfer' ||
-                transferring
-              }
-            />
+            <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
             <motion.div
               className='pi-font-sans pi-pointer-events-auto pi-overflow-hidden pi-bg-black pi-text-xs pi-cursor-pointer pi-text-white'
               animate={
-                view === 'call'
+                view === 'call' && !transferring
                   ? isOpen && (incoming || outgoing) && !accepted
                     ? // The call is incoming or outgoing
                       activeAlertsCount > 0
-                      ? variants.callView.expandedIncomingWithAlerts
-                      : variants.callView.expandedIncoming
+                      ? variants.callView.expandedIncomingWithAlerts // There are alerts and is incoming or outgoing
+                      : variants.callView.expandedIncoming // There aren't alerts and is incoming or outgoing
                     : isOpen && accepted
                     ? // The call is accepted and the island is expanded
                       activeAlertsCount > 0
-                      ? variants.callView.expandedAcceptedWithAlerts
+                      ? // There is accepted and there are alerts
+                        variants.callView.expandedAcceptedWithAlerts
                       : variants.callView.expandedAccepted
                     : activeAlertsCount > 0
-                    ? variants.expandedWithAlerts
+                    ? // There are alerts
+                      variants.expandedWithAlerts
                     : variants.callView.collapsed
+                  : view === 'call' && transferring
+                  ? activeAlertsCount > 0 && isOpen
+                    ? variants.callView.transfer.expandedWithAlerts
+                    : activeAlertsCount === 0 && isOpen
+                    ? variants.callView.transfer.expanded
+                    : variants.callView.transfer.collapsed
                   : view === 'keypad'
                   ? isOpen && activeAlertsCount > 0
                     ? variants.keypadView.expandedWithAlerts

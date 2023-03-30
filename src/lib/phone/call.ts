@@ -19,6 +19,7 @@ import {
   blindTransfer as blindTransferRequest,
   attendedTransfer as attendedTransferRequest,
 } from '../../services/astproxy'
+import dtmfAudios from '../../static/dtmf'
 
 /**
  * Starts a call to a number
@@ -174,4 +175,13 @@ export async function attendedTransfer(number: string) {
       endpointId: default_device.id,
     })
   }
+}
+
+/**
+ * Play the dtmf audio files
+ */
+export function playDtmfAudio(key: string) {
+  if (key === '*') key = 'star'
+  if (key === '#') key = 'pound'
+  store.dispatch.player.updateAndPlayAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
 }

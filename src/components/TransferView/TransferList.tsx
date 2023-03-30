@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { backToCallView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
 import {
-  faArrowRightLongToLine,
+  faArrowUpToLine,
   faPhone as faPhoneLight,
   faArrowLeft,
 } from '@nethesis/nethesis-light-svg-icons'
@@ -180,7 +180,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 </div>
                 <div className='pi-flex pi-gap-3.5'>
                   <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
+                    <FontAwesomeIcon size='xl' icon={faArrowUpToLine} />
                   </Button>
                   <Button onClick={() => blindTransfer(searchValue.current)} variant='default'>
                     <FontAwesomeIcon size='xl' icon={faPhoneLight} />
@@ -213,7 +213,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       onClick={() => setTransferDestination(userEndpoints.username)}
                       variant='default'
                     >
-                      <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
+                      <FontAwesomeIcon size='xl' icon={faArrowUpToLine} />
                     </Button>
                     <Button onClick={() => handleAttendedTransfer(userEndpoints)} variant='default'>
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
@@ -227,7 +227,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               </p>
             )}
           </div>
-          <Hangup transferDestination={transferDestination} clickCallback={handleHangupAndTransfer} />
+          <Hangup
+            isDestination={transferDestination !== ''}
+            clickCallback={handleHangupAndTransfer}
+          />
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>

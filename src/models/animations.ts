@@ -9,7 +9,7 @@ const COLLAPSED_PADDING = '8px 16px'
 const BORDER_RADIUS_EXPANDED = '20px'
 const BORDER_RADIUS_COLLAPSED = '99px'
 
-const defaultState: AnimationsTypes = {
+const defaultState = {
   variants: {
     // The animation variants for CallView
     callView: {
@@ -48,9 +48,36 @@ const defaultState: AnimationsTypes = {
         borderRadius: BORDER_RADIUS_COLLAPSED,
         padding: COLLAPSED_PADDING,
       },
+      // When there is a transfer
+      transfer: {
+        expanded: {
+          width: '348px',
+          height: '304px',
+          borderRadius: BORDER_RADIUS_EXPANDED,
+          padding: EXPANDED_PADDING,
+        },
+        expandedWithAlerts: {
+          width: '348px',
+          height: '336px',
+          borderRadius: BORDER_RADIUS_EXPANDED,
+          padding: EXPANDED_PADDING,
+        },
+        collapsed: {
+          width: '348px',
+          height: '336px',
+          borderRadius: BORDER_RADIUS_COLLAPSED,
+          padding: COLLAPSED_PADDING,
+        },
+      },
     },
     // The animation variant for keypadView
     keypadView: {
+      expandedWithAlerts: {
+        width: '338px',
+        height: '590px',
+        borderRadius: BORDER_RADIUS_EXPANDED,
+        padding: EXPANDED_PADDING,
+      },
       expanded: {
         width: '338px',
         height: '462px',
@@ -66,6 +93,12 @@ const defaultState: AnimationsTypes = {
     },
     // The animation variant for transferListView
     transferListView: {
+      expandedWithAlerts: {
+        width: '408px',
+        height: '600px',
+        borderRadius: BORDER_RADIUS_EXPANDED,
+        padding: EXPANDED_PADDING,
+      },
       expanded: {
         width: '408px',
         height: '472px',
@@ -108,14 +141,4 @@ export const animations = createModel<RootModel>()({
   state: defaultState,
 })
 
-export interface AnimationsTypes {
-  variants: {
-    [key: string]: {
-      [key: string]:
-        | {
-            [key: string]: string
-          }
-        | string
-    }
-  }
-}
+export type AnimationsTypes = typeof defaultState

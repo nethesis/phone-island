@@ -8,9 +8,9 @@ import { Dispatch, RootState } from '../../store'
 import { faArrowLeft } from '@nethesis/nethesis-light-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Actions from './Actions'
-import dtmfAudios from '../../static/dtmf'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { backToCallView } from '../../lib/island/island'
+import { playDtmfAudio } from '../../lib/phone/call'
 import Hangup from '../Hangup'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
@@ -20,12 +20,6 @@ const KeypadView: FC<KeypadViewTypes> = () => {
   const { keypadValue } = useSelector((state: RootState) => state.currentCall)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const keypadValueRef = useRef<typeof keypadValue>(keypadValue)
-
-  function playDtmfAudio(key: string) {
-    if (key === '*') key = 'star'
-    if (key === '#') key = 'pound'
-    dispatch.player.updateAndPlayAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
-  }
 
   function sendKey(key: string) {
     dispatch.currentCall.updateKeypadValue(`${keypadValueRef.current}${key}`)
