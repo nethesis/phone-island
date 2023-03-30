@@ -33,7 +33,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const relativeRef = useRef<HTMLDivElement>(null)
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
-  const [transferDestination, setUserForBlindTransfer] = useState<string>('')
+  const [transferDestination, setTransferDestination] = useState<string>('')
   const dispatch = useDispatch<Dispatch>()
   const { displayName, number, startTime } = useSelector((state: RootState) => state.currentCall)
 
@@ -135,7 +135,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
 
   // Reset transfer destination value when search value changes
   useEffect(() => {
-    setUserForBlindTransfer('')
+    setTransferDestination('')
   }, [searchValue.current])
 
   return (
@@ -210,7 +210,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   <div className='pi-flex pi-gap-3.5'>
                     <Button
                       active={userEndpoints.username === transferDestination}
-                      onClick={() => setUserForBlindTransfer(userEndpoints.username)}
+                      onClick={() => setTransferDestination(userEndpoints.username)}
                       variant='default'
                     >
                       <FontAwesomeIcon size='xl' icon={faArrowRightLongToLine} />
@@ -227,7 +227,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               </p>
             )}
           </div>
-          <Hangup clickCallback={handleHangupAndTransfer} />
+          <Hangup transferDestination={transferDestination} clickCallback={handleHangupAndTransfer} />
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
