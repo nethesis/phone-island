@@ -28,6 +28,7 @@ const defaultState = {
   transferringName: '',
   transferringNumber: '',
   transferringStartTime: '',
+  transferSwitching: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -49,6 +50,12 @@ export const currentCall = createModel<RootModel>()({
       return {
         ...state,
         transferring: payload,
+      }
+    },
+    updateTransferSwitching: (state, payload: boolean) => {
+      return {
+        ...state,
+        transferSwitching: payload,
       }
     },
     reset: () => {
@@ -125,4 +132,5 @@ export interface CurrentCallTypes {
   transferringName?: string
   transferringNumber?: string
   transferringStartTime?: string
+  transferSwitching?: boolean
 }
