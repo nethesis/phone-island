@@ -27,7 +27,7 @@ import { TransferListView } from './TransferView'
  */
 export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing, transferring, transferringName, displayName } = useSelector(
+  const { incoming, accepted, outgoing, transferring, transferringName, displayName, transferSwitching } = useSelector(
     (state: RootState) => state.currentCall,
   )
   // Get isOpen from island store
@@ -145,7 +145,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   // Set transferring to false when names are equal
   useEffect(() => {
-    if (transferringName === displayName) {
+    if (transferringName === displayName && !transferSwitching) {
       dispatch.currentCall.updateTransferring(false)
     }
   }, [transferringName, displayName])
