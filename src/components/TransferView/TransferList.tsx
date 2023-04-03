@@ -152,13 +152,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               onChange={handleChange}
               value={searchValue.current}
               autoFocus
-              className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0'
+              className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
             />
           </div>
           <div
             style={{ height: '272px' }}
             ref={relativeRef}
-            className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden'
+            className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-custom-scrollbar'
           >
             {showGradient && (
               <div
