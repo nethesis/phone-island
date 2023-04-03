@@ -32,9 +32,10 @@ module.exports = {
     },
   },
   variants: {
+    scrollbar: ['rounded'],
     extend: {},
   },
-  plugins: [],
+  plugins: [require('tailwind-scrollbar')({ nocompatible: true })],
   corePlugins: {
     preflight: false,
   },
