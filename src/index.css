@@ -19,19 +19,19 @@
 }
 
 @layer utilities {
-  .phone-island-container *::-webkit-scrollbar {
+  .pi-custom-scrollbar::-webkit-scrollbar {
     @apply pi-w-2;
   }
 
-  .phone-island-container *::-webkit-scrollbar-track {
+  .pi-custom-scrollbar::-webkit-scrollbar-track {
     @apply pi-rounded-full;
   }
 
-  .phone-island-container *::-webkit-scrollbar-thumb {
+  .pi-custom-scrollbar::-webkit-scrollbar-thumb {
     @apply pi-bg-gray-500 pi-rounded-full pi-border-none pi-duration-200 pi-transform pi-transition-colors;
   }
 
-  .pi-custom-scrollbar *::-webkit-scrollbar-thumb:hover {
+  .pi-custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply pi-bg-gray-400;
   }
 }
