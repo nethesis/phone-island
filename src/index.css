@@ -4,6 +4,23 @@
 @import url('https://rsms.me/inter/inter.css');
 
 @tailwind base;
+
+.phone-island-container *::-webkit-scrollbar {
+  @apply pi-w-2;
+}
+
+.phone-island-container *::-webkit-scrollbar-track {
+  @apply pi-rounded-full;
+}
+
+.phone-island-container *::-webkit-scrollbar-thumb {
+  @apply pi-bg-gray-500 pi-rounded-full pi-border-none pi-duration-200 pi-transform pi-transition-colors;
+}
+
+.pi-custom-scrollbar *::-webkit-scrollbar-thumb:hover {
+  @apply pi-bg-gray-400;
+}
+
 @tailwind components;
 @tailwind utilities;
 
@@ -16,21 +33,5 @@
   .phone-island-container ::before,
   .phone-island-container ::after {
     @apply pi-box-border pi-border-0 pi-border-solid pi-border-gray-800;
-  }
-
-  .pi-custom-scrollbar::-webkit-scrollbar {
-    @apply pi-w-2;
-  }
-
-  .pi-custom-scrollbar::-webkit-scrollbar-track {
-    @apply pi-rounded-full;
-  }
-
-  .pi-custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply pi-bg-gray-500 pi-rounded-full pi-border-none pi-duration-200 pi-transform pi-transition-colors;
-  }
-
-  .pi-custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply pi-bg-gray-400;
   }
 }
