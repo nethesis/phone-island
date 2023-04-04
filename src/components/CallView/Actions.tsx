@@ -100,15 +100,11 @@ const Actions: FC = () => {
             <FontAwesomeIcon size='xl' icon={faArrowDownArrowUp} />
           )}
         </Button>
-        <Button variant='default' onClick={openKeypad}>
+        <Button active={view === 'keypad'} variant='default' onClick={openKeypad}>
           {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
         </Button>
       </div>
-      {
-        transferring && (
-          <TransferActions />
-        )
-      }
+      {transferring && <TransferActions />}
     </>
   )
 }

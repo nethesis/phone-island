@@ -60,6 +60,12 @@ export const player = createModel<RootModel>()({
       ...state,
       audioPlayerLoop: payload,
     }),
+    playRemoteAudio: (state) => {
+      state.remoteAudio?.play()
+    },
+    pauseRemoteAudio: (state) => {
+      state.remoteAudio?.pause()
+    },
     reset: () => {
       return defaultState
     },

@@ -124,6 +124,8 @@ export function pauseCurrentCall() {
       store.dispatch.currentCall.updateCurrentCall({
         paused: true,
       })
+      // Pause remote audio
+      store.dispatch.player.pauseRemoteAudio()
     }
   }
 }
@@ -139,6 +141,8 @@ export function unpauseCurrentCall() {
       store.dispatch.currentCall.updateCurrentCall({
         paused: false,
       })
+      // Play remote audio
+      store.dispatch.player.playRemoteAudio()
     }
   }
 }
