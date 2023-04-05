@@ -43,9 +43,24 @@ eventDispatch(`<event-name>`, `<data-object>`)
 ## Listened Events
 
 - `phone-island-call-start` The event to start a call
+
   ```json
   {
     "number": "200" // string - The number to be called
+  }
+  ```
+
+- `phone-island-recording-start` The event to show the recording view.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-start` The event to show the audio player view and play an audio file.
+
+  ```json
+  {
+    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==" // string - The audio file to be played in base64 format
   }
   ```
 
@@ -171,6 +186,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-queue-member-update` Indicates that the informations of a member of a queue are changed.
+
   ```json
   {
     "212": {
@@ -187,4 +203,17 @@ eventDispatch(`<event-name>`, `<data-object>`)
       "lastPausedOutTimestamp": 1678122291524
     }
   }
+  ```
+
+- `phone-island-recording` Indicates that the recorded audio was accepted by the user from the recording view.
+
+  ```json
+  {
+    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==" // string - The recorded audio in base64 format
+  }
+  ```
+
+- `phone-island-audio-player-closed` Indicates that the audio player view was closed by the user.
+  ```json
+  {}
   ```
