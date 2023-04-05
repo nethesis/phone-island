@@ -1,7 +1,19 @@
+// Copyright (C) 2022 Nethesis S.r.l.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import * as React from 'react'
 
 const PhoneKeyboardSolid = (props) => (
-  <svg aria-hidden="true" focusable="false" width={22} height={22} fill='none' xmlns='http://www.w3.org/2000/svg' {...props}>
+  <svg
+    className='pi-pointer-events-none'
+    aria-hidden='true'
+    focusable='false'
+    width={22}
+    height={22}
+    fill='none'
+    xmlns='http://www.w3.org/2000/svg'
+    {...props}
+  >
     <g clipPath='url(#a)' fill='#fff'>
       <circle cx={3} cy={3} r={3} />
       <circle cx={19} cy={3} r={3} />
