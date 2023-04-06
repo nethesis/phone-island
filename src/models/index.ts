@@ -11,7 +11,7 @@ import { island } from './island'
 import { avatars } from './avatars'
 import { users } from './users'
 import { alerts } from './alerts'
-import { animations } from './animations'
+import { motions } from './motions'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -23,7 +23,7 @@ export interface RootModel extends Models<RootModel> {
   avatars: typeof avatars
   users: typeof users
   alerts: typeof alerts
-  animations: typeof animations
+  motions: typeof motions
 }
 
 export const models: RootModel = {
@@ -36,5 +36,5 @@ export const models: RootModel = {
   avatars,
   users,
   alerts,
-  animations,
+  motions,
 }

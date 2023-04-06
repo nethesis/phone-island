@@ -241,6 +241,11 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           dispatch.currentCall.checkAcceptedUpdate({
                             acceptedWebRTC: true,
                           })
+                          // Set incoming value to false
+                          dispatch.currentCall.updateCurrentCall({
+                            incoming: false,
+                            incomingWebRTC: false
+                          })
 
                           // Stop the local audio element ringing
                           store.dispatch.player.stopAudioPlayer()

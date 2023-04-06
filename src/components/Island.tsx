@@ -4,112 +4,47 @@
 import React, { useState, useRef, useEffect, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../store'
-import {
-  useLongPress,
-  useIsomorphicLayoutEffect,
-  useLocalStorage,
-  styleTransformValues,
-} from '../utils'
-import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
+import { useIsomorphicLayoutEffect } from '../utils'
 import CallView from './CallView'
 import KeyboardView from './KeypadView'
-import { xPosition, yPosition } from '../lib/island/island'
 import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
 import ViewsTransition from './ViewsTransition'
 import { TransferListView } from './TransferView'
+import IslandMotions from './IslandMotion'
+import IslandDrag from './IslandDrag'
 
 /**
  * Provides the Island logic
  *
  * @param showAlways Sets the Island ever visible
- *
  */
 export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing, transferring, transferringName, displayName, transferSwitching } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const {
+    incoming,
+    accepted,
+    outgoing,
+    transferring,
+    transferringName,
+    displayName,
+    transferSwitching,
+  } = useSelector((state: RootState) => state.currentCall)
+
   // Get isOpen from island store
-  const { isOpen, startPosition, view } = useSelector((state: RootState) => state.island)
+  const { view } = useSelector((state: RootState) => state.island)
+
   // Get activeAlertsCount from island store
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
-  // Get variants from animations store
-  const { variants } = useSelector((state: RootState) => state.animations)
+
   // Get audioPlayerLoop value from player store
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
 
-  // Initialize Island drag controls
-  const controls = useDragControls()
-
-  // Initialize Island storage
-  const [phoneIslandStorage, setPhoneIslandStorage] =
-    useLocalStorage<PhoneIslandStorageTypes | null>('phone-island', null)
-
-  // The Island reference
-  const islandRef = useRef<any>(null)
   // The Container reference
   const islandContainerRef = useRef<any>(null)
 
-  // Initialize position or get from storage
-  const [position, setPosition] = useState<PositionTypes | null>(
-    phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
-  )
-
-  // Initialize the moved property
-  const [moved, setMoved] = useState<boolean>(false)
   // Initialize useDispatch
   const dispatch = useDispatch<Dispatch>()
-
-  // Handles the drag started event
-  function handleStartDrag(event) {
-    controls.start(event)
-  }
-  // Handles log press event
-  const handleLongPress = () => {}
-
-  // Handle Island click
-  const handleIslandClick = () => {
-    dispatch.island.toggleIsOpen()
-  }
-
-  // Handles drag end event
-  const handleDragEnd = () => {
-    // Get initial transform values
-    let { x, y }: any = styleTransformValues(islandRef.current)
-    // Round position
-    x = xPosition(Math.round(x), islandRef.current, islandContainerRef.current)
-    y = yPosition(Math.round(y), islandRef.current, islandContainerRef.current)
-    // Save the new position to localstorage
-    setPhoneIslandStorage({
-      position: {
-        x,
-        y,
-      },
-    })
-    // Set position to variable
-    setPosition({
-      x,
-      y,
-    })
-  }
-
-  // Handles drag started event
-  function handleDragStarted() {
-    setMoved(true)
-  }
-
-  // Initialize the longPressEvent object
-  const longPressEvent = useLongPress(
-    handleLongPress,
-    handleIslandClick,
-    moved,
-    () => setMoved(false),
-    {
-      shouldPreventDefault: true,
-      delay: 250,
-    },
-  )
 
   const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
@@ -157,70 +92,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     >
       {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
         <>
-          <motion.div
-            drag
-            onPointerDown={handleStartDrag}
-            onDragStart={handleDragStarted}
-            dragTransition={{
-              power: 0,
-            }}
-            initial={{
-              x: position?.x || startPosition.x,
-              y: position?.y || startPosition.y,
-            }}
-            dragControls={controls}
-            dragConstraints={islandContainerRef}
-            onDragEnd={handleDragEnd}
-            ref={islandRef}
-            {...longPressEvent}
-            className='pi-absolute'
-          >
+          <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
             <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
-            <motion.div
-              className='pi-font-sans pi-pointer-events-auto pi-overflow-hidden pi-bg-black pi-text-xs pi-cursor-pointer pi-text-white'
-              animate={
-                view === 'call' && !transferring
-                  ? isOpen && (incoming || outgoing) && !accepted
-                    ? // The call is incoming or outgoing
-                      activeAlertsCount > 0
-                      ? variants.callView.expandedIncomingWithAlerts // There are alerts and is incoming or outgoing
-                      : variants.callView.expandedIncoming // There aren't alerts and is incoming or outgoing
-                    : isOpen && accepted
-                    ? // The call is accepted and the island is expanded
-                      activeAlertsCount > 0
-                      ? // There is accepted and there are alerts
-                        variants.callView.expandedAcceptedWithAlerts
-                      : variants.callView.expandedAccepted
-                    : activeAlertsCount > 0
-                    ? // There are alerts
-                      variants.expandedWithAlerts
-                    : variants.callView.collapsed
-                  : view === 'call' && transferring
-                  ? activeAlertsCount > 0 && isOpen
-                    ? variants.callView.transfer.expandedWithAlerts
-                    : activeAlertsCount === 0 && isOpen
-                    ? variants.callView.transfer.expanded
-                    : variants.callView.transfer.collapsed
-                  : view === 'keypad'
-                  ? isOpen && activeAlertsCount > 0
-                    ? variants.keypadView.expandedWithAlerts
-                    : isOpen && activeAlertsCount === 0
-                    ? variants.keypadView.expanded
-                    : !isOpen
-                    ? variants.keypadView.collapsed
-                    : ''
-                  : view === 'transfer'
-                  ? isOpen && activeAlertsCount > 0
-                    ? variants.transferListView.expandedWithAlerts
-                    : isOpen && activeAlertsCount === 0
-                    ? variants.transferListView.expanded
-                    : !isOpen
-                    ? variants.transferListView.collapsed
-                    : ''
-                  : ''
-              }
-            >
+            <IslandMotions>
               {/* The views logic */}
               <AlertGuard>
                 {currentView === 'call' ? (
@@ -239,8 +114,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                   <></>
                 )}
               </AlertGuard>
-            </motion.div>
-          </motion.div>
+            </IslandMotions>
+          </IslandDrag>
         </>
       )}
       <div className='pi-hidden'>
@@ -258,13 +133,4 @@ Island.displayName = 'Island'
 
 interface IslandProps {
   showAlways?: boolean
-}
-
-interface PositionTypes {
-  x: number
-  y: number
-}
-
-interface PhoneIslandStorageTypes {
-  position: PositionTypes
 }
