@@ -60,7 +60,9 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {
-    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==" // string - The audio file to be played in base64 format
+    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==", // string - The audio file to be played in base64 format, ignored if type is present
+    "type": "call_recording" || "announcement", // (optional) The type of the audio to be played
+    "id" : "1" // string - (optional) The id of the call_recording or announcement, required if type is present 
   }
   ```
 
@@ -209,7 +211,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {
-    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==" // string - The recorded audio in base64 format
+    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==", // string - (optional) The recorded audio in base64 format
   }
   ```
 
