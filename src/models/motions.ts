@@ -61,7 +61,7 @@ const defaultState = {
     // Alerts Section
     alerts: {
       width: 418,
-      height: 104,
+      height: 88,
     },
   },
 }

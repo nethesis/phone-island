@@ -88,7 +88,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   return (
     <div
       ref={islandContainerRef}
-      className='pi-absolute pi-min-w-full pi-min-h-full pi-left-0 pi-top-0 pi-overflow-hidden pi-pointer-events-none pi-flex pi-items-center pi-justify-center pi-content-center phone-island-container pi-z-1000'
+      className='pi-absolute pi-min-w-full pi-min-h-full pi-left-0 pi-top-0 pi-overflow-hidden pi-pointer-events-none pi-flex pi-items-center pi-justify-center pi-content-center pi-phone-island-container pi-z-1000'
     >
       {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
         <>

@@ -11,19 +11,21 @@ import { motion } from 'framer-motion/dist/framer-motion'
  * Shows user alerts
  */
 const AlertView: FC = () => {
-  const alerts = useSelector((state: RootState) => state.alerts)
+  const { data, status } = useSelector((state: RootState) => state.alerts)
 
   return (
     <motion.div
-      className='pi-flex pi-flex-col pi-gap-4 pi-mb-6 pi-overflow-y-auto'
+      className={`pi-flex pi-flex-col pi-gap-4 pi-mb-6 pi-overflow-y-auto pi-custom-scrollbar ${
+        status.activeAlertsCount > 1 && 'pi-pr-2'
+      }`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       style={{
-        maxHeight: '6.5rem',
+        maxHeight: '5.5rem',
       }}
     >
       {/* Show alerts */}
-      {Object.values(alerts.data).map(
+      {Object.values(data).map(
         (alert, index) =>
           alert.active && (
             <Alert

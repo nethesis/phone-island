@@ -87,9 +87,17 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         break
     }
 
+    const isAlert: boolean = activeAlertsCount > 0
+
     return {
-      width: `${size.width}px`,
-      height: `${activeAlertsCount > 0 ? size.height + variants.alerts.height : size.height}px`,
+      width: `${size.width === 0 && isAlert ? variants.alerts.width : size.width}px`,
+      height: `${
+        isAlert && isOpen
+          ? size.height +
+            variants.alerts.height +
+            (size.height === 0 ? padding_expanded * 2 : padding_expanded)
+          : size.height
+      }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
       padding: isOpen
         ? `${padding_expanded}px`
