@@ -11,7 +11,7 @@ import {
 } from '@nethesis/nethesis-solid-svg-icons'
 
 const classes = {
-  base: 'pi-border-4 pi-rounded-2xl pi-p-6 pi-flex pi-gap-5 pi-items-center',
+  base: 'pi-border-4 pi-rounded-2xl pi-p-4 pi-flex pi-gap-5 pi-items-center',
   red: 'pi-border-red-600',
   orange: 'pi-border-orange-600',
   green: 'pi-border-green-600',
@@ -29,7 +29,7 @@ const Alert: FC<AlertProps> = ({ color, message }) => {
           <FontAwesomeIcon icon={faCircleXmark} size='xl' className='pi-text-black' />
         )}
       </div>
-      <div className='pi-text-base pi-font-bold'>{message}</div>
+      <div className='pi-text-sm'>{message}</div>
     </div>
   )
 }

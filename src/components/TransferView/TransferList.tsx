@@ -158,7 +158,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           <div
             style={{ height: '272px' }}
             ref={relativeRef}
-            className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-500 pi-scrollbar-track-black pi-scrollbar-thumb-rounded-full pi-scrollbar-track-rounded-full hover:pi-scrollbar-thumb-gray-400'
+            className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-custom-scrollbar'
           >
             {showGradient && (
               <div

@@ -20,10 +20,11 @@ export const AlertGuard: FC<AlertGuard> = ({ children }) => {
   )
   // Get alerts status from alerts store
   const { call_transfered } = useSelector((state: RootState) => state.alerts.data)
+  const { isOpen } = useSelector((state: RootState) => state.island)
 
   return (
     <>
-      {activeAlertsCount > 0 && <AlertView />}
+      {activeAlertsCount > 0 && isOpen && <AlertView />}
       {breakActiveAlertsCount === 0 && !call_transfered.active && children}
     </>
   )
