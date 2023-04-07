@@ -41,7 +41,7 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
 
   // Handle Island click
   const handleIslandClick = () => {
-    dispatch.island.toggleIsOpen()
+    dispatch.island.handleToggleIsOpen()
   }
 
   // Handles drag end event
