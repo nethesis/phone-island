@@ -22,13 +22,26 @@ export const island = createModel<RootModel>()({
         view: payload,
       }
     },
-    toggleIsOpen: (state) => {
+    toggleIsOpen: (state, payload: boolean) => {
       return {
         ...state,
-        isOpen: !state.isOpen,
+        isOpen: payload,
       }
     },
   },
+  effects: (dispatch) => ({
+    handleToggleIsOpen: (_: void, rootState) => {
+      if (
+        rootState.island.isOpen &&
+        rootState.alerts.status.activeAlertsCount > 0 &&
+        !rootState.currentCall.displayName
+      ) {
+        dispatch.island.toggleIsOpen(true)
+      } else {
+        dispatch.island.toggleIsOpen(!rootState.island.isOpen)
+      }
+    },
+  }),
 })
 
 type IslandViewType = 'call' | 'keypad' | 'player' | 'transfer'
