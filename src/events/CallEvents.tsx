@@ -15,7 +15,7 @@ export const CallEvents: FC = () => {
   useEventListener('phone-island-call-start', (data) => {
     callNumber(data.number)
   })
-  return sipcall && <></>
+  return <></>
 }
 
 // !TODO add phone-island-outgoing-call-started phone-island-outgoing-call-ended

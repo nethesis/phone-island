@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC } from 'react'
-import { CallEvents } from '../events'
+import { CallEvents, PlayerEvents } from '../events'
 
 interface EventsProps {
   children: ReactNode
@@ -11,6 +11,7 @@ interface EventsProps {
 export const Events: FC<EventsProps> = ({ children }) => {
   return (
     <>
+      {<PlayerEvents />}
       {<CallEvents />}
       {children}
     </>
