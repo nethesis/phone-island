@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
-import { StyledAvatar } from '../../styles/Island.styles'
 import { motion } from 'framer-motion/dist/framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
-
-const AvatarMotion = motion(StyledAvatar)
 
 const iconVariants = {
   open: {
@@ -49,8 +46,8 @@ const Avatar: FC = () => {
           className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 -pi-z-10 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
         ></motion.div>
       )}
-      <AvatarMotion
-        className='pi-z-10 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm'
+      <motion.div
+        className='pi-z-10 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm pi-bg-cover'
         style={{
           backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
           backgroundRepeat: 'no-repeat',

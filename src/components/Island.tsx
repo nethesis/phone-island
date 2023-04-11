@@ -7,6 +7,7 @@ import { RootState, Dispatch } from '../store'
 import { useIsomorphicLayoutEffect } from '../utils'
 import CallView from './CallView'
 import KeyboardView from './KeypadView'
+import AudioPlayerView from './AudioPlayerView'
 import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
 import ViewsTransition from './ViewsTransition'
@@ -90,7 +91,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
       ref={islandContainerRef}
       className='pi-absolute pi-min-w-full pi-min-h-full pi-left-0 pi-top-0 pi-overflow-hidden pi-pointer-events-none pi-flex pi-items-center pi-justify-center pi-content-center pi-phone-island-container pi-z-1000'
     >
-      {(incoming || outgoing || accepted || showAlways || activeAlertsCount > 0) && (
+      {(incoming ||
+        outgoing ||
+        accepted ||
+        showAlways ||
+        activeAlertsCount > 0 ||
+        view === 'player') && (
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
@@ -109,6 +115,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'transfer' ? (
                   <ViewsTransition forView='transfer'>
                     <TransferListView />
+                  </ViewsTransition>
+                ) : currentView === 'player' ? (
+                  <ViewsTransition forView='player'>
+                    <AudioPlayerView />
                   </ViewsTransition>
                 ) : (
                   <></>
