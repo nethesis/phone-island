@@ -219,3 +219,8 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+- `phone-island-audio-player-started` Indicates that the audio player started playing an audio.
+  ```json
+  {}
+  ```

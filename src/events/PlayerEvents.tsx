@@ -3,12 +3,15 @@
 
 import React, { type FC } from 'react'
 import { eventDispatch } from '../utils'
-import { useSelector } from 'react-redux'
-import { RootState } from '../store'
 import { useEventListener } from '../utils'
 import { playAnnouncement, playCallRecording } from '../lib/player/audio'
+import { type PlayerStartTypes } from '../types'
+import { useDispatch } from 'react-redux'
+import { Dispatch } from '../store'
 
 export const PlayerEvents: FC = () => {
+  const dispatch = useDispatch<Dispatch>()
+
   /**
    * Event listner for phone-island-audio-player-start event
    */
@@ -16,7 +19,9 @@ export const PlayerEvents: FC = () => {
     if (data.type) {
       // Check the id required when a type is provided
       if (!data.id) {
-        console.error('phone-island-audio-player-start: when a type is provided, the id is required')
+        console.error(
+          'phone-island-audio-player-start: when a type is provided, the id is required',
+        )
         return
       }
       // Manage types
@@ -26,15 +31,23 @@ export const PlayerEvents: FC = () => {
         playCallRecording(data.id)
       }
     } else {
-
+      if (data.base64_audio_file) {
+        // Play the base64 audio file
+        dispatch.island.setIslandView('player')
+        dispatch.player.resetAudioPlayerType()
+        dispatch.player.updateAndPlayAudioPlayer({
+          src: data.base64_audio_file,
+        })
+      }
     }
   })
 
   return <></>
 }
 
-interface PlayerStartTypes {
-  base64_audio_file?: string
-  type?: 'announcement' | 'call_recording'
-  id?: string
+/**
+ * Dispatch call start
+ */
+export function dispatchAudioPlayerStarted() {
+  eventDispatch('phone-island-audio-player-started', {})
 }

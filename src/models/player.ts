@@ -4,11 +4,14 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import { updateAudioPlayerSource } from '../lib/phone/audio'
+import { dispatchAudioPlayerStarted } from '../events/PlayerEvents'
+import { type TypeTypes } from '../types'
 
 const defaultState: PlayerTypes = {
   audioPlayer: null,
   audioPlayerPlaying: false,
   audioPlayerLoop: false,
+  audioPlayerType: null,
   localAudio: null,
   remoteAudio: null,
   localVideo: null,
@@ -39,6 +42,8 @@ export const player = createModel<RootModel>()({
         }
         // Play the audio
         state.audioPlayer.play()
+        // Dispatch the event
+        dispatchAudioPlayerStarted()
         return {
           ...state,
           audioPlayerPlaying: true,
@@ -59,6 +64,14 @@ export const player = createModel<RootModel>()({
     setAudioPlayerLoop: (state, payload: boolean) => ({
       ...state,
       audioPlayerLoop: payload,
+    }),
+    setAudioPlayerType: (state, payload: TypeTypes) => ({
+      ...state,
+      audioPlayerType: payload,
+    }),
+    resetAudioPlayerType: (state) => ({
+      ...state,
+      audioPlayerType: null,
     }),
     playRemoteAudio: (state) => {
       state.remoteAudio?.play()
@@ -92,6 +105,7 @@ interface PlayerTypes {
   audioPlayer: HTMLAudioElement | null
   audioPlayerPlaying?: boolean
   audioPlayerLoop?: boolean
+  audioPlayerType?: TypeTypes | null
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null
   localVideo: HTMLVideoElement | null
