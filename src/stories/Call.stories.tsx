@@ -4,7 +4,7 @@
 import { Story, Meta } from '@storybook/react'
 import React from 'react'
 import { PhoneIsland } from '../App'
-import { eventDispatch, useEventListener } from '../utils'
+import { eventDispatch } from '../utils'
 
 const meta = {
   title: 'Default',

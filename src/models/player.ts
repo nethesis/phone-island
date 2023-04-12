@@ -11,7 +11,8 @@ const defaultState: PlayerTypes = {
   audioPlayer: null,
   audioPlayerPlaying: false,
   audioPlayerLoop: false,
-  audioPlayerType: null,
+  audioPlayerTrackType: null,
+  audioPlayerTrackName: null,
   localAudio: null,
   remoteAudio: null,
   localVideo: null,
@@ -67,11 +68,15 @@ export const player = createModel<RootModel>()({
     }),
     setAudioPlayerType: (state, payload: TypeTypes) => ({
       ...state,
-      audioPlayerType: payload,
+      audioPlayerTrackType: payload,
     }),
     resetAudioPlayerType: (state) => ({
       ...state,
-      audioPlayerType: null,
+      audioPlayerTrackType: null,
+    }),
+    setAudioPlayerTrackName: (state, payload: string) => ({
+      ...state,
+      audioPlayerTrackName: payload,
     }),
     playRemoteAudio: (state) => {
       state.remoteAudio?.play()
@@ -105,7 +110,8 @@ interface PlayerTypes {
   audioPlayer: HTMLAudioElement | null
   audioPlayerPlaying?: boolean
   audioPlayerLoop?: boolean
-  audioPlayerType?: TypeTypes | null
+  audioPlayerTrackType?: TypeTypes | null
+  audioPlayerTrackName?: string | null
   localAudio: HTMLAudioElement | null
   remoteAudio: HTMLAudioElement | null
   localVideo: HTMLVideoElement | null
