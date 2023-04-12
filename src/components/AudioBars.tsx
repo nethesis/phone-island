@@ -1,10 +1,9 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useEffect, useRef } from 'react'
+import React, { type FC, useEffect, useRef } from 'react'
 
-// Swapping values around for a better visual effect
-const LARGE_MAP = {
+const large = {
   0: 4,
   1: 3,
   2: 2,
@@ -15,140 +14,111 @@ const LARGE_MAP = {
   7: 4,
 }
 
-const SMALL_MAP = {
+const small = {
   0: 2,
   1: 1,
   2: 1,
   3: 2,
 }
 
-interface AudioBarsProps {
-  audioStream: MediaStream | null
-  size?: 'large' | 'small'
-}
-
 /**
  * This component shows a dynamic audio spectrum given an audio stream
  *
- * @param audioStream The audio stream to analyse
- *
+ * @param audioStream An audio stream to analyse
+ * @param audioElement An audio element to analyse
  */
-
-export const AudioBars = React.memo<AudioBarsProps>(({ audioStream, size = 'large' }) => {
-  // The container element ref
+export const AudioBars: FC<AudioBarsProps> = ({
+  audioStream = null,
+  audioElement = null,
+  size,
+}) => {
+  // Initialize the main elements
   const containerElement = useRef<HTMLDivElement | null>(null)
+  const animationRequest = useRef<number | null>(null)
+  const barsMap: BarsMapType = size === 'large' ? large : small
+  const audioContext = useRef<any>(new AudioContext())
+  const analyser = useRef<any>(audioContext.current.createAnalyser())
+  const source = useRef<ContextSourceType>(null)
 
-  // The variable that stops
-  // const [pause, setPause] = useState<boolean>(false)
-
-  const animationRequest = useRef<any>(null)
-  const stopped = useRef<any>(null)
-
-  // Initialize DATA_MAP depending on size
-  const dataMap: { [key: number]: number } = size === 'large' ? LARGE_MAP : SMALL_MAP
-
-  const connectStream = (audioStream: MediaStream) => {
-    // Initialize and audio context
-    // @ts-ignore
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-
-    // Create and audio contest analyser
-    const analyser = audioContext.createAnalyser()
-    const source = audioContext.createMediaStreamSource(audioStream)
-
-    // Connect the analyser to the audio source
-    source.connect(analyser)
-
-    // Set smooth constant
-    analyser.smoothingTimeConstant = 0.8
-
-    // The fftzize to be applied on the stream
-    analyser.fftSize = 32
-
-    // The function that renders the frames
-    const renderFrame = () => {
-      // Return if was stopped and not
-      if (stopped.current) {
-        return
-      }
-      // Find the frequency
-      const frequencyData = new Uint8Array(analyser.frequencyBinCount)
-      analyser.getByteFrequencyData(frequencyData)
-      const values = Object.values(frequencyData)
-
-      // Select the bars array
-      const bars = containerElement.current?.children
-      if (bars && bars?.length > 0) {
-        // Change styles to every bar
-        for (let i = 0; i < Object.keys(dataMap).length; ++i) {
-          const value = values[dataMap[i]] / 255
-          // @ts-ignore
-          const barStyles = bars && bars[i] && bars[i].style
-          if (barStyles && value > 0) {
-            // Set height to every bar
-            barStyles.height = `${100 * value}%`
-          }
-        }
-        const requestId: number = requestAnimationFrame(renderFrame)
-        if (requestId) {
-          animationRequest.current = requestId
-        }
-      }
-    }
-
-    // Render the frames using requestAnimationFrame API
-    const requestId: number = requestAnimationFrame(renderFrame)
+  function saveAnimationRequest(requestId: number) {
     if (requestId) {
       animationRequest.current = requestId
     }
   }
 
-  // The function that startAnimations
-  function startAnimation(callback?: () => void) {
+  function startAnimation() {
+    const animationRequestId: number = requestAnimationFrame(renderFrame)
+    saveAnimationRequest(animationRequestId)
+  }
+
+  // The function that renders the frames
+  function renderFrame() {
+    // Find the frequency
+    const frequencyData = new Uint8Array(analyser.current.frequencyBinCount)
+    analyser.current.getByteFrequencyData(frequencyData)
+    const values = Object.values(frequencyData)
+
+    // Select the bars array
+    const bars = containerElement.current?.children
+    if (bars && bars?.length > 0) {
+      // Change styles to every bar
+      for (let i = 0; i < Object.keys(barsMap).length; ++i) {
+        const value = values[barsMap[i]] / 255
+        // @ts-ignore
+        const barStyles = bars && bars[i] && bars[i].style
+        if (barStyles && value > 0) {
+          // Set height to every bar
+          barStyles.height = `${100 * value}%`
+        }
+      }
+      startAnimation()
+    }
+  }
+
+  function animateBars() {
+    if (source.current) {
+      // Set smooth constant
+      analyser.current.smoothingTimeConstant = 0.8
+      // The fftzize to be applied on the stream
+      analyser.current.fftSize = 32
+      // Connect the audio source to the analyser
+      source.current && source.current.connect(analyser.current)
+      analyser.current && analyser.current.connect(audioContext.current.destination)
+      // Render the frames using requestAnimationFrame API
+      startAnimation()
+    }
+  }
+
+  useEffect(() => {
     if (audioStream) {
-      // Initialize audio bars
-      connectStream(audioStream)
+      // The source is an audio stream
+      source.current = audioContext.current.createMediaStreamSource(audioStream)
+    } else if (audioElement) {
+      // The source is an audio element
+      source.current = audioContext.current.createMediaElementSource(audioElement)
     }
-    stopped.current = false
-    // Execute the callback
-    callback && callback()
-  }
+    // Start animation
+    animateBars()
 
-  // The function that stopAnimations
-  function stopAnimation(callback?: () => void) {
-    if (animationRequest.current) {
-      // Initialize audio bars
-      cancelAnimationFrame(animationRequest.current)
-    }
-    stopped.current = true
-    // Execute the callback
-    callback && callback()
-  }
-
-  // Handle size change
-  useEffect(() => {
-    stopAnimation(() => {
-      startAnimation()
-    })
-  }, [size])
-
-  // Handle audio stream
-  useEffect(() => {
-    stopAnimation(() => {
-      startAnimation()
-    })
-  }, [audioStream])
-
-  // Cleanup animation
-  useEffect(() => {
+    // Cleanup animation
     return () => {
-      stopAnimation()
+      animationRequest.current && cancelAnimationFrame(animationRequest.current)
+      source.current?.disconnect()
     }
   }, [])
 
+  useEffect(() => {
+    if (animationRequest.current) {
+      cancelAnimationFrame(animationRequest.current)
+      startAnimation()
+    }
+  }, [size])
+
   return (
     <div
-      className={`${size === 'small' ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'} pi-flex pi-justify-center pi-items-center`}
+      className={`${
+        size === 'small' ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'
+      } pi-flex pi-justify-center pi-items-center`}
     >
       {/* The bars container  */}
       <div
@@ -158,11 +128,23 @@ export const AudioBars = React.memo<AudioBarsProps>(({ audioStream, size = 'larg
         ref={containerElement}
       >
         {/* Every single bar */}
-        {audioStream &&
-          Object.keys(dataMap).map((key) => (
+        {(audioStream || audioElement) &&
+          Object.keys(barsMap).map((key) => (
             <span key={key} className='pi-bg-emerald-600 pi-w-0.5 pi-rounded-sm'></span>
           ))}
       </div>
     </div>
   )
-})
+}
+
+interface AudioBarsProps {
+  audioStream?: MediaStream | null
+  audioElement?: HTMLAudioElement | null
+  size?: 'large' | 'small'
+}
+
+type ContextSourceType = MediaStreamAudioSourceNode | MediaElementAudioSourceNode | null
+
+interface BarsMapType {
+  [key: number]: number
+}

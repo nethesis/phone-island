@@ -21,3 +21,22 @@ export async function getCallRecording(id: string): Promise<string> {
     throw new Error(error)
   }
 }
+
+/**
+ * Returns the file name of the recording
+ */
+export async function getRecordingFileName(id: string): Promise<string> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/historycall/down_callrec/${id}`, {
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}

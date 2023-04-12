@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { getAnnouncement } from '../../services/offhour'
-import { getCallRecording } from '../../services/history_call'
+import { getCallRecording, getRecordingFileName } from '../../services/history_call'
 import { store } from '../../store'
 
 /**
@@ -10,12 +10,12 @@ import { store } from '../../store'
  */
 export async function playAnnouncement(id: string) {
   if (id) {
-    const audio_file: string = await getAnnouncement(id)
-    if (audio_file) {
+    const audioFile: string = await getAnnouncement(id)
+    if (audioFile) {
       store.dispatch.island.setIslandView('player')
       store.dispatch.player.setAudioPlayerType('announcement')
       store.dispatch.player.updateAndPlayAudioPlayer({
-        src: audio_file,
+        src: audioFile,
       })
     }
   }
@@ -26,13 +26,25 @@ export async function playAnnouncement(id: string) {
  */
 export async function playCallRecording(id: string) {
   if (id) {
-    const audio_file: string = await getCallRecording(id)
-    if (audio_file) {
+    const audioFile: string = await getCallRecording(id)
+    if (audioFile) {
       store.dispatch.island.setIslandView('player')
       store.dispatch.player.setAudioPlayerType('call_recording')
       store.dispatch.player.updateAndPlayAudioPlayer({
-        src: audio_file,
+        src: audioFile,
       })
+    }
+  }
+}
+
+/**
+ * Given an id retrieves the name of the call recording
+ */
+export async function getRecordingName(id: string) {
+  if (id) {
+    const fileName: string = await getRecordingFileName(id)
+    if (fileName) {
+      store.dispatch.player.setAudioPlayerTrackName(fileName)
     }
   }
 }

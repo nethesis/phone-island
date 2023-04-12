@@ -8,6 +8,7 @@ import { playAnnouncement, playCallRecording } from '../lib/player/audio'
 import { type PlayerStartTypes } from '../types'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
+import { getRecordingName } from '../lib/player/audio'
 
 export const PlayerEvents: FC = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -28,6 +29,7 @@ export const PlayerEvents: FC = () => {
       if (data.type === 'announcement') {
         playAnnouncement(data.id)
       } else if (data.type === 'call_recording') {
+        getRecordingName(data.id)
         playCallRecording(data.id)
       }
     } else {
