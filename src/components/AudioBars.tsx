@@ -36,8 +36,8 @@ export const AudioBars: FC<AudioBarsProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null)
   const animationRequest = useRef<number | null>(null)
   const barsMap: BarsMapType = size === 'large' ? large : small
-  const audioContext = useRef<any>(new AudioContext())
-  const analyser = useRef<any>(audioContext.current.createAnalyser())
+  const audioContext = useRef<AudioContext | null>(null)
+  const analyser = useRef<AnalyserNode | null>(null)
   const source = useRef<ContextSourceType>(null)
 
   function saveAnimationRequest(requestId: number) {
@@ -47,49 +47,40 @@ export const AudioBars: FC<AudioBarsProps> = ({
   }
 
   function startAnimation() {
-    const animationRequestId: number = requestAnimationFrame(renderFrame)
+    const animationRequestId: number = requestAnimationFrame(animationFrame)
     saveAnimationRequest(animationRequestId)
   }
 
-  // The function that renders the frames
-  function renderFrame() {
-    // Find the frequency
-    const frequencyData = new Uint8Array(analyser.current.frequencyBinCount)
-    analyser.current.getByteFrequencyData(frequencyData)
-    const values = Object.values(frequencyData)
+  // The function that renders the frames of animation
+  function animationFrame() {
+    if (analyser && analyser.current) {
+      const frequencyData = new Uint8Array(analyser.current.frequencyBinCount)
+      analyser.current.getByteFrequencyData(frequencyData)
+      const values = Object.values(frequencyData)
 
-    // Select the bars array
-    const bars = containerElement.current?.children
-    if (bars && bars?.length > 0) {
-      // Change styles to every bar
-      for (let i = 0; i < Object.keys(barsMap).length; ++i) {
-        const value = values[barsMap[i]] / 255
-        // @ts-ignore
-        const barStyles = bars && bars[i] && bars[i].style
-        if (barStyles && value > 0) {
-          // Set height to every bar
-          barStyles.height = `${100 * value}%`
+      const bars = containerElement.current?.children
+      if (bars && bars?.length > 0) {
+        // Change styles to every bar
+        for (let i = 0; i < Object.keys(barsMap).length; ++i) {
+          const value = values[barsMap[i]] / 255
+          // @ts-ignore
+          const barStyles = bars && bars[i] && bars[i].style
+          if (barStyles && value > 0) {
+            barStyles.height = `${100 * value}%`
+          }
         }
+        startAnimation()
       }
-      startAnimation()
-    }
-  }
-
-  function animateBars() {
-    if (source.current) {
-      // Set smooth constant
-      analyser.current.smoothingTimeConstant = 0.8
-      // The fftzize to be applied on the stream
-      analyser.current.fftSize = 32
-      // Connect the audio source to the analyser
-      source.current && source.current.connect(analyser.current)
-      analyser.current && analyser.current.connect(audioContext.current.destination)
-      // Render the frames using requestAnimationFrame API
-      startAnimation()
     }
   }
 
   useEffect(() => {
+    // Initialize audio context and analyser once
+    audioContext.current = new AudioContext()
+    analyser.current = audioContext.current.createAnalyser()
+    analyser.current.smoothingTimeConstant = 0.8
+    analyser.current.fftSize = 32
+
     if (audioStream) {
       // The source is an audio stream
       source.current = audioContext.current.createMediaStreamSource(audioStream)
@@ -97,13 +88,18 @@ export const AudioBars: FC<AudioBarsProps> = ({
       // The source is an audio element
       source.current = audioContext.current.createMediaElementSource(audioElement)
     }
-    // Start animation
-    animateBars()
 
-    // Cleanup animation
+    // Connect the audio source to the analyser
+    source.current && source.current.connect(analyser.current)
+    analyser.current && analyser.current.connect(audioContext.current.destination)
+
+    startAnimation()
+
+    // Cleanup bars animation
     return () => {
       animationRequest.current && cancelAnimationFrame(animationRequest.current)
       source.current?.disconnect()
+      analyser.current?.disconnect()
     }
   }, [])
 
