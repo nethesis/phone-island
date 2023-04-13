@@ -4,11 +4,15 @@
 import React, { type FC } from 'react'
 import { eventDispatch } from '../utils'
 import { useEventListener } from '../utils'
-import { playAnnouncement, playCallRecording } from '../lib/player/audio'
+import {
+  playAnnouncement,
+  playCallRecording,
+  getRecordingName,
+  getAnnouncementName,
+} from '../lib/player/audio'
 import { type PlayerStartTypes } from '../types'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
-import { getRecordingName } from '../lib/player/audio'
 
 export const PlayerEvents: FC = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -27,6 +31,7 @@ export const PlayerEvents: FC = () => {
       }
       // Manage types
       if (data.type === 'announcement') {
+        getAnnouncementName(data.id)
         playAnnouncement(data.id)
       } else if (data.type === 'call_recording') {
         getRecordingName(data.id)
