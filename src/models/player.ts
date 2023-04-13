@@ -117,3 +117,5 @@ interface PlayerTypes {
   localVideo: HTMLVideoElement | null
   remoteVideo: HTMLVideoElement | null
 }
+
+type ContextSourceType = MediaStreamAudioSourceNode | MediaElementAudioSourceNode | null

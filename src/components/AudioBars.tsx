@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC, useEffect, useRef } from 'react'
+import { ContextSourceType } from '../models/audioBars'
+import { useDispatch } from 'react-redux'
+import { store } from '../store'
+import { Dispatch } from '../store'
 
 const large = {
   0: 4,
@@ -36,9 +40,10 @@ export const AudioBars: FC<AudioBarsProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null)
   const animationRequest = useRef<number | null>(null)
   const barsMap: BarsMapType = size === 'large' ? large : small
-  const audioContext = useRef<AudioContext | null>(null)
+  const context = useRef<AudioContext | null>(null)
   const analyser = useRef<AnalyserNode | null>(null)
   const source = useRef<ContextSourceType>(null)
+  const dispatch = useDispatch<Dispatch>()
 
   function saveAnimationRequest(requestId: number) {
     if (requestId) {
@@ -75,24 +80,36 @@ export const AudioBars: FC<AudioBarsProps> = ({
   }
 
   useEffect(() => {
+    const { audioElementContext, audioElementAnalyser, audioElementSource, isReady } =
+      store.getState().audioBars
     // Initialize audio context and analyser once
-    audioContext.current = new AudioContext()
-    analyser.current = audioContext.current.createAnalyser()
-    analyser.current.smoothingTimeConstant = 0.8
-    analyser.current.fftSize = 32
-
-    if (audioStream) {
-      // The source is an audio stream
-      source.current = audioContext.current.createMediaStreamSource(audioStream)
-    } else if (audioElement) {
+    if (audioElement && isReady) {
       // The source is an audio element
-      source.current = audioContext.current.createMediaElementSource(audioElement)
+      context.current = audioElementContext
+      analyser.current = audioElementAnalyser
+      source.current = audioElementSource
+    } else {
+      // The source is an audio stream
+      context.current = new AudioContext()
+      analyser.current = context.current.createAnalyser()
+      analyser.current.smoothingTimeConstant = 0.8
+      analyser.current.fftSize = 32
+      // Create the media source stream
+      if (audioStream) {
+        source.current = context.current.createMediaStreamSource(audioStream)
+      } else if (audioElement) {
+        source.current = context.current.createMediaElementSource(audioElement)
+        // Save the audio elements to stores
+        dispatch.audioBars.setAudioElementContext(context.current)
+        dispatch.audioBars.setAudioElementAnalyser(analyser.current)
+        dispatch.audioBars.setAudioElementSource(source.current)
+        dispatch.audioBars.setIsReady(true)
+      }
     }
 
     // Connect the audio source to the analyser
-    source.current && source.current.connect(analyser.current)
-    analyser.current && analyser.current.connect(audioContext.current.destination)
-
+    analyser.current && source.current && source.current.connect(analyser.current)
+    context.current && analyser.current && analyser.current.connect(context.current.destination)
     startAnimation()
 
     // Cleanup bars animation
@@ -138,8 +155,6 @@ interface AudioBarsProps {
   audioElement?: HTMLAudioElement | null
   size?: 'large' | 'small'
 }
-
-type ContextSourceType = MediaStreamAudioSourceNode | MediaElementAudioSourceNode | null
 
 interface BarsMapType {
   [key: number]: number

@@ -12,6 +12,7 @@ import { avatars } from './avatars'
 import { users } from './users'
 import { alerts } from './alerts'
 import { motions } from './motions'
+import { audioBars } from './audioBars'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -24,6 +25,7 @@ export interface RootModel extends Models<RootModel> {
   users: typeof users
   alerts: typeof alerts
   motions: typeof motions
+  audioBars: typeof audioBars
 }
 
 export const models: RootModel = {
@@ -37,4 +39,5 @@ export const models: RootModel = {
   users,
   alerts,
   motions,
+  audioBars,
 }
