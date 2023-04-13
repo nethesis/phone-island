@@ -17,11 +17,12 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
     <>
       <div className='pi-flex pi-gap-4'>
         <Avatar type={audioPlayerTrackType} />
-        <div className='pi-flex pi-items-center pi-w-fit'>
+        <div className='pi-flex pi-items-center pi-w-full'>
           <div
-            className={`pi-text-base ${
-              isOpen ? 'pi-w-56' : 'pi-w-16'
-            } pi-overflow-hidden pi-text-ellipsis pi-whitespace-nowrap pi-inline-block`}
+            style={{
+              width: isOpen ? '202px' : '60px',
+            }}
+            className={`pi-text-base pi-overflow-hidden pi-text-ellipsis pi-whitespace-nowrap pi-inline-block`}
           >
             {audioPlayerTrackName}
           </div>
