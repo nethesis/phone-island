@@ -8,14 +8,25 @@ import { store } from '../../store'
  */
 export async function updateAudioPlayerSource(payload) {
   return new Promise((resolve, reject) => {
-    // The can play through callback
     function canPlayCb() {
-      store.getState().player.audioPlayer?.removeEventListener('canplaythrough', canPlayCb)
+      store.getState().player.audioPlayer?.current?.removeEventListener('canplaythrough', canPlayCb)
       resolve(true)
     }
+    function loadedMetadata() {
+      const trackDuration = store.getState().player.audioPlayer?.current?.duration
+      trackDuration && store.dispatch.player.updateAudioPlayerTrackDuration(trackDuration)
+      store
+        .getState()
+        .player.audioPlayer?.current?.removeEventListener('loadedmetadata', loadedMetadata)
+    }
     try {
-      // Add event listener of can play through
-      store.getState().player.audioPlayer?.addEventListener('canplaythrough', canPlayCb)
+      // Event handlers must be set before updating the audio source of the element
+      // Add event listener for canplaythrough event
+      store.getState().player.audioPlayer?.current?.addEventListener('canplaythrough', canPlayCb)
+      // Add event listener for onloadedmetadata event
+      store
+        .getState()
+        .player.audioPlayer?.current?.addEventListener('loadedmetadata', loadedMetadata)
       // Update the audio player source
       store.dispatch.player.updateAudioPlayer(payload)
     } catch (err) {

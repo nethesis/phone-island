@@ -193,7 +193,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           // Check if the local audio is already playing and start playing
                           if (!audioPlayerPlaying) {
                             // Update audio player and start playing
-                            dispatch.player.updateAndPlayAudioPlayer({
+                            dispatch.player.updatePlayAudioPlayer({
                               src: outgoingRingtone,
                               loop: true,
                             })
@@ -223,7 +223,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
 
                           // Number and display name are updated inside socket
-                          dispatch.currentCall.checkIncomingUpdateAndPlay({
+                          dispatch.currentCall.checkIncomingUpdatePlay({
                             incomingWebRTC: true,
                           })
 
@@ -244,7 +244,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           // Set incoming value to false
                           dispatch.currentCall.updateCurrentCall({
                             incoming: false,
-                            incomingWebRTC: false
+                            incomingWebRTC: false,
                           })
 
                           // Stop the local audio element ringing
@@ -311,7 +311,9 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       // Initialize the new media stream for remote audio
                       if (audioTracks && audioTracks.length > 0) {
                         const audioStream: MediaStream = new MediaStream(audioTracks)
-                        Janus.attachMediaStream(remoteAudioElement, audioStream)
+                        remoteAudioElement &&
+                          remoteAudioElement.current &&
+                          Janus.attachMediaStream(remoteAudioElement.current, audioStream)
 
                         // Save the new audio stream to the store
                         store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
@@ -321,7 +323,9 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                       // Initialize the new media stream for remote video
                       if (videoTracks && videoTracks.length > 0) {
                         const videoStream: MediaStream = new MediaStream(videoTracks)
-                        Janus.attachMediaStream(remoteVideoElement, videoStream)
+                        remoteVideoElement &&
+                          remoteVideoElement.current &&
+                          Janus.attachMediaStream(remoteVideoElement.current, videoStream)
                       } else {
                         console.warn('No video tracks on remote stream')
                       }

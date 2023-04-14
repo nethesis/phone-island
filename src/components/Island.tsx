@@ -55,11 +55,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
-      audioPlayer: audioPlayer.current,
-      localAudio: localAudio.current,
-      localVideo: localVideo.current,
-      remoteVideo: remoteVideo.current,
-      remoteAudio: remoteAudio.current,
+      audioPlayer: audioPlayer,
+      localAudio: localAudio,
+      localVideo: localVideo,
+      remoteVideo: remoteVideo,
+      remoteAudio: remoteAudio,
     })
   }, [])
 

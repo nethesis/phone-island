@@ -187,5 +187,5 @@ export async function attendedTransfer(number: string) {
 export function playDtmfAudio(key: string) {
   if (key === '*') key = 'star'
   if (key === '#') key = 'pound'
-  store.dispatch.player.updateAndPlayAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
+  store.dispatch.player.updatePlayAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
 }

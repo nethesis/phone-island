@@ -6,6 +6,7 @@ import type { RootModel } from '.'
 import { updateAudioPlayerSource } from '../lib/phone/audio'
 import { dispatchAudioPlayerStarted } from '../events/PlayerEvents'
 import { type TypeTypes } from '../types'
+import { RefObject } from 'react'
 
 const defaultState: PlayerTypes = {
   audioPlayer: null,
@@ -13,6 +14,7 @@ const defaultState: PlayerTypes = {
   audioPlayerLoop: false,
   audioPlayerTrackType: null,
   audioPlayerTrackName: null,
+  audioPlayerTrackDuration: null,
   localAudio: null,
   remoteAudio: null,
   localVideo: null,
@@ -28,21 +30,27 @@ export const player = createModel<RootModel>()({
         ...payload,
       }
     },
+    updateAudioPlayerTrackDuration: (state, payload: number) => {
+      return {
+        ...state,
+        audioPlayerTrackDuration: payload,
+      }
+    },
     updateAudioPlayer: (state, payload: UpdateAudioSourceTypes) => {
-      if (state.audioPlayer) {
-        state.audioPlayer.src = `data:audio/ogg;base64, ${payload.src}`
+      if (state.audioPlayer && state.audioPlayer.current) {
+        state.audioPlayer.current.src = `data:audio/ogg;base64, ${payload.src}`
       }
       return state
     },
     playAudioPlayer: (state) => {
-      if (state.audioPlayer) {
+      if (state.audioPlayer && state.audioPlayer.current) {
         // Check if is playing
-        if (!state.audioPlayer.paused) {
-          state.audioPlayer.pause()
-          state.audioPlayer.currentTime = 0
+        if (!state.audioPlayer.current.paused) {
+          state.audioPlayer.current.pause()
+          state.audioPlayer.current.currentTime = 0
         }
         // Play the audio
-        state.audioPlayer.play()
+        state.audioPlayer.current.play()
         // Dispatch the event
         dispatchAudioPlayerStarted()
         return {
@@ -52,10 +60,10 @@ export const player = createModel<RootModel>()({
       }
     },
     stopAudioPlayer: (state) => {
-      if (state.audioPlayer) {
+      if (state.audioPlayer && state.audioPlayer.current) {
         // Pause audio
-        state.audioPlayer.pause()
-        state.audioPlayer.currentTime = 0
+        state.audioPlayer.current.pause()
+        state.audioPlayer.current.currentTime = 0
         return {
           ...state,
           audioPlayerPlaying: false,
@@ -79,10 +87,10 @@ export const player = createModel<RootModel>()({
       audioPlayerTrackName: payload,
     }),
     playRemoteAudio: (state) => {
-      state.remoteAudio?.play()
+      state.remoteAudio && state.remoteAudio.current?.play()
     },
     pauseRemoteAudio: (state) => {
-      state.remoteAudio?.pause()
+      state.remoteAudio && state.remoteAudio.current?.pause()
     },
     reset: () => {
       return defaultState
@@ -90,7 +98,7 @@ export const player = createModel<RootModel>()({
   },
   effects: (dispatch) => ({
     // This function is recommended for playing audio
-    updateAndPlayAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
+    updatePlayAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
       dispatch.player.setAudioPlayerLoop(loop)
       // Update the audio source
       await updateAudioPlayerSource({
@@ -107,15 +115,14 @@ interface UpdateAudioSourceTypes {
 }
 
 interface PlayerTypes {
-  audioPlayer: HTMLAudioElement | null
+  audioPlayer: RefObject<HTMLAudioElement> | null
   audioPlayerPlaying?: boolean
   audioPlayerLoop?: boolean
   audioPlayerTrackType?: TypeTypes | null
   audioPlayerTrackName?: string | null
-  localAudio: HTMLAudioElement | null
-  remoteAudio: HTMLAudioElement | null
-  localVideo: HTMLVideoElement | null
-  remoteVideo: HTMLVideoElement | null
+  audioPlayerTrackDuration?: number | null
+  localAudio: RefObject<HTMLAudioElement> | null
+  remoteAudio: RefObject<HTMLAudioElement> | null
+  localVideo: RefObject<HTMLVideoElement> | null
+  remoteVideo: RefObject<HTMLVideoElement> | null
 }
-
-type ContextSourceType = MediaStreamAudioSourceNode | MediaElementAudioSourceNode | null

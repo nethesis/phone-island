@@ -53,7 +53,7 @@ const Actions: FC = () => {
     const { audioPlayerPlaying } = store.getState().player
     // Check if the local audio is already playing and start playing
     if (!audioPlayerPlaying) {
-      dispatch.player.updateAndPlayAudioPlayer({
+      dispatch.player.updatePlayAudioPlayer({
         src: outgoingRingtone,
         loop: true,
       })

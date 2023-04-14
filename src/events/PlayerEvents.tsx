@@ -42,7 +42,7 @@ export const PlayerEvents: FC = () => {
         // Play the base64 audio file
         dispatch.island.setIslandView('player')
         dispatch.player.resetAudioPlayerType()
-        dispatch.player.updateAndPlayAudioPlayer({
+        dispatch.player.updatePlayAudioPlayer({
           src: data.base64_audio_file,
         })
       }
