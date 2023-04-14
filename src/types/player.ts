@@ -5,6 +5,7 @@ export interface PlayerStartTypes {
   base64_audio_file?: string
   type?: TypeTypes
   id?: string
+  description: string
 }
 
 export type TypeTypes = 'announcement' | 'call_recording'
