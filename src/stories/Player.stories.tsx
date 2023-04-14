@@ -38,6 +38,7 @@ const PlayerTemplate: Story<any> = (args) => {
   const handlePlayerStartAudioFile = () => {
     eventDispatch('phone-island-audio-player-start', {
       base64_audio_file: process.env.BASE64_AUDIO_FILE,
+      description: 'Custom Audio File',
     })
   }
 

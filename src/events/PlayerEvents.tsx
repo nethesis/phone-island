@@ -46,6 +46,9 @@ export const PlayerEvents: FC = () => {
           src: data.base64_audio_file,
         })
       }
+      if (data.description) {
+        dispatch.player.setAudioPlayerTrackName(data.description)
+      }
     }
   })
 
