@@ -53,7 +53,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
           switch (status) {
             case 'ringing':
               // The name and the number are updated here not in webrtc
-              dispatch.currentCall.checkIncomingUpdateAndPlay({
+              dispatch.currentCall.checkIncomingUpdatePlay({
                 conversationId: conv.id,
                 displayName: getDisplayName(conv),
                 number: `${conv.counterpartNum}`,

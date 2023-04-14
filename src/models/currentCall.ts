@@ -63,7 +63,7 @@ export const currentCall = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    checkIncomingUpdateAndPlay: (payload: CurrentCallTypes, rootState) => {
+    checkIncomingUpdatePlay: (payload: CurrentCallTypes, rootState) => {
       // Check call type and incoming confirmation source
       if (
         (rootState.currentUser.default_device?.type === 'webrtc' && payload.incomingWebRTC) ||
@@ -72,7 +72,7 @@ export const currentCall = createModel<RootModel>()({
         payload.incoming = true
 
         // Update local player and play the audio
-        dispatch.player.updateAndPlayAudioPlayer({ src: incomingRingtone, loop: true })
+        dispatch.player.updatePlayAudioPlayer({ src: incomingRingtone, loop: true })
       }
       // Update the current call values and set incoming
       dispatch.currentCall.updateCurrentCall({

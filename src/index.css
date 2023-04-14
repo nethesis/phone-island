@@ -19,4 +19,7 @@
   .pi-custom-scrollbar {
     @apply pi-scrollbar-thin pi-scrollbar-thumb-gray-500 pi-scrollbar-track-black pi-scrollbar-thumb-rounded-full pi-scrollbar-track-rounded-full hover:pi-scrollbar-thumb-gray-400;
   }
+  .pi-range::-webkit-slider-thumb {
+    @apply pi-bg-white
+  }
 }
