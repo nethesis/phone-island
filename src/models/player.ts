@@ -11,6 +11,7 @@ import { RefObject } from 'react'
 const defaultState: PlayerTypes = {
   audioPlayer: null,
   audioPlayerPlaying: false,
+  audioPlayerPaused: false,
   audioPlayerLoop: false,
   audioPlayerTrackType: null,
   audioPlayerTrackName: null,
@@ -42,23 +43,6 @@ export const player = createModel<RootModel>()({
       }
       return state
     },
-    playAudioPlayer: (state) => {
-      if (state.audioPlayer && state.audioPlayer.current) {
-        // Check if is playing
-        if (!state.audioPlayer.current.paused) {
-          state.audioPlayer.current.pause()
-          state.audioPlayer.current.currentTime = 0
-        }
-        // Play the audio
-        state.audioPlayer.current.play()
-        // Dispatch the event
-        dispatchAudioPlayerStarted()
-        return {
-          ...state,
-          audioPlayerPlaying: true,
-        }
-      }
-    },
     stopAudioPlayer: (state) => {
       if (state.audioPlayer && state.audioPlayer.current) {
         // Pause audio
@@ -70,6 +54,22 @@ export const player = createModel<RootModel>()({
         }
       }
     },
+    pauseAudioPlayer: (state) => {
+      if (state.audioPlayer && state.audioPlayer.current) {
+        state.audioPlayer.current.pause()
+        return {
+          ...state,
+          audioPlayerPaused: true,
+          audioPlayerPlaying: false,
+        }
+      }
+    },
+    setAudioPlayerPaused: (state, payload: boolean) => {
+      return {
+        ...state,
+        audioPlayerPaused: payload,
+      }
+    },
     setAudioPlayerLoop: (state, payload: boolean) => ({
       ...state,
       audioPlayerLoop: payload,
@@ -77,6 +77,10 @@ export const player = createModel<RootModel>()({
     setAudioPlayerType: (state, payload: TypeTypes) => ({
       ...state,
       audioPlayerTrackType: payload,
+    }),
+    setAudioPlayerPlaying: (state, payload: boolean) => ({
+      ...state,
+      audioPlayerPlaying: payload,
     }),
     resetAudioPlayerType: (state) => ({
       ...state,
@@ -92,20 +96,46 @@ export const player = createModel<RootModel>()({
     pauseRemoteAudio: (state) => {
       state.remoteAudio && state.remoteAudio.current?.pause()
     },
+    setAudioPlayerCurrentTime: (state, payload: number) => {
+      if (state.audioPlayer && state.audioPlayer.current) {
+        state.audioPlayer.current.currentTime = payload
+      }
+    },
     reset: () => {
       return defaultState
     },
   },
   effects: (dispatch) => ({
+    startAudioPlayer: (_: void, rootState) => {
+      if (rootState.player.audioPlayer && rootState.player.audioPlayer.current) {
+        // Check if is playing
+        if (!rootState.player.audioPlayer.current.paused) {
+          rootState.player.audioPlayer.current.pause()
+          rootState.player.audioPlayer.current.currentTime = 0
+        }
+        const endedCb = () => {
+          dispatch.player.setAudioPlayerPlaying(false)
+          rootState.player!.audioPlayer!.current!.removeEventListener('ended', endedCb)
+        }
+        // Handle ended event
+        rootState.player.audioPlayer.current.addEventListener('ended', endedCb)
+        // Play the audio
+        rootState.player.audioPlayer.current.play()
+        dispatch.player.setAudioPlayerPlaying(true)
+        dispatch.player.setAudioPlayerPaused(false)
+        // Dispatch the event
+        dispatchAudioPlayerStarted()
+      }
+    },
     // This function is recommended for playing audio
-    updatePlayAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
+    updateStartAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
       dispatch.player.setAudioPlayerLoop(loop)
       // Update the audio source
       await updateAudioPlayerSource({
         src: src,
       })
       // Play the outgoing ringtone when ready
-      dispatch.player.playAudioPlayer()
+      dispatch.player.startAudioPlayer()
     },
   }),
 })
@@ -117,6 +147,7 @@ interface UpdateAudioSourceTypes {
 interface PlayerTypes {
   audioPlayer: RefObject<HTMLAudioElement> | null
   audioPlayerPlaying?: boolean
+  audioPlayerPaused?: boolean
   audioPlayerLoop?: boolean
   audioPlayerTrackType?: TypeTypes | null
   audioPlayerTrackName?: string | null

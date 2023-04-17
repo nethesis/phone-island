@@ -15,7 +15,7 @@ export async function playAnnouncement(id: string) {
     if (audioFile) {
       store.dispatch.island.setIslandView('player')
       store.dispatch.player.setAudioPlayerType('announcement')
-      store.dispatch.player.updatePlayAudioPlayer({
+      store.dispatch.player.updateStartAudioPlayer({
         src: audioFile,
       })
     }
@@ -31,7 +31,7 @@ export async function playCallRecording(id: string) {
     if (audioFile) {
       store.dispatch.island.setIslandView('player')
       store.dispatch.player.setAudioPlayerType('call_recording')
-      store.dispatch.player.updatePlayAudioPlayer({
+      store.dispatch.player.updateStartAudioPlayer({
         src: audioFile,
       })
     }

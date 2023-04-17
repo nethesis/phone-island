@@ -193,7 +193,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                           // Check if the local audio is already playing and start playing
                           if (!audioPlayerPlaying) {
                             // Update audio player and start playing
-                            dispatch.player.updatePlayAudioPlayer({
+                            dispatch.player.updateStartAudioPlayer({
                               src: outgoingRingtone,
                               loop: true,
                             })
