@@ -15,6 +15,15 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
     useSelector((state: RootState) => state.player)
   const { isOpen } = useSelector((state: RootState) => state.island)
+  const dispatch = useDispatch<Dispatch>()
+
+  function startPlaying() {
+    dispatch.player.startAudioPlayer()
+  }
+
+  function pausePlaying() {
+    dispatch.player.pauseAudioPlayer()
+  }
 
   return (
     <div className='pi-flex pi-gap-7 pi-flex-col'>
@@ -39,7 +48,11 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
         <div>
           <Progress />
           <div className='pi-w-full pi-flex pi-justify-center pi-items-center pi-mt-6'>
-            <Button variant='default' className='pi-scale-110'>
+            <Button
+              onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
+              variant='default'
+              className='pi-scale-110'
+            >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} size='xl' />
               ) : (

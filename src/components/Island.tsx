@@ -14,6 +14,7 @@ import ViewsTransition from './ViewsTransition'
 import { TransferListView } from './TransferView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
+import Close from './Close'
 
 /**
  * Provides the Island logic
@@ -125,6 +126,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 )}
               </AlertGuard>
             </IslandMotions>
+            <Close />
           </IslandDrag>
         </>
       )}

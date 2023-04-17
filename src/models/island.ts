@@ -16,7 +16,7 @@ const defaultState: IslandTypes = {
 export const island = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    setIslandView: (state, payload: IslandViewType) => {
+    setIslandView: (state, payload: IslandViewType | null) => {
       return {
         ...state,
         view: payload,
