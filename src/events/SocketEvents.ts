@@ -10,7 +10,7 @@ import type {
   QueuesUpdateTypes,
   QueuesEventType,
   QueueUpdateMemberTypes,
-  QueuesMemberEventType
+  QueuesMemberEventType,
 } from '../types'
 
 /**
@@ -66,4 +66,14 @@ export function dispatchQueueMemberUpdate(event: QueueUpdateMemberTypes) {
   }
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-queue-member-update', data)
+}
+
+/**
+ * The dispatch function for the takeOver event
+ *
+ * @param event The takeOver event from socket
+ */
+export function dispatchAlreadyLogin() {
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-user-already-login', {})
 }
