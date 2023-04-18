@@ -69,6 +69,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 ## Dispatched Events
 
+- `phone-island-user-already-login` Indicates that a the user did login from another window and dispatches an empty object
+
+  ```json
+  {}
+  ```
+
 - `phone-island-main-presence` Indicates that a message has arrived and dispatches the userMainPresenceUpdate data from the WebSocket
 
   ```json

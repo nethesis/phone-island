@@ -11,6 +11,7 @@ import {
   dispatchConversations,
   dispatchQueueUpdate,
   dispatchQueueMemberUpdate,
+  dispatchAlreadyLogin,
 } from '../events'
 import { store } from '../store'
 import { withTimeout } from '../utils'
@@ -211,14 +212,22 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         }
       })
 
+      // `queueUpdate` is the socket event when the data of a queue updates
       socket.current.on('queueUpdate', (res: QueuesUpdateTypes) => {
         // Dispatch queueUpdate event
         dispatchQueueUpdate(res)
       })
 
+      // `queueMemberUpdate` is the socket event when the data of a queue member changes
       socket.current.on('queueMemberUpdate', (res: QueueUpdateMemberTypes) => {
         // Dispatch queueMemberUpdate event
         dispatchQueueMemberUpdate(res)
+      })
+
+      // `takeOver` is the socket event when the user does login from another new window
+      socket.current.on('takeOver', () => {
+        // Dispatch takeOver event
+        dispatchAlreadyLogin()
       })
     }
 
