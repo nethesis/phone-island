@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { formatTime } from '../../utils/genericFunctions/player'
 import { useDispatch } from 'react-redux'
+import { StyledCustomRange } from '../../styles/CustomRange.styles'
 
 export const Progress: FC<ProgressTypes> = () => {
   const { audioPlayer, audioPlayerPlaying, audioPlayerTrackDuration } = useSelector(
@@ -57,7 +58,7 @@ export const Progress: FC<ProgressTypes> = () => {
 
   return (
     <>
-      <input
+      <StyledCustomRange
         data-stop-propagation={true}
         ref={progressBarRef}
         defaultValue={0}
@@ -65,7 +66,6 @@ export const Progress: FC<ProgressTypes> = () => {
         step='1'
         min='0'
         max={(trackDuration && trackDuration) || 0}
-        className='pi-custom-range'
         onChange={handleProgressChange}
       />
       <div className='pi-flex pi-justify-between pi-mt-1'>
