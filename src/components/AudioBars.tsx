@@ -34,6 +34,7 @@ const small = {
 export const AudioBars: FC<AudioBarsProps> = ({
   audioStream = null,
   audioElement = null,
+  paused,
   size,
 }) => {
   // Initialize the main elements
@@ -109,23 +110,25 @@ export const AudioBars: FC<AudioBarsProps> = ({
 
     // Connect the audio source to the analyser
     analyser.current && source.current && source.current.connect(analyser.current)
-    context.current && analyser.current && analyser.current.connect(context.current.destination)
     startAnimation()
 
     // Cleanup bars animation
     return () => {
       animationRequest.current && cancelAnimationFrame(animationRequest.current)
       source.current?.disconnect()
-      analyser.current?.disconnect()
     }
   }, [])
 
   useEffect(() => {
     if (animationRequest.current) {
-      cancelAnimationFrame(animationRequest.current)
-      startAnimation()
+      if (!paused) {
+        cancelAnimationFrame(animationRequest.current)
+        startAnimation()
+      } else {
+        cancelAnimationFrame(animationRequest.current)
+      }
     }
-  }, [size])
+  }, [size, paused])
 
   return (
     <div
@@ -154,6 +157,7 @@ interface AudioBarsProps {
   audioStream?: MediaStream | null
   audioElement?: HTMLAudioElement | null
   size?: 'large' | 'small'
+  paused?: boolean
 }
 
 interface BarsMapType {

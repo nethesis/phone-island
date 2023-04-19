@@ -26,7 +26,7 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall store
-  const { incoming, accepted, outgoing, startTime } = useSelector(
+  const { incoming, accepted, outgoing, startTime, paused } = useSelector(
     (state: RootState) => state.currentCall,
   )
   // Get isOpen and view from island store
@@ -51,7 +51,11 @@ const CallView: FC<CallViewProps> = () => {
         {/* The timer when collapsed */}
         {!isOpen && accepted && <Timer startTime={startTime} />}
         {accepted && remoteAudioStream && (
-          <AudioBars audioStream={remoteAudioStream} size={isOpen ? 'large' : 'small'} />
+          <AudioBars
+            audioStream={remoteAudioStream}
+            paused={paused}
+            size={isOpen ? 'large' : 'small'}
+          />
         )}
       </StyledTopContent>
       {isOpen && (
