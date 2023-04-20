@@ -8,13 +8,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { backToCallView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
-import {
-  faArrowUpToLine,
-  faPhone as faPhoneLight,
-  faArrowLeft,
-} from '@nethesis/nethesis-light-svg-icons'
+import { faPhone as faPhoneLight, faArrowLeft } from '@nethesis/nethesis-light-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
-import { blindTransfer, attendedTransfer } from '../../lib/phone/call'
+import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import { getTimestampInSeconds } from '../../utils/genericFunctions/timestamp'
 import Hangup from '../Hangup'
@@ -33,7 +29,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const relativeRef = useRef<HTMLDivElement>(null)
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
-  const [transferDestination, setTransferDestination] = useState<string>('')
   const dispatch = useDispatch<Dispatch>()
   const { displayName, number, startTime } = useSelector((state: RootState) => state.currentCall)
 
@@ -62,22 +57,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
         userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
         userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()),
     )
-  }
-
-  async function handleHangupAndTransfer() {
-    // Manage blind transfer and hangup
-    if (transferDestination) {
-      const transfered = await blindTransfer(
-        (endpoints && endpoints[transferDestination].endpoints.mainextension[0].id) || '',
-      )
-      if (transfered === true) {
-        dispatch.alerts.setAlert('call_transfered')
-        dispatch.island.setIslandView('call')
-        setTimeout(() => {
-          dispatch.alerts.removeAlert('call_transfered')
-        }, 4000)
-      }
-    }
   }
 
   async function handleAttendedTransfer(userEndpoints: UserEndpointsTypes) {
@@ -133,11 +112,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     return () => relativeRef.current?.removeEventListener('scroll', handleScroll)
   }, [isOpen])
 
-  // Reset transfer destination value when search value changes
-  useEffect(() => {
-    setTransferDestination('')
-  }, [searchValue.current])
-
   return (
     <>
       {isOpen ? (
@@ -179,10 +153,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   </div>
                 </div>
                 <div className='pi-flex pi-gap-3.5'>
-                  <Button variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faArrowUpToLine} />
-                  </Button>
-                  <Button onClick={() => blindTransfer(searchValue.current)} variant='default'>
+                  <Button onClick={() => attendedTransfer(searchValue.current)} variant='default'>
                     <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                   </Button>
                 </div>
@@ -208,13 +179,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     </div>
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
-                    <Button
-                      active={userEndpoints.username === transferDestination}
-                      onClick={() => setTransferDestination(userEndpoints.username)}
-                      variant='default'
-                    >
-                      <FontAwesomeIcon size='xl' icon={faArrowUpToLine} />
-                    </Button>
                     <Button onClick={() => handleAttendedTransfer(userEndpoints)} variant='default'>
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
@@ -227,10 +191,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               </p>
             )}
           </div>
-          <Hangup
-            isDestination={transferDestination !== ''}
-            clickCallback={handleHangupAndTransfer}
-          />
+          <Hangup />
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
