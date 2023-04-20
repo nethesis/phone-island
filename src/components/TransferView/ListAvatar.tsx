@@ -1,11 +1,11 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { type FC, ComponentProps } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 
-const ListAvatar: FC<ListAvatarProps> = ({ username, status }) => {
+const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
   const { avatars } = useSelector((state: RootState) => state.avatars)
 
   return (
@@ -15,7 +15,9 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status }) => {
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'contain',
       }}
-      className='pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative'
+      data-stop-propagation={true}
+      className='pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition hover:pi-scale-110'
+      {...props}
     >
       {/* The status bullet */}
       {status && (
@@ -30,7 +32,7 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status }) => {
   )
 }
 
-interface ListAvatarProps {
+interface ListAvatarProps extends ComponentProps<'div'> {
   username?: string
   status?: string
 }

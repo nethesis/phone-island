@@ -168,6 +168,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 >
                   <div className='pi-flex pi-items-center pi-gap-4'>
                     <ListAvatar
+                      onClick={() => handleAttendedTransfer(userEndpoints)}
                       username={userEndpoints.username}
                       status={userEndpoints.mainPresence}
                     />
