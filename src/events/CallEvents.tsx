@@ -12,8 +12,9 @@ export const CallEvents: FC = () => {
   /**
    * Event listner for phone-island-call-start event
    */
-  useEventListener('phone-island-call-start', (data) => {
-    callNumber(data.number)
+  useEventListener('phone-island-call-start', (data: CallStartTypes) => {
+    const number = data.number.replace(/\s/g, '')
+    callNumber(number)
   })
   return <></>
 }
@@ -33,5 +34,9 @@ export function dispatchOutgoingCallStarted(name: string = '', number: string = 
 
 export interface OutgoingCallStartedTypes {
   name: string
+  number: string
+}
+
+interface CallStartTypes {
   number: string
 }
