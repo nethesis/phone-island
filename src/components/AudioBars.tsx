@@ -110,6 +110,9 @@ export const AudioBars: FC<AudioBarsProps> = ({
 
     // Connect the audio source to the analyser
     analyser.current && source.current && source.current.connect(analyser.current)
+    if (audioElement) {
+      context.current && analyser.current && analyser.current.connect(context.current.destination)
+    }
     startAnimation()
 
     // Cleanup bars animation
