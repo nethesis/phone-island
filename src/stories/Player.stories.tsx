@@ -5,6 +5,7 @@ import { Story, Meta } from '@storybook/react'
 import React from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
+import { getAnnouncement } from '../services/offhour'
 
 const meta = {
   title: 'Default',
@@ -35,9 +36,10 @@ const PlayerTemplate: Story<any> = (args) => {
     })
   }
 
-  const handlePlayerStartAudioFile = () => {
+  const handlePlayerStartAudioFile = async () => {
+    const audioFile = await getAnnouncement(process.env.ANNOUNCEMENT_ID!)
     eventDispatch('phone-island-audio-player-start', {
-      base64_audio_file: process.env.BASE64_AUDIO_FILE,
+      base64_audio_file: audioFile,
       description: 'Custom Audio File',
     })
   }
