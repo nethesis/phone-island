@@ -27,7 +27,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
           }}
           transition={{ duration: 0.3 }}
         >
-          <div className='pi-font-bold'>{transferring ? transferringName : displayName}</div>
+          <div className='pi-font-bold pi-text-sm'>{transferring ? transferringName : displayName}</div>
           <div className=''>
             <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
           </div>

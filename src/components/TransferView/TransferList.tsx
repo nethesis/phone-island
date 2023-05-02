@@ -60,6 +60,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }
 
   async function handleAttendedTransfer(userEndpoints: UserEndpointsTypes) {
+    // Check user's main status
+    if (userEndpoints.mainPresence !== 'online') return
+    // Send attended transfer message
     const transferring = await attendedTransfer(userEndpoints.endpoints.mainextension[0].id)
     if (transferring) {
       dispatch.island.setIslandView('call')
@@ -125,7 +128,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               type='text'
               onChange={handleChange}
               value={searchValue.current}
+              placeholder='Search or compose...'
               autoFocus
+              spellCheck={false}
               className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
             />
           </div>
@@ -173,14 +178,23 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       status={userEndpoints.mainPresence}
                     />
                     <div
-                      style={{ maxWidth: '146px' }}
-                      className='pi-h-fit pi-max-w-40 pi-font-sans pi-truncate pi-text-sm pi-font-bold'
+                      onClick={() => handleAttendedTransfer(userEndpoints)}
+                      style={{ maxWidth: '196px' }}
+                      data-stop-propagation={true}
+                      className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-200 pi-transition ${
+                        userEndpoints.mainPresence !== 'online' ? 'pi-opacity-70' : 'hover:pi-text-white'
+                      }`}
                     >
+                      {/* The name */}
                       {userEndpoints.name}
                     </div>
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
-                    <Button onClick={() => handleAttendedTransfer(userEndpoints)} variant='default'>
+                    <Button
+                      onClick={() => handleAttendedTransfer(userEndpoints)}
+                      variant='default'
+                      disabled={userEndpoints.mainPresence !== 'online'}
+                    >
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
                   </div>
