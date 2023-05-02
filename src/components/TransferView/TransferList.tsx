@@ -118,95 +118,104 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   return (
     <>
       {isOpen ? (
-        <div className='pi-relative pi-flex pi-flex-col pi-gap-7'>
-          <div className='pi-flex pi-gap-4'>
-            <Button variant='transparent' onClick={backToCallView}>
-              <FontAwesomeIcon size='xl' icon={faArrowLeft} />
-            </Button>
-            <input
-              data-stop-propagation={true}
-              type='text'
-              onChange={handleChange}
-              value={searchValue.current}
-              placeholder='Search or compose...'
-              autoFocus
-              spellCheck={false}
-              className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
-            />
+        <div className='pi-relative pi-flex pi-flex-col'>
+          {/* Top section */}
+          <div className='pi-relative pi-z-50'>
+            <div className='pi-flex pi-gap-4'>
+              <Button variant='transparent' onClick={backToCallView}>
+                <FontAwesomeIcon size='xl' icon={faArrowLeft} />
+              </Button>
+              <input
+                data-stop-propagation={true}
+                type='text'
+                onChange={handleChange}
+                value={searchValue.current}
+                placeholder='Search or compose...'
+                autoFocus
+                spellCheck={false}
+                className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
+              />
+            </div>
           </div>
-          <div
-            style={{ height: '272px' }}
-            ref={relativeRef}
-            className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-custom-scrollbar'
-          >
+          {/* List shadow */}
+          <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-6 pi-pr-2'>
             {showGradient && (
-              <div
-                style={{ right: '35px', left: '35px' }}
-                className='pi-fixed pi-z-10 pi-h-6 pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-pointer-events-none'
-              ></div>
+              <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-1000'></div>
             )}
-            {/* The custom user */}
-            {showCustomUser && listUsers.length === 0 && (
-              <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
-                <div className='pi-flex pi-items-center pi-gap-4'>
-                  <ListAvatar />
-                  <div
-                    style={{ maxWidth: '146px' }}
-                    className='pi-h-fit pi-max-w-40 pi-font-sans pi-truncate pi-text-sm pi-font-bold'
-                  >
-                    {searchValue.current}
-                  </div>
-                </div>
-                <div className='pi-flex pi-gap-3.5'>
-                  <Button onClick={() => attendedTransfer(searchValue.current)} variant='default'>
-                    <FontAwesomeIcon size='xl' icon={faPhoneLight} />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {/* The users list */}
-            {listUsers &&
-              listUsers.slice(0, showingUsers).map((userEndpoints, i) => (
-                <div
-                  key={i}
-                  className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
-                >
+          </div>
+          <div className='pi-flex pi-flex-col pi-gap-7 -pi-mt-6'>
+            {/* List section */}
+            <div
+              style={{ height: '17rem' }}
+              ref={relativeRef}
+              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-custom-scrollbar'
+            >
+              {/* The custom user */}
+              {showCustomUser && listUsers.length === 0 && (
+                <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
                   <div className='pi-flex pi-items-center pi-gap-4'>
-                    <ListAvatar
-                      onClick={() => handleAttendedTransfer(userEndpoints)}
-                      username={userEndpoints.username}
-                      status={userEndpoints.mainPresence}
-                    />
+                    <ListAvatar />
                     <div
-                      onClick={() => handleAttendedTransfer(userEndpoints)}
-                      style={{ maxWidth: '196px' }}
-                      data-stop-propagation={true}
-                      className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-200 pi-transition ${
-                        userEndpoints.mainPresence !== 'online' ? 'pi-opacity-70' : 'hover:pi-text-white'
-                      }`}
+                      style={{ maxWidth: '146px' }}
+                      className='pi-h-fit pi-max-w-40 pi-font-sans pi-truncate pi-text-sm pi-font-bold'
                     >
-                      {/* The name */}
-                      {userEndpoints.name}
+                      {searchValue.current}
                     </div>
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
-                    <Button
-                      onClick={() => handleAttendedTransfer(userEndpoints)}
-                      variant='default'
-                      disabled={userEndpoints.mainPresence !== 'online'}
-                    >
+                    <Button onClick={() => attendedTransfer(searchValue.current)} variant='default'>
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
                   </div>
                 </div>
-              ))}
-            {loaded && listUsers.length === 0 && !showCustomUser && (
-              <p className='pi-font-sans pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
-                No users found.
-              </p>
-            )}
+              )}
+              {/* The users list */}
+              {listUsers &&
+                listUsers.slice(0, showingUsers).map((userEndpoints, i) => (
+                  <div
+                    key={i}
+                    className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
+                  >
+                    <div className='pi-flex pi-items-center pi-gap-4'>
+                      <ListAvatar
+                        onClick={() => handleAttendedTransfer(userEndpoints)}
+                        username={userEndpoints.username}
+                        status={userEndpoints.mainPresence}
+                      />
+                      <div
+                        onClick={() => handleAttendedTransfer(userEndpoints)}
+                        style={{ maxWidth: '196px' }}
+                        data-stop-propagation={true}
+                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-200 pi-transition ${
+                          userEndpoints.mainPresence !== 'online'
+                            ? 'pi-opacity-70'
+                            : 'hover:pi-text-white'
+                        }`}
+                      >
+                        {/* The user name */}
+                        {userEndpoints.name}
+                      </div>
+                    </div>
+                    <div className='pi-flex pi-gap-3.5'>
+                      <Button
+                        onClick={() => handleAttendedTransfer(userEndpoints)}
+                        variant='default'
+                        disabled={userEndpoints.mainPresence !== 'online'}
+                      >
+                        <FontAwesomeIcon size='xl' icon={faPhoneLight} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              {loaded && listUsers.length === 0 && !showCustomUser && (
+                <p className='pi-font-sans pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
+                  No users found.
+                </p>
+              )}
+            </div>
+            {/* Bottom section */}
+            <Hangup />
           </div>
-          <Hangup />
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
