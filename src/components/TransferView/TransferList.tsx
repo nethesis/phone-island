@@ -12,7 +12,6 @@ import { faPhone as faPhoneLight, faArrowLeft } from '@nethesis/nethesis-light-s
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
-import { getTimestampInSeconds } from '../../utils/genericFunctions/timestamp'
 import Hangup from '../Hangup'
 
 const USERS_NUMBER_PER_PAGE = 10
@@ -59,19 +58,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     )
   }
 
-  async function handleAttendedTransfer(userEndpoints: UserEndpointsTypes) {
-    // Check user's main status
-    if (userEndpoints.mainPresence !== 'online') return
+  async function handleAttendedTransfer(number: string) {
     // Send attended transfer message
-    const transferring = await attendedTransfer(userEndpoints.endpoints.mainextension[0].id)
-    if (transferring) {
-      dispatch.island.setIslandView('call')
+    const transferringMessageSent = await attendedTransfer(number)
+    if (transferringMessageSent) {
       // Force current call to achieve the expected behavior
       dispatch.currentCall.updateCurrentCall({
-        username: userEndpoints.username,
-        displayName: userEndpoints.name,
-        number: userEndpoints.endpoints.mainextension[0].id,
-        startTime: `${getTimestampInSeconds()}`,
         transferring: true,
         transferringName: displayName,
         transferringNumber: number,
@@ -150,7 +142,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               ref={relativeRef}
               className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden'
             >
-              {/* The custom user */}
+              {/* The custom searched number */}
               {showCustomUser && listUsers.length === 0 && (
                 <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
                   <div className='pi-flex pi-items-center pi-gap-4'>
@@ -163,7 +155,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     </div>
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
-                    <Button onClick={() => attendedTransfer(searchValue.current)} variant='default'>
+                    <Button
+                      onClick={() => handleAttendedTransfer(searchValue.current)}
+                      variant='default'
+                    >
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
                   </div>
@@ -178,12 +173,18 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   >
                     <div className='pi-flex pi-items-center pi-gap-4'>
                       <ListAvatar
-                        onClick={() => handleAttendedTransfer(userEndpoints)}
+                        onClick={() =>
+                          userEndpoints.mainPresence === 'online' &&
+                          handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
+                        }
                         username={userEndpoints.username}
                         status={userEndpoints.mainPresence}
                       />
                       <div
-                        onClick={() => handleAttendedTransfer(userEndpoints)}
+                        onClick={() =>
+                          userEndpoints.mainPresence === 'online' &&
+                          handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
+                        }
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
                         className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
@@ -193,13 +194,18 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       </div>
                     </div>
                     <div className='pi-flex pi-gap-3.5'>
-                      <Button
-                        onClick={() => handleAttendedTransfer(userEndpoints)}
-                        variant='default'
-                        disabled={userEndpoints.mainPresence !== 'online'}
-                      >
-                        <FontAwesomeIcon size='xl' icon={faPhoneLight} />
-                      </Button>
+                      {userEndpoints.mainPresence === 'online' && (
+                        <Button
+                          onClick={() =>
+                            userEndpoints.mainPresence === 'online' &&
+                            handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
+                          }
+                          variant='default'
+                          disabled={userEndpoints.mainPresence !== 'online'}
+                        >
+                          <FontAwesomeIcon size='xl' icon={faPhoneLight} />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}

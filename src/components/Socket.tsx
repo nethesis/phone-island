@@ -22,7 +22,6 @@ import type {
   QueueUpdateMemberTypes,
   MainPresenceTypes,
 } from '../types'
-// import { userTotallyFree } from '../lib/user/extensions'
 
 interface SocketProps {
   children: ReactNode
@@ -43,7 +42,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
      * @param res The data from the socket
      * @param conv The conversation data
      */
-    const handleCurrentUserEvents = (res: any, conv: ConversationsTypes) => {
+    const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationsTypes) => {
       // Initialize status
       const status: string = res.status
       // Check conversation isn't empty
@@ -99,6 +98,31 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                     }` || '',
                 })
               }
+            case 'onhold':
+              // Handle transfer data
+              const { transferring, displayName } = store.getState().currentCall
+              // The new conversation during transferring
+              const { counterpartName, counterpartNum, startTime } = Object.values(
+                res.conversations,
+              )[0]
+              // Set the new call informations
+              if (
+                transferring &&
+                counterpartNum &&
+                startTime &&
+                counterpartName &&
+                counterpartName !== '<unknown>'
+              ) {
+                dispatch.currentCall.updateCurrentCall({
+                  displayName: counterpartName,
+                  number: counterpartNum,
+                  startTime: `${startTime}`,
+                })
+                // Set the view of the island to call
+                dispatch.island.setIslandView('call')
+              }
+
+              break
             default:
               break
           }
