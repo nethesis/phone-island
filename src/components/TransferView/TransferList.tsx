@@ -138,7 +138,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             </div>
           </div>
           {/* List shadow */}
-          <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-2'>
+          <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-4'>
             {showGradient && (
               <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-1000'></div>
             )}
@@ -148,7 +148,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             <div
               style={{ height: '17rem' }}
               ref={relativeRef}
-              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-2 pi-overflow-y-auto pi-overflow-x-hidden pi-custom-scrollbar'
+              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden'
             >
               {/* The custom user */}
               {showCustomUser && listUsers.length === 0 && (
@@ -186,11 +186,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         onClick={() => handleAttendedTransfer(userEndpoints)}
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
-                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition ${
-                          userEndpoints.mainPresence !== 'online'
-                            ? 'pi-opacity-75'
-                            : ''
-                        }`}
+                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
                       >
                         {/* The user name */}
                         {userEndpoints.name}
