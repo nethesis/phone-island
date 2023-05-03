@@ -138,7 +138,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             </div>
           </div>
           {/* List shadow */}
-          <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-6 pi-pr-2'>
+          <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-2'>
             {showGradient && (
               <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-1000'></div>
             )}
@@ -186,10 +186,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         onClick={() => handleAttendedTransfer(userEndpoints)}
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
-                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-200 pi-transition ${
+                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition ${
                           userEndpoints.mainPresence !== 'online'
-                            ? 'pi-opacity-70'
-                            : 'hover:pi-text-white'
+                            ? 'pi-opacity-75'
+                            : ''
                         }`}
                       >
                         {/* The user name */}

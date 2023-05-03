@@ -42,13 +42,16 @@ const Avatar: FC = () => {
         {(incoming || (outgoing && !accepted)) && (
           // The background pulse effect
           <motion.div
+            style={{
+              animationDuration: '2s'
+            }}
             animate={isOpen ? 'open' : 'closed'}
             variants={iconVariants}
-            className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 -pi-z-10 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
+            className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
           ></motion.div>
         )}
         <motion.div
-          className='pi-z-10 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm pi-bg-cover'
+          className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm pi-bg-cover'
           style={{
             backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
             backgroundRepeat: 'no-repeat',
