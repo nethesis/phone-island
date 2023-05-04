@@ -22,6 +22,7 @@ import type {
   QueueUpdateMemberTypes,
   MainPresenceTypes,
 } from '../types'
+import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 
 interface SocketProps {
   children: ReactNode
@@ -45,6 +46,8 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
     const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationsTypes) => {
       // Initialize status
       const status: string = res.status
+      // Handle transferring data
+      const { transferring } = store.getState().currentCall
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         // With conversation
@@ -69,7 +72,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
-                // Current call accepted
+                // Current call accepted and update connected call
                 dispatch.currentCall.updateCurrentCall({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),
@@ -82,6 +85,19 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                       extensions[conv.counterpartNum].username
                     }` || '',
                 })
+                // Handle transferring end
+                if (transferring) {
+                  // Get transferring data
+                  const { transferringName, transferringNumber, transferringStartTime } =
+                    store.getState().currentCall
+                  // Update transferring data for the current call
+                  dispatch.currentCall.updateCurrentCall({
+                    displayName: transferringName,
+                    number: transferringNumber,
+                    startTime: transferringStartTime,
+                    transferring: false,
+                  })
+                }
               }
               // Handle outgoing call
               else if (conv && !conv.connected && conv.direction === 'out') {
@@ -99,29 +115,23 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                 })
               }
             case 'onhold':
-              // Handle transfer data
-              const { transferring, displayName } = store.getState().currentCall
               // The new conversation during transferring
-              const { counterpartName, counterpartNum, startTime } = Object.values(
-                res.conversations,
-              )[0]
+              const { counterpartName, counterpartNum } = conv
               // Set the new call informations
               if (
                 transferring &&
                 counterpartNum &&
-                startTime &&
                 counterpartName &&
                 counterpartName !== '<unknown>'
               ) {
                 dispatch.currentCall.updateCurrentCall({
                   displayName: counterpartName,
                   number: counterpartNum,
-                  startTime: `${startTime}`,
+                  startTime: `${getTimestampInSeconds()}`,
                 })
                 // Set the view of the island to call
                 dispatch.island.setIslandView('call')
               }
-
               break
             default:
               break
