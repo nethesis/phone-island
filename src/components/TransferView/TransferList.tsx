@@ -13,6 +13,7 @@ import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import Hangup from '../Hangup'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -114,7 +115,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           {/* Top section */}
           <div className='pi-relative pi-z-50'>
             <div className='pi-flex pi-gap-4'>
-              <Button variant='transparent' onClick={backToCallView}>
+              <Button
+                variant='transparent'
+                onClick={backToCallView}
+                data-tooltip-id='transfer-list-tooltip'
+                data-tooltip-content='Back'
+              >
                 <FontAwesomeIcon size='xl' icon={faArrowLeft} />
               </Button>
               <input
@@ -158,6 +164,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     <Button
                       onClick={() => handleAttendedTransfer(searchValue.current)}
                       variant='default'
+                      data-tooltip-id='transfer-list-tooltip'
+                      data-tooltip-content='Call to transfer'
                     >
                       <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                     </Button>
@@ -179,6 +187,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         }
                         username={userEndpoints.username}
                         status={userEndpoints.mainPresence}
+                        data-tooltip-id={userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'}
+                        data-tooltip-content={userEndpoints.mainPresence === 'online' && 'Call to transfer'}
                       />
                       <div
                         onClick={() =>
@@ -187,6 +197,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         }
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
+                        data-tooltip-id={userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'}
+                        data-tooltip-content={userEndpoints.mainPresence === 'online' && 'Call to transfer'}
                         className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
                       >
                         {/* The user name */}
@@ -202,6 +214,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           }
                           variant='default'
                           disabled={userEndpoints.mainPresence !== 'online'}
+                          data-tooltip-id='transfer-list-tooltip'
+                          data-tooltip-content='Call to transfer'
                         >
                           <FontAwesomeIcon size='xl' icon={faPhoneLight} />
                         </Button>
@@ -222,6 +236,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
       )}
+      <Tooltip className='pi-z-20' id='transfer-list-tooltip' place='bottom' />
     </>
   )
 }

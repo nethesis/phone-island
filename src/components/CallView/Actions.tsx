@@ -28,6 +28,7 @@ import { sendDTMF } from '../../lib/webrtc/messages'
 import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { TransferActions } from '../TransferView'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -71,6 +72,8 @@ const Actions: FC = () => {
           variant='default'
           active={paused ? true : false}
           onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+          data-tooltip-id='tooltip'
+          data-tooltip-content={paused ? 'Play' : 'Pause'}
         >
           {paused ? (
             <FontAwesomeIcon size='xl' icon={faPlay} />
@@ -82,6 +85,8 @@ const Actions: FC = () => {
           variant='default'
           active={muted ? true : false}
           onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
+          data-tooltip-id='tooltip'
+          data-tooltip-content={muted ? 'Unmute' : 'Mute'}
         >
           {muted ? (
             <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
@@ -93,6 +98,8 @@ const Actions: FC = () => {
           active={transferring}
           onClick={transferring ? calcelTransfer : transfer}
           variant='default'
+          data-tooltip-id='tooltip'
+          data-tooltip-content='Transfer'
         >
           {transferring ? (
             <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
@@ -100,11 +107,19 @@ const Actions: FC = () => {
             <FontAwesomeIcon size='xl' icon={faArrowDownArrowUp} />
           )}
         </Button>
-        <Button active={view === 'keypad'} variant='default' onClick={openKeypad}>
+        <Button
+          active={view === 'keypad'}
+          variant='default'
+          onClick={openKeypad}
+          data-tooltip-id='tooltip'
+          data-tooltip-content='Keyboard'
+        >
           {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
         </Button>
       </div>
       {transferring && <TransferActions />}
+      {/* Buttons tooltips */}
+      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
     </>
   )
 }
