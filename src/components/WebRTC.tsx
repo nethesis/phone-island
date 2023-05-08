@@ -19,11 +19,20 @@ interface WebRTCProps {
   sipExten: string
   sipSecret: string
   hostName: string
+  janusHost: string
+  janusPort: string
 }
 
 const Janus: JanusTypes = JanusLib
 
-export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, children }) => {
+export const WebRTC: FC<WebRTCProps> = ({
+  hostName,
+  sipExten,
+  sipSecret,
+  children,
+  janusHost,
+  janusPort,
+}) => {
   const dispatch = useDispatch<Dispatch>()
 
   // Initialize janus check interval id
@@ -60,7 +69,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
                         sipcall: pluginHandle,
                       })
                       // Register the extension to the server
-                      register(sipExten, sipSecret)
+                      register({ sipExten, sipSecret, janusHost, janusPort })
                       if (pluginHandle) {
                         if (Janus.log)
                           Janus.log(
@@ -367,7 +376,7 @@ export const WebRTC: FC<WebRTCProps> = ({ hostName, sipExten, sipSecret, childre
           () =>
             webrtcCheck(() => {
               // Do the register as callback of webrtc check
-              register(sipExten, sipSecret)
+              register({ sipExten, sipSecret, janusHost, janusPort })
             }),
           CHECK_INTERVAL_TIME,
         )
