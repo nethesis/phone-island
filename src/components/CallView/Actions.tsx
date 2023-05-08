@@ -62,6 +62,12 @@ const Actions: FC = () => {
     setTimeout(() => {
       sendDTMF('1')
       dispatch.player.stopAudioPlayer()
+      // The workarround to disable transfer because of the wrong conv.connection value from ws
+      if (transferring) {
+        setTimeout(() => {
+          dispatch.currentCall.updateTransferring(false)
+        }, 500)
+      }
     }, 500)
   }
 

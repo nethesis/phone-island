@@ -29,6 +29,7 @@ const defaultState = {
   transferringNumber: '',
   transferringStartTime: '',
   transferSwitching: false,
+  transferCalls: new Array(),
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -38,6 +39,7 @@ export const currentCall = createModel<RootModel>()({
       return {
         ...state,
         ...payload,
+        transferCalls: state.transferCalls,
       }
     },
     updateKeypadValue: (state, payload: string) => {
@@ -56,6 +58,16 @@ export const currentCall = createModel<RootModel>()({
       return {
         ...state,
         transferSwitching: payload,
+      }
+    },
+    addTransferCalls: (state, payload: TransferCallsTypes) => {
+      if (state.transferCalls.find((item) => item.number === payload.number)) {
+        return state
+      } else {
+        return {
+          ...state,
+          transferCalls: [...state.transferCalls, payload],
+        }
       }
     },
     reset: () => {
@@ -111,6 +123,13 @@ export const currentCall = createModel<RootModel>()({
   }),
 })
 
+export type TransferCallsTypes = {
+  type: 'transferred' | 'destination'
+  displayName: string
+  number: string
+  startTime: string
+}
+
 export interface CurrentCallTypes {
   displayName?: string
   username?: string
@@ -133,4 +152,5 @@ export interface CurrentCallTypes {
   transferringNumber?: string
   transferringStartTime?: string
   transferSwitching?: boolean
+  transferCalls?: TransferCallsTypes[]
 }

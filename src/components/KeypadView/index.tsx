@@ -52,7 +52,6 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               readOnly
               value={keypadValue}
               autoFocus
-              placeholder='Keys...'
               className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
             />
           </div>

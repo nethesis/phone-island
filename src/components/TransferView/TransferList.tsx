@@ -30,7 +30,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
   const dispatch = useDispatch<Dispatch>()
-  const { displayName, number, startTime } = useSelector((state: RootState) => state.currentCall)
 
   function handleChange(event: FormEvent<HTMLInputElement>) {
     // Update search value
@@ -63,12 +62,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     // Send attended transfer message
     const transferringMessageSent = await attendedTransfer(number)
     if (transferringMessageSent) {
-      // Force current call to achieve the expected behavior
+      // Set transferring
       dispatch.currentCall.updateCurrentCall({
         transferring: true,
-        transferringName: displayName,
-        transferringNumber: number,
-        transferringStartTime: startTime,
       })
     }
   }
@@ -128,7 +124,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 type='text'
                 onChange={handleChange}
                 value={searchValue.current}
-                placeholder='Search or compose...'
                 autoFocus
                 spellCheck={false}
                 className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
@@ -187,8 +182,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         }
                         username={userEndpoints.username}
                         status={userEndpoints.mainPresence}
-                        data-tooltip-id={userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'}
-                        data-tooltip-content={userEndpoints.mainPresence === 'online' && 'Call to transfer'}
+                        data-tooltip-id={
+                          userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
+                        }
+                        data-tooltip-content={
+                          userEndpoints.mainPresence === 'online' && 'Call to transfer'
+                        }
                       />
                       <div
                         onClick={() =>
@@ -197,8 +196,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         }
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
-                        data-tooltip-id={userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'}
-                        data-tooltip-content={userEndpoints.mainPresence === 'online' && 'Call to transfer'}
+                        data-tooltip-id={
+                          userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
+                        }
+                        data-tooltip-content={
+                          userEndpoints.mainPresence === 'online' && 'Call to transfer'
+                        }
                         className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
                       >
                         {/* The user name */}
