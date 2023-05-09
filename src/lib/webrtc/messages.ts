@@ -8,13 +8,13 @@ import adapter from 'webrtc-adapter'
 export function register({
   sipExten,
   sipSecret,
-  janusHost,
-  janusPort,
+  sipHost,
+  sipPort,
 }: {
   sipExten: string
   sipSecret: string
-  janusHost: string
-  janusPort: string
+  sipHost: string
+  sipPort: string
 }) {
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   const { name } = store.getState().currentUser
@@ -25,8 +25,8 @@ export function register({
         username: `sip:${sipExten}@127.0.0.1`,
         display_name: name || '',
         secret: sipSecret,
-        proxy: `sip:${janusHost}:${janusPort}`,
-        outbound_proxy: `sip:${janusHost}:${janusPort}`,
+        proxy: `sip:${sipHost}:${sipPort}`,
+        outbound_proxy: `sip:${sipHost}:${sipPort}`,
         sips: false,
         refresh: false,
       },
