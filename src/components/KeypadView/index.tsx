@@ -11,7 +11,7 @@ import Actions from './Actions'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { backToCallView } from '../../lib/island/island'
 import { playDtmfAudio } from '../../lib/phone/call'
-import Hangup from '../Hangup'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -43,7 +43,12 @@ const KeypadView: FC<KeypadViewTypes> = () => {
       {isOpen ? (
         <div className='pi-flex pi-flex-col pi-gap-7'>
           <div className='pi-flex pi-gap-4'>
-            <Button variant='transparent' onClick={backToCallView}>
+            <Button
+              variant='transparent'
+              onClick={backToCallView}
+              data-tooltip-id='keyboard-tooltip'
+              data-tooltip-content='Back to call'
+            >
               <FontAwesomeIcon size='xl' icon={faArrowLeft} />
             </Button>
             <input
@@ -56,14 +61,11 @@ const KeypadView: FC<KeypadViewTypes> = () => {
             />
           </div>
           <Actions keyCallback={sendKey} />
-          <div className='pi-flex pi-justify-center'>
-            {/* The button to hangup the currentCall */}
-            <Hangup />
-          </div>
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base'>Keypad</div>
       )}
+      <Tooltip className='pi-z-1000' id='keyboard-tooltip' place='bottom' />
     </>
   )
 }

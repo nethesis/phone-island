@@ -105,7 +105,7 @@ const Actions: FC = () => {
           onClick={transferring ? calcelTransfer : transfer}
           variant='default'
           data-tooltip-id='tooltip'
-          data-tooltip-content='Transfer'
+          data-tooltip-content={transferring ? 'Cancel transfer' : 'Transfer'}
         >
           {transferring ? (
             <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />

@@ -76,7 +76,7 @@ const CallView: FC<CallViewProps> = () => {
                 <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
               </Button>
             ) : ( */}
-            <Hangup description="Handup and transfer" />
+            <Hangup description="Hangup and transfer" />
             {/* )} */}
             {/* The button to answer the incoming call */}
             {isAnswerVisible(outgoing, accepted) && (

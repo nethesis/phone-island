@@ -12,7 +12,6 @@ import { faPhone as faPhoneLight, faArrowLeft } from '@nethesis/nethesis-light-s
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
-import Hangup from '../Hangup'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 const USERS_NUMBER_PER_PAGE = 10
@@ -115,7 +114,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 variant='transparent'
                 onClick={backToCallView}
                 data-tooltip-id='transfer-list-tooltip'
-                data-tooltip-content='Back'
+                data-tooltip-content='Back to call'
               >
                 <FontAwesomeIcon size='xl' icon={faArrowLeft} />
               </Button>
@@ -133,10 +132,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           {/* List shadow */}
           <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-4'>
             {showGradient && (
-              <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-1000'></div>
+              <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-100'></div>
             )}
           </div>
-          <div className='pi-flex pi-flex-col pi-gap-7 -pi-mt-6'>
+          <div style={{marginTop: '-22px'}} className='pi-flex pi-flex-col pi-gap-7'>
             {/* List section */}
             <div
               style={{ height: '17rem' }}
@@ -232,14 +231,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 </p>
               )}
             </div>
-            {/* Bottom section */}
-            <Hangup />
           </div>
         </div>
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
       )}
-      <Tooltip className='pi-z-20' id='transfer-list-tooltip' place='bottom' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip' place='bottom' />
     </>
   )
 }
