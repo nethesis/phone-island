@@ -16,8 +16,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   const AUTH_TOKEN: string = CONFIG[2]
   const SIP_EXTEN: string = CONFIG[3]
   const SIP_SECRET: string = CONFIG[4]
-  const JANUS_HOST: string = CONFIG[5] || '127.0.0.1'
-  const JANUS_PORT: string = CONFIG[6] || '5060'
+  const JANUS_HOST: string = CONFIG[5]
+  const JANUS_PORT: string = CONFIG[6]
 
   return (
     <>
