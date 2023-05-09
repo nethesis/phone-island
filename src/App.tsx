@@ -31,7 +31,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
         >
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
-              <Events>
+              <Events sipHost={SIP_HOST}>
                 <Island showAlways={showAlways} />
               </Events>
             </Socket>

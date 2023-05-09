@@ -7,14 +7,14 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { callNumber } from '../lib/phone/call'
 
-export const CallEvents: FC = () => {
+export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
   /**
    * Event listner for phone-island-call-start event
    */
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
     const number = data.number.replace(/\s/g, '')
-    callNumber(number)
+    callNumber(number, sipHost)
   })
   return <></>
 }

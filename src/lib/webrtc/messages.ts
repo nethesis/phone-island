@@ -22,7 +22,7 @@ export function register({
     sipcall.send({
       message: {
         request: 'register',
-        username: `sip:${sipExten}@127.0.0.1`,
+        username: `sip:${sipExten}@${sipHost}`,
         display_name: name || '',
         secret: sipSecret,
         proxy: `sip:${sipHost}:${sipPort}`,
