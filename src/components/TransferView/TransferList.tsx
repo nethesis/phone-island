@@ -13,6 +13,7 @@ import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { unpauseCurrentCall } from '../../lib/phone/call'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -103,6 +104,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     return () => relativeRef.current?.removeEventListener('scroll', handleScroll)
   }, [isOpen])
 
+  function handleBackClick() {
+    // Unpause the current call
+    unpauseCurrentCall()
+    // Open the call view
+    backToCallView()
+  }
+
   return (
     <>
       {isOpen ? (
@@ -112,7 +120,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             <div className='pi-flex pi-gap-4'>
               <Button
                 variant='transparent'
-                onClick={backToCallView}
+                onClick={handleBackClick}
                 data-tooltip-id='transfer-list-tooltip'
                 data-tooltip-content='Back to call'
               >
@@ -135,7 +143,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-100'></div>
             )}
           </div>
-          <div style={{marginTop: '-22px'}} className='pi-flex pi-flex-col pi-gap-7'>
+          <div style={{ marginTop: '-22px' }} className='pi-flex pi-flex-col pi-gap-7'>
             {/* List section */}
             <div
               style={{ height: '17rem' }}

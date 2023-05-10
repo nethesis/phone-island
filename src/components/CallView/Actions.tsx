@@ -45,7 +45,10 @@ const Actions: FC = () => {
   }
 
   function transfer() {
+    // Open the transfer view
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    // Pause the call
+    pauseCurrentCall()
   }
 
   // Cancels the current transfer through dtmfs
