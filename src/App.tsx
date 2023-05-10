@@ -18,14 +18,22 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   const AUTH_TOKEN: string = CONFIG[2]
   const SIP_EXTEN: string = CONFIG[3]
   const SIP_SECRET: string = CONFIG[4]
+  const SIP_HOST: string = CONFIG[5]
+  const SIP_PORT: string = CONFIG[6]
 
   return (
     <>
       <Provider store={store}>
-        <WebRTC hostName={HOST_NAME} sipExten={SIP_EXTEN} sipSecret={SIP_SECRET}>
+        <WebRTC
+          hostName={HOST_NAME}
+          sipExten={SIP_EXTEN}
+          sipSecret={SIP_SECRET}
+          sipHost={SIP_HOST}
+          sipPort={SIP_PORT}
+        >
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
-              <Events>
+              <Events sipHost={SIP_HOST}>
                 <Island showAlways={showAlways} />
               </Events>
             </Socket>

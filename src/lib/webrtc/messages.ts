@@ -5,17 +5,28 @@ import Janus from './janus'
 import { store } from '../../store'
 import adapter from 'webrtc-adapter'
 
-export function register(sipExten: string, sipSecret: string) {
+export function register({
+  sipExten,
+  sipSecret,
+  sipHost,
+  sipPort,
+}: {
+  sipExten: string
+  sipSecret: string
+  sipHost: string
+  sipPort: string
+}) {
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   const { name } = store.getState().currentUser
   if (sipcall) {
     sipcall.send({
       message: {
         request: 'register',
-        username: 'sip:' + sipExten + '@' + '127.0.0.1',
+        username: `sip:${sipExten}@${sipHost}`,
         display_name: name || '',
         secret: sipSecret,
-        proxy: 'sip:' + '127.0.0.1' + ':5060',
+        proxy: `sip:${sipHost}:${sipPort}`,
+        outbound_proxy: `sip:${sipHost}:${sipPort}`,
         sips: false,
         refresh: false,
       },

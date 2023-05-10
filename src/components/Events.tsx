@@ -6,13 +6,14 @@ import { CallEvents, PlayerEvents } from '../events'
 
 interface EventsProps {
   children: ReactNode
+  sipHost: string
 }
 
-export const Events: FC<EventsProps> = ({ children }) => {
+export const Events: FC<EventsProps> = ({ sipHost, children }) => {
   return (
     <>
       {<PlayerEvents />}
-      {<CallEvents />}
+      {<CallEvents sipHost={sipHost} />}
       {children}
     </>
   )

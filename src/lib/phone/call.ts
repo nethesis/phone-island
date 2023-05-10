@@ -25,9 +25,8 @@ import dtmfAudios from '../../static/dtmf'
  * Starts a call to a number
  * @param number The number string
  */
-export function callNumber(number: string) {
-  const BASE_HOST_URL: string = '127.0.0.1'
-  const sipURI = `sip:${number}@${BASE_HOST_URL}`
+export function callNumber(number: string, sipHost: string) {
+  const sipURI = `sip:${number}@${sipHost}`
   callSipURI(sipURI)
 }
 
