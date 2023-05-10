@@ -4,6 +4,8 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import { Base64 } from 'js-base64'
 
+import 'react-tooltip/dist/react-tooltip.css'
+
 interface PhoneIslandProps {
   dataConfig: string
   showAlways?: boolean

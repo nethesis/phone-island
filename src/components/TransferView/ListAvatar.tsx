@@ -1,11 +1,11 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { type FC, ComponentProps } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 
-const ListAvatar: FC<ListAvatarProps> = ({ username, status }) => {
+const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
   const { avatars } = useSelector((state: RootState) => state.avatars)
 
   return (
@@ -15,22 +15,26 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status }) => {
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'contain',
       }}
-      className='pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative'
+      data-stop-propagation={true}
+      className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition ${
+        status === 'online' ? 'hover:pi-scale-110' : ''
+      }`}
+      {...props}
     >
       {/* The status bullet */}
       {status && (
         <span
-          style={{ marginBottom: '1px', marginRight: '1px' }}
-          className={`pi-absolute pi-rounded-full pi-w-3 pi-h-3 ${
+          style={{ right: '1px', bottom: '1px' }}
+          className={`pi-absolute pi-rounded-full pi-w-3 pi-h-3 pi-z-20 ${
             status === 'online' ? 'pi-bg-green-600' : 'pi-bg-red-600'
-          } pi-bottom-0 pi-right-0 pi-border-2 pi-border-white`}
+          } pi-border-2 pi-border-white`}
         ></span>
       )}
     </div>
   )
 }
 
-interface ListAvatarProps {
+interface ListAvatarProps extends ComponentProps<'div'> {
   username?: string
   status?: string
 }

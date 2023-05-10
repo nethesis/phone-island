@@ -47,24 +47,25 @@ export const StyledAvatar = styled.div`
 export const StyledDetails = styled.div<StyledDetailsProps>`
   display: grid;
   align-self: center;
+  grid-gap: 0.25rem;
   grid-template-columns: 1fr;
   grid-template-rows: repeat(2, 24px);
 `
 
 export const StyledTimer = styled.div<StyledTimerProps>`
   ${({ isOpen, size }) =>
-    size === 'large' ? (isOpen ? 'font-size: 1.25rem' : 'font-size: 1.2rem') : 'font-size: 1rem'};
-  max-height: 24px;
-  font-weight: 200;
+    size === 'large' ? (isOpen ? 'font-size: 1.25rem' : 'font-size: 1.15rem') : 'font-size: 1rem'};
+  height: fit-content;
+  font-weight: 300;
   color: #fff;
   letter-spacing: 0.5px;
   max-width: fit-content;
 `
 
 export const StyledNumber = styled.div<StyledNumberProps>`
-  font-size: ${({ isOpen }) => (isOpen ? '1.25rem' : '1.2rem')}};
+  ${({ isOpen }) => (isOpen ? 'font-size:1.25rem' : 'font-size:1.2rem')};
   max-height: 24px;
-  font-weight: 200;
+  font-weight: 300;
   color: #fff;
   letter-spacing: 0.5px;
   max-width: fit-content;

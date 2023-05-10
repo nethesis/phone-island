@@ -148,7 +148,7 @@ export function unpauseCurrentCall() {
 }
 
 /**
- * Transfer the current call through a blind transfer
+ * Transfer the current call through a blind transfer (not in use)
  */
 export async function blindTransfer(number: string) {
   // Retrieve current conversation info

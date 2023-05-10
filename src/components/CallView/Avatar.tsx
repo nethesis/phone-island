@@ -33,30 +33,35 @@ const Avatar: FC = () => {
   const { incoming, outgoing, accepted } = useSelector((state: RootState) => state.currentCall)
 
   return (
-    <motion.div className='pi-relative' animate={isOpen ? 'open' : 'closed'} variants={iconVariants}>
-      {(incoming || (outgoing && !accepted)) && (
-        // The background pulse effect
+    <>
+      <motion.div
+        className='pi-relative'
+        animate={isOpen ? 'open' : 'closed'}
+        variants={iconVariants}
+      >
+        {(incoming || (outgoing && !accepted)) && (
+          // The background pulse effect
+          <motion.div
+            style={{
+              animationDuration: '2s'
+            }}
+            animate={isOpen ? 'open' : 'closed'}
+            variants={iconVariants}
+            className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
+          ></motion.div>
+        )}
         <motion.div
+          className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm pi-bg-cover'
           style={{
-            animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
-            borderRadius: '4px',
+            backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
           }}
           animate={isOpen ? 'open' : 'closed'}
           variants={iconVariants}
-          className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 -pi-z-10 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
-        ></motion.div>
-      )}
-      <motion.div
-        className='pi-z-10 pi-h-12 pi-w-12 pi-bg-gray-300 pi-rounded-sm pi-bg-cover'
-        style={{
-          backgroundImage: `url(${avatars && avatars[username] && avatars[username]})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-        }}
-        animate={isOpen ? 'open' : 'closed'}
-        variants={iconVariants}
-      />
-    </motion.div>
+        />
+      </motion.div>
+    </>
   )
 }
 

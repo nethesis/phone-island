@@ -54,6 +54,7 @@
     "react-moment": "^1.1.2",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
+    "react-tooltip": "^5.11.1",
     "socket.io-client": "^4.5.3",
     "styled-components": "^5.3.6",
     "webrtc-adapter": "^8.2.0"
@@ -122,8 +123,8 @@
     "rollup-plugin-generate-package-json": "^3.2.0",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-terser": "^7.0.2",
-    "tailwindcss": "^3.2.2",
     "tailwind-scrollbar": "^3.0.0",
+    "tailwindcss": "^3.2.2",
     "typescript": "^4.8.4",
     "webpack": "^5.74.0"
   },

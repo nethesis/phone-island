@@ -80,13 +80,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     }, 200)
   }, [view])
 
-  // Set transferring to false when names are equal
-  useEffect(() => {
-    if (transferringName === displayName && !transferSwitching) {
-      dispatch.currentCall.updateTransferring(false)
-    }
-  }, [transferringName, displayName])
-
   return (
     <div
       ref={islandContainerRef}

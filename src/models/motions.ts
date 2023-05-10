@@ -40,7 +40,7 @@ const defaultState = {
     keypad: {
       expanded: {
         width: 338,
-        height: 462,
+        height: 400,
       },
       collapsed: {
         width: 168,
@@ -51,7 +51,7 @@ const defaultState = {
     transfer: {
       expanded: {
         width: 408,
-        height: 472,
+        height: 410,
       },
       collapsed: {
         width: 168,

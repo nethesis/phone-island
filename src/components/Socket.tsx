@@ -22,7 +22,7 @@ import type {
   QueueUpdateMemberTypes,
   MainPresenceTypes,
 } from '../types'
-// import { userTotallyFree } from '../lib/user/extensions'
+import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 
 interface SocketProps {
   children: ReactNode
@@ -43,15 +43,19 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
      * @param res The data from the socket
      * @param conv The conversation data
      */
-    const handleCurrentUserEvents = (res: any, conv: ConversationsTypes) => {
-      // Initialize status
-      const status: string = res.status
+    const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationsTypes) => {
+      // Handle transferring data
+      const {
+        transferring,
+        transferSwitching,
+        transferCalls,
+      } = store.getState().currentCall
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         // With conversation
-        if (status) {
+        if (res.status) {
           const { extensions } = store.getState().users
-          switch (status) {
+          switch (res.status) {
             case 'ringing':
               // The name and the number are updated here not in webrtc
               dispatch.currentCall.checkIncomingUpdatePlay({
@@ -70,7 +74,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
             // @ts-ignore
             case 'busy':
               if (conv && conv.connected) {
-                // Current call accepted
+                // Current call accepted and update connected call
                 dispatch.currentCall.updateCurrentCall({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),
@@ -83,9 +87,47 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                       extensions[conv.counterpartNum].username
                     }` || '',
                 })
+                // Add call to transfer calls
+                dispatch.currentCall.addTransferCalls({
+                  type: 'transferred',
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
+                  startTime: `${getTimestampInSeconds()}`,
+                })
+
+                // // Manage call transferring
+                // if (transferring) {
+                //   // Prepare the call data for the transfer
+                //   if (!transferringName && !transferringNumber && !transferringStartTime) {
+                //     dispatch.currentCall.updateCurrentCall({
+                //       transferringName: getDisplayName(conv),
+                //       transferringNumber: `${conv.counterpartNum}`,
+                //       transferringStartTime: `${conv.startTime / 1000}`,
+                //     })
+                //   }
+                // }
+              }
+              // Handle not connected calls
+              else if (conv && !conv.connected) {
+                if (transferring && !transferSwitching) {
+                  // Handle hangup during transfer
+                  const inTransferCalls = transferCalls.find(
+                    (item) => item.number === conv.counterpartNum,
+                  )
+                  if (!conv.connected && inTransferCalls) {
+                    // Update transferring data for the current call
+                    dispatch.currentCall.updateCurrentCall({
+                      transferring: false,
+                    })
+                    // Reset transfer switching
+                    // TODO - It needs to enhance how conversation connections (conv.connected) are updated server side
+                    // TODO - The transfer end is not handled when the an user hangups or after call switch
+                    dispatch.currentCall.updateTransferSwitching(false)
+                  }
+                }
               }
               // Handle outgoing call
-              else if (conv && !conv.connected && conv.direction === 'out') {
+              if (conv && !conv.connected && conv.direction === 'out') {
                 // Update the current outgoing conversation
                 dispatch.currentCall.checkOutgoingUpdate({
                   outgoingSocket: true,
@@ -99,6 +141,32 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                     }` || '',
                 })
               }
+            case 'onhold':
+              // The new conversation during transferring
+              const { counterpartName, counterpartNum, startTime } = conv
+              if (
+                transferring &&
+                counterpartNum &&
+                counterpartName &&
+                counterpartName !== '<unknown>'
+              ) {
+                // Add call to transfer calls
+                dispatch.currentCall.addTransferCalls({
+                  type: 'destination',
+                  displayName: getDisplayName(conv),
+                  number: counterpartNum,
+                  startTime: `${getTimestampInSeconds()}`,
+                })
+                // Set the current call informations
+                dispatch.currentCall.updateCurrentCall({
+                  displayName: getDisplayName(conv),
+                  number: counterpartNum,
+                  startTime: `${startTime / 1000}`,
+                })
+                // Set the view of the island to call
+                dispatch.island.setIslandView('call')
+              }
+              break
             default:
               break
           }

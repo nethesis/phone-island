@@ -25,6 +25,7 @@ module.exports = {
       },
       animation: {
         'animated-text': '3s linear 0s infinite alternate move',
+        'custom-ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],

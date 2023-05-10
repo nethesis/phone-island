@@ -1,21 +1,45 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import React, { FC, useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState } from '../../store'
 import Timer from './Timer'
 import { motion, AnimatePresence } from 'framer-motion/dist/framer-motion'
+import { TransferCallsTypes } from '../../models/currentCall'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
-  const { displayName, transferring, transferringName, startTime, transferringStartTime } =
-    useSelector((state: RootState) => state.currentCall)
+  const {
+    number,
+    displayName,
+    transferring,
+    transferringName,
+    startTime,
+    transferringStartTime,
+    transferCalls,
+  } = useSelector((state: RootState) => state.currentCall)
+  const dispatch = useDispatch<Dispatch>()
+
+  const { isOpen } = useSelector((state: RootState) => state.island)
+
+  useEffect(() => {
+    const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
+    // Handle call switch during transfer
+    if (callData) {
+      dispatch.currentCall.updateCurrentCall({
+        transferringName: callData.displayName,
+        transferringStartTime: callData.startTime,
+      })
+    }
+  }, [number])
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className='pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-white -pi-mt-10 -pi-z-10 pi-font-sans pi-px-6 pi-pt-3'
+          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-white -pi-mt-10 -pi-z-10 pi-font-sans pi-items-top ${
+            isOpen ? 'pi-px-6' : 'pi-px-4'
+          } pi-pt-3`}
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}
           initial={{ y: 60 }}
           animate={{ y: 0 }}
@@ -27,7 +51,16 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
           }}
           transition={{ duration: 0.3 }}
         >
-          <div className='pi-font-bold'>{transferring ? transferringName : displayName}</div>
+          <div className='pi-font-bold pi-text-sm pi-relative'>
+            <div
+              className={`pi-whitespace-nowrap pi-overflow-hidden ${
+                isOpen ? 'pi-w-44' : 'pi-w-16'
+              }`}
+            >
+              {transferring ? transferringName : displayName}
+            </div>
+            <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-500'></div>
+          </div>
           <div className=''>
             <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
           </div>
