@@ -62,9 +62,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     // Send attended transfer message
     const transferringMessageSent = await attendedTransfer(number)
     if (transferringMessageSent) {
-      // Set transferring
+      // Set transferring and disable pause
       dispatch.currentCall.updateCurrentCall({
         transferring: true,
+        paused: false
       })
     }
   }
