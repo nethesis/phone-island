@@ -7,7 +7,7 @@ import { PhoneIsland } from '../App'
 import { eventDispatch } from '../utils'
 
 const meta = {
-  title: 'Default',
+  title: 'Phone Island',
   component: PhoneIsland,
   argTypes: {},
   parameters: {

@@ -12,6 +12,7 @@ import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
 import ViewsTransition from './ViewsTransition'
 import { TransferListView } from './TransferView'
+import { RecorderView } from './RecorderView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
 import Close from './Close'
@@ -23,12 +24,9 @@ import Close from './Close'
  */
 export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const {
-    incoming,
-    accepted,
-    outgoing,
-    transferring,
-  } = useSelector((state: RootState) => state.currentCall)
+  const { incoming, accepted, outgoing, transferring } = useSelector(
+    (state: RootState) => state.currentCall,
+  )
 
   // Get isOpen from island store
   const { view } = useSelector((state: RootState) => state.island)
@@ -87,7 +85,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         accepted ||
         showAlways ||
         activeAlertsCount > 0 ||
-        view === 'player') && (
+        view === 'player'||
+        view === 'recorder') && (
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
@@ -110,6 +109,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'player' ? (
                   <ViewsTransition forView='player'>
                     <AudioPlayerView />
+                  </ViewsTransition>
+                ) : currentView === 'recorder' ? (
+                  <ViewsTransition forView='recorder'>
+                    <RecorderView />
                   </ViewsTransition>
                 ) : (
                   <></>

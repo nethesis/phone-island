@@ -98,6 +98,19 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           }
         }
         break
+      case 'recorder':
+        if (isOpen) {
+          size = {
+            width: variants.recorder.expanded.width,
+            height: variants.recorder.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.recorder.collapsed.width,
+            height: variants.recorder.collapsed.height,
+          }
+        }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0

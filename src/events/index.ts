@@ -4,3 +4,4 @@
 export * from './CallEvents'
 export * from './SocketEvents'
 export * from './PlayerEvents'
+export * from './RecorderEvents'
