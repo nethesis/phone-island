@@ -8,7 +8,7 @@ import { eventDispatch, useEventListener } from '../utils'
 import { getAnnouncement } from '../services/offhour'
 
 const meta = {
-  title: 'Default',
+  title: 'Phone Island',
   component: PhoneIsland,
   argTypes: {},
   parameters: {

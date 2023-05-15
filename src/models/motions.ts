@@ -69,6 +69,17 @@ const defaultState = {
         height: 40,
       },
     },
+    // Recorder View
+    recorder: {
+      expanded: {
+        width: 374,
+        height: 236,
+      },
+      collapsed: {
+        width: 168,
+        height: 40,
+      },
+    },
     // Alerts Section
     alerts: {
       width: 418,
