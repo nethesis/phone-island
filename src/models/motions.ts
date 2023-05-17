@@ -73,7 +73,7 @@ const defaultState = {
     recorder: {
       expanded: {
         width: 374,
-        height: 236,
+        height: 256,
       },
       collapsed: {
         width: 168,

@@ -26,7 +26,7 @@ export const Close: FC = () => {
 
   return (
     <>
-      {view === 'player' && (
+      {(view === 'player' || view === 'recorder') && (
         <div className='pi-flex pi-justify-center'>
           <div
             onClick={view === 'player' ? playerClose : close}
