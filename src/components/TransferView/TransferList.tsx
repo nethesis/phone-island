@@ -65,8 +65,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       // Set transferring and disable pause
       dispatch.currentCall.updateCurrentCall({
         transferring: true,
-        paused: false
+        paused: false,
       })
+      // Play the remote audio element
+      dispatch.player.playRemoteAudio()
     }
   }
 
