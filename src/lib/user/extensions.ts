@@ -53,3 +53,11 @@ export function userTotallyFree() {
   }
   return true
 }
+
+/**
+ * Retrieve the list of the extensions of the current user
+ */
+export function getExtensionsList(): string[] {
+  const { endpoints } = store.getState().currentUser
+  return endpoints?.extension.map((extension) => extension.id) || []
+}

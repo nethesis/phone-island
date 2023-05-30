@@ -6,7 +6,6 @@ import Janus from '../webrtc/janus'
 import {
   call,
   hangup,
-  decline,
   answerWebRTC,
   muteWebRTC,
   unmuteWebRTC,
@@ -20,6 +19,7 @@ import {
   attendedTransfer as attendedTransferRequest,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
+import { hangupConversation } from '../../services/astproxy'
 
 /**
  * Starts a call to a number
@@ -69,14 +69,32 @@ export function answerIncomingCall() {
 }
 
 /**
+ * Hangup all the conversations of all the extensions of the current user
+ */
+export function hangupAllExtensions() {
+  // Get current user endpoints
+  const { conversations } = store.getState().currentUser
+  // Hangup all the conversations of all extensions of the current user
+  for (const extension in conversations) {
+    const conversationsIds = Object.keys(conversations[extension])
+    conversationsIds.forEach((id) => {
+      hangupConversation({
+        convid: id,
+        endpointId: extension,
+      })
+    })
+  }
+}
+
+/**
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted } = store.getState().currentCall
+  const { outgoing, accepted, incoming } = store.getState().currentCall
   if (outgoing || accepted) {
     hangup()
-  } else {
-    decline()
+  } else if (incoming) {
+    hangupAllExtensions()
   }
   store.dispatch.player.stopAudioPlayer()
   store.dispatch.currentCall.reset()

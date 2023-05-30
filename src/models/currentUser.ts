@@ -3,10 +3,11 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import type { UserInfoTypes } from '../types'
+import type { UserInfoTypes, ExtensionTypes, ConversationsTypes } from '../types'
 
 const defaultState: CurrentUserTypes = {
   currentUserReady: false,
+  conversations: {},
 }
 
 export const currentUser = createModel<RootModel>()({
@@ -24,9 +25,19 @@ export const currentUser = createModel<RootModel>()({
         currentUserReady: payload,
       }
     },
+    updateConversations: (state, payload: ExtensionTypes) => {
+      // Update the conversatins of the exten
+      state.conversations[payload.exten] = payload.conversations
+      return state
+    },
   },
 })
 
 interface CurrentUserTypes extends UserInfoTypes {
   currentUserReady: boolean
+  conversations: UserConversationTypes
+}
+
+interface UserConversationTypes {
+  [exten: string]: ConversationsTypes
 }

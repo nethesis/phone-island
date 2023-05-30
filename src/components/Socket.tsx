@@ -16,7 +16,7 @@ import {
 import { store } from '../store'
 import { withTimeout } from '../utils'
 import type {
-  ConversationsTypes,
+  ConversationTypes,
   ExtensionTypes,
   QueuesUpdateTypes,
   QueueUpdateMemberTypes,
@@ -43,13 +43,9 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
      * @param res The data from the socket
      * @param conv The conversation data
      */
-    const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationsTypes) => {
+    const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationTypes) => {
       // Handle transferring data
-      const {
-        transferring,
-        transferSwitching,
-        transferCalls,
-      } = store.getState().currentCall
+      const { transferring, transferSwitching, transferCalls } = store.getState().currentCall
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         // With conversation
@@ -273,10 +269,12 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
         // Dispatch conversations event
         dispatchConversations(res)
         // Initialize conversation
-        const conv: ConversationsTypes = res.conversations[Object.keys(res.conversations)[0]] || {}
+        const conv = res.conversations[Object.keys(res.conversations)[0]] || {}
         // Handle only the events of the user
         if (res.username === username) {
           handleCurrentUserEvents(res, conv)
+          // Update the conversations of the user
+          dispatch.currentUser.updateConversations(res)
         }
       })
 

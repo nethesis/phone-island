@@ -68,6 +68,6 @@ export const users = createModel<RootModel>()({
 })
 
 interface UsersTypes {
-  extensions: ExtensionsTypes | null
-  endpoints: UsersEndpointsTypes | null
+  extensions: ExtensionsTypes | null // Useful for the conversations...
+  endpoints: UsersEndpointsTypes | null // Useful for the main presence...
 }

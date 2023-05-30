@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import type { ConversationsTypes } from './conversation'
+import type { ConversationTypes } from './conversation'
 
 export interface ExtensionsTypes {
   [key: string]: ExtensionTypes
@@ -27,7 +27,7 @@ export interface ExtensionTypes {
   username: string
   sipuseragent: string
   conversations: {
-    [id: string]: ConversationsTypes
+    [id: string]: ConversationTypes
   }
 }
 

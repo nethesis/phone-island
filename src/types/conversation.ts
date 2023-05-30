@@ -3,13 +3,15 @@
 
 export interface ConversationsEventType {
   [username: string]: {
-    conversations: {
-      [id: string]: ConversationsTypes
-    }
+    conversations: ConversationsTypes
   }
 }
 
 export interface ConversationsTypes {
+  [id: string]: ConversationTypes
+}
+
+export interface ConversationTypes {
   id: string
   owner: string
   chDest: ChTypes | null

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { getAllExtensions } from '../services/astproxy'
 import { getAllUsersEndpoints } from '../services/user'
+import { getExtensionsList } from '../lib/user/extensions'
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -25,19 +26,28 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
   }, [username, authToken, hostName])
 
   useEffect(() => {
+    // Get all extensions info and set to store
+    async function initExtensions() {
+      const extensions = await getAllExtensions()
+      if (extensions) {
+        dispatch.users.updateExtensions(extensions)
+        // Update the current user conversations
+        const currentUserExtensionsList = getExtensionsList()
+        const extensionsData = Object.values(extensions).filter((extension) =>
+          currentUserExtensionsList.includes(extension.exten),
+        )
+        // Update the user conversations to store
+        extensionsData.forEach((extension) => dispatch.currentUser.updateConversations(extension))
+      }
+    }
     // Get users info and set to store
     async function initCurrentUser() {
       const userInfo = await getCurrentUserInfo()
       if (userInfo) {
         dispatch.currentUser.updateCurrentUser(userInfo)
         dispatch.currentUser.setCurrentUserReady(true)
-      }
-    }
-    // Get all extensions info and set to store
-    async function initExtensions() {
-      const extensions = await getAllExtensions()
-      if (extensions) {
-        dispatch.users.updateExtensions(extensions)
+        // Inizialize all extensions after user initialization
+        initExtensions()
       }
     }
     // Get all users and endpoints info and set to store
@@ -50,7 +60,6 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
     // Call the needed APIs on startup
     if (fetchReady) {
       initCurrentUser()
-      initExtensions()
       initUsersEndpoints()
     }
   }, [fetchReady])
