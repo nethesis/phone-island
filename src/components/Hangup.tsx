@@ -11,16 +11,21 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { hangupAllExtensions } from '../lib/phone/call'
 
 /**
  * Return the status of the
  */
 const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) => {
-  const { transferring } = useSelector((state: RootState) => state.currentCall)
+  const { transferring, incoming } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
 
   function handleHangup() {
-    hangupCurrentCall()
+    if (incoming) {
+      hangupAllExtensions()
+    } else {
+      hangupCurrentCall()
+    }
     // Show confirmation message when a call is transferred
     if (transferring) {
       setTimeout(() => {

@@ -90,11 +90,9 @@ export function hangupAllExtensions() {
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted, incoming } = store.getState().currentCall
+  const { outgoing, accepted } = store.getState().currentCall
   if (outgoing || accepted) {
     hangup()
-  } else if (incoming) {
-    hangupAllExtensions()
   }
   store.dispatch.player.stopAudioPlayer()
   store.dispatch.currentCall.reset()
