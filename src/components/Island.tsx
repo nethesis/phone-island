@@ -28,9 +28,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     accepted,
     outgoing,
     transferring,
-    transferringName,
-    displayName,
-    transferSwitching,
   } = useSelector((state: RootState) => state.currentCall)
 
   // Get isOpen from island store
