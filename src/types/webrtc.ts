@@ -14,4 +14,5 @@ export interface JanusTypes extends JanusLibTypes {
     video: HTMLVideoElement | HTMLAudioElement | null,
     stream: MediaStream,
   ) => void
+  destroy?: () => void
 }
