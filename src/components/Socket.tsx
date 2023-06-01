@@ -29,9 +29,18 @@ interface SocketProps {
   hostName: string
   username: string
   authToken: string
+  reload: boolean
+  reloadedCallback: () => void
 }
 
-export const Socket: FC<SocketProps> = ({ hostName, username, authToken, children }) => {
+export const Socket: FC<SocketProps> = ({
+  hostName,
+  username,
+  authToken,
+  reload,
+  reloadedCallback,
+  children,
+}) => {
   const dispatch = useDispatch<Dispatch>()
   const connectionCheckInterval = useRef<any>()
   const socket = useRef<any>()
@@ -90,18 +99,6 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
                   number: `${conv.counterpartNum}`,
                   startTime: `${getTimestampInSeconds()}`,
                 })
-
-                // // Manage call transferring
-                // if (transferring) {
-                //   // Prepare the call data for the transfer
-                //   if (!transferringName && !transferringNumber && !transferringStartTime) {
-                //     dispatch.currentCall.updateCurrentCall({
-                //       transferringName: getDisplayName(conv),
-                //       transferringNumber: `${conv.counterpartNum}`,
-                //       transferringStartTime: `${conv.startTime / 1000}`,
-                //     })
-                //   }
-                // }
               }
               // Handle not connected calls
               else if (conv && !conv.connected) {
@@ -236,7 +233,7 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
               dispatch.alerts.setAlert('socket_down')
               console.debug('Socket is unreachable!')
             },
-            2000,
+            5000,
           ),
         )
       }, 5000)
@@ -306,6 +303,16 @@ export const Socket: FC<SocketProps> = ({ hostName, username, authToken, childre
       socket.current.close()
     }
   }, [])
+
+  // Manage reload events
+  useEffect(() => {
+    if (reload) {
+      console.info('websocket reconnection')
+      socket.current.disconnect()
+      socket.current.connect()
+      reloadedCallback()
+    }
+  }, [reload])
 
   return <>{children}</>
 }

@@ -1,8 +1,9 @@
-import React, { type FC } from 'react'
+import React, { type FC, useState, useEffect } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store } from './store'
 import { Base64 } from 'js-base64'
+import wakeUpWorker from './workers/wake_up'
 
 import 'react-tooltip/dist/react-tooltip.css'
 
@@ -21,6 +22,33 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   const SIP_HOST: string = CONFIG[5]
   const SIP_PORT: string = CONFIG[6]
 
+  // Initialize the state to manage the reload events
+  const [reload, setReload] = useState<boolean>(false)
+  const [reloadedWebRTC, setReloadedWebRTC] = useState<boolean>(false)
+  const [reloadedSocket, setReloadedSocket] = useState<boolean>(false)
+
+  useEffect(() => {
+    const worker = new Worker(wakeUpWorker, { type: 'module' })
+    worker.onmessage = (event: MessageEvent<string>) => {
+      // Handle wakeup message
+      if (event.data === 'wakeup') {
+        setReload(true)
+      }
+    }
+
+    return () => {
+      worker.terminate()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (reloadedSocket && reloadedWebRTC) {
+      setReload(false)
+      setReloadedWebRTC(false)
+      setReloadedSocket(false)
+    }
+  }, [reloadedSocket, reloadedWebRTC])
+
   return (
     <>
       <Provider store={store}>
@@ -30,9 +58,17 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
           sipSecret={SIP_SECRET}
           sipHost={SIP_HOST}
           sipPort={SIP_PORT}
+          reload={reload}
+          reloadedCallback={() => setReloadedWebRTC(true)}
         >
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
-            <Socket hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
+            <Socket
+              hostName={HOST_NAME}
+              username={USERNAME}
+              authToken={AUTH_TOKEN}
+              reload={reload}
+              reloadedCallback={() => setReloadedSocket(true)}
+            >
               <Events sipHost={SIP_HOST}>
                 <Island showAlways={showAlways} />
               </Events>
