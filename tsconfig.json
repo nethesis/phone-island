@@ -17,5 +17,5 @@
     "jsx": "react",
     "noImplicitAny": false
   },
-  "include": ["src", "public/libs"]
+  "include": ["src"],
 }

@@ -41,3 +41,23 @@ export async function getAllAnnouncementsInfo(): Promise<AnnouncementInfoTypes[]
     throw new Error(error)
   }
 }
+
+/**
+ * Start a call to record an announcement
+ */
+export async function startAnnouncementRecording(): Promise<null> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/offhour/record_announcement`, {
+      method: 'POST',
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
