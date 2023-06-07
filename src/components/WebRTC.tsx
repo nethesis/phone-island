@@ -120,6 +120,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                   }
                 },
                 onmessage: function (msg, jsep) {
+                  // Get webrtc state
                   const { sipcall }: { sipcall: any } = store.getState().webrtc
 
                   if (janus.current.debug) {
@@ -149,10 +150,12 @@ export const WebRTC: FC<WebRTCProps> = ({
                     result['event'] !== undefined &&
                     result['event'] !== null
                   ) {
-                    // get event
+                    // Get event data
                     var event = result['event']
+                    // Get the recording state
+                    const { recording } = store.getState().recorder
 
-                    //switch event
+                    // Manage different types of events
                     switch (event) {
                       case 'registration_failed':
                         if (janus.current.error)
@@ -235,15 +238,26 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'incomingcall':
+                        // Update webrtc state
                         dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
+                        // Check if is recording an audio through call
+                        // ...recording an audio is a request made by the user
+                        // ...it must be managed differently than an incoming call
+                        if (recording) {
+                          // Update the recorder state
+                          dispatch.recorder.setIncoming(true)
+                        } else {
+                          // Manage the incoming message as a webrtc call
+                          // Update incoming webrtc state, number and display name
+                          // ...are updated inside socket
+                          dispatch.currentCall.checkIncomingUpdatePlay({
+                            incomingWebRTC: true,
+                          })
 
-                        // Number and display name are updated inside socket
-                        dispatch.currentCall.checkIncomingUpdatePlay({
-                          incomingWebRTC: true,
-                        })
+                          if (janus.current.log)
+                            janus.current.log('Incoming call from ' + result['username'] + '!')
+                        }
 
-                        if (janus.current.log)
-                          janus.current.log('Incoming call from ' + result['username'] + '!')
                         // Update the webrtc last activity time
                         dispatch.webrtc.updateLastActivity(new Date().getTime())
                         break
@@ -272,6 +286,11 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'hangup':
+                        // Manage hangup message during recording
+                        if (recording) {
+                          dispatch.recorder.setRecording(false)
+                        }
+
                         hangupCurrentCall()
                         sipcall.hangup()
                         // if (

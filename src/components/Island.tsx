@@ -60,7 +60,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   }, [])
 
   // Handle and apply view switch logic
+  // ...set callview as the current view
   useEffect(() => {
+    // Check and switch the view
     if (incoming || outgoing) {
       dispatch.island.setIslandView('call')
     }
@@ -85,7 +87,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         accepted ||
         showAlways ||
         activeAlertsCount > 0 ||
-        view === 'player'||
+        view === 'player' ||
         view === 'recorder') && (
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>

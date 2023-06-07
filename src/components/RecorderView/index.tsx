@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useState, useRef } from 'react'
+import React, { type FC, useState, useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { Actions } from './Actions'
