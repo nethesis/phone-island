@@ -2,15 +2,58 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC, useState, useRef, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState, store } from '../../store'
 import { Actions } from './Actions'
 import { BarsGroup } from './BarsGroup'
+import { useIsomorphicLayoutEffect } from '../../utils'
 
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const visibleContainerRef = useRef<HTMLDivElement>(null)
   const [animationStarted, setAnimationStarted] = useState<boolean>(false)
+  const recorderRef = useRef<any>(null)
+  const mediaChunks = useRef<Blob[]>([])
+
+  // Initialize state dispatch
+  const dispatch = useDispatch<Dispatch>()
+
+  // Retrieve the local audio stream from webrtc state
+  const { localAudioStream } = useSelector((state: RootState) => state.webrtc)
+
+  // Set visible container reference to recorder state
+  useIsomorphicLayoutEffect(() => {
+    dispatch.recorder.setVisibleContainerRef(visibleContainerRef)
+  }, [])
+
+  function handleRecordedMedia(event: BlobEvent) {
+    mediaChunks.current.push(event.data)
+  }
+
+  function handleRecordingStopped(e) {
+    const blob = new Blob(mediaChunks.current, { type: 'audio/ogg; codecs=opus' })
+    const audioURL = URL.createObjectURL(blob)
+    // TODO - ADD THE AUDIOURL TO THE AUDIO ELEMENT AND USE IT TO PLAY 
+  }
+
+  // Starts the recording of the local audio stream
+  function startRecording() {
+    if (recorderRef.current) {
+      recorderRef.current = localAudioStream && new MediaRecorder(localAudioStream)
+      recorderRef.current.ondataavailable = handleRecordedMedia
+      recorderRef.current.onstop = handleRecordingStopped
+      // Start the media recording
+      recorderRef.current.start()
+    }
+  }
+
+  useEffect(() => {
+    if (animationStarted) {
+      startRecording()
+    } else {
+      recorderRef.current?.stop()
+    }
+  }, [animationStarted])
 
   return (
     <>
@@ -27,12 +70,13 @@ export const RecorderView: FC<RecorderViewProps> = () => {
             className='pi-relative pi-w-full pi-h-8 pi-overflow-x-hidden pi-flex'
             ref={visibleContainerRef}
           >
+            {/* Create a custom numbers of bars groups */}
             {Array.from({ length: 2 }).map((_, i) => (
               <BarsGroup
                 key={i}
                 index={i}
                 startAnimation={animationStarted}
-                visibleContainerRef={visibleContainerRef}
+                audioStream={localAudioStream}
               />
             ))}
           </div>

@@ -25,14 +25,14 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  * The main view to manage calls, the starting point for calls actions flows
  */
 const CallView: FC<CallViewProps> = () => {
-  // Get multiple values from currentCall store
+  // Get multiple values from currentCall state
   const { incoming, accepted, outgoing, startTime, paused } = useSelector(
     (state: RootState) => state.currentCall,
   )
-  // Get isOpen and view from island store
+  // Get isOpen and view from island state
   const { isOpen } = useSelector((state: RootState) => state.island)
 
-  // Retrieve the audio stream from the webrtc store
+  // Retrieve the audio stream from the webrtc state
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   return (
