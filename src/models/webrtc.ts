@@ -10,9 +10,10 @@ const defaultState = {
   sipcall: null,
   jsepGlobal: null,
   remoteAudioStream: null,
+  localAudioStream: null,
   lastActivity: null,
   registered: false,
-  destroyed: false
+  destroyed: false,
 }
 
 export const webrtc = createModel<RootModel>()({
@@ -30,6 +31,10 @@ export const webrtc = createModel<RootModel>()({
         remoteAudioStream: payload,
       }
     },
+    updateLocalAudioStream: (state, payload: any) => {
+      state.localAudioStream = payload
+      return state
+    },
     updateLastActivity: (state, payload: any) => {
       return {
         ...state,
@@ -45,6 +50,7 @@ export interface WebRTCTypes {
   sipcall?: any
   jsepGlobal?: any
   remoteAudioStream?: any
+  localAudioStream?: any
   lastActivity?: any
   registered?: boolean
   destroyed?: boolean

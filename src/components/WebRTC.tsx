@@ -328,6 +328,18 @@ export const WebRTC: FC<WebRTCProps> = ({
                     janus.current.debug(' ::: Got a local stream :::')
                     janus.current.debug(stream)
                   }
+
+                  // Update local audio stream in webrtc state
+                  dispatch.webrtc.updateLocalAudioStream(stream)
+
+                  // Get audio and video tracks from stream
+                  const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
+                  const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
+
+                  // Manage local audio tracks
+                  const localAudioStream: MediaStream = new MediaStream(audioTracks)
+                  store.dispatch.webrtc.updateLocalAudioStream(localAudioStream)
+
                   // if (Janus.attachMediaStream) Janus.attachMediaStream(localVideoElement, stream)
                   /* IS VIDEO ENABLED ? */
                   // var videoTracks = stream.getVideoTracks()

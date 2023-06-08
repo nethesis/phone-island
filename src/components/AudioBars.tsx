@@ -52,13 +52,8 @@ export const AudioBars: FC<AudioBarsProps> = ({
     }
   }
 
-  function startAnimation() {
-    const animationRequestId: number = requestAnimationFrame(animationFrame)
-    saveAnimationRequest(animationRequestId)
-  }
-
   // The function that renders the frames of animation
-  function animationFrame() {
+  function animation() {
     if (analyser && analyser.current) {
       const frequencyData = new Uint8Array(analyser.current.frequencyBinCount)
       analyser.current.getByteFrequencyData(frequencyData)
@@ -80,6 +75,11 @@ export const AudioBars: FC<AudioBarsProps> = ({
     }
   }
 
+  function startAnimation() {
+    const animationRequestId: number = requestAnimationFrame(animation)
+    saveAnimationRequest(animationRequestId)
+  }
+
   useEffect(() => {
     const { audioElementContext, audioElementAnalyser, audioElementSource, isReady } =
       store.getState().audioBars
@@ -90,7 +90,7 @@ export const AudioBars: FC<AudioBarsProps> = ({
       analyser.current = audioElementAnalyser
       source.current = audioElementSource
     } else {
-      // The source is an audio stream
+      // The source is an audio stream or isn't ready
       context.current = new AudioContext()
       analyser.current = context.current.createAnalyser()
       analyser.current.smoothingTimeConstant = 0.8
@@ -111,6 +111,7 @@ export const AudioBars: FC<AudioBarsProps> = ({
     // Connect the audio source to the analyser
     analyser.current && source.current && source.current.connect(analyser.current)
     if (audioElement) {
+      // Connect the analyser to the destination of the context
       context.current && analyser.current && analyser.current.connect(context.current.destination)
     }
     startAnimation()
