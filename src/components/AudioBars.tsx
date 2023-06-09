@@ -7,7 +7,8 @@ import { useDispatch } from 'react-redux'
 import { store } from '../store'
 import { Dispatch } from '../store'
 
-const large = {
+// The map for the large versione of the audio bars
+const LARGE = {
   0: 4,
   1: 3,
   2: 2,
@@ -18,7 +19,8 @@ const large = {
   7: 4,
 }
 
-const small = {
+// The map for the small versione of the audio bars
+const SMALL = {
   0: 2,
   1: 1,
   2: 1,
@@ -40,7 +42,7 @@ export const AudioBars: FC<AudioBarsProps> = ({
   // Initialize the main elements
   const containerElement = useRef<HTMLDivElement | null>(null)
   const animationRequest = useRef<number | null>(null)
-  const barsMap: BarsMapType = size === 'large' ? large : small
+  const barsMap: BarsMapType = size === 'large' ? LARGE : SMALL
   const context = useRef<AudioContext | null>(null)
   const analyser = useRef<AnalyserNode | null>(null)
   const source = useRef<ContextSourceType>(null)

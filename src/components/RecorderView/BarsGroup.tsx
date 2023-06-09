@@ -17,7 +17,7 @@ const BARS_COUNT: number = 55
 // ...that is used when performing a fast fourier transform
 // ...to get frequency domain data
 // ...a higher number result in more details in frequency and fewer in amplitude
-const AUDIO_FFT_VALUE: number = 64
+const AUDIO_FFT_VALUE: number = 32
 
 function getTranslateXPercent(element: HTMLDivElement) {
   const transformValue = element.style.transform

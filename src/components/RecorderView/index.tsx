@@ -7,12 +7,17 @@ import { Dispatch, RootState, store } from '../../store'
 import { Actions } from './Actions'
 import { BarsGroup } from './BarsGroup'
 import { useIsomorphicLayoutEffect } from '../../utils'
+import Moment from 'react-moment'
+
+// The number of groups to be created
+// ...the minimun to have this effect is 2
+const BAR_GROUPS_COUNT = 2
 
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const visibleContainerRef = useRef<HTMLDivElement>(null)
   const [animationStarted, setAnimationStarted] = useState<boolean>(false)
-  const recorderRef = useRef<any>(null)
+  const recorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunks = useRef<Blob[]>([])
 
   // Initialize state dispatch
@@ -20,6 +25,8 @@ export const RecorderView: FC<RecorderViewProps> = () => {
 
   // Retrieve the local audio stream from webrtc state
   const { localAudioStream } = useSelector((state: RootState) => state.webrtc)
+  // Retrieve the local audio stream from recorder state
+  const { recording } = useSelector((state: RootState) => state.recorder)
 
   // Set visible container reference to recorder state
   useIsomorphicLayoutEffect(() => {
@@ -31,26 +38,26 @@ export const RecorderView: FC<RecorderViewProps> = () => {
   }
 
   function handleRecordingStopped(e) {
-    const blob = new Blob(mediaChunks.current, { type: 'audio/ogg; codecs=opus' })
+    const blob = new Blob(mediaChunks.current, { type: 'audio/webm' })
     const audioURL = URL.createObjectURL(blob)
-    // TODO - ADD THE AUDIOURL TO THE AUDIO ELEMENT AND USE IT TO PLAY 
+    dispatch.player.updateAudioPlayerSource(audioURL)
   }
 
-  // Starts the recording of the local audio stream
-  function startRecording() {
-    if (recorderRef.current) {
-      recorderRef.current = localAudioStream && new MediaRecorder(localAudioStream)
+  // Manage audio recording start
+  useEffect(() => {
+    // @ts-ignore
+    if (localAudioStream && localAudioStream.active && animationStarted) {
+      recorderRef.current = new MediaRecorder(localAudioStream, { mimeType: 'audio/webm' })
       recorderRef.current.ondataavailable = handleRecordedMedia
       recorderRef.current.onstop = handleRecordingStopped
       // Start the media recording
       recorderRef.current.start()
     }
-  }
+    // @ts-ignore
+  }, [localAudioStream, localAudioStream?.active, animationStarted])
 
   useEffect(() => {
-    if (animationStarted) {
-      startRecording()
-    } else {
+    if (recording && !animationStarted) {
       recorderRef.current?.stop()
     }
   }, [animationStarted])
@@ -62,7 +69,18 @@ export const RecorderView: FC<RecorderViewProps> = () => {
           {' '}
           <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-4 pi-pb-9'>
             <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit pi-text-white'>
-              00:00:00
+              {animationStarted ? (
+                <Moment
+                  date={new Date().getTime() / 1000}
+                  interval={1000}
+                  format='hh:mm:ss'
+                  trim={false}
+                  unix
+                  durationFromNow
+                />
+              ) : (
+                '00:00:00'
+              )}
             </div>
           </div>
           {/* Bars animation section  */}
@@ -71,7 +89,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
             ref={visibleContainerRef}
           >
             {/* Create a custom numbers of bars groups */}
-            {Array.from({ length: 2 }).map((_, i) => (
+            {Array.from({ length: BAR_GROUPS_COUNT }).map((_, i) => (
               <BarsGroup
                 key={i}
                 index={i}
