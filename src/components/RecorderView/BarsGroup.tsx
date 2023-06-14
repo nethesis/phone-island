@@ -32,7 +32,7 @@ export const BarsGroup: FC<BarsGroupProps> = ({ index, startAnimation, audioStre
   const barsContainerRef = useRef<HTMLDivElement>(null)
   const animationRequestRef = useRef<number>(0)
   const lastTranslateRef = useRef<number>(0)
-  const { visibleContainerRef } = useSelector((state: RootState) => state.recorder)
+  const visibleContainerRef = useSelector((state: RootState) => state.recorder.visibleContainerRef)
   const dispatch = useDispatch<Dispatch>()
   const analyser = useRef<AnalyserNode | null>(null)
 

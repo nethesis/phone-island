@@ -18,7 +18,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
   const dispatch = useDispatch<Dispatch>()
 
   function startPlaying() {
-    dispatch.player.startAudioPlayer()
+    dispatch.player.startAudioPlayer(() => {})
   }
 
   function pausePlaying() {
@@ -47,11 +47,11 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
       {isOpen && (
         <div>
           <Progress />
-          <div className='pi-w-full pi-flex pi-justify-center pi-items-center pi-mt-6'>
+          <div className='pi-w-full pi-flex pi-justify-center pi-items-center pi-pt-7'>
             <Button
               onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
               variant='default'
-              className='pi-scale-110'
+              style={{ transform: 'scale(1.15)' }}
             >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} size='xl' />
