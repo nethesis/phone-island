@@ -37,13 +37,7 @@ export const player = createModel<RootModel>()({
         audioPlayerTrackDuration: payload,
       }
     },
-    updateAudioPlayer: (state, payload: UpdateAudioSourceTypes) => {
-      if (state.audioPlayer && state.audioPlayer.current) {
-        state.audioPlayer.current.src = `data:audio/ogg;base64, ${payload.src}`
-      }
-      return state
-    },
-    updateAudioPlayerSource: (state, payload: string) => {
+    updateAudioPlayerSrc: (state, payload: string) => {
       if (state.audioPlayer && state.audioPlayer.current) {
         state.audioPlayer.current.src = payload
       }
@@ -112,19 +106,20 @@ export const player = createModel<RootModel>()({
     },
   },
   effects: (dispatch) => ({
-    startAudioPlayer: (_: void, rootState) => {
+    startAudioPlayer: (endedEventCallback: () => void, rootState) => {
       if (rootState.player.audioPlayer && rootState.player.audioPlayer.current) {
         // Check if is playing
         if (!rootState.player.audioPlayer.current.paused) {
           rootState.player.audioPlayer.current.pause()
           rootState.player.audioPlayer.current.currentTime = 0
         }
-        const endedCb = () => {
+        const endedCallback = () => {
           dispatch.player.setAudioPlayerPlaying(false)
-          rootState.player!.audioPlayer!.current!.removeEventListener('ended', endedCb)
+          rootState.player!.audioPlayer!.current!.removeEventListener('ended', endedCallback)
+          endedEventCallback()
         }
-        // Handle ended event
-        rootState.player.audioPlayer.current.addEventListener('ended', endedCb)
+        // Handle playing ended event
+        rootState.player.audioPlayer.current.addEventListener('ended', endedCallback)
         // Play the audio
         rootState.player.audioPlayer.current.play()
         dispatch.player.setAudioPlayerPlaying(true)
@@ -133,22 +128,16 @@ export const player = createModel<RootModel>()({
         dispatchAudioPlayerStarted()
       }
     },
-    // This function is recommended for playing audio
+    // This function is recommended for playing audio with base64 sources
     updateStartAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
       dispatch.player.setAudioPlayerLoop(loop)
       // Update the audio source
-      await updateAudioPlayerSource({
-        src: src,
-      })
+      await updateAudioPlayerSource(`data:audio/ogg;base64, ${src}`)
       // Play the outgoing ringtone when ready
-      dispatch.player.startAudioPlayer()
+      dispatch.player.startAudioPlayer(() => {})
     },
   }),
 })
-
-interface UpdateAudioSourceTypes {
-  src: string
-}
 
 interface PlayerTypes {
   audioPlayer: RefObject<HTMLAudioElement> | null

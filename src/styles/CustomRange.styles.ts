@@ -16,6 +16,7 @@ export const StyledCustomRange = styled.input.attrs({ type: 'range' })`
   background: #fff0;
   overflow: hidden;
   appearance: none;
+  margin: 0;
 
   &:active {
     cursor: grabbing;

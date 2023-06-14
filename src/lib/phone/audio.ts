@@ -6,7 +6,7 @@ import { store } from '../../store'
 /**
  * Manages the audio update action
  */
-export async function updateAudioPlayerSource(payload) {
+export async function updateAudioPlayerSource(payload: string) {
   return new Promise((resolve, reject) => {
     function canPlayCb() {
       store.getState().player.audioPlayer?.current?.removeEventListener('canplaythrough', canPlayCb)
@@ -28,7 +28,7 @@ export async function updateAudioPlayerSource(payload) {
         .getState()
         .player.audioPlayer?.current?.addEventListener('loadedmetadata', loadedMetadata)
       // Update the audio player source
-      store.dispatch.player.updateAudioPlayer(payload)
+      store.dispatch.player.updateAudioPlayerSrc(payload)
     } catch (err) {
       console.error(err)
       reject(err)

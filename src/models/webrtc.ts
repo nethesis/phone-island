@@ -50,7 +50,7 @@ export interface WebRTCTypes {
   sipcall?: any
   jsepGlobal?: any
   remoteAudioStream?: any
-  localAudioStream?: any
+  localAudioStream?: null
   lastActivity?: any
   registered?: boolean
   destroyed?: boolean

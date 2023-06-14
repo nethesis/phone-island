@@ -25,6 +25,10 @@ const RecorderTemplate: Story<any> = (args) => {
     eventDispatch('phone-island-recording-start', {})
   }
 
+  useEventListener('phone-island-recording-save', (data) => {
+    console.info('phone-island-recording-save', data)
+  })
+
   return (
     <div className='pi-flex pi-gap-2 pi-flex-col pi-w-fit'>
       <button

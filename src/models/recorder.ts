@@ -11,6 +11,11 @@ const defaultState: RecorderTypes = {
   incoming: false,
   visibleContainerRef: null,
   frequency: 0,
+  recorded: false,
+  playing: false,
+  paused: false,
+  currentTime: '00:00:00',
+  tempFilename: '',
 }
 
 export const recorder = createModel<RootModel>()({
@@ -36,6 +41,35 @@ export const recorder = createModel<RootModel>()({
       state.frequency = payload
       return state
     },
+    setRecorded: (state, payload: boolean) => {
+      state.recorded = payload
+      return state
+    },
+    setPlaying: (state, payload: boolean) => {
+      state.playing = payload
+      return state
+    },
+    setPaused: (state, payload: boolean) => {
+      state.paused = payload
+      return state
+    },
+    setCurrentTime: (state, payload: string) => {
+      state.currentTime = payload
+      return state
+    },
+    resetRecorded: (state, _: void) => {
+      return {
+        ...defaultState,
+        visibleContainerRef: state.visibleContainerRef,
+      }
+    },
+    setTempFilename: (state, payload: string) => {
+      state.tempFilename = payload
+      return state
+    },
+    reset: () => {
+      return defaultState
+    },
   },
 })
 
@@ -45,4 +79,9 @@ interface RecorderTypes {
   incoming: boolean
   visibleContainerRef: RefObject<HTMLDivElement> | null
   frequency: number
+  recorded: boolean
+  playing: boolean
+  paused: boolean
+  currentTime: string
+  tempFilename: string
 }

@@ -57,7 +57,7 @@ export const Progress: FC<ProgressTypes> = () => {
   }
 
   return (
-    <>
+    <div className='pi-w-full pi-h-fit'>
       <StyledCustomRange
         data-stop-propagation={true}
         ref={progressBarRef}
@@ -72,7 +72,7 @@ export const Progress: FC<ProgressTypes> = () => {
         <div className='pi-font-bold'>{timeProgress}</div>
         <div className='pi-font-bold'>{displayDuration}</div>
       </div>
-    </>
+    </div>
   )
 }
 

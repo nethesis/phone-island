@@ -45,7 +45,7 @@ export async function getAllAnnouncementsInfo(): Promise<AnnouncementInfoTypes[]
 /**
  * Start a call to record an announcement
  */
-export async function startAnnouncementRecording(): Promise<null> {
+export async function startAnnouncementRecording(): Promise<{tempFilename: string}> {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
     const response = await fetch(`${baseURL}/offhour/record_announcement`, {
