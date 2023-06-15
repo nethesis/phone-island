@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useRef, useCallback } from 'react'
+import React, { type FC, useEffect, useRef, useCallback, useState } from 'react'
 import { Bar } from './Bar'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
@@ -35,6 +35,7 @@ export const BarsGroup: FC<BarsGroupProps> = ({ index, startAnimation, audioStre
   const visibleContainerRef = useSelector((state: RootState) => state.recorder.visibleContainerRef)
   const dispatch = useDispatch<Dispatch>()
   const analyser = useRef<AnalyserNode | null>(null)
+  const [showBars, setShowBars] = useState<boolean>()
 
   // The animation of the bars groups
   const barsGroupAnimation = useCallback(() => {
@@ -88,6 +89,12 @@ export const BarsGroup: FC<BarsGroupProps> = ({ index, startAnimation, audioStre
     }
   }, [startAnimation])
 
+  useEffect(() => {
+    if (barsContainerRef?.current) {
+      setShowBars(true)
+    }
+  }, [])
+
   return (
     <div
       id={`${index}`}
@@ -98,11 +105,12 @@ export const BarsGroup: FC<BarsGroupProps> = ({ index, startAnimation, audioStre
       ref={barsContainerRef}
     >
       {/* Create a custom number of bars */}
-      {Array.from(Array(BARS_COUNT).keys()).map(
-        (_, i) =>
-          visibleContainerRef?.current && (
-            <Bar key={i} visibleContainer={visibleContainerRef.current} />
-          ),
+      {showBars && (
+        <>
+          {Array.from(Array(BARS_COUNT).keys()).map((_, i) => (
+            <Bar key={i} visibleContainer={visibleContainerRef?.current || null} />
+          ))}
+        </>
       )}
     </div>
   )
