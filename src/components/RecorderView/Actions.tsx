@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 
-import React, { type FC, useState, useEffect, useMemo, useRef } from 'react'
+import React, { type FC, useState, useEffect, memo } from 'react'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -20,10 +20,7 @@ import { Dispatch, RootState } from '../../store'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
 
-export const Actions: FC<{ animationStartedCallback: (started: boolean) => void }> = ({
-  animationStartedCallback,
-}) => {
-  const [animationStarted, setAnimationStarted] = useState<boolean>(false)
+export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
   const { incoming, waiting, recording, recorded, playing } = useSelector(
     (state: RootState) => ({
@@ -44,6 +41,8 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
     const data: { tempFilename: string } | null = await startAnnouncementRecording()
     // Set the returned temp file name to the store
     if (data.tempFilename) dispatch.recorder.setTempFilename(data.tempFilename)
+    // Set the start time of recording
+    dispatch.recorder.setStartTime(`${Date.now() / 1000}`)
   }
 
   function handleStop() {
@@ -51,8 +50,6 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
     dispatch.recorder.setWaiting(true)
     // Call the function to hangup the current call used for recording
     hangupCurrentCall()
-    // Manage animation status
-    animationStartedCallback(false)
     dispatch.recorder.setRecorded(true)
   }
 
@@ -84,7 +81,6 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
 
   useEffect(() => {
     if (!recording) {
-      setAnimationStarted(false)
       dispatch.recorder.setWaiting(false)
     }
   }, [recording])
@@ -96,10 +92,6 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
       // Reset incoming to recorder state
       dispatch.recorder.setIncoming(false)
       dispatch.recorder.setWaiting(false)
-
-      // Manage animation status
-      animationStartedCallback(true)
-      setAnimationStarted(true)
     }
   }, [incoming])
 
@@ -108,7 +100,7 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
       className={`pi-flex pi-justify-center pi-items-center pi-pt-9 pi-gap-6`}
       style={recorded ? { paddingTop: '2rem' } : {}}
     >
-      {animationStarted && (
+      {recording && (
         <Button onClick={handleStop} variant='default' style={{ transform: 'scale(1.15)' }}>
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -117,7 +109,7 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
           )}
         </Button>
       )}
-      {recorded && !animationStarted && (
+      {recorded && !recording && (
         <>
           <Button onClick={handleDelete} variant='default'>
             <FontAwesomeIcon icon={faTrash} size='xl' />
@@ -136,7 +128,7 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
           </Button>
         </>
       )}
-      {!animationStarted && !recorded && (
+      {!recording && !recorded && (
         <Button onClick={handleStart} variant='red' style={{ transform: 'scale(1.15)' }}>
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />

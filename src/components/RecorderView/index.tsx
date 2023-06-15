@@ -6,11 +6,10 @@ import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { Actions } from './Actions'
 import { BarsGroup } from './BarsGroup'
-import { useIsomorphicLayoutEffect } from '../../utils'
 import Progress from '../AudioPlayerView/Progress'
 import { updateAudioPlayerSource } from '../../lib/phone/audio'
 import fixWebmDuration from 'webm-duration-fix'
-import TimerComponent from './Timer'
+import Timer from './Timer'
 
 // The number of groups to be created
 // ...the minimun to have this effect is 2
@@ -22,7 +21,6 @@ const MIME_TYPE = 'video/webm;codecs=vp9'
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const visibleContainerRef = useRef<HTMLDivElement>(null)
-  const [animationStarted, setAnimationStarted] = useState<boolean>(false)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunks = useRef<BlobPart[]>([])
 
@@ -33,11 +31,10 @@ export const RecorderView: FC<RecorderViewProps> = () => {
   const localAudioStream = useSelector((state: RootState) => state.webrtc.localAudioStream)
 
   // Retrieve the local audio stream from recorder state
-  const { recording, recorded, currentTime } = useSelector(
+  const { recording, recorded } = useSelector(
     (state: RootState) => ({
       recording: state.recorder.recording,
       recorded: state.recorder.recorded,
-      currentTime: state.recorder.currentTime,
     }),
     shallowEqual,
   )
@@ -46,27 +43,17 @@ export const RecorderView: FC<RecorderViewProps> = () => {
     mediaChunks.current.push(event.data)
   }
 
-  // Time changed callback
-  function timerChanged(value: string) {
-    dispatch.recorder.setCurrentTime(value)
-  }
-
-  async function handleRecordingStopped(e) {
+  async function handleRecordingStopped() {
     const blob = await fixWebmDuration(new Blob(mediaChunks.current, { type: MIME_TYPE }))
     const audioURL = URL.createObjectURL(blob)
     // The next function is async
     updateAudioPlayerSource(audioURL)
   }
 
-  // Set visible container reference to recorder state
-  useIsomorphicLayoutEffect(() => {
-    dispatch.recorder.setVisibleContainerRef(visibleContainerRef)
-  }, [])
-
   // Handle and manage audio recording start
   useEffect(() => {
     // @ts-ignore
-    if (localAudioStream && localAudioStream.active && animationStarted) {
+    if (localAudioStream?.active && recording) {
       recorderRef.current = new MediaRecorder(localAudioStream, {
         mimeType: MIME_TYPE,
       })
@@ -76,29 +63,25 @@ export const RecorderView: FC<RecorderViewProps> = () => {
       recorderRef.current.start()
     }
     // @ts-ignore
-  }, [localAudioStream, localAudioStream?.active, animationStarted])
+  }, [localAudioStream?.active, recording])
 
-  // Handle and manage recording stop
+  // Handle and manage audio recorded
   useEffect(() => {
-    if (recording && !animationStarted) {
+    if (recorded) {
+      mediaChunks.current = []
       recorderRef.current?.stop()
     }
-  }, [animationStarted])
+  }, [recorded])
 
   // Handle view close and reset state
   useEffect(() => {
+    // Set visible container reference to recorder state
+    dispatch.recorder.setVisibleContainerRef(visibleContainerRef)
+
     return () => {
       dispatch.recorder.reset()
     }
   }, [])
-
-  // Handle and manage audio recorded
-  useEffect(() => {
-    if (recorded) mediaChunks.current = []
-  }, [recorded])
-
-  // Avoid timer multiple renderings
-  const Timer = useCallback(() => <TimerComponent changedCallback={timerChanged} />, [])
 
   return (
     <>
@@ -107,7 +90,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
           {' '}
           <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-4 pi-pb-9'>
             <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit pi-text-white'>
-              {animationStarted ? <Timer /> : currentTime}
+              <Timer />
             </div>
           </div>
           {/* Bars animation section  */}
@@ -125,14 +108,14 @@ export const RecorderView: FC<RecorderViewProps> = () => {
                 <BarsGroup
                   key={i}
                   index={i}
-                  startAnimation={animationStarted}
+                  startAnimation={recording}
                   audioStream={localAudioStream}
                 />
               ))
             )}
           </div>
           {/* Actions section */}
-          <Actions animationStartedCallback={(started: boolean) => setAnimationStarted(started)} />
+          <Actions />
         </>
       ) : (
         <div className='pi-font-medium pi-text-base'>Recorder</div>
