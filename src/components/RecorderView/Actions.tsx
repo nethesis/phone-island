@@ -78,6 +78,8 @@ export const Actions: FC<{ animationStartedCallback: (started: boolean) => void 
   function handleSaveRecording() {
     // Dispatch the reconrding save event
     dispatchRecordingSave()
+    // Close the Island
+    dispatch.island.setIslandView(null)
   }
 
   useEffect(() => {
