@@ -214,11 +214,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-recording` Indicates that the recorded audio was accepted by the user from the recording view.
+- `phone-island-recording-save` Indicates that the recorded audio was saved by the user from the recording view.
 
   ```json
   {
-    "base64_audio_file": "UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==" // string - (optional) The recorded audio in base64 format
+    "tempFileName": "user-cti-1686824454167.wav", // string - The temp file name of the asterisk recording to pass to the /enable_announcement API
+    "audioFileURL": "blob:http://localhost:6006/3897f2da-2411-4e38-a024-56bbeab72a91" // string - The local URL of the recorded file in blob format
   }
   ```
 
