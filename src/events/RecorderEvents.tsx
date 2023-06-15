@@ -24,8 +24,10 @@ export const RecorderEvents: FC = () => {
  * Dispatch recording save
  */
 export function dispatchRecordingSave() {
-  const tempFilename = store.getState().recorder.tempFilename
+  const tempFileName = store.getState().recorder.tempFileName
+  const audioFileURL = store.getState().player.audioPlayer?.current?.src || ''
   eventDispatch('phone-island-recording-save', {
-    tempFilename: tempFilename
+    tempFileName,
+    audioFileURL,
   })
 }
