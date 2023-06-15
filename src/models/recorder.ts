@@ -15,7 +15,7 @@ const defaultState: RecorderTypes = {
   playing: false,
   paused: false,
   currentTime: '00:00:00',
-  tempFilename: '',
+  tempFileName: '',
 }
 
 export const recorder = createModel<RootModel>()({
@@ -64,7 +64,7 @@ export const recorder = createModel<RootModel>()({
       }
     },
     setTempFilename: (state, payload: string) => {
-      state.tempFilename = payload
+      state.tempFileName = payload
       return state
     },
     reset: () => {
@@ -83,5 +83,5 @@ interface RecorderTypes {
   playing: boolean
   paused: boolean
   currentTime: string
-  tempFilename: string
+  tempFileName: string
 }
