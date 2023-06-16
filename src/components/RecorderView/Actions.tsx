@@ -19,6 +19,7 @@ import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -101,7 +102,13 @@ export const Actions: FC<{}> = () => {
       style={recorded ? { paddingTop: '2rem' } : {}}
     >
       {recording && (
-        <Button onClick={handleStop} variant='default' style={{ transform: 'scale(1.15)' }}>
+        <Button
+          onClick={handleStop}
+          variant='default'
+          style={{ transform: 'scale(1.15)' }}
+          data-tooltip-id='tooltip'
+          data-tooltip-content='Stop'
+        >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
           ) : (
@@ -111,25 +118,53 @@ export const Actions: FC<{}> = () => {
       )}
       {recorded && !recording && (
         <>
-          <Button onClick={handleDelete} variant='default'>
+          <Button
+            onClick={handleDelete}
+            variant='default'
+            data-tooltip-id='tooltip'
+            data-tooltip-content='Delete'
+          >
             <FontAwesomeIcon icon={faTrash} size='xl' />
           </Button>
           {playing ? (
-            <Button onClick={handlePause} variant='default' style={{ transform: 'scale(1.15)' }}>
+            <Button
+              onClick={handlePause}
+              variant='default'
+              style={{ transform: 'scale(1.15)' }}
+              data-tooltip-id='tooltip'
+              data-tooltip-content='Pause'
+            >
               <FontAwesomeIcon icon={faPause} size='xl' />
             </Button>
           ) : (
-            <Button onClick={handlePlay} variant='default' style={{ transform: 'scale(1.15)' }}>
+            <Button
+              onClick={handlePlay}
+              variant='default'
+              style={{ transform: 'scale(1.15)' }}
+              data-tooltip-id='tooltip'
+              data-tooltip-content='Play'
+            >
               <FontAwesomeIcon icon={faPlay} size='xl' />
             </Button>
           )}
-          <Button onClick={handleSaveRecording} variant='green'>
+          <Button
+            onClick={handleSaveRecording}
+            variant='green'
+            data-tooltip-id='tooltip'
+            data-tooltip-content='Save'
+          >
             <FontAwesomeIcon icon={faCheck} size='xl' />
           </Button>
         </>
       )}
       {!recording && !recorded && (
-        <Button onClick={handleStart} variant='red' style={{ transform: 'scale(1.15)' }}>
+        <Button
+          onClick={handleStart}
+          variant='red'
+          style={{ transform: 'scale(1.15)' }}
+          data-tooltip-id='tooltip'
+          data-tooltip-content='Start recording'
+        >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
           ) : (
@@ -137,6 +172,8 @@ export const Actions: FC<{}> = () => {
           )}
         </Button>
       )}
+      {/* Buttons tooltips */}
+      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
     </div>
   )
 }

@@ -10,6 +10,7 @@ import Progress from './Progress'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay, faPause } from '@nethesis/nethesis-solid-svg-icons'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
@@ -52,6 +53,8 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
               variant='default'
               style={{ transform: 'scale(1.15)' }}
+              data-tooltip-id='tooltip'
+              data-tooltip-content={audioPlayerPlaying ? 'Pause' : 'Play' }
             >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} size='xl' />
@@ -62,6 +65,8 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
           </div>
         </div>
       )}
+      {/* Buttons tooltips */}
+      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
     </div>
   )
 }
