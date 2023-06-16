@@ -151,7 +151,7 @@ export const Actions: FC<{}> = () => {
             onClick={handleSaveRecording}
             variant='green'
             data-tooltip-id='tooltip'
-            data-tooltip-content='Save'
+            data-tooltip-content='Confirm'
           >
             <FontAwesomeIcon icon={faCheck} size='xl' />
           </Button>
