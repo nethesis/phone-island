@@ -17,6 +17,7 @@ const Actions: FC<ActionsTypes> = ({ keyCallback }) => {
           onClick={() => keyCallback(key + 1)}
           variant='default'
           className={'pi-text-2xl'}
+          style={{ transform: 'scale(1.15)' }}
         >
           {key + 1}
         </Button>
@@ -27,6 +28,7 @@ const Actions: FC<ActionsTypes> = ({ keyCallback }) => {
           onClick={() => keyCallback(bottomKey)}
           variant='default'
           className={'pi-text-2xl'}
+          style={{ transform: 'scale(1.15)' }}
         >
           {bottomKey}
         </Button>
