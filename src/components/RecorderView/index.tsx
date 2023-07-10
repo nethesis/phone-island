@@ -16,7 +16,7 @@ import Timer from './Timer'
 const BAR_GROUPS_COUNT = 2
 
 // The mime type of the recorded audio
-const MIME_TYPE = 'video/webm;codecs=vp9'
+const MIME_TYPE = 'audio/webm'
 
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
