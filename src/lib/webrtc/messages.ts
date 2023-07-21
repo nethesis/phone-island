@@ -241,7 +241,7 @@ export function sendDTMF(key: string) {
     sipcall.send({
       message: {
         request: 'dtmf_info',
-        digit: key,
+        digit: `${key}`,
       },
     })
   }
