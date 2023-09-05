@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useEffect, useRef, useCallback, useMemo } from 'react'
+import React, { type ReactNode, FC, useEffect, useRef, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
@@ -169,7 +169,6 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.log(
                             'Successfully un-registered as ' + result['username'] + '!',
                           )
-                        // registered = false
                         break
 
                       case 'registered':
@@ -189,7 +188,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'registering':
-                        if (janus.current.log) janus.current.log('janus registering')
+                        if (janus.current.log) {
+                          janus.current.log('janus registering')
+                        }
                         break
 
                       // This event arrive on outgoing call start
@@ -224,13 +225,15 @@ export const WebRTC: FC<WebRTCProps> = ({
                       // ...that the outgoing ringtone arrives from the stream
                       // ...playing the local outgoing ringtone isn't needed
                       case 'progress':
-                        if (janus.current.log)
+                        if (janus.current.log) {
                           janus.current.log(
                             "There's early media from " +
                               result['username'] +
                               ', wairing for the call!',
                           )
-                        if (jsep !== null && jsep !== undefined) {
+                        }
+                        // Set the remote description to janus lib
+                        if (jsep) {
                           handleRemote(jsep)
                         }
                         // Update webrtc lastActivity time
@@ -254,8 +257,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                             incomingWebRTC: true,
                           })
 
-                          if (janus.current.log)
+                          if (janus.current.log) {
                             janus.current.log('Incoming call from ' + result['username'] + '!')
+                          }
                         }
 
                         // Update the webrtc last activity time
@@ -263,8 +267,10 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'accepted':
-                        if (janus.current.log)
+                        if (janus.current.log) {
                           janus.current.log(result['username'] + ' accepted the call!')
+                        }
+                        // Set the remote description to janus lib
                         if (jsep) {
                           handleRemote(jsep)
                         }
@@ -329,21 +335,34 @@ export const WebRTC: FC<WebRTCProps> = ({
                     janus.current.debug(stream)
                   }
 
-                  // Update local audio stream in webrtc state
-                  dispatch.webrtc.updateLocalAudioStream(stream)
+                  // Get local video element
+                  const localVideoElement = store.getState().player.localVideo
 
                   // Get audio and video tracks from stream
                   const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
                   const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
 
-                  // Manage local audio tracks
-                  const localAudioStream: MediaStream = new MediaStream(audioTracks)
-                  store.dispatch.webrtc.updateLocalAudioStream(localAudioStream)
+                  if (janus.current.attachMediaStream) {
+                    // Initialize the new media stream for local audio
+                    if (audioTracks && audioTracks.length > 0) {
+                      const audioStream: MediaStream = new MediaStream(audioTracks)
 
-                  // if (Janus.attachMediaStream) Janus.attachMediaStream(localVideoElement, stream)
-                  /* IS VIDEO ENABLED ? */
-                  // var videoTracks = stream.getVideoTracks()
-                  /* */
+                      // Save the new audio stream to the store
+                      store.dispatch.webrtc.updateLocalAudioStream(audioStream)
+                    } else {
+                      console.warn('No audio tracks on local stream')
+                    }
+                    // Initialize the new media stream for local video
+                    if (videoTracks && videoTracks.length > 0) {
+                      const videoStream: MediaStream = new MediaStream(videoTracks)
+
+                      if (localVideoElement && localVideoElement.current) {
+                        janus.current.attachMediaStream(localVideoElement.current, videoStream)
+                      }
+                    } else {
+                      console.warn('No video tracks on local stream')
+                    }
+                  }
                 },
                 onremotestream: function (stream: MediaStream) {
                   if (janus.current.debug) {
@@ -364,10 +383,10 @@ export const WebRTC: FC<WebRTCProps> = ({
                     // Initialize the new media stream for remote audio
                     if (audioTracks && audioTracks.length > 0) {
                       const audioStream: MediaStream = new MediaStream(audioTracks)
-                      remoteAudioElement &&
-                        remoteAudioElement.current &&
-                        janus.current.attachMediaStream(remoteAudioElement.current, audioStream)
 
+                      if (remoteAudioElement && remoteAudioElement.current) {
+                        janus.current.attachMediaStream(remoteAudioElement.current, audioStream)
+                      }
                       // Save the new audio stream to the store
                       store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
                     } else {
@@ -376,21 +395,24 @@ export const WebRTC: FC<WebRTCProps> = ({
                     // Initialize the new media stream for remote video
                     if (videoTracks && videoTracks.length > 0) {
                       const videoStream: MediaStream = new MediaStream(videoTracks)
-                      remoteVideoElement &&
-                        remoteVideoElement.current &&
+
+                      if (remoteVideoElement && remoteVideoElement.current) {
                         janus.current.attachMediaStream(remoteVideoElement.current, videoStream)
+                      }
                     } else {
                       console.warn('No video tracks on remote stream')
                     }
                   }
                 },
                 oncleanup: function () {
-                  if (janus.current.log)
+                  if (janus.current.log) {
                     janus.current.log(' ::: janus Got a cleanup notification :::')
+                  }
                 },
                 detached: function () {
-                  if (janus.current.warn)
+                  if (janus.current.warn) {
                     janus.current.warn('SIP plugin handle detached from the plugin itself')
+                  }
                 },
               })
             }
