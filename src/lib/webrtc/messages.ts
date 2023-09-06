@@ -37,9 +37,6 @@ export function register({
 export function answerWebRTC() {
   const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
-
-    console.warn("INSIDE CREATE ANSWER")
-
     sipcall.createAnswer({
       jsep: jsepGlobal,
       media: {

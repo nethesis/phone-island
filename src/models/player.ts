@@ -109,7 +109,7 @@ export const player = createModel<RootModel>()({
     startAudioPlayer: (endedEventCallback: () => void, rootState) => {
       if (rootState.player.audioPlayer && rootState.player.audioPlayer.current) {
         // Check if is playing
-        if (!rootState.player.audioPlayer.current.paused) {
+        if (rootState.player.audioPlayerPlaying) {
           rootState.player.audioPlayer.current.pause()
           rootState.player.audioPlayer.current.currentTime = 0
         }
@@ -125,7 +125,9 @@ export const player = createModel<RootModel>()({
         dispatch.player.setAudioPlayerPlaying(true)
         dispatch.player.setAudioPlayerPaused(false)
         // Dispatch the event
-        dispatchAudioPlayerStarted()
+        if (rootState.island.view === 'player') {
+          dispatchAudioPlayerStarted()
+        }
       }
     },
     // This function is recommended for playing audio with base64 sources

@@ -299,6 +299,11 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                         hangupCurrentCall()
                         sipcall.hangup()
+
+                        // Stop the local audio element ringing
+                        store.dispatch.player.stopAudioPlayer()
+
+                        // Check the janus doc before enable the following
                         // if (
                         //   result['code'] === 486 &&
                         //   result['event'] === 'hangup' &&
