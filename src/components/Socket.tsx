@@ -233,10 +233,10 @@ export const Socket: FC<SocketProps> = ({
               dispatch.alerts.setAlert('socket_down')
               console.debug('Socket is unreachable!')
             },
-            5000,
+            7 * 1000, // Waits for the response 7 seconds
           ),
         )
-      }, 5000)
+      }, 7 * 1000) // Executes a new check every 7 seconds
 
       // Handle connection message
       socket.current.on('connect', () => {
