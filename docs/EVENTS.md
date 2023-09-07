@@ -230,6 +230,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-audio-player-started` Indicates that the audio player started playing an audio.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-server-reloaded` Indicates that server is reloaded
+
   ```json
   {}
   ```

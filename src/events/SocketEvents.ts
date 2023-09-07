@@ -77,3 +77,13 @@ export function dispatchAlreadyLogin() {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-user-already-login', {})
 }
+
+/**
+ * The dispatch function for server reload
+ *
+ * @param event The serverReload event from socket
+ */
+export function dispatchServerReload() {
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-server-reloaded', {})
+}
