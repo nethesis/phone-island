@@ -12,6 +12,7 @@ import {
   dispatchQueueUpdate,
   dispatchQueueMemberUpdate,
   dispatchAlreadyLogin,
+  dispatchServerReload,
 } from '../events'
 import { store } from '../store'
 import { withTimeout } from '../utils'
@@ -291,6 +292,12 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('takeOver', () => {
         // Dispatch takeOver event
         dispatchAlreadyLogin()
+      })
+
+      // `serverReload` is the socket event when server is reloaded
+      socket.current.on('serverReload', () => {
+        // Dispatch serverReload event
+        dispatchServerReload()
       })
     }
 
