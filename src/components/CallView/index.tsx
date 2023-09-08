@@ -36,58 +36,65 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   return (
-    <StyledCallView incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
-      <StyledTopContent isOpen={isOpen} incoming={incoming} accepted={accepted} outgoing={outgoing}>
-        <Avatar />
+    <div className='pi-bg-red pi-flex pi-content-center pi-justify-center'>
+      <StyledCallView incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
+        <StyledTopContent
+          isOpen={isOpen}
+          incoming={incoming}
+          accepted={accepted}
+          outgoing={outgoing}
+        >
+          <Avatar />
+          {isOpen && (
+            <StyledDetails>
+              <DisplayName />
+              {/* The timer when expanded */}
+              {accepted ? <Timer startTime={startTime} /> : <Number />}
+            </StyledDetails>
+          )}
+          {/* The display name when collepsed */}
+          {!isOpen && !accepted && <DisplayName />}
+          {/* The timer when collapsed */}
+          {!isOpen && accepted && <Timer startTime={startTime} />}
+          {accepted && remoteAudioStream && (
+            <AudioBars
+              audioStream={remoteAudioStream}
+              paused={paused}
+              size={isOpen ? 'large' : 'small'}
+            />
+          )}
+        </StyledTopContent>
         {isOpen && (
-          <StyledDetails>
-            <DisplayName />
-            {/* The timer when expanded */}
-            {accepted ? <Timer startTime={startTime} /> : <Number />}
-          </StyledDetails>
-        )}
-        {/* The display name when collepsed */}
-        {!isOpen && !accepted && <DisplayName />}
-        {/* The timer when collapsed */}
-        {!isOpen && accepted && <Timer startTime={startTime} />}
-        {accepted && remoteAudioStream && (
-          <AudioBars
-            audioStream={remoteAudioStream}
-            paused={paused}
-            size={isOpen ? 'large' : 'small'}
-          />
-        )}
-      </StyledTopContent>
-      {isOpen && (
-        <div className='pi-grid pi-gap-y-5'>
-          {accepted && <Actions />}
-          <div
-            className={`pi-grid ${
-              isAnswerVisible(outgoing, accepted)
-                ? 'pi-grid-cols-2'
-                : accepted
-                ? 'pi-grid-cols-1 pi-justify-items-center'
-                : 'pi-grid-cols-1 pi-justify-items-end'
-            } pi-gap-3.5`}
-          >
-            {/* The button to hangup the currentCall */}
-            {/* {incoming || outgoing ? (
+          <div className='pi-grid pi-gap-y-5'>
+            {accepted && <Actions />}
+            <div
+              className={`pi-grid ${
+                isAnswerVisible(outgoing, accepted)
+                  ? 'pi-grid-cols-2'
+                  : accepted
+                  ? 'pi-grid-cols-1 pi-justify-items-center'
+                  : 'pi-grid-cols-1 pi-justify-items-end'
+              } pi-gap-3.5`}
+            >
+              {/* The button to hangup the currentCall */}
+              {/* {incoming || outgoing ? (
               <Button onClick={hangupCurrentCall} variant='red'>
                 <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
               </Button>
             ) : ( */}
-            <Hangup description="Hangup and transfer" />
-            {/* )} */}
-            {/* The button to answer the incoming call */}
-            {isAnswerVisible(outgoing, accepted) && (
-              <Button onClick={answerIncomingCall} variant='green'>
-                <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
-              </Button>
-            )}
+              <Hangup description='Hangup and transfer' />
+              {/* )} */}
+              {/* The button to answer the incoming call */}
+              {isAnswerVisible(outgoing, accepted) && (
+                <Button onClick={answerIncomingCall} variant='green'>
+                  <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </StyledCallView>
+        )}
+      </StyledCallView>
+    </div>
   )
 }
 

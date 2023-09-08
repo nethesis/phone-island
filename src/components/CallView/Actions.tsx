@@ -24,6 +24,7 @@ import {
   faMicrophoneSlash,
   faPlay,
   faArrowDownUpAcrossLine,
+  faCircleParking as faCircleParkingSolid,
 } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
@@ -169,7 +170,7 @@ const Actions: FC = () => {
               data-tooltip-id='tooltip'
               data-tooltip-content='Park'
             >
-              <FontAwesomeIcon size='xl' icon={faCircleParking} />
+              <FontAwesomeIcon size='xl' icon={parked ? faCircleParkingSolid : faCircleParking} />
             </Button>
           </div>
         </>
