@@ -7,6 +7,7 @@ import type { RootModel } from '.'
 const defaultState: IslandTypes = {
   view: null,
   isOpen: true,
+  actionsExpanded: false,
   startPosition: {
     x: 0,
     y: 0,
@@ -27,6 +28,10 @@ export const island = createModel<RootModel>()({
         ...state,
         isOpen: payload,
       }
+    },
+    toggleActionsExpanded: (state, payload: boolean) => {
+      state.actionsExpanded = payload
+      return state
     },
   },
   effects: (dispatch) => ({
@@ -49,6 +54,7 @@ type IslandViewType = 'call' | 'keypad' | 'player' | 'transfer' | 'recorder'
 interface IslandTypes {
   view?: IslandViewType | null
   isOpen: boolean
+  actionsExpanded: boolean
   startPosition: {
     x: number
     y: number

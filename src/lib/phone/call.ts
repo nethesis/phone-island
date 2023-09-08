@@ -19,7 +19,7 @@ import {
   attendedTransfer as attendedTransferRequest,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
-import { hangupConversation } from '../../services/astproxy'
+import { hangupConversation, parkConversation } from '../../services/astproxy'
 
 /**
  * Starts a call to a number
@@ -203,4 +203,17 @@ export function playDtmfAudio(key: string) {
   if (key === '*') key = 'star'
   if (key === '#') key = 'pound'
   store.dispatch.player.updateStartAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
+}
+
+export function park() {
+  const mainExtension = store.getState().currentUser.endpoints?.mainextension[0].id
+  const conversationId = store.getState().currentCall.conversationId
+
+  if (mainExtension && conversationId) {
+    parkConversation({
+      applicantId: mainExtension,
+      convid: conversationId,
+      endpointId: mainExtension,
+    })
+  }
 }

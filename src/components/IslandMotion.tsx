@@ -11,7 +11,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   const { incoming, outgoing, accepted, transferring } = useSelector(
     (state: RootState) => state.currentCall,
   )
-  const { view, isOpen } = useSelector((state: RootState) => state.island)
+  const { view, isOpen, actionsExpanded } = useSelector((state: RootState) => state.island)
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
   const {
     variants,
@@ -35,6 +35,11 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             size = {
               width: variants.call.expanded.transfer.width,
               height: variants.call.expanded.transfer.height,
+            }
+          } else if (accepted && actionsExpanded) {
+            size = {
+              width: variants.call.expanded.accepted.actionsExpanded.width,
+              height: variants.call.expanded.accepted.actionsExpanded.height,
             }
           } else if (accepted) {
             size = {

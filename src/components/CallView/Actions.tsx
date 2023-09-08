@@ -6,6 +6,9 @@ import {
   faPause as faPauseRegular,
   faMicrophone as faMicrophoneLight,
   faArrowDownArrowUp,
+  faCircleParking,
+  faChevronDown,
+  faChevronUp,
 } from '@nethesis/nethesis-light-svg-icons'
 import {
   muteCurrentCall,
@@ -29,14 +32,16 @@ import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { park } from '../../lib/phone/call'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
   const { paused, muted } = useSelector((state: RootState) => state.currentCall)
+  const parked = useSelector((state: RootState) => state.currentCall.parked)
 
   // Get isOpen and view from island store
-  const { view } = useSelector((state: RootState) => state.island)
-  const { transferring } = useSelector((state: RootState) => state.currentCall)
+  const { view, actionsExpanded } = useSelector((state: RootState) => state.island)
+  const transferring = useSelector((state: RootState) => state.currentCall.transferring)
 
   const dispatch = useDispatch<Dispatch>()
 
@@ -72,6 +77,19 @@ const Actions: FC = () => {
         }, 500)
       }
     }, 500)
+  }
+
+  function toggleActionsExpanded() {
+    if (actionsExpanded) {
+      dispatch.island.toggleActionsExpanded(false)
+    } else {
+      dispatch.island.toggleActionsExpanded(true)
+    }
+  }
+
+  function parkAction() {
+    park()
+    dispatch.currentCall.setParked(true)
   }
 
   return (
@@ -117,15 +135,48 @@ const Actions: FC = () => {
           )}
         </Button>
         <Button
-          active={view === 'keypad'}
-          variant='default'
-          onClick={openKeypad}
+          active={actionsExpanded}
+          variant='transparent'
+          onClick={() => toggleActionsExpanded()}
           data-tooltip-id='tooltip'
-          data-tooltip-content='Keyboard'
+          data-tooltip-content={actionsExpanded ? 'Collapse' : 'Expand'}
         >
-          {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
+          {actionsExpanded ? (
+            <FontAwesomeIcon className='' size='xl' icon={faChevronUp} />
+          ) : (
+            <FontAwesomeIcon size='xl' icon={faChevronDown} />
+          )}
         </Button>
       </div>
+      {/* Actions expanded section */}
+      {actionsExpanded ? (
+        <>
+          {' '}
+          <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
+            <Button
+              active={view === 'keypad'}
+              variant='default'
+              onClick={openKeypad}
+              data-tooltip-id='tooltip'
+              data-tooltip-content='Keyboard'
+            >
+              {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
+            </Button>
+            <Button
+              active={parked}
+              variant='default'
+              onClick={parkAction}
+              data-tooltip-id='tooltip'
+              data-tooltip-content='Park'
+            >
+              <FontAwesomeIcon size='xl' icon={faCircleParking} />
+            </Button>
+          </div>
+        </>
+      ) : (
+        <></>
+      )}
+
       {transferring && <TransferActions />}
       {/* Buttons tooltips */}
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
