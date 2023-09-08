@@ -82,3 +82,24 @@ export async function hangupConversation(body: { convid: string; endpointId: str
     throw new Error(error)
   }
 }
+
+export async function parkConversation(body: {
+  applicantId: string // Current user main extension
+  convid: string
+  endpointId: string // Current user main extension
+}) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/park`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}

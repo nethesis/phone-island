@@ -25,11 +25,15 @@ const defaultState = {
         accepted: {
           width: 348,
           height: 236,
+          actionsExpanded: {
+            width: 348,
+            height: 304,
+          },
         },
         transfer: {
           width: 348,
           height: 304,
-        },
+        }
       },
       collapsed: {
         width: 168,

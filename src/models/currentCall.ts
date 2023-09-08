@@ -18,6 +18,7 @@ const defaultState = {
   accepted: false,
   outgoingSocket: false,
   outgoingWebRTC: false,
+  parked: false,
   outgoing: false,
   startTime: '',
   muted: false,
@@ -69,6 +70,10 @@ export const currentCall = createModel<RootModel>()({
           transferCalls: [...state.transferCalls, payload],
         }
       }
+    },
+    setParked: (state, payload: boolean) => {
+      state.parked = payload
+      return state
     },
     reset: () => {
       return defaultState
@@ -136,6 +141,7 @@ export interface CurrentCallTypes {
   number?: string
   incomingSocket?: boolean
   incomingWebRTC?: boolean
+  parked?: boolean
   incoming?: boolean
   acceptedSocket?: boolean
   acceptedWebRTC?: boolean
