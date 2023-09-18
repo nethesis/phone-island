@@ -54,7 +54,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           extension.id.toLowerCase().startsWith(searchValue.current.toLowerCase()),
         ) ||
         userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
-        userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()),
+        userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+        userEndpoints.name.toLowerCase().includes(searchValue.current.toLowerCase()) ||
+        userEndpoints.username.toLowerCase() === searchValue.current.toLowerCase(),
     )
   }
 
