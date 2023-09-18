@@ -172,13 +172,12 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon size='xl' icon={parked ? faCircleParkingSolid : faCircleParking} />
             </Button>
+            {transferring && <TransferActions />}
           </div>
         </>
       ) : (
         <></>
       )}
-
-      {transferring && <TransferActions />}
       {/* Buttons tooltips */}
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
     </>
