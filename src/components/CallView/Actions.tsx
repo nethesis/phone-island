@@ -15,6 +15,7 @@ import {
   unmuteCurrentCall,
   pauseCurrentCall,
   unpauseCurrentCall,
+  attendedTransfer,
 } from '../../lib/phone/call'
 import PhoneKeypadLight from '../../static/icons/PhoneKeypadLight'
 import PhoneKeypadSolid from '../../static/icons/PhoneKeypadSolid'
@@ -34,6 +35,7 @@ import outgoingRingtone from '../../static/outgoing_ringtone'
 import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { park } from '../../lib/phone/call'
+import { useEventListener } from '../../utils'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -93,6 +95,28 @@ const Actions: FC = () => {
     dispatch.currentCall.setParked(true)
   }
 
+  /**
+   * Event listner for phone-island-transfer-call event
+   */
+  useEventListener('phone-island-transfer-call', (data) => {
+    const transferNumber = data.to
+    handleAttendedTransfer(transferNumber)
+  })
+
+  async function handleAttendedTransfer(number: string) {
+    // Send attended transfer message
+    const transferringMessageSent = await attendedTransfer(number)
+    if (transferringMessageSent) {
+      // Set transferring and disable pause
+      dispatch.currentCall.updateCurrentCall({
+        transferring: true,
+        paused: false,
+      })
+      // Play the remote audio element
+      dispatch.player.playRemoteAudio()
+    }
+  }
+
   return (
     <>
       <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
@@ -109,6 +133,7 @@ const Actions: FC = () => {
             <FontAwesomeIcon size='xl' icon={faPauseRegular} />
           )}
         </Button>
+
         <Button
           variant='default'
           active={muted ? true : false}
