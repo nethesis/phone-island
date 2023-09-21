@@ -240,3 +240,11 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+- `phone-island-transfer-call` The event to transfer call.
+
+  ```json
+  {
+    "to": "123456" // string - The transfered number
+  }
+  ```
