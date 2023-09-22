@@ -206,14 +206,36 @@ export function playDtmfAudio(key: string) {
 }
 
 export function park() {
-  const mainExtension = store.getState().currentUser.endpoints?.mainextension[0].id
-  const conversationId = store.getState().currentCall.conversationId
+  const conversationId = store?.getState()?.currentCall?.conversationId
 
-  if (mainExtension && conversationId) {
-    parkConversation({
-      applicantId: mainExtension,
-      convid: conversationId,
-      endpointId: mainExtension,
-    })
+  if (conversationId) {
+    let conversationIdSplitted = conversationId.split('>')
+    let firstConversationIdSplitted = conversationIdSplitted[0]
+    let firstConversationIdNumber: any = firstConversationIdSplitted?.match(/\/(\d+)-/)
+    let secondConversationIdSplitted = conversationIdSplitted[1]
+    let secondConversationIdNumber: any = secondConversationIdSplitted?.match(/\/(\d+)-/)
+
+    const endpoints: any = store?.getState()?.currentUser?.endpoints
+
+    if (Array.isArray(endpoints.extension)) {
+      // Get id from extensions
+      const extensionIds = endpoints.extension.map((endpoint) => endpoint.id)
+      // Map id and check if conversation id numbers is equal to extension id
+      if (extensionIds.indexOf(firstConversationIdNumber[1]) !== -1) {
+        const endpointId = firstConversationIdNumber[1]
+        parkConversation({
+          applicantId: endpointId,
+          convid: conversationId,
+          endpointId: endpointId,
+        })
+      } else if (extensionIds.indexOf(secondConversationIdNumber[1]) !== -1) {
+        const endpointId = secondConversationIdNumber[1]
+        parkConversation({
+          applicantId: endpointId,
+          convid: conversationId,
+          endpointId: endpointId,
+        })
+      }
+    }
   }
 }
