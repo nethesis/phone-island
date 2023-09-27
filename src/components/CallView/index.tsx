@@ -36,7 +36,7 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   return (
-    <div className='pi-bg-red pi-flex pi-content-center pi-justify-center'>
+    <div className='pi-bg-red pi-content-center pi-justify-center'>
       <StyledCallView incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
         <StyledTopContent
           isOpen={isOpen}
