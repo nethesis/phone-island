@@ -42,13 +42,16 @@ export function callSipURI(sipURI: string) {
     await call(sipURI, {
       audio: {
         mandatory: {
-          echoCancellation: false,
-          googEchoCancellation: false,
-          googAutoGainControl: false,
-          googAutoGainControl2: false,
-          googNoiseSuppression: false,
-          googHighpassFilter: false,
-          googTypingNoiseDetection: false,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          googEchoCancellation: true,
+          googAutoGainControl: true,
+          googNoiseSuppression: true,
+          googHighpassFilter: true,
+          googTypingNoiseDetection: true,
+          googNoiseReduction: true,
+          volume: 1.0,
         },
       },
       audioSend: true,
