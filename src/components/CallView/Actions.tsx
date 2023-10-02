@@ -35,7 +35,7 @@ import outgoingRingtone from '../../static/outgoing_ringtone'
 import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { park } from '../../lib/phone/call'
-import { useEventListener } from '../../utils'
+import { eventDispatch, useEventListener } from '../../utils'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -93,6 +93,7 @@ const Actions: FC = () => {
   function parkAction() {
     park()
     dispatch.currentCall.setParked(true)
+    eventDispatch('phone-island-call-parked', {})
   }
 
   /**

@@ -248,3 +248,9 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "to": "123456" // string - The transfered number
   }
   ```
+
+- `phone-island-call-parked` Indicates that actual call it's been parked
+
+  ```json
+  {}
+  ```
