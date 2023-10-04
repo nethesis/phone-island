@@ -15,7 +15,7 @@ import {
   dispatchServerReload,
 } from '../events'
 import { store } from '../store'
-import { withTimeout } from '../utils'
+import { eventDispatch, withTimeout } from '../utils'
 import type {
   ConversationTypes,
   ExtensionTypes,
@@ -195,6 +195,7 @@ export const Socket: FC<SocketProps> = ({
       })
       socket.current.on('disconnect', (reason) => {
         console.log(`Socket disconnect - reason: ${reason}`)
+        eventDispatch('phone-island-socket-disconnected', {})
       })
       socket.current.io.on('error', (err) => {
         console.debug(`Socket error: `, err)
