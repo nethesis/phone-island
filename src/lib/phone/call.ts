@@ -210,33 +210,32 @@ export function playDtmfAudio(key: string) {
 
 export function park() {
   const conversationId = store?.getState()?.currentCall?.conversationId
+  const userConversationInformations = store?.getState()?.currentUser?.conversations
+
+  let parkingInformation: any = {}
 
   if (conversationId) {
-    let conversationIdSplitted = conversationId.split('>')
-    let firstConversationIdSplitted = conversationIdSplitted[0]
-    let firstConversationIdNumber: any = firstConversationIdSplitted?.match(/\/(\d+)-/)
-    let secondConversationIdSplitted = conversationIdSplitted[1]
-    let secondConversationIdNumber: any = secondConversationIdSplitted?.match(/\/(\d+)-/)
+    if (userConversationInformations) {
+      for (const key in userConversationInformations) {
+        if (userConversationInformations.hasOwnProperty(key)) {
+          const conversation = userConversationInformations[key]
+          if (Object.keys(conversation).length > 0) {
+            parkingInformation = {
+              numberParkId: key,
+              idConversation: conversationId,
+            }
+          }
+        }
+      }
+    }
 
-    const endpoints: any = store?.getState()?.currentUser?.endpoints
-
-    if (Array.isArray(endpoints.extension)) {
-      // Get id from extensions
-      const extensionIds = endpoints.extension.map((endpoint) => endpoint.id)
-      // Map id and check if conversation id numbers is equal to extension id
-      if (extensionIds.indexOf(firstConversationIdNumber[1]) !== -1) {
-        const endpointId = firstConversationIdNumber[1]
+    if (Object.keys(parkingInformation).length > 0) {
+      if (parkingInformation?.numberParkId) {
+        // If park information are not empty park call
         parkConversation({
-          applicantId: endpointId,
+          applicantId: parkingInformation?.numberParkId,
           convid: conversationId,
-          endpointId: endpointId,
-        })
-      } else if (extensionIds.indexOf(secondConversationIdNumber[1]) !== -1) {
-        const endpointId = secondConversationIdNumber[1]
-        parkConversation({
-          applicantId: endpointId,
-          convid: conversationId,
-          endpointId: endpointId,
+          endpointId: parkingInformation?.numberParkId,
         })
       }
     }
