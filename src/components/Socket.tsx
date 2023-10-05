@@ -296,7 +296,7 @@ export const Socket: FC<SocketProps> = ({
       })
 
       // `serverReload` is the socket event when server is reloaded
-      socket.current.on('serverReload', () => {
+      socket.current.on('serverReloaded', () => {
         // Dispatch serverReload event
         dispatchServerReload()
       })
