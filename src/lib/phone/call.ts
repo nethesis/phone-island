@@ -210,96 +210,33 @@ export function playDtmfAudio(key: string) {
 
 export function park() {
   const conversationId = store?.getState()?.currentCall?.conversationId
+  const userConversationInformations = store?.getState()?.currentUser?.conversations
+
+  let parkingInformation: any = {}
 
   if (conversationId) {
-    let conversationIdSplitted = conversationId.split('>')
-    let firstConversationIdSplitted = conversationIdSplitted[0]
-    let firstConversationIdNumber: any = ''
-    let secondConversationIdSplitted = conversationIdSplitted[1]
-    let secondConversationIdNumber: any = ''
-    let firstNumberToCheck: any = ''
-    let secondNumberToCheck: any = ''
-
-    let isCallInQueue = false
-    // Check if call id contains @from-queue
-    if (firstConversationIdSplitted.includes('@from-queue')) {
-      // Remove @from-queue
-      firstConversationIdSplitted = firstConversationIdSplitted.replace('@from-queue', '')
-      // Remove all the caracter except for extension number
-      firstConversationIdSplitted = firstConversationIdSplitted.replace(/\/(\d+)-\d+;.*/, '$1')
-      firstConversationIdNumber = firstConversationIdSplitted?.match(/(\d+)/)
-      isCallInQueue = true
-    } else {
-      firstConversationIdNumber = firstConversationIdSplitted?.match(/\/(\d+)-/)
-    }
-
-    if (firstConversationIdNumber !== undefined) {
-      firstNumberToCheck = firstConversationIdNumber[1]
-    }
-
-    // Check if call id contains @from-queue
-    if (secondConversationIdSplitted.includes('@from-queue')) {
-      // Remove @from-queue
-      secondConversationIdSplitted = secondConversationIdSplitted.replace('@from-queue', '')
-      // Remove all the caracter except for extension number
-      secondConversationIdSplitted = secondConversationIdSplitted.replace(/\/(\d+)-\d+;.*/, '$1')
-      secondConversationIdNumber = secondConversationIdSplitted?.match(/(\d+)/)
-      isCallInQueue = true
-    } else {
-      secondConversationIdNumber = secondConversationIdSplitted?.match(/\/(\d+)-/)
-    }
-
-    if (secondConversationIdNumber !== undefined) {
-      secondNumberToCheck = secondConversationIdNumber[1]
-    }
-
-    // If call is not from queue
-    if (!isCallInQueue) {
-      const endpoints: any = store?.getState()?.currentUser?.endpoints
-
-      if (Array.isArray(endpoints.extension)) {
-        // Get id from extensions
-        const extensionIds = endpoints.extension.map((endpoint) => endpoint.id)
-        if (extensionIds.indexOf(firstConversationIdNumber[1]) !== -1) {
-          const endpointId = firstConversationIdNumber[1]
-          parkConversation({
-            applicantId: endpointId,
-            convid: conversationId,
-            endpointId: endpointId,
-          })
-        } else if (extensionIds.indexOf(secondConversationIdNumber[1]) !== -1) {
-          const endpointId = secondConversationIdNumber[1]
-          parkConversation({
-            applicantId: endpointId,
-            convid: conversationId,
-            endpointId: endpointId,
-          })
+    if (userConversationInformations) {
+      for (const key in userConversationInformations) {
+        if (userConversationInformations.hasOwnProperty(key)) {
+          const conversation = userConversationInformations[key]
+          if (Object.keys(conversation).length > 0) {
+            parkingInformation = {
+              numberParkId: key,
+              idConversation: conversationId,
+            }
+          }
         }
       }
-      // If call is from queue
-    } else {
-      // Get user informations from store
-      const userInformations = store?.getState()?.users
+    }
 
-      if (userInformations?.extensions) {
-        // Get keys of conversations not empty
-        const currentUserConversationsKeys = Object.keys(
-          store.getState().currentUser.conversations,
-        ).filter((key) => Object.keys(store.getState().currentUser.conversations[key]).length > 0)
-
-        // Check number to get corresponding extension with not empty conversation object
-        const matchingNumbers: any = [firstNumberToCheck, secondNumberToCheck].filter((number) => {
-          return currentUserConversationsKeys.includes(number)
+    if (Object.keys(parkingInformation).length > 0) {
+      if (parkingInformation?.numberParkId) {
+        // If park information are not empty park call
+        parkConversation({
+          applicantId: parkingInformation?.numberParkId,
+          convid: conversationId,
+          endpointId: parkingInformation?.numberParkId,
         })
-
-        if (matchingNumbers.length > 0) {
-          const endpointId = matchingNumbers[0]
-          parkConversation({
-            applicantId: endpointId,
-            convid: conversationId,
-            endpointId: endpointId,
-          })
-        }
       }
     }
   }
