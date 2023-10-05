@@ -214,30 +214,92 @@ export function park() {
   if (conversationId) {
     let conversationIdSplitted = conversationId.split('>')
     let firstConversationIdSplitted = conversationIdSplitted[0]
-    let firstConversationIdNumber: any = firstConversationIdSplitted?.match(/\/(\d+)-/)
+    let firstConversationIdNumber: any = ''
     let secondConversationIdSplitted = conversationIdSplitted[1]
-    let secondConversationIdNumber: any = secondConversationIdSplitted?.match(/\/(\d+)-/)
+    let secondConversationIdNumber: any = ''
+    let firstNumberToCheck: any = ''
+    let secondNumberToCheck: any = ''
 
-    const endpoints: any = store?.getState()?.currentUser?.endpoints
+    let isCallInQueue = false
+    // Check if call id contains @from-queue
+    if (firstConversationIdSplitted.includes('@from-queue')) {
+      // Remove @from-queue
+      firstConversationIdSplitted = firstConversationIdSplitted.replace('@from-queue', '')
+      // Remove all the caracter except for extension number
+      firstConversationIdSplitted = firstConversationIdSplitted.replace(/\/(\d+)-\d+;.*/, '$1')
+      firstConversationIdNumber = firstConversationIdSplitted?.match(/(\d+)/)
+      isCallInQueue = true
+    } else {
+      firstConversationIdNumber = firstConversationIdSplitted?.match(/\/(\d+)-/)
+    }
 
-    if (Array.isArray(endpoints.extension)) {
-      // Get id from extensions
-      const extensionIds = endpoints.extension.map((endpoint) => endpoint.id)
-      // Map id and check if conversation id numbers is equal to extension id
-      if (extensionIds.indexOf(firstConversationIdNumber[1]) !== -1) {
-        const endpointId = firstConversationIdNumber[1]
-        parkConversation({
-          applicantId: endpointId,
-          convid: conversationId,
-          endpointId: endpointId,
+    if (firstConversationIdNumber !== undefined) {
+      firstNumberToCheck = firstConversationIdNumber[1]
+    }
+
+    // Check if call id contains @from-queue
+    if (secondConversationIdSplitted.includes('@from-queue')) {
+      // Remove @from-queue
+      secondConversationIdSplitted = secondConversationIdSplitted.replace('@from-queue', '')
+      // Remove all the caracter except for extension number
+      secondConversationIdSplitted = secondConversationIdSplitted.replace(/\/(\d+)-\d+;.*/, '$1')
+      secondConversationIdNumber = secondConversationIdSplitted?.match(/(\d+)/)
+      isCallInQueue = true
+    } else {
+      secondConversationIdNumber = secondConversationIdSplitted?.match(/\/(\d+)-/)
+    }
+
+    if (secondConversationIdNumber !== undefined) {
+      secondNumberToCheck = secondConversationIdNumber[1]
+    }
+
+    // If call is not from queue
+    if (!isCallInQueue) {
+      const endpoints: any = store?.getState()?.currentUser?.endpoints
+
+      if (Array.isArray(endpoints.extension)) {
+        // Get id from extensions
+        const extensionIds = endpoints.extension.map((endpoint) => endpoint.id)
+        if (extensionIds.indexOf(firstConversationIdNumber[1]) !== -1) {
+          const endpointId = firstConversationIdNumber[1]
+          parkConversation({
+            applicantId: endpointId,
+            convid: conversationId,
+            endpointId: endpointId,
+          })
+        } else if (extensionIds.indexOf(secondConversationIdNumber[1]) !== -1) {
+          const endpointId = secondConversationIdNumber[1]
+          parkConversation({
+            applicantId: endpointId,
+            convid: conversationId,
+            endpointId: endpointId,
+          })
+        }
+      }
+      // If call is from queue
+    } else {
+      // Get user informations from store
+      const userInformations = store?.getState()?.users
+
+      if (userInformations?.extensions) {
+        // Get keys of conversations not empty
+        const currentUserConversationsKeys = Object.keys(
+          store.getState().currentUser.conversations,
+        ).filter((key) => Object.keys(store.getState().currentUser.conversations[key]).length > 0)
+
+        // Check number to get corresponding extension with not empty conversation object
+        const matchingNumbers: any = [firstNumberToCheck, secondNumberToCheck].filter((number) => {
+          return currentUserConversationsKeys.includes(number)
         })
-      } else if (extensionIds.indexOf(secondConversationIdNumber[1]) !== -1) {
-        const endpointId = secondConversationIdNumber[1]
-        parkConversation({
-          applicantId: endpointId,
-          convid: conversationId,
-          endpointId: endpointId,
-        })
+
+        if (matchingNumbers.length > 0) {
+          const endpointId = matchingNumbers[0]
+          parkConversation({
+            applicantId: endpointId,
+            convid: conversationId,
+            endpointId: endpointId,
+          })
+        }
       }
     }
   }
