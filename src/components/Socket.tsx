@@ -13,6 +13,7 @@ import {
   dispatchQueueMemberUpdate,
   dispatchAlreadyLogin,
   dispatchServerReload,
+  dispatchParkingUpdate
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -299,6 +300,12 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('serverReloaded', () => {
         // Dispatch serverReload event
         dispatchServerReload()
+      })
+
+      // `serverReload` is the socket event when server is reloaded
+      socket.current.on('parkingUpdate', () => {
+        // Dispatch serverReload event
+        dispatchParkingUpdate()
       })
     }
 

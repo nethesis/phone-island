@@ -87,3 +87,13 @@ export function dispatchServerReload() {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-server-reloaded', {})
 }
+
+/**
+ * The dispatch function for parking update
+ *
+ * @param event The parking update event from socket
+ */
+export function dispatchParkingUpdate() {
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-parking-update', {})
+}
