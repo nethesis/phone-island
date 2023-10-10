@@ -261,6 +261,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-socket-reconnected` Indicates that websocket connection it's been reconnected
+
+  ```json
+  {}
+  ```
+
 - `phone-island-parking-update` Indicates update on parking list status
 
   ```json
