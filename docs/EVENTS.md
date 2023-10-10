@@ -256,6 +256,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-socket-disconnected` Indicates that webscket connection it's been disconnected
+
+  ```json
+  {}
+  ```
+
+- `phone-island-parking-update` Indicates update on parking list status
+
   ```json
   {}
   ```
