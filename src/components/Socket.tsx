@@ -196,7 +196,12 @@ export const Socket: FC<SocketProps> = ({
       })
       socket.current.on('disconnect', (reason) => {
         console.log(`Socket disconnect - reason: ${reason}`)
-        eventDispatch('phone-island-socket-disconnected', {})
+        console.log('Questa è la reason', reason)
+        if (reason.includes('server disconnect')) {
+          eventDispatch('phone-island-server-disconnected', {})
+        } else {
+          eventDispatch('phone-island-socket-disconnected', {})
+        }
       })
       socket.current.io.on('error', (err) => {
         console.debug(`Socket error: `, err)

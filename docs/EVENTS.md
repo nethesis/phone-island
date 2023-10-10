@@ -266,3 +266,9 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+- `phone-island-server-disconnected` Indicates that server connection it's been disconnected
+
+  ```json
+  {}
+  ```
