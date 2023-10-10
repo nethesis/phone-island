@@ -13,7 +13,7 @@ import {
   dispatchQueueMemberUpdate,
   dispatchAlreadyLogin,
   dispatchServerReload,
-  dispatchParkingUpdate
+  dispatchParkingUpdate,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -196,7 +196,11 @@ export const Socket: FC<SocketProps> = ({
       })
       socket.current.on('disconnect', (reason) => {
         console.log(`Socket disconnect - reason: ${reason}`)
-        eventDispatch('phone-island-socket-disconnected', {})
+        if (reason.includes('server disconnect')) {
+          eventDispatch('phone-island-server-disconnected', {})
+        } else {
+          eventDispatch('phone-island-socket-disconnected', {})
+        }
       })
       socket.current.io.on('error', (err) => {
         console.debug(`Socket error: `, err)
@@ -205,6 +209,7 @@ export const Socket: FC<SocketProps> = ({
         console.debug(`Socket connect_error: `, err)
       })
       socket.current.io.on('reconnect', (attempt) => {
+        eventDispatch('phone-island-socket-reconnected', {})
         console.debug(`Socket reconnect attemp ${attempt} (sid: ${socket.current.id})`)
       })
       socket.current.io.on('reconnect_attempt', (attempt) => {
