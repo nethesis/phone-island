@@ -3,30 +3,26 @@
 
 import React, { type FC } from 'react'
 import {
-  faPause as faPauseRegular,
-  faMicrophone as faMicrophoneLight,
-  faArrowDownArrowUp,
-  faCircleParking,
-  faChevronDown,
-  faChevronUp,
-} from '@nethesis/nethesis-light-svg-icons'
-import {
   muteCurrentCall,
   unmuteCurrentCall,
   pauseCurrentCall,
   unpauseCurrentCall,
   attendedTransfer,
 } from '../../lib/phone/call'
-import PhoneKeypadLight from '../../static/icons/PhoneKeypadLight'
-import PhoneKeypadSolid from '../../static/icons/PhoneKeypadSolid'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faMicrophoneSlash,
+  faPause,
   faPlay,
+  faMicrophone,
+  faMicrophoneSlash,
   faArrowDownUpAcrossLine,
-  faCircleParking as faCircleParkingSolid,
-} from '@nethesis/nethesis-solid-svg-icons'
+  faSquareParking,
+  faChevronDown,
+  faChevronUp,
+  faArrowRightArrowLeft,
+} from '@fortawesome/free-solid-svg-icons'
+import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
 import { sendDTMF } from '../../lib/webrtc/messages'
@@ -131,7 +127,7 @@ const Actions: FC = () => {
           {paused ? (
             <FontAwesomeIcon size='xl' icon={faPlay} />
           ) : (
-            <FontAwesomeIcon size='xl' icon={faPauseRegular} />
+            <FontAwesomeIcon size='xl' icon={faPause} />
           )}
         </Button>
 
@@ -145,7 +141,7 @@ const Actions: FC = () => {
           {muted ? (
             <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
           ) : (
-            <FontAwesomeIcon size='xl' icon={faMicrophoneLight} />
+            <FontAwesomeIcon size='xl' icon={faMicrophone} />
           )}
         </Button>
         <Button
@@ -158,7 +154,7 @@ const Actions: FC = () => {
           {transferring ? (
             <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
           ) : (
-            <FontAwesomeIcon size='xl' icon={faArrowDownArrowUp} />
+            <FontAwesomeIcon size='xl' className='pi-rotate-90' icon={faArrowRightArrowLeft} />
           )}
         </Button>
         <Button
@@ -187,7 +183,7 @@ const Actions: FC = () => {
               data-tooltip-id='tooltip'
               data-tooltip-content='Keyboard'
             >
-              {view === 'keypad' ? <PhoneKeypadSolid /> : <PhoneKeypadLight />}
+              <FontAwesomeIcon size='xl' icon={faGridRound} />
             </Button>
             <Button
               active={parked}
@@ -196,7 +192,7 @@ const Actions: FC = () => {
               data-tooltip-id='tooltip'
               data-tooltip-content='Park'
             >
-              <FontAwesomeIcon size='xl' icon={parked ? faCircleParkingSolid : faCircleParking} />
+              <FontAwesomeIcon size='xl' icon={faSquareParking} />
             </Button>
             {transferring && <TransferActions />}
           </div>

@@ -8,7 +8,7 @@ import {
   faTriangleExclamation,
   faCircleCheck,
   faCircleXmark,
-} from '@nethesis/nethesis-solid-svg-icons'
+} from '@fortawesome/free-solid-svg-icons'
 
 const classes = {
   base: 'pi-border-4 pi-rounded-2xl pi-p-4 pi-flex pi-gap-5 pi-items-center',

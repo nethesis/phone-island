@@ -3,17 +3,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 
-import React, { type FC, useState, useEffect, memo } from 'react'
+import React, { type FC, useEffect } from 'react'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faPause,
+  faPlay,
+  faTrash,
+  faCheck,
   faRecordVinyl,
   faStop,
   faCircleNotch,
-  faPause,
-  faPlay,
-} from '@nethesis/nethesis-solid-svg-icons'
-import { faTrash, faCheck } from '@nethesis/nethesis-light-svg-icons'
+} from '@fortawesome/free-solid-svg-icons'
 import { startAnnouncementRecording } from '../../services/offhour'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'

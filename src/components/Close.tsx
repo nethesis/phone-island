@@ -1,8 +1,8 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import React, { type FC } from 'react'
-import { faXmark } from '@nethesis/nethesis-light-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 

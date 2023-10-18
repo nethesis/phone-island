@@ -6,7 +6,7 @@ import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Is
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone } from '@nethesis/nethesis-solid-svg-icons'
+import { faPhone } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
 import Number from './Number'
