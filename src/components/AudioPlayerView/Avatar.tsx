@@ -4,7 +4,7 @@
 import React, { type FC } from 'react'
 import { type TypeTypes } from '../../types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBullhorn, faVoicemail, faMusic } from '@nethesis/nethesis-solid-svg-icons'
+import { faBullhorn, faVoicemail, faMusic } from '@fortawesome/free-solid-svg-icons'
 import { motion } from 'framer-motion/dist/framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'

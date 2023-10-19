@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useRef, useState } from 'react'
+import React, { type FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { Avatar } from './Avatar'
@@ -9,7 +9,7 @@ import { AudioBars } from '../AudioBars'
 import Progress from './Progress'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay, faPause } from '@nethesis/nethesis-solid-svg-icons'
+import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
@@ -54,7 +54,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content={audioPlayerPlaying ? 'Pause' : 'Play' }
+              data-tooltip-content={audioPlayerPlaying ? 'Pause' : 'Play'}
             >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} size='xl' />

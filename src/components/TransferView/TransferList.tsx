@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { backToCallView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
-import { faPhone as faPhoneLight, faArrowLeft } from '@nethesis/nethesis-light-svg-icons'
+import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
@@ -153,7 +153,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             <div
               style={{ height: '17rem' }}
               ref={relativeRef}
-              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden'
+              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
             >
               {/* The custom searched number */}
               {showCustomUser && listUsers.length === 0 && (
@@ -174,7 +174,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       data-tooltip-id='transfer-list-tooltip'
                       data-tooltip-content='Call to transfer'
                     >
-                      <FontAwesomeIcon size='xl' icon={faPhoneLight} />
+                      <FontAwesomeIcon size='xl' icon={faPhone} />
                     </Button>
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           data-tooltip-id='transfer-list-tooltip'
                           data-tooltip-content='Call to transfer'
                         >
-                          <FontAwesomeIcon size='xl' icon={faPhoneLight} />
+                          <FontAwesomeIcon size='xl' icon={faPhone} />
                         </Button>
                       )}
                     </div>
