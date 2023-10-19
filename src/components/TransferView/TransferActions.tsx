@@ -4,7 +4,7 @@
 import React, { type FC } from 'react'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowsRepeat } from '@nethesis/nethesis-light-svg-icons'
+import { faArrowsRepeat } from '@nethesis/nethesis-solid-svg-icons'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { store, Dispatch } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
