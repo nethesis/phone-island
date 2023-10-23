@@ -47,7 +47,7 @@ export const TransferActions: FC<TransferActionsProps> = () => {
           onClick={switchTransfer}
           variant='default'
           data-tooltip-id='transfer-actions-tooltip'
-          data-tooltip-content={t('Tooltip.Switch calls')}
+          data-tooltip-content={t('Tooltip.Switch call')}
         >
           <FontAwesomeIcon size='xl' icon={faArrowsRepeat} />
         </Button>

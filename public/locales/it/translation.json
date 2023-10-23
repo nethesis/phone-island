@@ -7,8 +7,8 @@
     "Hangup": "Chiudi",
     "Pause": "Pausa",
     "Play": "Riproduci",
-    "Mute": "Silenzia",
-    "Unmute": "Desilenzia",
+    "Mute": "Muto",
+    "Unmute": "Togli muto",
     "Transfer": "Trasferisci",
     "Cancel transfer": "Annulla trasferimento",
     "Collapse": "Riduci",
@@ -17,10 +17,10 @@
     "Park": "Parcheggia",
     "Back to call": "Torna alla chiamata",
     "Stop": "Stop",
-    "Delete": "Elima",
+    "Delete": "Elimina",
     "Confirm": "Conferma",
     "Start recording": "Inizia registrazione",
-    "Switch calls": "Cambia chiamate",
+    "Switch call": "Scambia chiamata",
     "Call to transfer": "Chiamata da trasferire",
     "Hangup and transfer": "Chiudi e trasferisci"
   }
