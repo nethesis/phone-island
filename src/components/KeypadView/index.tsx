@@ -12,6 +12,7 @@ import { sendDTMF } from '../../lib/webrtc/messages'
 import { backToCallView } from '../../lib/island/island'
 import { playDtmfAudio } from '../../lib/phone/call'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { useTranslation } from 'react-i18next'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -38,6 +39,8 @@ const KeypadView: FC<KeypadViewTypes> = () => {
     return () => window.removeEventListener('keydown', handlePhysicalKeydown)
   }, [])
 
+  const { t } = useTranslation()
+
   return (
     <>
       {isOpen ? (
@@ -47,7 +50,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               variant='transparent'
               onClick={backToCallView}
               data-tooltip-id='keyboard-tooltip'
-              data-tooltip-content='Back to call'
+              data-tooltip-content={t('Tooltip.Back to call')}
             >
               <FontAwesomeIcon size='xl' icon={faArrowLeft} />
             </Button>

@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
+import loadI18n from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener } from './utils'
@@ -57,6 +58,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   useEventListener('phone-island-intrude-call', (data: any) => {
     store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
   })
+
+  const [firstRenderI18n, setFirstRenderI18n] = useState(true)
+  //initialize i18n
+  useEffect(() => {
+    if (firstRenderI18n) {
+      loadI18n()
+      setFirstRenderI18n(false)
+    }
+  }, [firstRenderI18n])
 
   return (
     <>

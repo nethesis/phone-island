@@ -32,6 +32,7 @@ import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { park } from '../../lib/phone/call'
 import { eventDispatch, useEventListener } from '../../utils'
+import { useTranslation } from 'react-i18next'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -114,6 +115,8 @@ const Actions: FC = () => {
     }
   }
 
+  const { t } = useTranslation()
+
   return (
     <>
       <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
@@ -122,7 +125,7 @@ const Actions: FC = () => {
           active={paused ? true : false}
           onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
           data-tooltip-id='tooltip'
-          data-tooltip-content={paused ? 'Play' : 'Pause'}
+          data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
         >
           {paused ? (
             <FontAwesomeIcon size='xl' icon={faPlay} />
@@ -136,7 +139,7 @@ const Actions: FC = () => {
           active={muted ? true : false}
           onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
           data-tooltip-id='tooltip'
-          data-tooltip-content={muted ? 'Unmute' : 'Mute'}
+          data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
         >
           {muted ? (
             <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
@@ -149,7 +152,9 @@ const Actions: FC = () => {
           onClick={transferring ? calcelTransfer : transfer}
           variant='default'
           data-tooltip-id='tooltip'
-          data-tooltip-content={transferring ? 'Cancel transfer' : 'Transfer'}
+          data-tooltip-content={
+            transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
+          }
         >
           {transferring ? (
             <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
@@ -162,7 +167,9 @@ const Actions: FC = () => {
           variant='transparent'
           onClick={() => toggleActionsExpanded()}
           data-tooltip-id='tooltip'
-          data-tooltip-content={actionsExpanded ? 'Collapse' : 'Expand'}
+          data-tooltip-content={
+            actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
+          }
         >
           {actionsExpanded ? (
             <FontAwesomeIcon className='' size='xl' icon={faChevronUp} />
@@ -181,7 +188,7 @@ const Actions: FC = () => {
               variant='default'
               onClick={openKeypad}
               data-tooltip-id='tooltip'
-              data-tooltip-content='Keyboard'
+              data-tooltip-content={t('Tooltip.Keyboard')}
             >
               <FontAwesomeIcon size='xl' icon={faGridRound} />
             </Button>
@@ -190,7 +197,7 @@ const Actions: FC = () => {
               variant='default'
               onClick={parkAction}
               data-tooltip-id='tooltip'
-              data-tooltip-content='Park'
+              data-tooltip-content={t('Tooltip.Park')}
             >
               <FontAwesomeIcon size='xl' icon={faSquareParking} />
             </Button>

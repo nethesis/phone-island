@@ -11,6 +11,7 @@ import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { useTranslation } from 'react-i18next'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
@@ -25,6 +26,8 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
   function pausePlaying() {
     dispatch.player.pauseAudioPlayer()
   }
+
+  const { t } = useTranslation()
 
   return (
     <div className='pi-flex pi-gap-7 pi-flex-col'>
@@ -54,7 +57,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content={audioPlayerPlaying ? 'Pause' : 'Play'}
+              data-tooltip-content={audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`}
             >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} size='xl' />

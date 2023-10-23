@@ -21,6 +21,7 @@ import { Dispatch, RootState } from '../../store'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { useTranslation } from 'react-i18next'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -97,6 +98,8 @@ export const Actions: FC<{}> = () => {
     }
   }, [incoming])
 
+  const { t } = useTranslation()
+
   return (
     <div
       className={`pi-flex pi-justify-center pi-items-center pi-pt-9 pi-gap-6`}
@@ -108,7 +111,7 @@ export const Actions: FC<{}> = () => {
           variant='default'
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
-          data-tooltip-content='Stop'
+          data-tooltip-content={t('Tooltip.Stop')}
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -123,7 +126,7 @@ export const Actions: FC<{}> = () => {
             onClick={handleDelete}
             variant='default'
             data-tooltip-id='tooltip'
-            data-tooltip-content='Delete'
+            data-tooltip-content={t('Tooltip.Delete')}
           >
             <FontAwesomeIcon icon={faTrash} size='xl' />
           </Button>
@@ -133,7 +136,7 @@ export const Actions: FC<{}> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content='Pause'
+              data-tooltip-content={t('Tooltip.Pause')}
             >
               <FontAwesomeIcon icon={faPause} size='xl' />
             </Button>
@@ -143,7 +146,7 @@ export const Actions: FC<{}> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content='Play'
+              data-tooltip-content={t('Tooltip.Play')}
             >
               <FontAwesomeIcon icon={faPlay} size='xl' />
             </Button>
@@ -152,7 +155,7 @@ export const Actions: FC<{}> = () => {
             onClick={handleSaveRecording}
             variant='green'
             data-tooltip-id='tooltip'
-            data-tooltip-content='Confirm'
+            data-tooltip-content={t('Tooltip.Confirm')}
           >
             <FontAwesomeIcon icon={faCheck} size='xl' />
           </Button>
@@ -164,7 +167,7 @@ export const Actions: FC<{}> = () => {
           variant='red'
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
-          data-tooltip-content='Start recording'
+          data-tooltip-content={t('Tooltip.Start recording')}
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />

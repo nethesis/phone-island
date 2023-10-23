@@ -49,12 +49,16 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-moment": "^1.1.2",
+    "react-i18next": "^12.1.5",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
     "react-tooltip": "^5.11.1",
     "socket.io-client": "^4.5.3",
     "styled-components": "^5.3.6",
-    "webrtc-adapter": "^8.2.0"
+    "webrtc-adapter": "^8.2.0",
+    "i18next": "^22.4.9",
+    "i18next-browser-languagedetector": "^7.0.1",
+    "i18next-http-backend": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
