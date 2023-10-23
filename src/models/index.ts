@@ -14,6 +14,7 @@ import { alerts } from './alerts'
 import { motions } from './motions'
 import { audioBars } from './audioBars'
 import { recorder } from './recorder'
+import { listen } from './listen'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -28,6 +29,7 @@ export interface RootModel extends Models<RootModel> {
   motions: typeof motions
   audioBars: typeof audioBars
   recorder: typeof recorder
+  listen: typeof listen
 }
 
 export const models: RootModel = {
@@ -43,4 +45,5 @@ export const models: RootModel = {
   motions,
   audioBars,
   recorder,
+  listen,
 }

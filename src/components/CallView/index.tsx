@@ -6,7 +6,7 @@ import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Is
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone } from '@fortawesome/free-solid-svg-icons'
+import { faPhone, faEarListen, faHandPointUp } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
 import Number from './Number'
@@ -35,6 +35,8 @@ const CallView: FC<CallViewProps> = () => {
   // Retrieve the audio stream from the webrtc state
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
+  const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
       <StyledCallView incoming={incoming} accepted={accepted} outgoing={outgoing} isOpen={isOpen}>
@@ -44,14 +46,70 @@ const CallView: FC<CallViewProps> = () => {
           accepted={accepted}
           outgoing={outgoing}
         >
-          <Avatar />
-          {isOpen && (
-            <StyledDetails>
-              <DisplayName />
-              {/* The timer when expanded */}
-              {accepted ? <Timer startTime={startTime} /> : <Number />}
-            </StyledDetails>
+          {intrudeListenStatus?.isListen ? (
+            <FontAwesomeIcon
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover'
+              }`}
+              icon={faEarListen}
+            />
+          ) : intrudeListenStatus?.isIntrude ? (
+            <FontAwesomeIcon
+              // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover'
+              }`}
+              icon={faHandPointUp}
+            />
+          ) : (
+            <Avatar />
           )}
+          {isOpen ? (
+            intrudeListenStatus?.isIntrude ? (
+              <StyledDetails>
+                <span className='pi-justify-center pi-w-fit pi-relative pi-inline-block pi-font-bold pi-text-base'>
+                  {' '}
+                  Intrude
+                  {intrudeListenStatus?.isIntrudeExtension
+                    ? ` - ${intrudeListenStatus?.isIntrudeExtension}`
+                    : ''}
+                </span>
+                {accepted ? (
+                  <Timer startTime={startTime} />
+                ) : intrudeListenStatus?.isIntrudeExtension ? (
+                  ` - ${intrudeListenStatus?.isIntrudeExtension}`
+                ) : (
+                  ''
+                )}
+              </StyledDetails>
+            ) : intrudeListenStatus?.isListen ? (
+              <StyledDetails>
+                <span className='pi-justify-center pi-w-fit pi-relative pi-inline-block pi-font-bold pi-text-base'>
+                  {' '}
+                  Listen
+                  {intrudeListenStatus?.isListenExtension
+                    ? ` - ${intrudeListenStatus?.isListenExtension}`
+                    : ''}
+                </span>
+                {accepted ? (
+                  <Timer startTime={startTime} />
+                ) : intrudeListenStatus?.isListenExtension ? (
+                  ` - ${intrudeListenStatus?.isListenExtension}`
+                ) : (
+                  ''
+                )}{' '}
+              </StyledDetails>
+            ) : (
+              <StyledDetails>
+                <DisplayName />
+                {accepted ? <Timer startTime={startTime} /> : <Number />}
+              </StyledDetails>
+            )
+          ) : null}
           {/* The display name when collepsed */}
           {!isOpen && !accepted && <DisplayName />}
           {/* The timer when collapsed */}

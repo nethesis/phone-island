@@ -6,6 +6,7 @@ import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 
 import 'react-tooltip/dist/react-tooltip.css'
+import { useEventListener } from './utils'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -48,6 +49,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
       setReloadedSocket(false)
     }
   }, [reloadedSocket, reloadedWebRTC])
+
+  useEventListener('phone-island-listen-call', (data: any) => {
+    store.dispatch.listen.setUpdateListenStatus(true, data.to)
+  })
+
+  useEventListener('phone-island-intrude-call', (data: any) => {
+    store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
+  })
 
   return (
     <>

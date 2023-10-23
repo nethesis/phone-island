@@ -99,6 +99,7 @@ export function hangupCurrentCall() {
   }
   store.dispatch.player.stopAudioPlayer()
   store.dispatch.currentCall.reset()
+  store.dispatch.listen.reset()
 }
 
 /**
