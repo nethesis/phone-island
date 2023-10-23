@@ -81,7 +81,7 @@ const CallView: FC<CallViewProps> = () => {
                 {accepted ? (
                   <Timer startTime={startTime} />
                 ) : intrudeListenStatus?.isIntrudeExtension ? (
-                  ` - ${intrudeListenStatus?.isIntrudeExtension}`
+                  `${intrudeListenStatus?.isIntrudeExtension}`
                 ) : (
                   ''
                 )}
@@ -98,7 +98,7 @@ const CallView: FC<CallViewProps> = () => {
                 {accepted ? (
                   <Timer startTime={startTime} />
                 ) : intrudeListenStatus?.isListenExtension ? (
-                  ` - ${intrudeListenStatus?.isListenExtension}`
+                  `${intrudeListenStatus?.isListenExtension}`
                 ) : (
                   ''
                 )}{' '}

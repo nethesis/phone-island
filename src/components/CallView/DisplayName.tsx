@@ -29,7 +29,37 @@ const DisplayName: FC<DisplayNameProps> = () => {
 
   return (
     <>
-      {!intrudeListenStatus.isIntrude || !intrudeListenStatus?.isListen ? (
+      {intrudeListenStatus?.isIntrude ? (
+        <NameMotion
+          ref={nameContainer}
+          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
+        >
+          <div
+            className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
+            ref={nameText}
+          >
+            {intrudeListenStatus?.isIntrudeExtension !== ''
+              ? 'Intrude' + '-' + intrudeListenStatus?.isIntrudeExtension
+              : '-'}
+          </div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+        </NameMotion>
+      ) : intrudeListenStatus?.isListen ? (
+        <NameMotion
+          ref={nameContainer}
+          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
+        >
+          <div
+            className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
+            ref={nameText}
+          >
+            {intrudeListenStatus?.isListenExtension !== ''
+              ? 'Listen' + '-' + intrudeListenStatus?.isListenExtension
+              : '-'}
+          </div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+        </NameMotion>
+      ) : (
         <NameMotion
           ref={nameContainer}
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
@@ -42,8 +72,6 @@ const DisplayName: FC<DisplayNameProps> = () => {
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
         </NameMotion>
-      ) : (
-        <></>
       )}
     </>
   )
