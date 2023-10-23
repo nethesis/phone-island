@@ -16,6 +16,7 @@ import { answerIncomingCall } from '../../lib/phone/call'
 import Avatar from './Avatar'
 import Actions from './Actions'
 import Hangup from '../Hangup'
+import { useTranslation } from 'react-i18next'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -36,6 +37,8 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+
+  const { t } = useTranslation()
 
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
@@ -73,7 +76,7 @@ const CallView: FC<CallViewProps> = () => {
               <StyledDetails>
                 <span className='pi-justify-center pi-w-fit pi-relative pi-inline-block pi-font-bold pi-text-base'>
                   {' '}
-                  Intrude
+                  {t('Common.Intrude')}
                   {intrudeListenStatus?.isIntrudeExtension
                     ? ` - ${intrudeListenStatus?.isIntrudeExtension}`
                     : ''}
@@ -90,7 +93,7 @@ const CallView: FC<CallViewProps> = () => {
               <StyledDetails>
                 <span className='pi-justify-center pi-w-fit pi-relative pi-inline-block pi-font-bold pi-text-base'>
                   {' '}
-                  Listen
+                  {t('Common.Listen')}
                   {intrudeListenStatus?.isListenExtension
                     ? ` - ${intrudeListenStatus?.isListenExtension}`
                     : ''}
@@ -140,7 +143,7 @@ const CallView: FC<CallViewProps> = () => {
                 <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
               </Button>
             ) : ( */}
-              <Hangup description='Hangup and transfer' />
+              <Hangup description={t('Tooltip.Hangup and transfer')} />
               {/* )} */}
               {/* The button to answer the incoming call */}
               {isAnswerVisible(outgoing, accepted) && (

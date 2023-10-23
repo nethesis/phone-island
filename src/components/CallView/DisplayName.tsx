@@ -6,6 +6,7 @@ import { StyledName } from '../../styles/Island.styles'
 import { motion } from 'framer-motion/dist/framer-motion'
 import { RootState } from '../../store'
 import { useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 
 const DisplayName: FC<DisplayNameProps> = () => {
   const [animateText, setAnimateText] = useState<boolean>(false)
@@ -16,6 +17,8 @@ const DisplayName: FC<DisplayNameProps> = () => {
   // Get the displayName of the currentCall store
   const { displayName } = useSelector((state: RootState) => state.currentCall)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+
+  const { t } = useTranslation()
 
   useLayoutEffect(() => {
     if (
@@ -39,7 +42,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
             ref={nameText}
           >
             {intrudeListenStatus?.isIntrudeExtension !== ''
-              ? 'Intrude' + '-' + intrudeListenStatus?.isIntrudeExtension
+              ? `${t('Common.Intrude')}` + '-' + intrudeListenStatus?.isIntrudeExtension
               : '-'}
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
@@ -54,7 +57,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
             ref={nameText}
           >
             {intrudeListenStatus?.isListenExtension !== ''
-              ? 'Listen' + '-' + intrudeListenStatus?.isListenExtension
+              ? `${t('Common.Listen')}` + '-' + intrudeListenStatus?.isListenExtension
               : '-'}
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>

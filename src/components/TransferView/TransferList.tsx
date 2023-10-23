@@ -14,6 +14,7 @@ import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { unpauseCurrentCall } from '../../lib/phone/call'
+import { useTranslation } from 'react-i18next'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -116,6 +117,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     backToCallView()
   }
 
+  const { t } = useTranslation()
+
   return (
     <>
       {isOpen ? (
@@ -127,7 +130,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 variant='transparent'
                 onClick={handleBackClick}
                 data-tooltip-id='transfer-list-tooltip'
-                data-tooltip-content='Back to call'
+                data-tooltip-content={t('Tooltip.Back to call')}
               >
                 <FontAwesomeIcon size='xl' icon={faArrowLeft} />
               </Button>
@@ -172,7 +175,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       onClick={() => handleAttendedTransfer(searchValue.current)}
                       variant='default'
                       data-tooltip-id='transfer-list-tooltip'
-                      data-tooltip-content='Call to transfer'
+                      data-tooltip-content={t('Tooltip.Call to transfer')}
                     >
                       <FontAwesomeIcon size='xl' icon={faPhone} />
                     </Button>
@@ -198,7 +201,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
                         }
                         data-tooltip-content={
-                          userEndpoints.mainPresence === 'online' && 'Call to transfer'
+                          userEndpoints.mainPresence === 'online' &&
+                          `${t('Tooltip.Call to transfer')}`
                         }
                       />
                       <div
@@ -212,7 +216,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
                         }
                         data-tooltip-content={
-                          userEndpoints.mainPresence === 'online' && 'Call to transfer'
+                          userEndpoints.mainPresence === 'online' &&
+                          `${t('Tooltip.Call to transfer')}`
                         }
                         className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
                       >
@@ -230,7 +235,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           variant='default'
                           disabled={userEndpoints.mainPresence !== 'online'}
                           data-tooltip-id='transfer-list-tooltip'
-                          data-tooltip-content='Call to transfer'
+                          data-tooltip-content={t('Tooltip.Call to transfer')}
                         >
                           <FontAwesomeIcon size='xl' icon={faPhone} />
                         </Button>

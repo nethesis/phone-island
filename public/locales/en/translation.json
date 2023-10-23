@@ -1,0 +1,27 @@
+{
+  "Common": {
+    "Intrude": "Intrude",
+    "Listen": "Listen"
+  },
+  "Tooltip": {
+    "Hangup": "Hangup",
+    "Pause": "Pause",
+    "Play": "Play",
+    "Mute": "Mute",
+    "Unmute": "Unmute",
+    "Transfer": "Transfer",
+    "Cancel transfer": "Cancel transfer",
+    "Collapse": "Collapse",
+    "Expand": "Expand",
+    "Keyboard": "Keyboard",
+    "Park": "Park",
+    "Back to call": "Back to call",
+    "Stop": "Stop",
+    "Delete": "Delete",
+    "Confirm": "Confirm",
+    "Start recording": "Start recording",
+    "Switch call": "Switch call",
+    "Call to transfer": "Call to transfer",
+    "Hangup and transfer": "Hangup and transfer"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "Common": {
+    "Intrude": "Intromesso",
+    "Listen": "Ascolto"
+  },
+  "Tooltip": {
+    "Hangup": "Chiudi",
+    "Pause": "Pausa",
+    "Play": "Riproduci",
+    "Mute": "Muto",
+    "Unmute": "Togli muto",
+    "Transfer": "Trasferisci",
+    "Cancel transfer": "Annulla trasferimento",
+    "Collapse": "Riduci",
+    "Expand": "Espandi",
+    "Keyboard": "Tastiera",
+    "Park": "Parcheggia",
+    "Back to call": "Torna alla chiamata",
+    "Stop": "Stop",
+    "Delete": "Elimina",
+    "Confirm": "Conferma",
+    "Start recording": "Inizia registrazione",
+    "Switch call": "Scambia chiamata",
+    "Call to transfer": "Chiamata da trasferire",
+    "Hangup and transfer": "Chiudi e trasferisci"
+  }
+}

@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { RootState } from '../../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { useTranslation } from 'react-i18next'
 
 export const TransferActions: FC<TransferActionsProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -36,6 +37,8 @@ export const TransferActions: FC<TransferActionsProps> = () => {
     }, 500)
   }
 
+  const { t } = useTranslation()
+
   return (
     <>
       <div className='pi-grid pi-grid-cols-3 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
@@ -44,7 +47,7 @@ export const TransferActions: FC<TransferActionsProps> = () => {
           onClick={switchTransfer}
           variant='default'
           data-tooltip-id='transfer-actions-tooltip'
-          data-tooltip-content='Switch calls'
+          data-tooltip-content={t('Tooltip.Switch call')}
         >
           <FontAwesomeIcon size='xl' icon={faArrowsRepeat} />
         </Button>

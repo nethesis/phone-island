@@ -12,6 +12,7 @@ import { RootState } from '../store'
 import { Dispatch } from '../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { hangupAllExtensions } from '../lib/phone/call'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Return the status of the
@@ -37,6 +38,8 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
     }
   }
 
+  const { t } = useTranslation()
+
   return (
     <>
       <div className={`pi-flex pi-justify-center ${transferring && 'pi-w-full'}`}>
@@ -47,7 +50,9 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
             variant='red'
             className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
             data-tooltip-id='tooltip'
-            data-tooltip-content={description && transferring ? description : 'Hangup'}
+            data-tooltip-content={
+              description && transferring ? description : `${t('Tooltip.Hangup')}`
+            }
           >
             <FontAwesomeIcon className='pi-rotate-135 pi-h-6 pi-w-6' icon={faPhone} />
             {transferring && description && (
@@ -71,5 +76,5 @@ export default Hangup
 interface HangupProps {
   clickCallback?: () => void
   isDestination?: boolean
-  description?: string
+  description?: any
 }
