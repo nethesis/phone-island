@@ -183,7 +183,7 @@ export const Socket: FC<SocketProps> = ({
      * Initialize socket connection and listeners
      */
     const initSocketConnection = () => {
-      socket.current = io(hostName, {
+      socket.current = io('https://' + hostName, {
         upgrade: false,
         transports: ['websocket'],
         reconnection: true,
