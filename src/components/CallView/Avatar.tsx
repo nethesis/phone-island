@@ -43,7 +43,7 @@ const Avatar: FC = () => {
           // The background pulse effect
           <motion.div
             style={{
-              animationDuration: '2s'
+              animationDuration: '2s',
             }}
             animate={isOpen ? 'open' : 'closed'}
             variants={iconVariants}

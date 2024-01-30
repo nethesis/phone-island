@@ -99,6 +99,13 @@ export function unregister() {
   }
 }
 
+export function detach() {
+  const { sipcall }: { sipcall: any } = store.getState().webrtc
+  if (sipcall) {
+    return sipcall.detach()
+  }
+}
+
 export function handleRemote(jsep) {
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {

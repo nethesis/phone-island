@@ -8,6 +8,7 @@ import loadI18n from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener } from './utils'
+import { detach } from './lib/webrtc/messages'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -57,6 +58,10 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
 
   useEventListener('phone-island-intrude-call', (data: any) => {
     store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
+  })
+
+  useEventListener('phone-island-detach', () => {
+    detach()
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)
