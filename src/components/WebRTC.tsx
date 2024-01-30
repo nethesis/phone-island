@@ -13,6 +13,7 @@ import { checkMediaPermissions } from '../lib/devices/devices'
 import { hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
+import { useEventListener } from '../utils'
 
 interface WebRTCProps {
   children: ReactNode
@@ -494,6 +495,10 @@ export const WebRTC: FC<WebRTCProps> = ({
       }, 10000)
     }
   }, [reload])
+
+  useEventListener('phone-island-attach', () => {
+    initWebRTC()
+  })
 
   return <>{children}</>
 }
