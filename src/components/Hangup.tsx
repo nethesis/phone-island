@@ -13,6 +13,7 @@ import { Dispatch } from '../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
+import DropdownContent from './SwitchInputView/DropdownContent'
 
 /**
  * Return the status of the
@@ -40,11 +41,13 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
 
   const { t } = useTranslation()
 
+  // Phone island footer section
   return (
     <>
       <div className={`pi-flex pi-justify-center ${transferring && 'pi-w-full'}`}>
         {/* The button to hangup the currentCall */}
-        <motion.div className={`${transferring && description ? 'pi-w-full' : 'pi-w-12'}`}>
+
+        <motion.div className={`${transferring && description ? 'pi-w-full' : 'pi-w-12'} pi-flex`}>
           <Button
             onClick={() => handleHangup()}
             variant='red'
@@ -64,6 +67,8 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
               </motion.div>
             )}
           </Button>
+
+          <DropdownContent></DropdownContent>
         </motion.div>
       </div>
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />

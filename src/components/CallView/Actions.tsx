@@ -115,6 +115,7 @@ const Actions: FC = () => {
 
   const { t } = useTranslation()
 
+  // Phone island header section
   return (
     <>
       <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
@@ -145,6 +146,7 @@ const Actions: FC = () => {
             <FontAwesomeIcon size='xl' icon={faMicrophone} />
           )}
         </Button>
+
         <Button
           active={transferring}
           onClick={transferring ? calcelTransfer : transfer}
@@ -160,6 +162,7 @@ const Actions: FC = () => {
             <FontAwesomeIcon size='xl' className='pi-rotate-90' icon={faArrowRightArrowLeft} />
           )}
         </Button>
+
         <Button
           active={actionsExpanded}
           variant='transparent'
