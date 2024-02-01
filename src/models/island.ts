@@ -12,6 +12,7 @@ const defaultState: IslandTypes = {
     x: 0,
     y: 0,
   },
+  inputOutputOpened: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -31,6 +32,10 @@ export const island = createModel<RootModel>()({
     },
     toggleActionsExpanded: (state, payload: boolean) => {
       state.actionsExpanded = payload
+      return state
+    },
+    toggleInputOutputOpened: (state, payload: boolean) => {
+      state.inputOutputOpened = payload
       return state
     },
   },
@@ -59,4 +64,5 @@ interface IslandTypes {
     x: number
     y: number
   }
+  inputOutputOpened: boolean
 }
