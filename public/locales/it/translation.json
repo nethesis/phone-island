@@ -22,10 +22,14 @@
     "Start recording": "Inizia registrazione",
     "Switch call": "Scambia chiamata",
     "Call to transfer": "Chiamata da trasferire",
-    "Hangup and transfer": "Chiudi e trasferisci"
+    "Hangup and transfer": "Trasferisci"
   },
   "DropdownContent": {
     "Microphones": "MICROFONI",
     "Speakers": "ALTOPARLANTI"
+  },
+  "Call": {
+    "In progress...": "In corso...",
+    "Outgoing call": "Chiamata in uscita"
   }
 }

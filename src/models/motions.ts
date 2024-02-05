@@ -32,7 +32,11 @@ const defaultState = {
         },
         transfer: {
           width: 348,
-          height: 304,
+          height: 236,
+          actionsExpanded: {
+            width: 348,
+            height: 304,
+          },
         }
       },
       collapsed: {

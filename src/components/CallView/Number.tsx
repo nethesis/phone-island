@@ -5,12 +5,17 @@ import React, { type FC } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { StyledNumber } from '../../styles/Island.styles'
+import { t } from 'i18next'
 
 const Number: FC = () => {
   const { number } = useSelector((state: RootState) => state.currentCall)
   const { isOpen } = useSelector((state: RootState) => state.island)
 
-  return <StyledNumber isOpen={isOpen}>{number && number !== '<unknown>' && number}</StyledNumber>
+  return (
+    <StyledNumber isOpen={isOpen}>
+      {number && number !== '<unknown>' ? number : t('Call.In progress...') || '-'}
+    </StyledNumber>
+  )
 }
 
 export default Number

@@ -32,9 +32,16 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       case 'call':
         if (isOpen) {
           if (accepted && transferring) {
-            size = {
-              width: variants.call.expanded.transfer.width,
-              height: variants.call.expanded.transfer.height,
+            if (actionsExpanded) {
+              size = {
+                width: variants.call.expanded.transfer.actionsExpanded.width,
+                height: variants.call.expanded.transfer.actionsExpanded.height,
+              }
+            } else {
+              size = {
+                width: variants.call.expanded.transfer.width,
+                height: variants.call.expanded.transfer.height,
+              }
             }
           } else if (accepted && actionsExpanded) {
             size = {

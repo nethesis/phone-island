@@ -71,9 +71,15 @@ const DisplayName: FC<DisplayNameProps> = () => {
             className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
             ref={nameText}
           >
-            {displayName && displayName === '<unknown>' ? 'PBX' : displayName && displayName}
+            {displayName && displayName === '<unknown>'
+              ? 'PBX'
+              : displayName
+              ? displayName
+              : t('Call.Outgoing call') || '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'>
+            {' '}
+          </div>
         </NameMotion>
       )}
     </>

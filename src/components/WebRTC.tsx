@@ -10,7 +10,7 @@ import type { JanusTypes } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { store } from '../store'
 import { checkMediaPermissions } from '../lib/devices/devices'
-import { hangupCurrentCall } from '../lib/phone/call'
+import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { useEventListener } from '../utils'
@@ -499,6 +499,29 @@ export const WebRTC: FC<WebRTCProps> = ({
   useEventListener('phone-island-attach', () => {
     initWebRTC()
   })
+
+  /**
+   * Event listner for phone-island-transfer-call event
+   */
+  useEventListener('phone-island-transfer-call', (data) => {
+    const transferNumber = data?.to
+    dispatch.island.toggleIsOpen(true)
+    handleAttendedTransfer(transferNumber)
+  })
+
+  async function handleAttendedTransfer(number: string) {
+    // Send attended transfer message
+    const transferringMessageSent = await attendedTransfer(number)
+    if (transferringMessageSent) {
+      // Set transferring and disable pause
+      dispatch.currentCall.updateCurrentCall({
+        transferring: true,
+        paused: false,
+      })
+      // Play the remote audio element
+      dispatch.player.playRemoteAudio()
+    }
+  }
 
   return <>{children}</>
 }

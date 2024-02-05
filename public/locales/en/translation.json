@@ -27,5 +27,9 @@
   "DropdownContent": {
     "Microphones": "MICROPHONES",
     "Speakers": "SPEAKERS"
+  },
+  "Call": {
+    "In progress...": "In progress...",
+    "Outgoing call": "Outgoing call"
   }
 }

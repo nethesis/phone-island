@@ -91,27 +91,7 @@ const Actions: FC = () => {
     eventDispatch('phone-island-call-parked', {})
   }
 
-  /**
-   * Event listner for phone-island-transfer-call event
-   */
-  useEventListener('phone-island-transfer-call', (data) => {
-    const transferNumber = data.to
-    handleAttendedTransfer(transferNumber)
-  })
 
-  async function handleAttendedTransfer(number: string) {
-    // Send attended transfer message
-    const transferringMessageSent = await attendedTransfer(number)
-    if (transferringMessageSent) {
-      // Set transferring and disable pause
-      dispatch.currentCall.updateCurrentCall({
-        transferring: true,
-        paused: false,
-      })
-      // Play the remote audio element
-      dispatch.player.playRemoteAudio()
-    }
-  }
 
   const { t } = useTranslation()
 
