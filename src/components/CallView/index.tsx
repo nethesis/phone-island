@@ -6,7 +6,7 @@ import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Is
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone, faEarListen, faHandPointUp } from '@fortawesome/free-solid-svg-icons'
+import { faPhone, faEarListen, faHandPointUp, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
 import Number from './Number'
@@ -27,9 +27,11 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall state
-  const { incoming, accepted, outgoing, startTime, paused } = useSelector(
+  const { incoming, accepted, outgoing, startTime, paused, username, number } = useSelector(
     (state: RootState) => state.currentCall,
   )
+
+  const currentCallDetails: any = useSelector((state: RootState) => state.currentCall)
   // Get isOpen and view from island state
   const { isOpen } = useSelector((state: RootState) => state.island)
 
@@ -68,8 +70,62 @@ const CallView: FC<CallViewProps> = () => {
               }`}
               icon={faHandPointUp}
             />
-          ) : (
+          ) : number !== '' &&
+            currentCallDetails?.username !== '' &&
+            currentCallDetails?.username !== 'undefined' ? (
             <Avatar />
+          ) : incoming &&
+            (currentCallDetails?.username === '' ||
+              currentCallDetails?.username === 'undefined') ? (
+            <FontAwesomeIcon
+              // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi--rotate-45'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover pi--rotate-45'
+              }`}
+              icon={faArrowLeft}
+            />
+          ) : accepted &&
+            !outgoing &&
+            (currentCallDetails?.username === '' ||
+              currentCallDetails?.username === 'undefined') ? (
+            <FontAwesomeIcon
+              // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi--rotate-45'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover pi--rotate-45'
+              }`}
+              icon={faArrowLeft}
+            />
+          ) : outgoing &&
+            (currentCallDetails?.username === '' ||
+              currentCallDetails?.username === 'undefined') ? (
+            // set a loading avatar when the call is not attached to a user
+            <FontAwesomeIcon
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi-rotate-[135deg]'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover pi-rotate-[135deg]'
+              }`}
+              icon={faArrowLeft}
+            />
+          ) : outgoing &&
+            accepted &&
+            (currentCallDetails?.username === '' ||
+              currentCallDetails?.username === 'undefined') ? (
+            // set a loading avatar when the call is not attached to a user
+            <FontAwesomeIcon
+              className={`${
+                isOpen
+                  ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi-rotate-[135deg]'
+                  : 'pi-relative pi-z-30 pi-h-6 pi-w-6 pi-rounded-sm pi-bg-cover pi-rotate-[135deg]'
+              }`}
+              icon={faArrowLeft}
+            />
+          ) : (
+            <></>
           )}
           {isOpen ? (
             intrudeListenStatus?.isIntrude ? (

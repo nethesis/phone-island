@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
@@ -24,7 +24,7 @@ const transferNumber = process.env.DEST_TRANSFER_NUMBER
 
 const CallTemplate: Story<any> = (args) => {
   const handleExtensionCallStart = () => {
-    eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER_EXTENSION })
+    eventDispatch('phone-island-call-start', { number: "269" })
   }
 
   const handleExternalCallStart = () => {
@@ -57,6 +57,7 @@ const CallTemplate: Story<any> = (args) => {
 
   let transferObject: any = {}
   transferObject.to = transferNumber
+
   return (
     <div className='pi-flex pi-gap-2 pi-flex-col pi-w-fit'>
       <button

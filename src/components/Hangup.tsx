@@ -19,8 +19,9 @@ import DropdownContent from './SwitchInputView/DropdownContent'
  * Return the status of the
  */
 const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) => {
-  const { transferring, incoming } = useSelector((state: RootState) => state.currentCall)
+  const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
+  const { isOpen } = useSelector((state: RootState) => state.island)
 
   function handleHangup() {
     if (incoming) {
@@ -44,10 +45,21 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
   // Phone island footer section
   return (
     <>
-      <div className={`pi-flex pi-justify-center ${transferring && 'pi-w-full'}`}>
+      <div
+        className={` ${
+          transferring
+            ? 'pi-grid pi-w-full pi-space-x-2 pi-justify-start'
+            : 'pi-flex pi-justify-center'
+        }`}
+      >
         {/* The button to hangup the currentCall */}
-
-        <motion.div className={`${transferring && description ? 'pi-w-full' : 'pi-w-12'} pi-flex`}>
+        <motion.div
+          className={`${
+            transferring && description
+              ? 'pi-grid pi-grid-cols-[12rem,1rem] pi-ml-4 pi-justify-start'
+              : 'pi-flex pi-w-12'
+          } `}
+        >
           <Button
             onClick={() => handleHangup()}
             variant='red'
@@ -67,8 +79,17 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
               </motion.div>
             )}
           </Button>
-
-          <DropdownContent></DropdownContent>
+          {isOpen && accepted && (
+            <div
+              className={`${
+                transferring && description
+                  ? 'pi-grid pi-grid-cols-1 pi-ml-8'
+                  : 'pi-flex pi-items-center pi-justify-end pi-ml-16'
+              }`}
+            >
+              <DropdownContent data-stop-propagation={true}></DropdownContent>
+            </div>
+          )}
         </motion.div>
       </div>
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
