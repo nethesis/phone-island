@@ -3,6 +3,7 @@
 
 import { store } from '../store'
 import { ExtensionsTypes, TransferTypes } from '../types'
+import { useSelector } from 'react-redux'
 
 /**
  * Get all extensions
@@ -91,6 +92,198 @@ export async function parkConversation(body: {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
     const response = await fetch(`${baseURL}/astproxy/park`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function answerPhysical() {
+  // get data
+  const { ownerExtension } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    endpointId: ownerExtension,
+    endpointType: 'extension',
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/answer`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function hangupPhysical() {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().currentCall
+  // compose body
+  let body: any = {
+    convid: conversationId,
+    endpointId: ownerExtension,
+    endpointType: 'extension',
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/hangup`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function mutePhysical() {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    convid: conversationId,
+    endpointId: ownerExtension,
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/mute`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    store.dispatch.currentCall.updateCurrentCall({
+      muted: true,
+    })
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function unmutePhysical() {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    convid: conversationId,
+    endpointId: ownerExtension,
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/unmute`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    store.dispatch.currentCall.updateCurrentCall({
+      muted: false,
+    })
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function pausePhysical(togglePause: boolean) {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    endpointId: ownerExtension,
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/toggle_hold`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    store.dispatch.currentCall.updateCurrentCall({
+      paused: togglePause,
+    })
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function sendPhysicalDTMF(key: string) {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    convid: conversationId,
+    endpointId: ownerExtension,
+    tone: key.toString(),
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/dtmf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function callPhysical(to: string) {
+  // get data
+  const { ownerExtension } = store.getState().currentCall
+
+  // compose body
+  let body: any = {
+    endpointId: ownerExtension,
+    endpointTpe: 'extension',
+    number: to,
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/call`, {
       method: 'POST',
       headers: { ...headers },
       body: JSON.stringify(body),

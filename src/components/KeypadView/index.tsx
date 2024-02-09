@@ -13,6 +13,8 @@ import { backToCallView } from '../../lib/island/island'
 import { playDtmfAudio } from '../../lib/phone/call'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
+import { isWebRTC } from '../../lib/user/default_device'
+import { sendPhysicalDTMF } from '../../services/astproxy'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -26,7 +28,11 @@ const KeypadView: FC<KeypadViewTypes> = () => {
     dispatch.currentCall.updateKeypadValue(`${keypadValueRef.current}${key}`)
     keypadValueRef.current = `${keypadValueRef.current}${key}`
     playDtmfAudio(key)
-    sendDTMF(key)
+    if (isWebRTC()) {
+      sendDTMF(key)
+    } else {
+      sendPhysicalDTMF(key)
+    }
   }
 
   useEffect(() => {

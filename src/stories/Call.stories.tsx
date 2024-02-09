@@ -24,7 +24,7 @@ const transferNumber = process.env.DEST_TRANSFER_NUMBER
 
 const CallTemplate: Story<any> = (args) => {
   const handleExtensionCallStart = () => {
-    eventDispatch('phone-island-call-start', { number: "269" })
+    eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER_EXTENSION })
   }
 
   const handleExternalCallStart = () => {

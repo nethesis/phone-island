@@ -33,6 +33,8 @@ import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { park } from '../../lib/phone/call'
 import { eventDispatch, useEventListener } from '../../utils'
 import { useTranslation } from 'react-i18next'
+import { isWebRTC } from '../../lib/user/default_device'
+import { sendPhysicalDTMF } from '../../services/astproxy'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -56,7 +58,12 @@ const Actions: FC = () => {
 
   // Cancels the current transfer through dtmfs
   function calcelTransfer() {
-    sendDTMF('*')
+    if (isWebRTC()) {
+      sendDTMF('*')
+    } else {
+      sendPhysicalDTMF('*')
+    }
+
     const { audioPlayerPlaying } = store.getState().player
     // Check if the local audio is already playing and start playing
     if (!audioPlayerPlaying) {
@@ -66,7 +73,12 @@ const Actions: FC = () => {
       })
     }
     setTimeout(() => {
-      sendDTMF('1')
+      if (isWebRTC()) {
+        sendDTMF('1')
+      } else {
+        sendPhysicalDTMF('1')
+      }
+
       dispatch.player.stopAudioPlayer()
       // The workarround to disable transfer because of the wrong conv.connection value from ws
       if (transferring) {
@@ -90,8 +102,6 @@ const Actions: FC = () => {
     dispatch.currentCall.setParked(true)
     eventDispatch('phone-island-call-parked', {})
   }
-
-
 
   const { t } = useTranslation()
 
