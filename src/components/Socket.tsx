@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useEffect, useRef } from 'react'
-import { useDispatch } from 'react-redux'
-import { Dispatch } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName } from '../lib/phone/conversation'
 import {
@@ -25,6 +25,7 @@ import type {
   MainPresenceTypes,
 } from '../types'
 import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
+import { userTotallyFree } from '../lib/user/extensions'
 
 interface SocketProps {
   children: ReactNode
@@ -47,6 +48,26 @@ export const Socket: FC<SocketProps> = ({
   const connectionCheckInterval = useRef<any>()
   const socket = useRef<any>()
 
+  // get user information
+  const userInformation = useSelector((state: RootState) => state.currentUser)
+
+  const checkDefaultDeviceConversationActive = (conv: any) => {
+    dispatch.currentCall.updateCurrentCall({
+      conversationId: conv.id,
+      accepted: true,
+      incoming: conv.direction === 'in' ? false : undefined,
+    })
+
+    // Stop the local audio element ringing
+    store.dispatch.player.stopAudioPlayer()
+  }
+
+  const checkDefaultDeviceConversationClosed = (conv: any) => {
+    // store.dispatch.player.stopAudioPlayer()
+    store.dispatch.currentCall.reset()
+    // store.dispatch.listen.reset()
+  }
+
   useEffect(() => {
     /**
      * Manages event and data for the currentUser
@@ -57,6 +78,7 @@ export const Socket: FC<SocketProps> = ({
     const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationTypes) => {
       // Handle transferring data
       const { transferring, transferSwitching, transferCalls } = store.getState().currentCall
+
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         // With conversation
@@ -87,6 +109,7 @@ export const Socket: FC<SocketProps> = ({
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   startTime: `${conv.startTime / 1000}`,
+                  ownerExtension: conv.owner,
                   username:
                     `${
                       extensions &&
@@ -101,6 +124,10 @@ export const Socket: FC<SocketProps> = ({
                   number: `${conv.counterpartNum}`,
                   startTime: `${getTimestampInSeconds()}`,
                 })
+
+                if (userInformation?.default_device?.type !== 'webrtc') {
+                  checkDefaultDeviceConversationActive(conv)
+                }
               }
               // Handle not connected calls
               else if (conv && !conv.connected) {
@@ -157,6 +184,7 @@ export const Socket: FC<SocketProps> = ({
                   displayName: getDisplayName(conv),
                   number: counterpartNum,
                   startTime: `${startTime / 1000}`,
+                  conversationId: conv.id,
                 })
                 // Set the view of the island to call
                 dispatch.island.setIslandView('call')
@@ -168,14 +196,12 @@ export const Socket: FC<SocketProps> = ({
         }
       } else {
         // Without conversation for physical phone management
-        // if (status) {
-        // if (res.status == 'online' && userTotallyFree()) {
-        //     // Stop ringing sounds
-        //     dispatch.player.stopAudioPlayer()
-        //     // Reset current call info
-        //     dispatch.currentCall.reset()
-        // }
-        // }
+        if (res.status == 'online' && userTotallyFree()) {
+          // Stop ringing sounds
+          dispatch.player.stopAudioPlayer()
+          // Reset current call info
+          dispatch.currentCall.reset()
+        }
       }
     }
 

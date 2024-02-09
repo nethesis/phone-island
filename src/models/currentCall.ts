@@ -31,6 +31,7 @@ const defaultState = {
   transferringStartTime: '',
   transferSwitching: false,
   transferCalls: new Array(),
+  ownerExtension: '',
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -159,4 +160,5 @@ export interface CurrentCallTypes {
   transferringStartTime?: string
   transferSwitching?: boolean
   transferCalls?: TransferCallsTypes[]
+  ownerExtension?: string
 }

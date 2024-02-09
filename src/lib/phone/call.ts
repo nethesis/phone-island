@@ -17,6 +17,12 @@ import { isWebRTC } from '../user/default_device'
 import {
   blindTransfer as blindTransferRequest,
   attendedTransfer as attendedTransferRequest,
+  hangupPhysical,
+  answerPhysical,
+  mutePhysical,
+  unmutePhysical,
+  pausePhysical,
+  callPhysical,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -27,7 +33,11 @@ import { hangupConversation, parkConversation } from '../../services/astproxy'
  */
 export function callNumber(number: string, sipHost: string) {
   const sipURI = `sip:${number}@${sipHost}`
-  callSipURI(sipURI)
+  if (isWebRTC()) {
+    callSipURI(sipURI)
+  } else {
+    callPhysical(number)
+  }
 }
 
 /**
@@ -68,6 +78,8 @@ export function callSipURI(sipURI: string) {
 export function answerIncomingCall() {
   if (isWebRTC()) {
     answerWebRTC()
+  } else {
+    answerPhysical()
   }
 }
 
@@ -95,11 +107,15 @@ export function hangupAllExtensions() {
 export function hangupCurrentCall() {
   const { outgoing, accepted } = store.getState().currentCall
   if (outgoing || accepted) {
-    hangup()
+    if (isWebRTC()) {
+      hangup()
+    } else {
+      hangupPhysical()
+    }
+    store.dispatch.player.stopAudioPlayer()
+    store.dispatch.currentCall.reset()
+    store.dispatch.listen.reset()
   }
-  store.dispatch.player.stopAudioPlayer()
-  store.dispatch.currentCall.reset()
-  store.dispatch.listen.reset()
 }
 
 /**
@@ -114,6 +130,8 @@ export function muteCurrentCall() {
         muted: true,
       })
     }
+  } else {
+    mutePhysical()
   }
 }
 
@@ -129,6 +147,8 @@ export function unmuteCurrentCall() {
         muted: false,
       })
     }
+  } else {
+    unmutePhysical()
   }
 }
 
@@ -146,6 +166,8 @@ export function pauseCurrentCall() {
       // Pause remote audio
       store.dispatch.player.pauseRemoteAudio()
     }
+  } else {
+    pausePhysical(true)
   }
 }
 
@@ -163,6 +185,8 @@ export function unpauseCurrentCall() {
       // Play remote audio
       store.dispatch.player.playRemoteAudio()
     }
+  } else {
+    pausePhysical(false)
   }
 }
 
