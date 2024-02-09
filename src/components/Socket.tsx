@@ -98,6 +98,7 @@ export const Socket: FC<SocketProps> = ({
                     extensions[conv.counterpartNum] &&
                     extensions[conv.counterpartNum].username
                   }` || '',
+                ownerExtension: conv.owner,
               })
               break
             // @ts-ignore
