@@ -93,7 +93,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
             leaveTo='transform opacity-0 scale-95'
           >
             <Menu.Items
-              className='pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0 pi-right-[4.5rem] pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-bg-black pi-shadow-lg pi-ring-1 pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-900 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
+              className='pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0 pi-right-[4.5rem] pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 pi-bg-black pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-900 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
               data-stop-propagation={true}
             >
               <div className='' data-stop-propagation={true}>
