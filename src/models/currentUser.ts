@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { createModel } from '@rematch/core'
@@ -18,6 +18,9 @@ export const currentUser = createModel<RootModel>()({
         ...state,
         ...payload,
       }
+    },
+    updateCurrentDefaultDevice: (state, payload) => {
+      state.default_device = payload
     },
     setCurrentUserReady: (state, payload: boolean) => {
       return {
