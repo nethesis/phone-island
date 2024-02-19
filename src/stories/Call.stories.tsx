@@ -6,6 +6,7 @@ import React from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch } from '../utils'
 import { store } from '../store'
+import { setDefaultDevice } from '../services/user'
 
 const meta = {
   title: 'Phone Island',
@@ -21,6 +22,8 @@ export default meta as Meta
 // Uses the configuration token from .env
 const config = process.env.CONFIG_TOKEN
 const transferNumber = process.env.DEST_TRANSFER_NUMBER
+const webrtcNumber: any = process.env.WEBRTC_NUMBER
+const physicalNumber: any = process.env.PHYSICAL_NUMBER
 
 const CallTemplate: Story<any> = (args) => {
   const handleExtensionCallStart = () => {
@@ -41,14 +44,6 @@ const CallTemplate: Story<any> = (args) => {
 
   const handleIntrude = () => {
     eventDispatch('phone-island-intrude-call', { to: process.env.DEST_INTRUDE_NUMBER })
-  }
-
-  const handleDetach = () => {
-    eventDispatch('phone-island-detach', {})
-  }
-
-  const handleAttach = () => {
-    eventDispatch('phone-island-attach', {})
   }
 
   const resetListenStatus = () => {
@@ -95,20 +90,6 @@ const CallTemplate: Story<any> = (args) => {
         className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'
       >
         Reset listen and intrude store status
-      </button>
-
-      <button
-        onClick={() => handleDetach()}
-        className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'
-      >
-        detach phone island
-      </button>
-
-      <button
-        onClick={() => handleAttach()}
-        className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'
-      >
-        Attach phone island
       </button>
 
       <PhoneIsland dataConfig={config} showAlways={false} {...args} />

@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useEffect, useRef, useCallback } from 'react'
@@ -496,8 +496,9 @@ export const WebRTC: FC<WebRTCProps> = ({
     }
   }, [reload])
 
-  useEventListener('phone-island-attach', () => {
+  useEventListener('phone-island-attach', (data) => {
     initWebRTC()
+    store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
   })
 
   /**

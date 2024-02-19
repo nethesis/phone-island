@@ -60,8 +60,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
     store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
   })
 
-  useEventListener('phone-island-detach', () => {
+  useEventListener('phone-island-detach', (data) => {
     detach()
+    store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)
