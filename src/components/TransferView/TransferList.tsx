@@ -15,6 +15,7 @@ import { Dispatch } from '../../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
+import { useEventListener, eventDispatch } from '../../utils'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -72,8 +73,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       })
       // Play the remote audio element
       dispatch.player.playRemoteAudio()
+
+      eventDispatch('phone-island-call-transfered', {})
     }
   }
+  useEventListener('phone-island-call-transfer', (data: CallStartTypes) => {
+    handleAttendedTransfer(data.number)
+  })
 
   // Initialize users list
   useEffect(() => {
@@ -260,3 +266,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
 }
 
 interface TransferListViewProps {}
+
+interface CallStartTypes {
+  number: string
+}

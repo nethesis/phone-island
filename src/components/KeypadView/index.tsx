@@ -15,6 +15,7 @@ import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
+import { useEventListener, eventDispatch } from '../../utils'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -33,7 +34,12 @@ const KeypadView: FC<KeypadViewTypes> = () => {
     } else {
       sendPhysicalDTMF(key)
     }
+
+    eventDispatch('phone-island-call-keypad-sent', {})
   }
+  useEventListener('phone-island-call-keypad-send', (key: string) => {
+    sendKey(key)
+  })
 
   useEffect(() => {
     function handlePhysicalKeydown(event) {

@@ -502,9 +502,9 @@ export const WebRTC: FC<WebRTCProps> = ({
   })
 
   /**
-   * Event listner for phone-island-transfer-call event
+   * Event listner for phone-island-call-transfer event
    */
-  useEventListener('phone-island-transfer-call', (data) => {
+  useEventListener('phone-island-call-transfer', (data) => {
     const transferNumber = data?.to
     dispatch.island.toggleIsOpen(true)
     handleAttendedTransfer(transferNumber)

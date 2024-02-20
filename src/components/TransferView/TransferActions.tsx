@@ -12,6 +12,7 @@ import outgoingRingtone from '../../static/outgoing_ringtone'
 import { RootState } from '../../store'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
+import { useEventListener, eventDispatch } from '../../utils'
 
 export const TransferActions: FC<TransferActionsProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -34,8 +35,13 @@ export const TransferActions: FC<TransferActionsProps> = () => {
       // Send the second DTMF for transferring
       sendDTMF('4')
       dispatch.player.stopAudioPlayer()
+
+      eventDispatch('phone-island-call-transfer-switched', {})
     }, 500)
   }
+  useEventListener('phone-island-call-transfer-switch', () => {
+    switchTransfer()
+  })
 
   const { t } = useTranslation()
 

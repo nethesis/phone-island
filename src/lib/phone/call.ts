@@ -26,6 +26,7 @@ import {
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
+import { eventDispatch } from '../../utils'
 
 /**
  * Starts a call to a number
@@ -38,6 +39,8 @@ export function callNumber(number: string, sipHost: string) {
   } else {
     callPhysical(number)
   }
+
+  eventDispatch('phone-island-call-started', {})
 }
 
 /**
@@ -81,6 +84,8 @@ export function answerIncomingCall() {
   } else {
     answerPhysical()
   }
+
+  eventDispatch('phone-island-call-answered', {})
 }
 
 /**
@@ -115,6 +120,8 @@ export function hangupCurrentCall() {
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
+
+    eventDispatch('phone-island-call-end', {})
   }
 }
 
@@ -133,6 +140,7 @@ export function muteCurrentCall() {
   } else {
     mutePhysical()
   }
+  eventDispatch('phone-island-call-muted', {})
 }
 
 /**
@@ -150,6 +158,7 @@ export function unmuteCurrentCall() {
   } else {
     unmutePhysical()
   }
+  eventDispatch('phone-island-call-unmuted', {})
 }
 
 /**
@@ -169,6 +178,7 @@ export function pauseCurrentCall() {
   } else {
     pausePhysical(true)
   }
+  eventDispatch('phone-island-call-held', {})
 }
 
 /**
@@ -188,6 +198,7 @@ export function unpauseCurrentCall() {
   } else {
     pausePhysical(false)
   }
+  eventDispatch('phone-island-call-unheld', {})
 }
 
 /**
@@ -233,7 +244,10 @@ export function playDtmfAudio(key: string) {
   store.dispatch.player.updateStartAudioPlayer({ src: dtmfAudios[`dtmf_${key}`] })
 }
 
-export function park() {
+/**
+ * Park the current call
+ */
+export function parkCurrentCall() {
   const conversationId = store?.getState()?.currentCall?.conversationId
   const userConversationInformations = store?.getState()?.currentUser?.conversations
 
@@ -262,6 +276,10 @@ export function park() {
           convid: conversationId,
           endpointId: parkingInformation?.numberParkId,
         })
+
+        store.dispatch.currentCall.setParked(true)
+
+        eventDispatch('phone-island-call-parked', {})
       }
     }
   }

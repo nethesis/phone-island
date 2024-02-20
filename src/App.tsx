@@ -7,7 +7,7 @@ import wakeUpWorker from './workers/wake_up'
 import loadI18n from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import { useEventListener } from './utils'
+import { useEventListener, eventDispatch } from './utils'
 import { detach } from './lib/webrtc/messages'
 
 interface PhoneIslandProps {
@@ -58,6 +58,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
 
   useEventListener('phone-island-intrude-call', (data: any) => {
     store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
+  })
+
+  useEventListener('phone-island-call-keypad-close', () => {
+    store.dispatch.island.setIslandView('call')
+    eventDispatch('phone-island-call-keypad-closed', {})
+  })
+  useEventListener('phone-island-call-transfer-close', () => {
+    store.dispatch.island.setIslandView('call')
+    eventDispatch('phone-island-call-transfer-closed', {})
   })
 
   useEventListener('phone-island-detach', (data) => {

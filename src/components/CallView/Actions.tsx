@@ -7,7 +7,7 @@ import {
   unmuteCurrentCall,
   pauseCurrentCall,
   unpauseCurrentCall,
-  attendedTransfer,
+  parkCurrentCall,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -30,11 +30,10 @@ import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
-import { park } from '../../lib/phone/call'
-import { eventDispatch, useEventListener } from '../../utils'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
+import { useEventListener, eventDispatch } from '../../utils'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -49,15 +48,26 @@ const Actions: FC = () => {
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
+    eventDispatch('phone-island-call-keypad-opened', {})
   }
+  useEventListener('phone-island-call-keypad-open', () => {
+    openKeypad()
+  })
 
   function transfer() {
     // Open the transfer view
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    eventDispatch('phone-island-call-transfer-opened', {})
   }
+  useEventListener('phone-island-call-transfer-open', () => {
+    transfer()
+  })
+  useEventListener('phone-island-call-transfer-cancel', () => {
+    cancelTransfer()
+  })
 
   // Cancels the current transfer through dtmfs
-  function calcelTransfer() {
+  function cancelTransfer() {
     if (isWebRTC()) {
       sendDTMF('*')
     } else {
@@ -86,6 +96,8 @@ const Actions: FC = () => {
           dispatch.currentCall.updateTransferring(false)
         }, 500)
       }
+
+      eventDispatch('phone-island-call-transfer-canceled', {})
     }, 500)
   }
 
@@ -95,12 +107,6 @@ const Actions: FC = () => {
     } else {
       dispatch.island.toggleActionsExpanded(true)
     }
-  }
-
-  function parkAction() {
-    park()
-    dispatch.currentCall.setParked(true)
-    eventDispatch('phone-island-call-parked', {})
   }
 
   const { t } = useTranslation()
@@ -139,7 +145,7 @@ const Actions: FC = () => {
 
         <Button
           active={transferring}
-          onClick={transferring ? calcelTransfer : transfer}
+          onClick={transferring ? cancelTransfer : transfer}
           variant='default'
           data-tooltip-id='tooltip'
           data-tooltip-content={
@@ -186,7 +192,7 @@ const Actions: FC = () => {
             <Button
               active={parked}
               variant='default'
-              onClick={parkAction}
+              onClick={parkCurrentCall}
               data-tooltip-id='tooltip'
               data-tooltip-content={t('Tooltip.Park')}
             >
