@@ -3,23 +3,67 @@
 
 import React, { FC } from 'react'
 import { useEventListener, eventDispatch } from '../utils'
-import { useSelector } from 'react-redux'
-import { RootState } from '../store'
-import { callNumber } from '../lib/phone/call'
+import { useDispatch } from 'react-redux'
+import { Dispatch } from '../store'
+import {
+  callNumber,
+  muteCurrentCall,
+  unmuteCurrentCall,
+  pauseCurrentCall,
+  unpauseCurrentCall,
+  parkCurrentCall,
+  answerIncomingCall,
+  hangupCurrentCall,
+} from '../lib/phone/call'
 
 export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
-  const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
+  const dispatch = useDispatch<Dispatch>()
+
   /**
-   * Event listner for phone-island-call-start event
+   * Event listner for phone-island-call-* events
    */
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
     const number = data.number.replace(/\s/g, '')
     callNumber(number, sipHost)
   })
+  useEventListener('phone-island-call-hold', () => {
+    pauseCurrentCall()
+  })
+  useEventListener('phone-island-call-unhold', () => {
+    unpauseCurrentCall()
+  })
+  useEventListener('phone-island-call-mute', () => {
+    muteCurrentCall()
+  })
+  useEventListener('phone-island-call-unmute', () => {
+    unmuteCurrentCall()
+  })
+
+  useEventListener('phone-island-call-park', () => {
+    parkCurrentCall()
+  })
+  useEventListener('phone-island-call-answer', () => {
+    answerIncomingCall()
+  })
+  useEventListener('phone-island-call-end', () => {
+    hangupCurrentCall()
+  })
+
+  useEventListener('phone-island-call-input-switch', () => {})
+  useEventListener('phone-island-call-output-switch', () => {})
+
+  useEventListener('phone-island-call-listen', (data: ListenIntrudeTypes) => {
+    dispatch.listen.setUpdateListenStatus(true, data.number)
+    eventDispatch('phone-island-call-listened', {})
+  })
+
+  useEventListener('phone-island-call-intrude', (data: ListenIntrudeTypes) => {
+    dispatch.listen.setUpdateIntrudeStatus(true, data.number)
+    eventDispatch('phone-island-call-intruded', {})
+  })
+
   return <></>
 }
-
-// !TODO add phone-island-outgoing-call-started phone-island-outgoing-call-ended
 
 /**
  * Dispatch the phone-island-outgoing-call-started event
@@ -32,11 +76,15 @@ export function dispatchOutgoingCallStarted(name: string = '', number: string = 
   eventDispatch('phone-island-outgoing-call-started', data)
 }
 
-export interface OutgoingCallStartedTypes {
+interface CallStartTypes {
+  number: string
+}
+
+interface OutgoingCallStartedTypes {
   name: string
   number: string
 }
 
-interface CallStartTypes {
+interface ListenIntrudeTypes {
   number: string
 }

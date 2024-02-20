@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
-import React from 'react'
+import React, { useState } from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch } from '../utils'
 import { store } from '../store'
@@ -26,6 +26,10 @@ const webrtcNumber: any = process.env.WEBRTC_NUMBER
 const physicalNumber: any = process.env.PHYSICAL_NUMBER
 
 const CallTemplate: Story<any> = (args) => {
+  const [getEventName, setEventName]: any = useState('phone-island-call-start')
+  const [getNumber, setNumber]: any = useState(process.env.DEST_NUMBER_EXTENSION)
+  const [getKey, setKey]: any = useState('0')
+
   const handleExtensionCallStart = () => {
     eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER_EXTENSION })
   }
@@ -44,6 +48,29 @@ const CallTemplate: Story<any> = (args) => {
 
   const handleIntrude = () => {
     eventDispatch('phone-island-intrude-call', { to: process.env.DEST_INTRUDE_NUMBER })
+  }
+
+  const launchEvent = () => {
+    eventDispatch(
+      getEventName,
+      getEventName == 'phone-island-call-keypad-send' ? getKey : { number: getNumber },
+    )
+  }
+
+  const handleEventChange = (event: any) => {
+    event.preventDefault()
+    const example = event.target.value
+    setEventName(example)
+  }
+  const handleNumberChange = (event: any) => {
+    event.preventDefault()
+    const example = event.target.value
+    setNumber(example)
+  }
+  const handleKeyChange = (event: any) => {
+    event.preventDefault()
+    const example = event.target.value
+    setKey(example)
   }
 
   const resetListenStatus = () => {
@@ -91,6 +118,23 @@ const CallTemplate: Story<any> = (args) => {
       >
         Reset listen and intrude store status
       </button>
+
+      <input
+        id='input-event'
+        type='text'
+        className=''
+        value={getEventName}
+        onChange={handleEventChange}
+      />
+      <input
+        id='input-number'
+        type='text'
+        className=''
+        value={getNumber}
+        onChange={handleNumberChange}
+      />
+      <input id='input-key' type='text' className='' value={getKey} onChange={handleKeyChange} />
+      <button onClick={() => launchEvent()}>Launch {getEventName}</button>
 
       <PhoneIsland dataConfig={config} showAlways={false} {...args} />
     </div>

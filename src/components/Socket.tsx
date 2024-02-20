@@ -220,9 +220,10 @@ export const Socket: FC<SocketProps> = ({
       // Handle socket errors
       socket.current.on('connect', () => {
         console.debug(`Socket connected sid: ${socket.current.id}`)
+        eventDispatch('phone-island-socket-connected', {})
       })
       socket.current.on('disconnect', (reason) => {
-        console.log(`Socket disconnect - reason: ${reason}`)
+        console.debug(`Socket disconnect - reason: ${reason}`)
         if (reason.includes('server disconnect')) {
           eventDispatch('phone-island-server-disconnected', {})
         } else {
@@ -275,7 +276,7 @@ export const Socket: FC<SocketProps> = ({
 
       // Handle connection message
       socket.current.on('connect', () => {
-        console.log('Socket on: ' + hostName + ' is connected!')
+        console.debug('Socket on: ' + hostName + ' is connected!')
         socket.current.emit('login', {
           accessKeyId: `${username}`,
           token: authToken,
@@ -285,7 +286,7 @@ export const Socket: FC<SocketProps> = ({
 
       // Handle authentication success message
       socket.current.on('authe_ok', () => {
-        console.log('Socket authentication success!')
+        console.debug('Socket authentication success!')
       })
 
       socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
