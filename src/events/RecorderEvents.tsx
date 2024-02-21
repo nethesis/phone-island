@@ -13,8 +13,9 @@ export const RecorderEvents: FC = () => {
   /**
    * Event listner for phone-island-audio-player-start event
    */
-  useEventListener('phone-island-recording-start', (data: {}) => {
+  useEventListener('phone-island-recording-open', (data: {}) => {
     dispatch.island.setIslandView('recorder')
+    eventDispatch('phone-island-recording-opened', {})
   })
 
   return <></>
@@ -26,7 +27,7 @@ export const RecorderEvents: FC = () => {
 export function dispatchRecordingSave() {
   const tempFileName = store.getState().recorder.tempFileName
   const audioFileURL = store.getState().player.audioPlayer?.current?.src || ''
-  eventDispatch('phone-island-recording-save', {
+  eventDispatch('phone-island-recording-saved', {
     tempFileName,
     audioFileURL,
   })

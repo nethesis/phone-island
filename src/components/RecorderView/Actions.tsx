@@ -22,6 +22,7 @@ import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
+import { useEventListener, eventDispatch } from '../../utils'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -46,7 +47,11 @@ export const Actions: FC<{}> = () => {
     if (data.tempFilename) dispatch.recorder.setTempFilename(data.tempFilename)
     // Set the start time of recording
     dispatch.recorder.setStartTime(`${Date.now() / 1000}`)
+    eventDispatch('phone-island-recording-started', {})
   }
+  useEventListener('phone-island-recording-start', (data: {}) => {
+    handleStart()
+  })
 
   function handleStop() {
     // Set waiting to true
@@ -54,7 +59,11 @@ export const Actions: FC<{}> = () => {
     // Call the function to hangup the current call used for recording
     hangupCurrentCall()
     dispatch.recorder.setRecorded(true)
+    eventDispatch('phone-island-recording-stopped', {})
   }
+  useEventListener('phone-island-recording-stop', (data: {}) => {
+    handleStop()
+  })
 
   function handlePlay() {
     dispatch.player.startAudioPlayer(() => {
@@ -63,17 +72,29 @@ export const Actions: FC<{}> = () => {
       dispatch.recorder.setPaused(true)
     })
     dispatch.recorder.setPlaying(true)
+    eventDispatch('phone-island-recording-played', {})
   }
+  useEventListener('phone-island-recording-play', (data: {}) => {
+    handlePlay()
+  })
 
   function handlePause() {
     dispatch.player.pauseAudioPlayer()
     dispatch.recorder.setPlaying(false)
     dispatch.recorder.setPaused(true)
+    eventDispatch('phone-island-recording-paused', {})
   }
+  useEventListener('phone-island-recording-pause', (data: {}) => {
+    handlePause()
+  })
 
   function handleDelete() {
     dispatch.recorder.resetRecorded()
+    eventDispatch('phone-island-recording-deleted', {})
   }
+  useEventListener('phone-island-recording-delete', (data: {}) => {
+    handleDelete()
+  })
 
   function handleSaveRecording() {
     // Dispatch the reconrding save event
@@ -81,6 +102,9 @@ export const Actions: FC<{}> = () => {
     // Close the Island
     dispatch.island.setIslandView(null)
   }
+  useEventListener('phone-island-recording-save', (data: {}) => {
+    handleSaveRecording()
+  })
 
   useEffect(() => {
     if (!recording) {

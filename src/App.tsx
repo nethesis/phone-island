@@ -68,6 +68,10 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
     store.dispatch.island.setIslandView('call')
     eventDispatch('phone-island-call-transfer-closed', {})
   })
+  useEventListener('phone-island-recording-close', () => {
+    store.dispatch.island.setIslandView(null)
+    eventDispatch('phone-island-recording-closed', {})
+  })
 
   useEventListener('phone-island-detach', (data) => {
     detach()
