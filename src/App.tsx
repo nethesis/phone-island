@@ -52,14 +52,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
     }
   }, [reloadedSocket, reloadedWebRTC])
 
-  useEventListener('phone-island-listen-call', (data: any) => {
-    store.dispatch.listen.setUpdateListenStatus(true, data.to)
-  })
-
-  useEventListener('phone-island-intrude-call', (data: any) => {
-    store.dispatch.listen.setUpdateIntrudeStatus(true, data.to)
-  })
-
   useEventListener('phone-island-call-keypad-close', () => {
     store.dispatch.island.setIslandView('call')
     eventDispatch('phone-island-call-keypad-closed', {})
