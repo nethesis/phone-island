@@ -72,6 +72,10 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
     store.dispatch.island.setIslandView(null)
     eventDispatch('phone-island-recording-closed', {})
   })
+  useEventListener('phone-island-audio-player-close', () => {
+    store.dispatch.island.setIslandView(null)
+    eventDispatch('phone-island-audio-player-closed', {})
+  })
 
   useEventListener('phone-island-detach', (data) => {
     detach()
