@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
+import { useEventListener, eventDispatch } from '../../utils'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
@@ -21,11 +22,19 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
 
   function startPlaying() {
     dispatch.player.startAudioPlayer(() => {})
+    eventDispatch('phone-island-audio-player-played', {})
   }
+  useEventListener('phone-island-audio-player-play', (data: {}) => {
+    startPlaying()
+  })
 
   function pausePlaying() {
     dispatch.player.pauseAudioPlayer()
+    eventDispatch('phone-island-audio-player-paused', {})
   }
+  useEventListener('phone-island-audio-player-pause', (data: {}) => {
+    pausePlaying()
+  })
 
   const { t } = useTranslation()
 
