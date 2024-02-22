@@ -40,7 +40,7 @@ As you can see, the helper function can be used in the following way:
 
 eventDispatch(`<event-name>`, `<data-object>`)
 
-## Listened Events
+## Listen Call Events - phone-island-call-*
 
 - `phone-island-call-start` The event to start a call
 
@@ -50,11 +50,328 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-recording-start` The event to show the recording view.
+- `phone-island-call-answer` The event to answer a call
+
+  ```json
+  {}
+
+- `phone-island-call-end` The event to end a call
+
+  ```json
+  {}
+
+- `phone-island-call-hold` The event to hold a call
 
   ```json
   {}
   ```
+
+- `phone-island-call-unhold` The event to unhold a call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-mute` The event to mute a call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-unmute` The event to unmute a call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-open` The event to show transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-close` The event to close transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-switch` The event to switch caller in transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-cancel` The event to cancel the transfer
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer` The event to show transfer view
+
+  ```json
+  {
+    "number": "200" // string - The number to transfer
+  }
+  ```
+
+- `phone-island-call-keypad-open` The event to show keypad view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-keypad-close` The event to close keypad view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-keypad-send` The event to send DTMF tone
+
+  ```json
+  {
+    "key": "1" // string - The DTMF tone key
+  }
+
+- `phone-island-call-park` The event to park a call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-intrude` The event to intrude in a call
+
+  ```json
+  {
+    "number": "200" // string - The number to intrude
+  }
+  ```
+
+- `phone-island-call-listen` The event to listen a call
+
+  ```json
+  {
+    "number": "200" // string - The number to listen
+  }
+  ```
+
+## Dispatch Call Events - phone-island-call-*
+
+- `phone-island-call-ringing` The dispatch of call ringing
+
+  ```json
+  {}
+
+- `phone-island-call-started` The dispatch of call start
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-answered` The dispatch of call answer
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-ended` The dispatch of call end
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-held` The dispatch of call hold
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-unheld` The dispatch of call unhold
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-muted` The dispatch of call mute
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-unmuted` The dispatch of call unmute
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-opened` The dispatch of call show transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-closed` The dispatch of call close transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-switched` The dispatch of call switch caller in transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-canceled` The dispatch of call cancel the transfer
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfered` The dispatch of call show transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-keypad-opened` The dispatch of show keypad view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-keypad-closed` The dispatch of close keypad view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-keypad-sent` The dispatch of send DTMF tone
+
+  ```json
+  {}
+
+- `phone-island-call-parked` The dispatch of call park
+
+  ```json
+  {}
+
+- `phone-island-call-listened` The dispatch of call listen
+
+  ```json
+  {}
+
+- `phone-island-call-intruded` The dispatch of call intrude
+
+  ```json
+  {}
+
+## Listen Recording Events - phone-island-recording-*
+
+- `phone-island-recording-open` The event to show the recording view.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-close` The event to close the recording view.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-start` The event to start the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-stop` The event to stop the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-play` The event to play the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-pause` The event to pause the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-save` The event to save the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-delete` The event to delete the recording.
+
+  ```json
+  {}
+  ```
+
+## Dispatch Recording Events - phone-island-recording-*
+
+- `phone-island-recording-opened` The dispatch of show the recording view.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-closed` The dispatch of close the recording view.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-started` The dispatch of start the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-stopped` The dispatch of stop the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-played` The dispatch of play the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-paused` The dispatch of pause the recording.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-recording-saved` The dispatch of save the recording.
+
+  ```json
+  {
+    "tempFileName": "user-cti-1686824454167.wav", // string - The temp file name of the asterisk recording to pass to the /enable_announcement API
+    "audioFileURL": "blob:http://localhost:6006/3897f2da-2411-4e38-a024-56bbeab72a91" // string - The local URL of the recorded file in blob format
+  }
+  ```
+
+- `phone-island-recording-deleted` The dispatch of delete the recording.
+
+  ```json
+  {}
+  ```
+
+## Listen Audio Player Events - phone-island-audio-player-*
 
 - `phone-island-audio-player-start` The event to show the audio player view and play an audio file.
 
@@ -67,7 +384,51 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-## Dispatched Events
+- `phone-island-audio-player-play` The event to play the audio player.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-pause` The event to pause the audio player.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-close` The event to close the audio player.
+
+  ```json
+  {}
+  ```
+
+## Dispatch Audio Player Events - phone-island-audio-player-*
+
+- `phone-island-audio-player-started` THe dispatch of show the audio player view and play an audio file.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-played` THe dispatch of play the audio player.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-paused` THe dispatch of pause the audio player.
+
+  ```json
+  {}
+  ```
+
+- `phone-island-audio-player-closed` THe dispatch of close the audio player.
+
+  ```json
+  {}
+  ```
+
+## General Dispatch Events
 
 - `phone-island-user-already-login` Indicates that a the user did login from another window and dispatches an empty object
 
@@ -139,15 +500,6 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-outgoing-call-started` Indicates that an outgoing call has started and dispatches the called name and number.
-
-  ```json
-  {
-    "name": "Foo 1", // string - The called name
-    "number": "211" // string - The called number
-  }
-  ```
-
 - `phone-island-queue-update` Indicates that the informations of a queue are changed.
 
   ```json
@@ -214,26 +566,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-recording-save` Indicates that the recorded audio was saved by the user from the recording view.
-
-  ```json
-  {
-    "tempFileName": "user-cti-1686824454167.wav", // string - The temp file name of the asterisk recording to pass to the /enable_announcement API
-    "audioFileURL": "blob:http://localhost:6006/3897f2da-2411-4e38-a024-56bbeab72a91" // string - The local URL of the recorded file in blob format
-  }
-  ```
-
-- `phone-island-audio-player-closed` Indicates that the audio player view was closed by the user.
+- `phone-island-parking-update` Indicates update on parking list status
 
   ```json
   {}
   ```
 
-- `phone-island-audio-player-started` Indicates that the audio player started playing an audio.
+## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
-  ```json
-  {}
-  ```
 
 - `phone-island-server-reloaded` Indicates that server is reloaded
 
@@ -241,15 +581,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-transfer-call` The event to transfer call.
+- `phone-island-server-disconnected` Indicates that server connection it's been disconnected
 
   ```json
-  {
-    "to": "123456" // string - The transfered number
-  }
+  {}
   ```
 
-- `phone-island-call-parked` Indicates that actual call it's been parked
+- `phone-island-socket-connected` Indicates that webscket connection it's been connected
 
   ```json
   {}
@@ -262,18 +600,6 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-socket-reconnected` Indicates that websocket connection it's been reconnected
-
-  ```json
-  {}
-  ```
-
-- `phone-island-parking-update` Indicates update on parking list status
-
-  ```json
-  {}
-  ```
-
-- `phone-island-server-disconnected` Indicates that server connection it's been disconnected
 
   ```json
   {}
