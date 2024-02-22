@@ -37,8 +37,8 @@ const KeypadView: FC<KeypadViewTypes> = () => {
 
     eventDispatch('phone-island-call-keypad-sent', {})
   }
-  useEventListener('phone-island-call-keypad-send', (key: string) => {
-    sendKey(key)
+  useEventListener('phone-island-call-keypad-send', (data: KeypadTypes) => {
+    sendKey(data.key)
   })
 
   useEffect(() => {
@@ -88,3 +88,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
 export default KeypadView
 
 export interface KeypadViewTypes {}
+
+interface KeypadTypes {
+  key: string
+}

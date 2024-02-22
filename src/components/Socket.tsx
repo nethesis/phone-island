@@ -100,6 +100,8 @@ export const Socket: FC<SocketProps> = ({
                   }` || '',
                 ownerExtension: conv.owner,
               })
+
+              eventDispatch('phone-island-call-ringing', {})
               break
             // @ts-ignore
             case 'busy':
