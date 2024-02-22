@@ -1,7 +1,9 @@
 {
   "Common": {
     "Intrude": "Intrude",
-    "Listen": "Listen"
+    "Listen": "Listen",
+    "Start recording message before": "Click the button below to start recording",
+    "Start recording message after": "You can speak in a moment..."
   },
   "Tooltip": {
     "Hangup": "Hangup",
