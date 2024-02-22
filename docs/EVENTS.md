@@ -54,15 +54,36 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 ## Dispatch Phone-Island Events - phone-island-*
 
-- `phone-island-attached` The dispatch of initialize webrtc with phone-island
+- `phone-island-attached` The dispatch of initialize webrtc with phone-island (switch to webrtc device)
 
   ```json
-  {}
+  {
+    "id": "269",
+    "type": "webrtc",
+    "secret": "<secret>>",
+    "username": "269",
+    "description": "",
+    "actions": {
+        "answer": true,
+        "dtmf": true,
+        "hold": true
+    }
+  }
 
-- `phone-island-detached` The dispatch of destroy webrtc instance with phone-island
+- `phone-island-detached` The dispatch of destroy webrtc instance with phone-island (switch to physical device)
 
   ```json
-  {}
+  {
+    "id": "92269",
+    "type": "physical",
+    "description": "Fanvil X6U-V2 2.12.16.18 0c383e32a7cb",
+    "actions": {
+        "answer": false,
+        "dtmf": false,
+        "hold": false
+    }
+  }
+
 
 ## Listen Call Events - phone-island-call-*
 
