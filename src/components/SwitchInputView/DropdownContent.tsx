@@ -9,41 +9,75 @@ import { faCheck, faEllipsis, faMicrophone, faVolumeHigh } from '@fortawesome/fr
 import { Menu, Transition } from '@headlessui/react'
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
+import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
 
 const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
   const remoteAudioElement: any = useSelector((state: RootState) => state.player.remoteAudio)
 
-  const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(null)
-  const [selectedAudioOutput, setSelectedAudioOutput] = useState<string | null>(null)
+  const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
+    getJSONItem('phone-island-audio-input-device').deviceId || null,
+  )
+  const [selectedAudioOutput, setSelectedAudioOutput] = useState<string | null>(
+    getJSONItem('phone-island-audio-output-device').deviceId || null,
+  )
 
   const handleClickAudioInput = (audioInputDevice: string) => {
     setSelectedAudioInput(audioInputDevice)
 
-    sipcall?.replaceTracks({
-      tracks: [
-        {
-          type: 'audio',
-          mid: '0', // We assume mid 0 is audio
-          capture: { deviceId: { exact: audioInputDevice } },
+    if (sipcall.webrtcStuff.myStream) {
+      sipcall?.replaceTracks({
+        tracks: [
+          {
+            type: 'audio',
+            mid: '0', // We assume mid 0 is audio
+            capture: { deviceId: { exact: audioInputDevice } },
+          },
+        ],
+        success: function () {
+          console.info('Audio input device switch success!')
+          // set device to localstorage
+          setJSONItem('phone-island-audio-input-device', { deviceId: audioInputDevice })
+
+          // dispatch event
+          eventDispatch('phone-island-call-audio-input-switched', {})
         },
-      ],
-      error: function (err) {
-        console.log('Audio input device switch error:', err)
-      },
-    })
+        error: function (err) {
+          console.error('Audio input device switch error:', err)
+        },
+      })
+    } else {
+      // set device to localstorage
+      setJSONItem('phone-island-audio-input-device', { deviceId: audioInputDevice })
+
+      // dispatch event
+      eventDispatch('phone-island-call-audio-input-switched', {})
+    }
   }
+  useEventListener('phone-island-call-audio-input-switch', (data: DeviceInputOutputTypes) => {
+    handleClickAudioInput(data.deviceId)
+  })
 
   const handleClickAudioOutput = (audioOutputDevice: string) => {
     setSelectedAudioOutput(audioOutputDevice)
 
     remoteAudioElement?.current
       .setSinkId(audioOutputDevice)
-      .then(function () {})
+      .then(function () {
+        console.info('Audio output device switch success!')
+        // set device to localstorage
+        setJSONItem('phone-island-audio-output-device', { deviceId: audioOutputDevice })
+
+        // dispatch event
+        eventDispatch('phone-island-call-audio-output-switched', {})
+      })
       .catch(function (err) {
-        console.log('Audio output device switch error:', err)
+        console.error('Audio output device switch error:', err)
       })
   }
+  useEventListener('phone-island-call-audio-output-switch', (data: DeviceInputOutputTypes) => {
+    handleClickAudioOutput(data.deviceId)
+  })
 
   const [actualDevice, setActualDevice]: any = useState([])
 
@@ -147,7 +181,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                             } pi-text-gray-100 pi-mr-1`}
                           />
                           <div className='pi-text-gray-50'>
-                            {audioDevice?.label || `Device ${index + 1}`}
+                            {audioDevice?.label || `Input device ${index + 1}`}
                           </div>
                         </div>
                       )}
@@ -222,7 +256,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                           className='pi-text-gray-100 pi-mr-2'
                         /> */}
                           <div className='pi-text-gray-50'>
-                            {audioDevice?.label || `Device ${index + 1}`}
+                            {audioDevice?.label || `Output device ${index + 1}`}
                           </div>
                         </div>
                       )}
@@ -257,6 +291,10 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
 interface DropdownContentProps extends ComponentProps<'div'> {
   username?: string
   status?: string
+}
+
+interface DeviceInputOutputTypes {
+  deviceId: string
 }
 
 export default DropdownContent

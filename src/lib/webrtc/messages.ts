@@ -4,6 +4,8 @@
 import Janus from './janus'
 import { store } from '../../store'
 import adapter from 'webrtc-adapter'
+import { getSupportedDevices } from '../devices/devices'
+import { getJSONItem } from '../../utils'
 
 export function register({
   sipExten,
@@ -37,10 +39,32 @@ export function register({
 export function answerWebRTC() {
   const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
+    // get current input device id from localstorage
+    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null;
+
     sipcall.createAnswer({
       jsep: jsepGlobal,
-      media: {
+      /*media: {
         audio: true,
+        videoSend: false,
+        videoRecv: false,
+      },*/
+      media: {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          googEchoCancellation: true,
+          googAutoGainControl: true,
+          googNoiseSuppression: true,
+          googHighpassFilter: true,
+          googTypingNoiseDetection: true,
+          googNoiseReduction: true,
+          volume: 1.0,
+          deviceId: currentDeviceInputId,
+        },
+        audioSend: true,
+        audioRecv: false,
         videoSend: false,
         videoRecv: false,
       },
@@ -124,13 +148,36 @@ export function handleRemote(jsep) {
   }
 }
 
-/**
- * Starts a call to a sipuri
- *
- * @param sipURI The sipuri to be called
- * @param mediaObj The object containing the media constrains
- * @returns
- */
+export function callSipURI(sipURI: string) {
+  getSupportedDevices(async () => {
+    // @ts-ignore
+    Janus.log('This is a SIP call')
+
+    // get current input device id from localstorage
+    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
+
+    await call(sipURI, {
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        googEchoCancellation: true,
+        googAutoGainControl: true,
+        googNoiseSuppression: true,
+        googHighpassFilter: true,
+        googTypingNoiseDetection: true,
+        googNoiseReduction: true,
+        volume: 1.0,
+        deviceId: currentDeviceInputId,
+      },
+      audioSend: true,
+      audioRecv: true,
+      videoSend: false,
+      videoRecv: false,
+    })
+  })
+}
+
 export function call(sipURI: string, mediaObj: object) {
   return new Promise((resolve, reject) => {
     const { sipcall }: { sipcall: any } = store.getState().webrtc
@@ -153,7 +200,7 @@ export function call(sipURI: string, mediaObj: object) {
         },
         error: function (error) {
           // @ts-ignore
-          Janus.error('ebRTC error...', error)
+          Janus.error('WebRTC error...', error)
           // @ts-ignore
           Janus.error('WebRTC error call on createOffer: ', error)
           reject(false)
