@@ -40,6 +40,30 @@ As you can see, the helper function can be used in the following way:
 
 eventDispatch(`<event-name>`, `<data-object>`)
 
+## Listen Phone-Island Events - phone-island-*
+
+- `phone-island-attach` The event to initialize webrtc with phone-island
+
+  ```json
+  {}
+
+- `phone-island-detach` The event to destroy webrtc instance with phone-island
+
+  ```json
+  {}
+
+## Dispatch Phone-Island Events - phone-island-*
+
+- `phone-island-attached` The dispatch of initialize webrtc with phone-island
+
+  ```json
+  {}
+
+- `phone-island-detached` The dispatch of destroy webrtc instance with phone-island
+
+  ```json
+  {}
+
 ## Listen Call Events - phone-island-call-*
 
 - `phone-island-call-start` The event to start a call
