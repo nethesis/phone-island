@@ -72,6 +72,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   useEventListener('phone-island-detach', (data) => {
     detach()
     store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
+    eventDispatch('phone-island-detached', {})
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)

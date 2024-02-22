@@ -13,7 +13,7 @@ import { checkMediaPermissions } from '../lib/devices/devices'
 import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
-import { useEventListener } from '../utils'
+import { eventDispatch, useEventListener } from '../utils'
 
 interface WebRTCProps {
   children: ReactNode
@@ -499,6 +499,7 @@ export const WebRTC: FC<WebRTCProps> = ({
   useEventListener('phone-island-attach', (data) => {
     initWebRTC()
     store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
+    eventDispatch('phone-island-attached', {})
   })
 
   /**
