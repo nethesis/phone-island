@@ -22,11 +22,11 @@ const config = process.env.CONFIG_TOKEN
 
 const RecorderTemplate: Story<any> = (args) => {
   const handleRecordingStart = async () => {
-    eventDispatch('phone-island-recording-start', {})
+    eventDispatch('phone-island-recording-started', {})
   }
 
   useEventListener('phone-island-recording-save', (data) => {
-    console.info('phone-island-recording-save', data)
+    console.info('phone-island-recording-saved', data)
   })
 
   return (
