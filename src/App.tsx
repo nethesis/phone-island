@@ -7,12 +7,16 @@ import wakeUpWorker from './workers/wake_up'
 import loadI18n from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
-import { useEventListener, eventDispatch } from './utils'
+import { useEventListener, eventDispatch, setJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
 
 interface PhoneIslandProps {
   dataConfig: string
   showAlways?: boolean
+}
+
+interface DeviceInputOutputTypes {
+  deviceId: string
 }
 
 export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = false }) => {
@@ -73,6 +77,27 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
     detach()
     store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
     eventDispatch('phone-island-detached', {})
+  })
+
+  useEventListener('phone-island-audio-input-change', (data: DeviceInputOutputTypes) => {
+    setJSONItem('phone-island-audio-input-device', { deviceId: data.deviceId })
+    eventDispatch('phone-island-audio-input-changed', {})
+  })
+  useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
+    // set audio output
+    /*remoteAudioElement?.current
+      .setSinkId(data.deviceId)
+      .then(function () {
+        console.info('Default audio output device change with success!')
+        // set device to localstorage
+        setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+
+        // dispatch event
+        eventDispatch('phone-island-audio-output-changed', {})
+      })
+      .catch(function (err) {
+        console.error('Default audio output device change error:', err)
+      })*/
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)

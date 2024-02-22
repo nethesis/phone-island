@@ -1,10 +1,8 @@
 // Copyright (C) 2022 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { getSupportedDevices } from '../devices/devices'
-import Janus from '../webrtc/janus'
 import {
-  call,
+  callSipURI,
   hangup,
   answerWebRTC,
   muteWebRTC,
@@ -41,38 +39,6 @@ export function callNumber(number: string, sipHost: string) {
   }
 
   eventDispatch('phone-island-call-started', {})
-}
-
-/**
- * Starts a call to a SIP URI
- *
- * @param sipURI The SIP URI string
- */
-export function callSipURI(sipURI: string) {
-  getSupportedDevices(async () => {
-    // @ts-ignore
-    Janus.log('This is a SIP call')
-    await call(sipURI, {
-      audio: {
-        mandatory: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          googEchoCancellation: true,
-          googAutoGainControl: true,
-          googNoiseSuppression: true,
-          googHighpassFilter: true,
-          googTypingNoiseDetection: true,
-          googNoiseReduction: true,
-          volume: 1.0,
-        },
-      },
-      audioSend: true,
-      audioRecv: true,
-      videoSend: false,
-      videoRecv: false,
-    })
-  })
 }
 
 /**
