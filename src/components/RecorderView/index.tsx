@@ -10,6 +10,7 @@ import Progress from '../AudioPlayerView/Progress'
 import { updateAudioPlayerSource } from '../../lib/phone/audio'
 import fixWebmDuration from 'webm-duration-fix'
 import Timer from './Timer'
+import { useTranslation } from 'react-i18next'
 
 // The number of groups to be created
 // ...the minimun to have this effect is 2
@@ -31,10 +32,11 @@ export const RecorderView: FC<RecorderViewProps> = () => {
   const localAudioStream = useSelector((state: RootState) => state.webrtc.localAudioStream)
 
   // Retrieve the local audio stream from recorder state
-  const { recording, recorded } = useSelector(
+  const { recording, recorded, waiting } = useSelector(
     (state: RootState) => ({
       recording: state.recorder.recording,
       recorded: state.recorder.recorded,
+      waiting: state.recorder.waiting,
     }),
     shallowEqual,
   )
@@ -83,6 +85,8 @@ export const RecorderView: FC<RecorderViewProps> = () => {
     }
   }, [])
 
+  const { t } = useTranslation()
+
   return (
     <>
       {isOpen ? (
@@ -95,14 +99,14 @@ export const RecorderView: FC<RecorderViewProps> = () => {
           </div>
           {/* Bars animation section  */}
           <div
-            className={`pi-relative pi-w-full ${
+            className={`pi-relative pi-w-full pi-justify-center ${
               !recorded ? 'pi-h-8' : ''
             } pi-overflow-x-hidden pi-flex`}
             ref={visibleContainerRef}
           >
             {recorded ? (
               <Progress />
-            ) : (
+            ) : recording && !waiting ? (
               // Create a custom numbers of bars groups
               Array.from({ length: BAR_GROUPS_COUNT }).map((_, i) => (
                 <BarsGroup
@@ -112,6 +116,14 @@ export const RecorderView: FC<RecorderViewProps> = () => {
                   audioStream={localAudioStream}
                 />
               ))
+            ) : recording && waiting ? (
+              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit pi-text-white'>
+                {t('Common.Start recording message after')}
+              </div>
+            ) : (
+              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit pi-text-white'>
+                {t('Common.Start recording message before')}
+              </div>
             )}
           </div>
           {/* Actions section */}
