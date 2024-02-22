@@ -23,6 +23,7 @@ import { dispatchRecordingSave } from '../../events'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
+import DropdownContent from '../SwitchInputView/DropdownContent'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -199,6 +200,13 @@ export const Actions: FC<{}> = () => {
             <FontAwesomeIcon icon={faRecordVinyl} size='xl' />
           )}
         </Button>
+      )}
+      {!recording && !recorded && (
+        <div
+          className='pi-grid pi-grid-cols-1 pi-ml-8'
+        >
+          <DropdownContent data-stop-propagation={true}></DropdownContent>
+        </div>
       )}
       {/* Buttons tooltips */}
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
