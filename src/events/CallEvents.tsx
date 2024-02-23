@@ -49,9 +49,6 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
     hangupCurrentCall()
   })
 
-  useEventListener('phone-island-call-input-switch', () => {})
-  useEventListener('phone-island-call-output-switch', () => {})
-
   useEventListener('phone-island-call-listen', (data: ListenIntrudeTypes) => {
     dispatch.listen.setUpdateListenStatus(true, data.number)
     eventDispatch('phone-island-call-listened', {})

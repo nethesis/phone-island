@@ -23,6 +23,7 @@ import { dispatchRecordingSave } from '../../events'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
+import DropdownContent from '../SwitchInputView/DropdownContent'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -126,7 +127,7 @@ export const Actions: FC<{}> = () => {
 
   return (
     <div
-      className={`pi-flex pi-justify-center pi-items-center pi-pt-9 pi-gap-6`}
+      className={`pi-flex pi-items-center pi-justify-center pi-pt-9 pi-gap-6`}
       style={recorded ? { paddingTop: '2rem' } : {}}
     >
       {recording && (
@@ -192,6 +193,7 @@ export const Actions: FC<{}> = () => {
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
           data-tooltip-content={t('Tooltip.Start recording')}
+          className='pi-flex pi-justify-center pi-ml-[4.7rem]'
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -199,6 +201,13 @@ export const Actions: FC<{}> = () => {
             <FontAwesomeIcon icon={faRecordVinyl} size='xl' />
           )}
         </Button>
+      )}
+      {!recording && !recorded && (
+        <div
+          className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'
+        >
+          <DropdownContent data-stop-propagation={true}></DropdownContent>
+        </div>
       )}
       {/* Buttons tooltips */}
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />

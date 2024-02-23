@@ -6,7 +6,6 @@ import React, { useState } from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
-import { setDefaultDevice } from '../services/user'
 import audioFile from '../static/test_audio'
 
 const meta = {
@@ -30,6 +29,7 @@ const CallTemplate: Story<any> = (args) => {
   const [getEventName, setEventName]: any = useState('phone-island-call-start')
   const [getNumber, setNumber]: any = useState(process.env.DEST_NUMBER_EXTENSION)
   const [getKey, setKey]: any = useState('0')
+  const [getDevice, setDevice]: any = useState('default')
 
   const handleExtensionCallStart = () => {
     eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER_EXTENSION })
@@ -52,18 +52,43 @@ const CallTemplate: Story<any> = (args) => {
   }
 
   useEventListener('phone-island-call-ringing', () => {
-    console.log("The call is ringing")
+    console.log('The call is ringing')
   })
 
   const launchEvent = () => {
-    eventDispatch(
-      getEventName,
-      getEventName == 'phone-island-call-keypad-send'
-        ? { key: getKey }
-        : getEventName == 'phone-island-audio-player-start'
-        ? { base64_audio_file: audioFile, description: 'Custom Audio File' }
-        : { number: getNumber },
-    )
+    let obj = {}
+
+    switch (getEventName) {
+      case 'phone-island-call-keypad-send':
+        obj = { key: getKey }
+        break
+
+      case 'phone-island-audio-player-start':
+        obj = { base64_audio_file: audioFile, description: 'Custom Audio File' }
+        break
+
+      case 'phone-island-audio-input-change':
+        obj = { deviceId: getDevice }
+        break
+
+      case 'phone-island-audio-output-change':
+        obj = { deviceId: getDevice }
+        break
+      case 'phone-island-call-audio-input-switch':
+
+        obj = { deviceId: getDevice }
+        break
+
+      case 'phone-island-call-audio-output-switch':
+        obj = { deviceId: getDevice }
+        break
+
+      default:
+        obj = { number: getNumber }
+        break
+    }
+
+    eventDispatch(getEventName, obj)
   }
 
   const handleEventChange = (event: any) => {
@@ -80,6 +105,11 @@ const CallTemplate: Story<any> = (args) => {
     event.preventDefault()
     const example = event.target.value
     setKey(example)
+  }
+  const handleDeviceChange = (event: any) => {
+    event.preventDefault()
+    const example = event.target.value
+    setDevice(example)
   }
 
   const resetListenStatus = () => {
@@ -128,6 +158,7 @@ const CallTemplate: Story<any> = (args) => {
         Reset listen and intrude store status
       </button>
 
+      <label>Event name:</label>
       <input
         id='input-event'
         type='text'
@@ -135,6 +166,7 @@ const CallTemplate: Story<any> = (args) => {
         value={getEventName}
         onChange={handleEventChange}
       />
+      <label>Number to call:</label>
       <input
         id='input-number'
         type='text'
@@ -142,7 +174,16 @@ const CallTemplate: Story<any> = (args) => {
         value={getNumber}
         onChange={handleNumberChange}
       />
+      <label>DTMF tone to send:</label>
       <input id='input-key' type='text' className='' value={getKey} onChange={handleKeyChange} />
+      <label>Input/Output device to set:</label>
+      <input
+        id='input-device'
+        type='text'
+        className=''
+        value={getDevice}
+        onChange={handleDeviceChange}
+      />
       <button onClick={() => launchEvent()}>Launch {getEventName}</button>
 
       <PhoneIsland dataConfig={config} showAlways={false} {...args} />

@@ -72,6 +72,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
     }
   }
 
+- `phone-island-audio-input-change` The event to change default audio input device for phone island
+
+  ```json
+  {
+    "deviceId": "756ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee" // string - The input deviceId obtained by getUserMediaDevices
+  }
+  ```
+
+- `phone-island-audio-output-change` The event to change default audio output device for phone island
+
+  ```json
+  {
+    "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
+  }
+  ```
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-attached` The dispatch of initialize webrtc with phone-island (switch to webrtc device)
@@ -80,6 +96,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
 
 - `phone-island-detached` The dispatch of destroy webrtc instance with phone-island (switch to physical device)
+
+  ```json
+  {}
+
+- `phone-island-audio-input-changed` The dispatch of change default audio input device for phone island
+
+  ```json
+  {}
+
+- `phone-island-audio-output-changed` The dispatch of change default audio output device for phone island
 
   ```json
   {}
@@ -202,6 +228,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-call-audio-input-switch` The event to change audio input device during a call
+
+  ```json
+  {
+    "deviceId": "756ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee" // string - The input deviceId obtained by getUserMediaDevices
+  }
+  ```
+
+- `phone-island-call-audio-output-switch` The event to change audio output device during a call
+
+  ```json
+  {
+    "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
+  }
+  ```
+
 ## Dispatch Call Events - phone-island-call-*
 
 - `phone-island-call-ringing` The dispatch of call ringing
@@ -309,6 +351,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
 
 - `phone-island-call-intruded` The dispatch of call intrude
+
+  ```json
+  {}
+
+- `phone-island-call-audio-input-switched` The dispatch of call input switch
+
+  ```json
+  {}
+
+- `phone-island-call-audio-output-switched` The dispatch of call output switch
 
   ```json
   {}
