@@ -114,10 +114,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
 
   const remoteAudioElement: any = store.getState().player.remoteAudio
 
-  //initialize i18n
+  //get output device from localstorage
   useEffect(() => {
     if (firstAudioOutputInit && remoteAudioElement) {
-      const defaultAudioOutputDevice: any = getJSONItem(`phone-island-audio-output-device`)?.deviceId
+      const defaultAudioOutputDevice: any = getJSONItem(
+        `phone-island-audio-output-device`,
+      )?.deviceId
       eventDispatch('phone-island-audio-output-change', { deviceId: defaultAudioOutputDevice })
       setFirstAudioOutputInit(false)
     }
