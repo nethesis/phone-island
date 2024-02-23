@@ -127,7 +127,7 @@ export const Actions: FC<{}> = () => {
 
   return (
     <div
-      className={`pi-flex pi-justify-center pi-items-center pi-pt-9 pi-gap-6`}
+      className={`pi-flex pi-items-center pi-justify-center pi-pt-9 pi-gap-6`}
       style={recorded ? { paddingTop: '2rem' } : {}}
     >
       {recording && (
@@ -193,6 +193,7 @@ export const Actions: FC<{}> = () => {
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
           data-tooltip-content={t('Tooltip.Start recording')}
+          className='pi-flex pi-justify-center pi-ml-[4.7rem]'
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -203,7 +204,7 @@ export const Actions: FC<{}> = () => {
       )}
       {!recording && !recorded && (
         <div
-          className='pi-grid pi-grid-cols-1 pi-ml-8'
+          className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'
         >
           <DropdownContent data-stop-propagation={true}></DropdownContent>
         </div>
