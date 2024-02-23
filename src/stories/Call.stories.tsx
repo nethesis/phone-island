@@ -75,7 +75,6 @@ const CallTemplate: Story<any> = (args) => {
         obj = { deviceId: getDevice }
         break
       case 'phone-island-call-audio-input-switch':
-        console.log('siamo nella story', getDevice)
 
         obj = { deviceId: getDevice }
         break
