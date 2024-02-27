@@ -87,7 +87,7 @@ export function hangupCurrentCall() {
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
 
-    eventDispatch('phone-island-call-end', {})
+    eventDispatch('phone-island-call-ended', {})
   }
 }
 
