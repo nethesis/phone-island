@@ -24,7 +24,9 @@
     "Start recording": "Start recording",
     "Switch call": "Switch call",
     "Call to transfer": "Call to transfer",
-    "Hangup and transfer": "Transfer"
+    "Hangup and transfer": "Transfer",
+    "Answer": "Answer",
+    "Settings": "Settings"
   },
   "DropdownContent": {
     "Microphones": "MICROPHONES",

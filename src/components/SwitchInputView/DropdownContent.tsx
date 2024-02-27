@@ -10,6 +10,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
+import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
 const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
@@ -104,7 +105,8 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
   return (
     <>
       {isWebRTC() ? (
-        <Menu as='div' className='relative inline-block text-left' data-stop-propagation={true}>
+        <Menu as='div' className='relative inline-block text-left' data-stop-propagation={true} data-tooltip-id='tooltip-left'
+        data-tooltip-content={t('Tooltip.Settings')}>
           <Menu.Button
             className='pi-bg-transparent enabled:hover:pi-bg-gray-500 focus:pi-ring-gray-500 pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-text-white pi-border pi-border-transparent focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
             data-stop-propagation={true}
@@ -284,6 +286,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
       ) : (
         <div></div>
       )}
+      <Tooltip className='pi-z-20' id='tooltip-left' place='left' />
     </>
   )
 }

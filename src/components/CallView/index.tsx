@@ -17,6 +17,7 @@ import Avatar from './Avatar'
 import Actions from './Actions'
 import Hangup from '../Hangup'
 import { useTranslation } from 'react-i18next'
+import { Tooltip } from 'react-tooltip'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -203,7 +204,12 @@ const CallView: FC<CallViewProps> = () => {
               {/* )} */}
               {/* The button to answer the incoming call */}
               {isAnswerVisible(outgoing, accepted) && (
-                <Button onClick={answerIncomingCall} variant='green'>
+                <Button
+                  onClick={answerIncomingCall}
+                  variant='green'
+                  data-tooltip-id='tooltip-left'
+                  data-tooltip-content={t('Tooltip.Answer')}
+                >
                   <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
                 </Button>
               )}
