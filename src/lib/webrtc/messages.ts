@@ -44,11 +44,6 @@ export function answerWebRTC() {
 
     sipcall.createAnswer({
       jsep: jsepGlobal,
-      /*media: {
-        audio: true,
-        videoSend: false,
-        videoRecv: false,
-      },*/
       media: {
         audio: {
           echoCancellation: true,
@@ -63,8 +58,6 @@ export function answerWebRTC() {
           volume: 1.0,
           deviceId: currentDeviceInputId,
         },
-        audioSend: true,
-        audioRecv: false,
         videoSend: false,
         videoRecv: false,
       },
