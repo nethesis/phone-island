@@ -7,6 +7,7 @@ import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
 import audioFile from '../static/test_audio'
+import { setTheme } from '../lib/darkTheme'
 
 const meta = {
   title: 'Phone Island',
@@ -26,7 +27,7 @@ const webrtcNumber: any = process.env.WEBRTC_NUMBER
 const physicalNumber: any = process.env.PHYSICAL_NUMBER
 
 const CallTemplate: Story<any> = (args) => {
-  const [getEventName, setEventName]: any = useState('phone-island-call-start')
+  const [getEventName, setEventName]: any = useState('phone-island-recording-open')
   const [getNumber, setNumber]: any = useState(process.env.DEST_NUMBER_EXTENSION)
   const [getKey, setKey]: any = useState('0')
   const [getDevice, setDevice]: any = useState('default')
@@ -75,7 +76,6 @@ const CallTemplate: Story<any> = (args) => {
         obj = { deviceId: getDevice }
         break
       case 'phone-island-call-audio-input-switch':
-
         obj = { deviceId: getDevice }
         break
 
@@ -119,8 +119,23 @@ const CallTemplate: Story<any> = (args) => {
   let transferObject: any = {}
   transferObject.to = transferNumber
 
+  const [temporaryTheme, setTemporaryTheme] = useState('system')
+  const toggleDarkTheme = () => {
+    if (
+      temporaryTheme === 'dark' ||
+      (temporaryTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      setTemporaryTheme('light')
+      eventDispatch('phone-island-theme-change', { selectedTheme: 'light' })
+    } else {
+      setTemporaryTheme('dark')
+      eventDispatch('phone-island-theme-change', { selectedTheme: 'dark' })
+    }
+  }
+
   return (
     <div className='pi-flex pi-gap-2 pi-flex-col pi-w-fit'>
+      <button onClick={() => toggleDarkTheme()}>Change theme</button>
       <button
         onClick={handleExtensionCallStart}
         className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'

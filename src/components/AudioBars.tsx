@@ -152,7 +152,7 @@ export const AudioBars: FC<AudioBarsProps> = ({
         {/* Every single bar */}
         {(audioStream || audioElement) &&
           Object.keys(barsMap).map((key) => (
-            <span key={key} className='pi-bg-emerald-600 pi-w-0.5 pi-rounded-sm'></span>
+            <span key={key} className='pi-bg-emerald-700 dark:pi-bg-emerald-600 pi-w-0.5 pi-rounded-sm'></span>
           ))}
       </div>
     </div>

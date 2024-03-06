@@ -33,6 +33,7 @@ const Timer: FC<TimerProps> = ({ size = 'large', startTime }) => {
             trim={false}
             unix
             durationFromNow
+            className='pi-text-gray-700 dark:pi-text-gray-100'
           />
         </StyledTimer>
       )}

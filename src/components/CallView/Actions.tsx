@@ -169,9 +169,9 @@ const Actions: FC = () => {
           }
         >
           {actionsExpanded ? (
-            <FontAwesomeIcon className='' size='xl' icon={faChevronUp} />
+            <FontAwesomeIcon className='pi-text-gray-700 dark:pi-text-gray-100' size='xl' icon={faChevronUp} />
           ) : (
-            <FontAwesomeIcon size='xl' icon={faChevronDown} />
+            <FontAwesomeIcon size='xl' className='pi-text-gray-700 dark:pi-text-gray-100' icon={faChevronDown} />
           )}
         </Button>
       </div>
@@ -185,7 +185,7 @@ const Actions: FC = () => {
               variant='default'
               onClick={openKeypad}
               data-tooltip-id='tooltip'
-              data-tooltip-content={t('Tooltip.Keyboard')}
+              data-tooltip-content={t('Tooltip.Keyboard') || ''}
             >
               <FontAwesomeIcon size='xl' icon={faGridRound} />
             </Button>
@@ -194,7 +194,7 @@ const Actions: FC = () => {
               variant='default'
               onClick={parkCurrentCall}
               data-tooltip-id='tooltip'
-              data-tooltip-content={t('Tooltip.Park')}
+              data-tooltip-content={t('Tooltip.Park') || ''}
             >
               <FontAwesomeIcon size='xl' icon={faSquareParking} />
             </Button>

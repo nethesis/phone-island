@@ -136,7 +136,7 @@ export const Actions: FC<{}> = () => {
           variant='default'
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
-          data-tooltip-content={t('Tooltip.Stop')}
+          data-tooltip-content={t('Tooltip.Stop') || ''}
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -151,7 +151,7 @@ export const Actions: FC<{}> = () => {
             onClick={handleDelete}
             variant='default'
             data-tooltip-id='tooltip'
-            data-tooltip-content={t('Tooltip.Delete')}
+            data-tooltip-content={t('Tooltip.Delete') || ''}
           >
             <FontAwesomeIcon icon={faTrash} size='xl' />
           </Button>
@@ -161,7 +161,7 @@ export const Actions: FC<{}> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content={t('Tooltip.Pause')}
+              data-tooltip-content={t('Tooltip.Pause') || ''}
             >
               <FontAwesomeIcon icon={faPause} size='xl' />
             </Button>
@@ -171,7 +171,7 @@ export const Actions: FC<{}> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip'
-              data-tooltip-content={t('Tooltip.Play')}
+              data-tooltip-content={t('Tooltip.Play') || ''}
             >
               <FontAwesomeIcon icon={faPlay} size='xl' />
             </Button>
@@ -180,7 +180,7 @@ export const Actions: FC<{}> = () => {
             onClick={handleSaveRecording}
             variant='green'
             data-tooltip-id='tooltip'
-            data-tooltip-content={t('Tooltip.Confirm')}
+            data-tooltip-content={t('Tooltip.Confirm') || ''}
           >
             <FontAwesomeIcon icon={faCheck} size='xl' />
           </Button>
@@ -192,7 +192,7 @@ export const Actions: FC<{}> = () => {
           variant='red'
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip'
-          data-tooltip-content={t('Tooltip.Start recording')}
+          data-tooltip-content={t('Tooltip.Start recording') || ''}
           className='pi-flex pi-justify-center pi-ml-[4.7rem]'
         >
           {waiting ? (

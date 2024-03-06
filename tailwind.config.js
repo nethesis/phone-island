@@ -3,6 +3,10 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   mode: 'jit',
+  plugins: [
+    require('tailwind-scrollbar')({ nocompatible: true, preferredStrategy: 'pseudoelements' }),
+  ],
+  darkMode: 'selector',
   theme: {
     extend: {
       rotate: {
@@ -36,9 +40,7 @@ module.exports = {
     scrollbar: ['rounded'],
     extend: {},
   },
-  plugins: [
-    require('tailwind-scrollbar')({ nocompatible: true, preferredStrategy: 'pseudoelements' }),
-  ],
+
   corePlugins: {
     preflight: false,
   },
