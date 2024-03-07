@@ -47,7 +47,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
               ? `${t('Common.Intrude')}` + '-' + intrudeListenStatus?.isIntrudeExtension
               : '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
       ) : intrudeListenStatus?.isListen ? (
         <NameMotion
@@ -64,7 +64,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
               ? `${t('Common.Listen')}` + '-' + intrudeListenStatus?.isListenExtension
               : '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
       ) : (
         <NameMotion
@@ -83,7 +83,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
               ? displayName
               : t('Call.Outgoing call') || '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-black pi-to-gray-50'>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'>
             {' '}
           </div>
         </NameMotion>

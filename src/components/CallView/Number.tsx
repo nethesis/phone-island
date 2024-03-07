@@ -12,7 +12,7 @@ const Number: FC = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
 
   return (
-    <StyledNumber isOpen={isOpen}>
+    <StyledNumber isOpen={isOpen} className='dark:pi-text-gray-50 pi-text-gray-600'>
       {number && number !== '<unknown>' ? number : t('Call.In progress...') || '-'}
     </StyledNumber>
   )

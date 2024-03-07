@@ -6,7 +6,6 @@ import styled from 'styled-components'
 export const StyledCustomRange = styled.input.attrs({ type: 'range' })`
   font-size: 1.5rem;
   width: 100%;
-  color: white;
   --thumb-height: 0.75rem;
   --track-height: 0.125rem;
   --track-color: #6b7280;

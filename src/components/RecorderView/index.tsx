@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC, useState, useRef, useEffect, useCallback, memo } from 'react'
@@ -93,7 +93,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
         <>
           {' '}
           <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-4 pi-pb-9'>
-            <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit pi-text-white'>
+            <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit dark:pi-text-white'>
               <Timer />
             </div>
           </div>
@@ -117,11 +117,11 @@ export const RecorderView: FC<RecorderViewProps> = () => {
                 />
               ))
             ) : recording && waiting ? (
-              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit pi-text-white'>
+              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white'>
                 {t('Common.Start recording message after')}
               </div>
             ) : (
-              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit pi-text-white'>
+              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white'>
                 {t('Common.Start recording message before')}
               </div>
             )}

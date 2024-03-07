@@ -172,15 +172,20 @@ const CallTemplate: Story<any> = (args) => {
       >
         Reset listen and intrude store status
       </button>
-
-      <label>Event name:</label>
-      <input
-        id='input-event'
-        type='text'
-        className=''
-        value={getEventName}
-        onChange={handleEventChange}
-      />
+      <label htmlFor='select-event'>Event name:</label>
+      <select id='select-event' value={getEventName} onChange={handleEventChange}>
+        <option value='phone-island-recording-open'>phone-island-recording-open</option>
+        <option value='phone-island-call-keypad-send'>phone-island-call-keypad-send</option>
+        <option value='phone-island-audio-player-start'>phone-island-audio-player-start</option>
+        <option value='phone-island-audio-input-change'>phone-island-audio-input-change</option>
+        <option value='phone-island-audio-output-change'>phone-island-audio-output-change</option>
+        <option value='phone-island-call-audio-input-switch'>
+          phone-island-call-audio-input-switch
+        </option>
+        <option value='phone-island-call-audio-output-switch'>
+          phone-island-call-audio-output-switch
+        </option>
+      </select>
       <label>Number to call:</label>
       <input
         id='input-number'
