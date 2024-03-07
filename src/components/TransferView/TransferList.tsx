@@ -204,7 +204,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         username={userEndpoints.username}
                         status={userEndpoints.mainPresence}
                         data-tooltip-id={
-                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip' : ''
+                          userEndpoints.mainPresence === 'online'
+                            ? 'transfer-list-tooltip-right'
+                            : ''
                         }
                         data-tooltip-content={
                           userEndpoints?.mainPresence === 'online'
@@ -220,7 +222,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
                         data-tooltip-id={
-                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip' : ''
+                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip-top' : ''
                         }
                         data-tooltip-content={
                           userEndpoints.mainPresence === 'online'
@@ -242,7 +244,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           }
                           variant='default'
                           disabled={userEndpoints.mainPresence !== 'online'}
-                          data-tooltip-id='transfer-list-tooltip'
+                          data-tooltip-id='transfer-list-tooltip-left'
                           data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                         >
                           <FontAwesomeIcon size='xl' icon={faPhone} />
@@ -262,7 +264,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       ) : (
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
       )}
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip' place='bottom' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />
     </>
   )
 }

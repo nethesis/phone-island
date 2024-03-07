@@ -19,7 +19,7 @@ import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
 import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 
-const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
+const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
   const remoteAudioElement: any = useSelector((state: RootState) => state.player.remoteAudio)
 
@@ -115,6 +115,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
   const handleSelectTheme = (clickedTheme: string) => {
     eventDispatch('phone-island-theme-change', { selectedTheme: clickedTheme })
   }
+  const { transferring } = useSelector((state: RootState) => state.currentCall)
 
   return (
     <>
@@ -148,7 +149,9 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
             leaveTo='transform opacity-0 scale-95'
           >
             <Menu.Items
-              className='pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0 pi-right-[4.5rem] pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
+              className={`${
+                transferring ? 'pi-right-[1.5rem]' : 'pi-right-[4.5rem]'
+              } pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0  pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
               data-stop-propagation={true}
             >
               <div className='' data-stop-propagation={true}>
@@ -387,8 +390,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
 }
 
 interface DropdownContentProps extends ComponentProps<'div'> {
-  username?: string
-  status?: string
+  isTransferView?: boolean
 }
 
 interface DeviceInputOutputTypes {
