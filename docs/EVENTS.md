@@ -87,6 +87,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
   }
   ```
+- `phone-island-theme-change` The event to change phone-island theme
+
+  ```json
+  {
+    "selectedTheme": "light | dark"
+  }
+  ```
 
 ## Dispatch Phone-Island Events - phone-island-*
 
@@ -94,21 +101,30 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {}
+  ```
 
 - `phone-island-detached` The dispatch of destroy webrtc instance with phone-island (switch to physical device)
 
   ```json
   {}
+  ```
 
 - `phone-island-audio-input-changed` The dispatch of change default audio input device for phone island
 
   ```json
   {}
+  ```
 
 - `phone-island-audio-output-changed` The dispatch of change default audio output device for phone island
 
   ```json
   {}
+  ```
+- `phone-island-theme-changed-` The dispatch of change phone-island theme
+
+  ```json
+  {}
+  ```
 
 
 ## Listen Call Events - phone-island-call-*
