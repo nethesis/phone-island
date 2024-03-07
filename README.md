@@ -2,15 +2,29 @@
 
 A fully standalone component for managing calls, video calls, screen sharing and more...
 
-## Preview
+## Screenshots
 
-### Closed
+### Dark Theme
+#### Call started
+![dark-call](https://github.com/nethesis/phone-island/assets/6152486/a65ce4b8-53b9-4450-a530-a8b9eba5216e)
 
-![pi-close](https://user-images.githubusercontent.com/6152486/205046804-98037726-7b2a-408b-b247-7053f0fc08e0.png)
+#### Call incoming
+![dark-incoming](https://github.com/nethesis/phone-island/assets/6152486/54f30441-21d2-42b2-bed5-af99aa9f85e4)
 
-### Open
+#### Call connected
+![dark-conn](https://github.com/nethesis/phone-island/assets/6152486/bac24d1f-aa5e-405f-b00e-a5093f3b0bea)
 
-![pi-open](https://user-images.githubusercontent.com/6152486/205046912-e32d81ad-781e-4985-bb35-397be675b4b7.png)
+### Light Theme
+#### Call started
+![white-call](https://github.com/nethesis/phone-island/assets/6152486/280a6d6f-0cda-4779-b15a-d3613ae3d8cb)
+
+#### Call incoming
+![white-incoming](https://github.com/nethesis/phone-island/assets/6152486/5ca7e539-de88-4d69-9dac-98573564ad8c)
+
+#### Call connected
+![white-conn](https://github.com/nethesis/phone-island/assets/6152486/8eb88b6b-0e74-4e51-9b80-904548762473)
+
+
 
 ## Structure
 
