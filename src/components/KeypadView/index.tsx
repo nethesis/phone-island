@@ -62,7 +62,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               variant='transparent'
               onClick={backToCallView}
               data-tooltip-id='keyboard-tooltip'
-              data-tooltip-content={t('Tooltip.Back to call')}
+              data-tooltip-content={t('Tooltip.Back to call') || ''}
             >
               <FontAwesomeIcon size='xl' icon={faArrowLeft} />
             </Button>
@@ -72,7 +72,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
               readOnly
               value={keypadValue}
               autoFocus
-              className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
+              className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 dark:pi-text-white pi-text-gray-700 pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
             />
           </div>
           <Actions keyCallback={sendKey} />

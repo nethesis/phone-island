@@ -139,7 +139,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} />
+                  <Timer startTime={startTime} isHome/>
                 ) : intrudeListenStatus?.isIntrudeExtension ? (
                   `${intrudeListenStatus?.isIntrudeExtension}`
                 ) : (
@@ -156,7 +156,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} />
+                  <Timer startTime={startTime} isHome/>
                 ) : intrudeListenStatus?.isListenExtension ? (
                   `${intrudeListenStatus?.isListenExtension}`
                 ) : (
@@ -166,14 +166,14 @@ const CallView: FC<CallViewProps> = () => {
             ) : (
               <StyledDetails>
                 <DisplayName />
-                {accepted ? <Timer startTime={startTime} /> : <Number />}
+                {accepted ? <Timer startTime={startTime} isHome/> : <Number />}
               </StyledDetails>
             )
           ) : null}
           {/* The display name when collepsed */}
           {!isOpen && !accepted && <DisplayName />}
           {/* The timer when collapsed */}
-          {!isOpen && accepted && <Timer startTime={startTime} />}
+          {!isOpen && accepted && <Timer startTime={startTime} isHome/>}
           {accepted && remoteAudioStream && (
             <AudioBars
               audioStream={remoteAudioStream}
@@ -208,7 +208,7 @@ const CallView: FC<CallViewProps> = () => {
                   onClick={answerIncomingCall}
                   variant='green'
                   data-tooltip-id='tooltip-left'
-                  data-tooltip-content={t('Tooltip.Answer')}
+                  data-tooltip-content={t('Tooltip.Answer') || ''}
                 >
                   <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
                 </Button>

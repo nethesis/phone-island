@@ -19,7 +19,7 @@ export const Bar: FC<BarProps> = memo(({ visibleContainer }) => {
   return (
     <div
       ref={barRef}
-      className='pi-h-1 pi-bg-emerald-500'
+      className='pi-h-1 pi-bg-emerald-700 dark:pi-bg-emerald-500'
       style={{ width: '0.125rem', height: '10%' }}
     />
   )

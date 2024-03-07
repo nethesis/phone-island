@@ -5,7 +5,14 @@ import React, { type FC, ComponentProps, Fragment, useState, useEffect } from 'r
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faEllipsis, faMicrophone, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCheck,
+  faEllipsis,
+  faMicrophone,
+  faMoon,
+  faSun,
+  faVolumeHigh,
+} from '@fortawesome/free-solid-svg-icons'
 import { Menu, Transition } from '@headlessui/react'
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
@@ -102,19 +109,31 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
       navigator.mediaDevices.removeEventListener('devicechange', checkInputOutputDevices)
     }
   }, [selectedAudioOutput, selectedAudioInput])
+
+  const { theme } = useSelector((state: RootState) => state.darkTheme)
+
+  const handleSelectTheme = (clickedTheme: string) => {
+    eventDispatch('phone-island-theme-change', { selectedTheme: clickedTheme })
+  }
+
   return (
     <>
       {isWebRTC() ? (
-        <Menu as='div' className='relative inline-block text-left' data-stop-propagation={true} data-tooltip-id='tooltip-left'
-        data-tooltip-content={t('Tooltip.Settings')}>
+        <Menu
+          as='div'
+          className='relative inline-block text-left'
+          data-stop-propagation={true}
+          data-tooltip-id='tooltip-left'
+          data-tooltip-content={t('Tooltip.Settings')}
+        >
           <Menu.Button
-            className='pi-bg-transparent enabled:hover:pi-bg-gray-500 focus:pi-ring-gray-500 pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-text-white pi-border pi-border-transparent focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
+            className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-500 enabled:hover:pi-bg-gray-400 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 dark:pi-text-white pi-text-gray-600 pi-border pi-border-transparent focus:pi-ring-offset-gray-200 dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
             data-stop-propagation={true}
           >
             <FontAwesomeIcon
               size='xl'
               icon={faEllipsis}
-              className='pi-text-gray-100'
+              className='dark:pi-text-gray-100 pi-text-gray-700'
               data-stop-propagation={true}
             />
           </Menu.Button>
@@ -129,12 +148,12 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
             leaveTo='transform opacity-0 scale-95'
           >
             <Menu.Items
-              className='pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0 pi-right-[4.5rem] pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 pi-bg-black pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-900 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
+              className='pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0 pi-right-[4.5rem] pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
               data-stop-propagation={true}
             >
               <div className='' data-stop-propagation={true}>
                 {/* Microphones */}
-                <div className='pi-font-semibold pi-text-gray-50 pi-py-1 pi-px-4'>
+                <div className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'>
                   {t('DropdownContent.Microphones')}
                 </div>
                 {actualDevice
@@ -143,7 +162,9 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                     <Menu.Item key={index}>
                       {({ active }) => (
                         <div
-                          className={`pi-flex pi-py-2 pi-px-2  ${active ? 'pi-bg-gray-700' : ''}`}
+                          className={`pi-flex pi-py-2 pi-px-2 ${
+                            active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
+                          }`}
                           onClick={() => handleClickAudioInput(audioDevice.deviceId)}
                           data-stop-propagation={true}
                         >
@@ -152,7 +173,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                             <FontAwesomeIcon
                               size='lg'
                               icon={faCheck}
-                              className='pi-text-green-400 pi-mr-2'
+                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
                             />
                           )}
 
@@ -161,7 +182,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                             <FontAwesomeIcon
                               size='lg'
                               icon={faCheck}
-                              className='pi-text-green-400 pi-mr-2'
+                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
                             />
                           )}
 
@@ -180,9 +201,15 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                                 : selectedAudioInput === null && audioDevice?.deviceId !== 'default'
                                 ? 'pi-ml-6'
                                 : ''
-                            } pi-text-gray-100 pi-mr-1`}
+                            } dark:pi-text-gray-100 pi-text-gray-600 pi-mr-1`}
                           />
-                          <div className='pi-text-gray-50'>
+                          <div
+                            className={`${
+                              active
+                                ? 'dark:pi-text-gray-50 pi-text-gray-900'
+                                : 'dark:pi-text-gray-50 pi-text-gray-700'
+                            }`}
+                          >
                             {audioDevice?.label || `Input device ${index + 1}`}
                           </div>
                         </div>
@@ -195,12 +222,12 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                     className='pi-absolute pi-inset-0 pi-flex pi-items-center'
                     aria-hidden='true'
                   >
-                    <div className='pi-w-full pi-border-t pi-border-gray-600' />
+                    <div className='pi-w-full pi-border-t pi-border-gray-400 dark:pi-border-gray-600' />
                   </div>
                 </div>
                 {/* Speaker */}
                 <div
-                  className='pi-font-semibold pi-text-gray-50 pi-py-1 pi-px-4'
+                  className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'
                   data-stop-propagation={true}
                 >
                   {t('DropdownContent.Speakers')}
@@ -211,7 +238,9 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                     <Menu.Item key={index}>
                       {({ active }) => (
                         <div
-                          className={`pi-flex pi-py-2 pi-px-2 ${active ? 'pi-bg-gray-700' : ''}`}
+                          className={`pi-flex pi-py-2 pi-px-2 ${
+                            active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
+                          }`}
                           onClick={() => handleClickAudioOutput(audioDevice?.deviceId)}
                           data-stop-propagation={true}
                         >
@@ -220,7 +249,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                             <FontAwesomeIcon
                               size='lg'
                               icon={faCheck}
-                              className='pi-text-green-400 pi-mr-2'
+                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
                             />
                           )}
 
@@ -229,7 +258,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                             <FontAwesomeIcon
                               size='lg'
                               icon={faCheck}
-                              className='pi-text-green-400 pi-mr-2'
+                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
                             />
                           )}
 
@@ -249,21 +278,87 @@ const DropdownContent: FC<DropdownContentProps> = ({ username, status }) => {
                                   audioDevice?.deviceId !== 'default'
                                 ? 'pi-ml-6'
                                 : ''
-                            } pi-text-gray-100 pi-mr-1`}
+                            } dark:pi-text-gray-100 pi-text-gray-600 pi-mr-1`}
                           />
 
-                          {/* <FontAwesomeIcon
-                          size='lg'
-                          icon={faMicrophone}
-                          className='pi-text-gray-100 pi-mr-2'
-                        /> */}
-                          <div className='pi-text-gray-50'>
+                          <div
+                            className={`${
+                              active
+                                ? 'dark:pi-text-gray-50 pi-text-gray-900'
+                                : 'dark:pi-text-gray-50 pi-text-gray-700'
+                            }`}
+                          >
                             {audioDevice?.label || `Output device ${index + 1}`}
                           </div>
                         </div>
                       )}
                     </Menu.Item>
                   ))}
+                {/* Divider  */}
+                <div className='pi-relative pi-py-2'>
+                  <div
+                    className='pi-absolute pi-inset-0 pi-flex pi-items-center'
+                    aria-hidden='true'
+                  >
+                    <div className='pi-w-full pi-border-t pi-border-gray-400 dark:pi-border-gray-600' />
+                  </div>
+                </div>
+                {/* theme selection */}
+                <div
+                  className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'
+                  data-stop-propagation={true}
+                >
+                  {t('DropdownContent.Theme')}
+                </div>
+
+                {/* dark theme  */}
+                <div
+                  className={`pi-flex pi-py-2 pi-px-2 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700`}
+                  onClick={() => handleSelectTheme('dark')}
+                  data-stop-propagation={true}
+                >
+                  {theme === 'dark' && (
+                    <FontAwesomeIcon
+                      size='lg'
+                      icon={faCheck}
+                      className='pi-text-green-600 dark:pi-text-green-400 pi-mr-[0.57rem]'
+                    />
+                  )}
+                  <FontAwesomeIcon
+                    size='lg'
+                    icon={faMoon}
+                    className={`${
+                      theme !== 'dark' ? 'pi-ml-[1.49rem] pi-mr-[0.42rem]' : 'pi-mr-[0.4rem]'
+                    } dark:pi-text-gray-100 pi-text-gray-600 `}
+                  />
+
+                  <div>{t('DropdownContent.Dark')}</div>
+                </div>
+
+                {/* light theme  */}
+                <div
+                  className={`pi-flex pi-py-2 pi-px-2 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700`}
+                  onClick={() => handleSelectTheme('light')}
+                  data-stop-propagation={true}
+                >
+                  {theme === 'light' && (
+                    <FontAwesomeIcon
+                      size='lg'
+                      icon={faCheck}
+                      className='pi-text-green-600 dark:pi-text-green-400 pi-mr-[0.4rem]'
+                    />
+                  )}
+
+                  <FontAwesomeIcon
+                    size='lg'
+                    icon={faSun}
+                    className={`${
+                      theme !== 'light' ? 'pi-ml-[1.4rem] pi-mr-[0.27rem]' : 'pi-mr-[0.28rem]'
+                    } dark:pi-text-gray-100 pi-text-gray-600 `}
+                  />
+                  <div>{t('DropdownContent.Light')}</div>
+                </div>
+
                 {/* Video
               <div className='pi-font-semibold pi-text-gray-700 pi-py-1 pi-px-4'>
                 Video

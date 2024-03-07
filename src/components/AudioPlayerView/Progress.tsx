@@ -67,6 +67,7 @@ export const Progress: FC<ProgressTypes> = () => {
         min='0'
         max={(trackDuration && trackDuration) || 0}
         onChange={handleProgressChange}
+        className='pi-text-gray-400 dark:pi-text-gray-50'
       />
       <div className='pi-flex pi-justify-between pi-mt-1'>
         <div className='pi-font-bold'>{timeProgress}</div>

@@ -9,6 +9,7 @@ import loadI18n from './lib/i18n'
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
+import { checkDarkTheme, setTheme } from './lib/darkTheme'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -124,6 +125,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
       setFirstAudioOutputInit(false)
     }
   }, [firstAudioOutputInit, remoteAudioElement])
+
+  useEffect(() => {
+    checkDarkTheme()
+  }, [])
+
+  useEventListener('phone-island-theme-change', (theme: any) => {
+    setTheme(theme?.selectedTheme)
+  })
 
   return (
     <>

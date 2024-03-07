@@ -66,7 +66,6 @@ export const StyledNumber = styled.div<StyledNumberProps>`
   ${({ isOpen }) => (isOpen ? 'font-size:1.25rem' : 'font-size:1.2rem')};
   max-height: 24px;
   font-weight: 300;
-  color: #fff;
   letter-spacing: 0.5px;
   max-width: fit-content;
 `

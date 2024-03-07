@@ -15,6 +15,7 @@ import { motions } from './motions'
 import { audioBars } from './audioBars'
 import { recorder } from './recorder'
 import { listen } from './listen'
+import { darkTheme } from './darkTheme'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -30,6 +31,7 @@ export interface RootModel extends Models<RootModel> {
   audioBars: typeof audioBars
   recorder: typeof recorder
   listen: typeof listen
+  darkTheme: typeof darkTheme
 }
 
 export const models: RootModel = {
@@ -46,4 +48,5 @@ export const models: RootModel = {
   audioBars,
   recorder,
   listen,
+  darkTheme
 }

@@ -26,7 +26,7 @@ export const Avatar: FC<AvatarProps> = ({ type }) => {
       ) : type === 'call_recording' ? (
         <FontAwesomeIcon size={isOpen ? '2xl' : 'lg'} icon={faVoicemail} />
       ) : (
-        <FontAwesomeIcon size={isOpen ? '2xl' : 'lg'} icon={faMusic} />
+        <FontAwesomeIcon size={isOpen ? '2xl' : 'lg'} icon={faMusic} className='pi-text-gray-50 dark:pi-text-gray-50' />
       )}
     </motion.div>
   )

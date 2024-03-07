@@ -51,7 +51,7 @@ const Avatar: FC = () => {
             }}
             animate={isOpen ? 'open' : 'closed'}
             variants={iconVariants}
-            className={`pi-rounded-xl pi-bg-white pi-absolute pi-opacity-60 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
+            className={`pi-rounded-xl pi-bg-gray-600 pi-absolute pi-opacity-60 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12`}
           ></motion.div>
         )}
         {!transferring ? (

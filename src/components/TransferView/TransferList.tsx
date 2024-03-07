@@ -136,7 +136,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 variant='transparent'
                 onClick={handleBackClick}
                 data-tooltip-id='transfer-list-tooltip'
-                data-tooltip-content={t('Tooltip.Back to call')}
+                data-tooltip-content={t('Tooltip.Back to call') || ''}
               >
                 <FontAwesomeIcon size='xl' icon={faArrowLeft} />
               </Button>
@@ -147,14 +147,14 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 value={searchValue.current}
                 autoFocus
                 spellCheck={false}
-                className='pi-w-full pi-rounded-full pi-bg-black pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
+                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-gray-700 dark:pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
               />
             </div>
           </div>
           {/* List shadow */}
           <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-4'>
             {showGradient && (
-              <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b pi-from-black pi-to-transparent pi-z-100'></div>
+              <div className='pi-h-6 pi-w-full pi-bg-gradient-to-b dark:pi-from-black pi-from-gray-100 pi-to-transparent pi-z-100'></div>
             )}
           </div>
           <div style={{ marginTop: '-22px' }} className='pi-flex pi-flex-col pi-gap-7'>
@@ -162,7 +162,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
             <div
               style={{ height: '17rem' }}
               ref={relativeRef}
-              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
+              className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
             >
               {/* The custom searched number */}
               {showCustomUser && listUsers.length === 0 && (
@@ -181,7 +181,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       onClick={() => handleAttendedTransfer(searchValue.current)}
                       variant='default'
                       data-tooltip-id='transfer-list-tooltip'
-                      data-tooltip-content={t('Tooltip.Call to transfer')}
+                      data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                     >
                       <FontAwesomeIcon size='xl' icon={faPhone} />
                     </Button>
@@ -204,11 +204,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         username={userEndpoints.username}
                         status={userEndpoints.mainPresence}
                         data-tooltip-id={
-                          userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
+                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip' : ''
                         }
                         data-tooltip-content={
-                          userEndpoints.mainPresence === 'online' &&
-                          `${t('Tooltip.Call to transfer')}`
+                          userEndpoints?.mainPresence === 'online'
+                            ? `${t('Tooltip.Call to transfer')}`
+                            : ''
                         }
                       />
                       <div
@@ -219,13 +220,14 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                         style={{ maxWidth: '196px' }}
                         data-stop-propagation={true}
                         data-tooltip-id={
-                          userEndpoints.mainPresence === 'online' && 'transfer-list-tooltip'
+                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip' : ''
                         }
                         data-tooltip-content={
-                          userEndpoints.mainPresence === 'online' &&
-                          `${t('Tooltip.Call to transfer')}`
+                          userEndpoints.mainPresence === 'online'
+                            ? `${t('Tooltip.Call to transfer')}`
+                            : ''
                         }
-                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-white pi-transition`}
+                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition`}
                       >
                         {/* The user name */}
                         {userEndpoints.name}
@@ -241,7 +243,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           variant='default'
                           disabled={userEndpoints.mainPresence !== 'online'}
                           data-tooltip-id='transfer-list-tooltip'
-                          data-tooltip-content={t('Tooltip.Call to transfer')}
+                          data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                         >
                           <FontAwesomeIcon size='xl' icon={faPhone} />
                         </Button>
@@ -251,7 +253,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 ))}
               {loaded && listUsers.length === 0 && !showCustomUser && (
                 <p className='pi-font-sans pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
-                  No users found.
+                  {t('No users found')}
                 </p>
               )}
             </div>

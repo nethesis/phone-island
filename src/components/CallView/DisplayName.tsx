@@ -38,14 +38,16 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+              animateText && 'animated-text'
+            }`}
             ref={nameText}
           >
             {intrudeListenStatus?.isIntrudeExtension !== ''
               ? `${t('Common.Intrude')}` + '-' + intrudeListenStatus?.isIntrudeExtension
               : '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
       ) : intrudeListenStatus?.isListen ? (
         <NameMotion
@@ -53,22 +55,26 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+              animateText && 'animated-text'
+            }`}
             ref={nameText}
           >
             {intrudeListenStatus?.isListenExtension !== ''
               ? `${t('Common.Listen')}` + '-' + intrudeListenStatus?.isListenExtension
               : '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'></div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
       ) : (
         <NameMotion
           ref={nameContainer}
-          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
+          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden '
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block ${animateText && 'animated-text'}`}
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+              animateText && 'animated-text'
+            }`}
             ref={nameText}
           >
             {displayName && displayName === '<unknown>'
@@ -77,7 +83,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
               ? displayName
               : t('Call.Outgoing call') || '-'}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-black'>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'>
             {' '}
           </div>
         </NameMotion>

@@ -30,10 +30,16 @@
   },
   "DropdownContent": {
     "Microphones": "MICROFONI",
-    "Speakers": "ALTOPARLANTI"
+    "Speakers": "ALTOPARLANTI",
+    "Theme": "TEMA",
+    "Dark": "Scuro",
+    "Light": "Chiaro"
   },
   "Call": {
     "In progress...": "In corso...",
     "Outgoing call": "Chiamata in uscita"
+  },
+  "Transfer": {
+    "No users found": "Nessun utente trovato"
   }
 }

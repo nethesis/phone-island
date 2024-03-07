@@ -64,10 +64,11 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
             onClick={() => handleHangup()}
             variant='red'
             className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
-            data-tooltip-id='tooltip-left'
+            data-tooltip-id='tooltip-top'
             data-tooltip-content={
               description && transferring ? description : `${t('Tooltip.Hangup')}`
             }
+            // data-tooltip-placement="top"
           >
             <FontAwesomeIcon className='pi-rotate-135 pi-h-6 pi-w-6' icon={faPhone} />
             {transferring && description && (
@@ -94,6 +95,8 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
       </div>
       <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-left' place='left' />
+      <Tooltip className='pi-z-20' id='tooltip-top' place='top' />
+
     </>
   )
 }

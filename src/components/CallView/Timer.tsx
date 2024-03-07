@@ -7,7 +7,7 @@ import { RootState } from '../../store'
 import { StyledTimer } from '../../styles/Island.styles'
 import Moment from 'react-moment'
 
-const Timer: FC<TimerProps> = ({ size = 'large', startTime }) => {
+const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
   // Set timer negative differences
   const [timerNegativeDifference, setTimerNegativeDifference] = useState<number>(0)
   // Get isOpen from the island store
@@ -33,6 +33,11 @@ const Timer: FC<TimerProps> = ({ size = 'large', startTime }) => {
             trim={false}
             unix
             durationFromNow
+            className={`${
+              isHome !== undefined && isHome
+                ? 'pi-text-gray-700 dark:pi-text-gray-50'
+                : 'pi-text-gray-50 dark:pi-text-gray-50'
+            }`}
           />
         </StyledTimer>
       )}
@@ -45,4 +50,6 @@ export default Timer
 export interface TimerProps {
   size?: 'small' | 'large'
   startTime: string
+  // when the timer is used in the home view or in the pill view
+  isHome?: boolean
 }
