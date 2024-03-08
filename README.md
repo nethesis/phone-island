@@ -2,6 +2,17 @@
 
 A fully standalone component for managing calls, video calls, screen sharing and more...
 
+## Builds
+
+Available as component on `npm`
+
+[![alt text](https://img.shields.io/npm/dw/@nethesis/phone-island?label=npm&color=red&style=for-the-badge)](https://www.npmjs.com/package/@nethesis/phone-island)
+
+Available as widget on `jsDelivr`
+
+[![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-js&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.js)
+[![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-css&color=blue&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.css)
+
 ## Screenshots
 
 ### Dark Theme
@@ -23,8 +34,6 @@ A fully standalone component for managing calls, video calls, screen sharing and
 
 #### Call connected
 ![white-conn](https://github.com/nethesis/phone-island/assets/6152486/8eb88b6b-0e74-4e51-9b80-904548762473)
-
-
 
 ## Structure
 
@@ -52,17 +61,6 @@ flowchart LR
     Chat --> CS{{Single Chat}} --- 7CComp>Chat Component]
     Chat --> CG{{Group Chat}} --- 7CComp>Chat Component]
 ```
-
-## Builds
-
-Available as component on `npm`
-
-[![alt text](https://img.shields.io/npm/dw/@nethesis/phone-island?label=npm&color=red&style=for-the-badge)](https://www.npmjs.com/package/@nethesis/phone-island)
-
-Available as widget on `jsDelivr`
-
-[![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-js&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.js)
-[![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-css&color=blue&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.css)
 
 ## Scaffolding
 
