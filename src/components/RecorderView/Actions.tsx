@@ -98,6 +98,12 @@ export const Actions: FC<{}> = () => {
   })
 
   function handleSaveRecording() {
+    // check if the audio is playing and pause it
+    if (playing) {
+      dispatch.player.pauseAudioPlayer()
+      dispatch.recorder.setPlaying(false)
+      dispatch.recorder.setPaused(true)
+    }
     // Dispatch the reconrding save event
     dispatchRecordingSave()
     // Close the Island
