@@ -13,6 +13,7 @@ import { checkDarkTheme, setTheme } from './lib/darkTheme'
 
 interface PhoneIslandProps {
   dataConfig: string
+  i18nLoader?: () => void
   showAlways?: boolean
 }
 
@@ -20,7 +21,7 @@ interface DeviceInputOutputTypes {
   deviceId: string
 }
 
-export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = false }) => {
+export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoader = undefined, showAlways = false }: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
@@ -108,7 +109,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, showAlways = fal
   //initialize i18n
   useEffect(() => {
     if (firstRenderI18n) {
-      loadI18n()
+      i18nLoader ? i18nLoader() : loadI18n()
       setFirstRenderI18n(false)
     }
   }, [firstRenderI18n])
