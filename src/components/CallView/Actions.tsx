@@ -103,19 +103,19 @@ const Actions: FC = () => {
 
   useEventListener('phone-island-call-actions-open', () => {
     dispatch.island.toggleActionsExpanded(true)
-    eventDispatch('phone-island-actions-opened', {})
+    eventDispatch('phone-island-call-actions-opened', {})
   })
   useEventListener('phone-island-call-actions-close', () => {
     dispatch.island.toggleActionsExpanded(false)
-    eventDispatch('phone-island-actions-closed', {})
+    eventDispatch('phone-island-call-actions-closed', {})
   })
   function toggleActionsExpanded() {
     if (actionsExpanded) {
       dispatch.island.toggleActionsExpanded(false)
-      eventDispatch('phone-island-actions-closed', {})
+      eventDispatch('phone-island-call-actions-closed', {})
     } else {
       dispatch.island.toggleActionsExpanded(true)
-      eventDispatch('phone-island-actions-opened', {})
+      eventDispatch('phone-island-call-actions-opened', {})
     }
   }
 
