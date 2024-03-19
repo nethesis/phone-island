@@ -36,8 +36,8 @@ export function yPosition(y: number, islandElement: HTMLElement, containerElemen
  * Sets callview as the current view
  */
 export function backToCallView() {
-  eventDispatch('phone-island-call-keypad-closed', {})
-  eventDispatch('phone-island-call-transfer-closed', {})
+  const { view } = store.getState().island
+  eventDispatch(`phone-island-call-${view}-closed`, {})
 
   store.dispatch.island.setIslandView('call')
 }
