@@ -5,6 +5,7 @@ import { store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 import loadI18n from './lib/i18n'
+import i18next, { i18n } from 'i18next'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
@@ -13,7 +14,7 @@ import { checkDarkTheme, setTheme } from './lib/darkTheme'
 
 interface PhoneIslandProps {
   dataConfig: string
-  i18nLoader?: () => void
+  i18nLoadPath?: string
   showAlways?: boolean
 }
 
@@ -21,7 +22,7 @@ interface DeviceInputOutputTypes {
   deviceId: string
 }
 
-export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoader = undefined, showAlways = false }: PhoneIslandProps) => {
+export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoadPath = undefined, showAlways = false }: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
@@ -109,7 +110,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoader = und
   //initialize i18n
   useEffect(() => {
     if (firstRenderI18n) {
-      i18nLoader ? i18nLoader() : loadI18n()
+      loadI18n(i18nLoadPath)
       setFirstRenderI18n(false)
     }
   }, [firstRenderI18n])

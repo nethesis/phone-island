@@ -10,7 +10,7 @@ const options = {
   order: ['navigator'],
 }
 
-export const loadI18n = () => {
+export const loadI18n = (loadPath?: string) => {
   if (typeof window === 'undefined') {
     return
   }
@@ -19,6 +19,11 @@ export const loadI18n = () => {
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
+      ...(loadPath ? {
+        backend: {
+          loadPath
+        }
+      } : {}),
       fallbackLng,
       load: 'languageOnly',
       debug: true,
