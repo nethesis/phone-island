@@ -259,6 +259,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
   }
   ```
+- `phone-island-call-actions-open` The event to open actions view
+
+  ```json
+  {}
+  ```
+- `phone-island-call-actions-close` The event to close actions view
+
+  ```json
+  {}
+  ```
 
 ## Dispatch Call Events - phone-island-call-*
 
@@ -377,6 +387,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
 
 - `phone-island-call-audio-output-switched` The dispatch of call output switch
+
+  ```json
+  {}
+- `phone-island-call-actions-opened` The dispatch of call actions open
+
+  ```json
+  {}
+- `phone-island-call-actions-closed` The dispatch of call actions close
 
   ```json
   {}

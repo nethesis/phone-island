@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { store } from '../../store'
+import { eventDispatch } from '../../utils'
 
 /**
  * Retrieve the position on x axis
@@ -35,5 +36,8 @@ export function yPosition(y: number, islandElement: HTMLElement, containerElemen
  * Sets callview as the current view
  */
 export function backToCallView() {
+  eventDispatch('phone-island-call-keypad-closed', {})
+  eventDispatch('phone-island-call-transfer-closed', {})
+
   store.dispatch.island.setIslandView('call')
 }

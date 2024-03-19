@@ -101,11 +101,21 @@ const Actions: FC = () => {
     }, 500)
   }
 
+  useEventListener('phone-island-call-actions-open', () => {
+    dispatch.island.toggleActionsExpanded(true)
+    eventDispatch('phone-island-actions-opened', {})
+  })
+  useEventListener('phone-island-call-actions-close', () => {
+    dispatch.island.toggleActionsExpanded(false)
+    eventDispatch('phone-island-actions-closed', {})
+  })
   function toggleActionsExpanded() {
     if (actionsExpanded) {
       dispatch.island.toggleActionsExpanded(false)
+      eventDispatch('phone-island-actions-closed', {})
     } else {
       dispatch.island.toggleActionsExpanded(true)
+      eventDispatch('phone-island-actions-opened', {})
     }
   }
 
@@ -169,9 +179,17 @@ const Actions: FC = () => {
           }
         >
           {actionsExpanded ? (
-            <FontAwesomeIcon className='pi-text-gray-700 dark:pi-text-gray-100' size='xl' icon={faChevronUp} />
+            <FontAwesomeIcon
+              className='pi-text-gray-700 dark:pi-text-gray-100'
+              size='xl'
+              icon={faChevronUp}
+            />
           ) : (
-            <FontAwesomeIcon size='xl' className='pi-text-gray-700 dark:pi-text-gray-100' icon={faChevronDown} />
+            <FontAwesomeIcon
+              size='xl'
+              className='pi-text-gray-700 dark:pi-text-gray-100'
+              icon={faChevronDown}
+            />
           )}
         </Button>
       </div>
