@@ -57,6 +57,7 @@ export const Socket: FC<SocketProps> = ({
       accepted: true,
       incoming: conv.direction === 'in' ? false : undefined,
     })
+    eventDispatch('phone-island-call-answered', {})
 
     // Stop the local audio element ringing
     store.dispatch.player.stopAudioPlayer()

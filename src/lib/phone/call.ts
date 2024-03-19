@@ -50,8 +50,6 @@ export function answerIncomingCall() {
   } else {
     answerPhysical()
   }
-
-  eventDispatch('phone-island-call-answered', {})
 }
 
 /**
