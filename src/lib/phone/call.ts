@@ -84,9 +84,9 @@ export function hangupCurrentCall() {
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
-
-    eventDispatch('phone-island-call-ended', {})
   }
+  // Caller close the call before the call is accepted
+  eventDispatch('phone-island-call-ended', {})
 }
 
 /**
