@@ -5,6 +5,7 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import incomingRingtone from '../static/incoming_ringtone'
 import { dispatchOutgoingCallStarted } from '../events/index'
+import { eventDispatch } from '../utils'
 
 const defaultState = {
   displayName: '',
@@ -119,7 +120,7 @@ export const currentCall = createModel<RootModel>()({
         (rootState.currentUser.default_device?.type === 'physical' && payload.acceptedSocket)
       ) {
         payload.accepted = true
-        // TODO - dispatch accepted event
+        eventDispatch('phone-island-call-answered', {})
       }
       // Update the current call values
       dispatch.currentCall.updateCurrentCall({
