@@ -59,6 +59,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoadPath = u
     }
   }, [reloadedSocket, reloadedWebRTC])
 
+  useEventListener('phone-island-expand', () => {
+    store.dispatch.island.toggleIsOpen(true)
+    eventDispatch('phone-island-expanded', {})
+  })
+  useEventListener('phone-island-compress', () => {
+    store.dispatch.island.toggleIsOpen(false)
+    eventDispatch('phone-island-compressed', {})
+  })
+
   useEventListener('phone-island-call-keypad-close', () => {
     store.dispatch.island.setIslandView('call')
     eventDispatch('phone-island-call-keypad-closed', {})

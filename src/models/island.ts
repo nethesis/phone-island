@@ -3,6 +3,7 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import { eventDispatch } from '../utils'
 
 const defaultState: IslandTypes = {
   view: null,
@@ -46,8 +47,10 @@ export const island = createModel<RootModel>()({
         rootState.alerts.status.activeAlertsCount > 0 &&
         !rootState.currentCall.displayName
       ) {
+        eventDispatch('phone-island-expanded', {})
         dispatch.island.toggleIsOpen(true)
       } else {
+        eventDispatch('phone-island-' + (rootState.island.isOpen ? 'compressed' : 'expanded'), {})
         dispatch.island.toggleIsOpen(!rootState.island.isOpen)
       }
     },

@@ -42,6 +42,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 ## Listen Phone-Island Events - phone-island-*
 
+- `phone-island-expand` The event to expand phone-island
+
+  ```json
+  {}
+
+- `phone-island-compress` The event to compress phone-island
+
+  ```json
+  {}
+
 - `phone-island-attach` The event to initialize webrtc with phone-island
 
   ```json
@@ -96,6 +106,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 ## Dispatch Phone-Island Events - phone-island-*
+
+- `phone-island-expanded` The dispatch of phone-island expand
+
+  ```json
+  {}
+  ```
+
+- `phone-island-compressed` The dispatch of phone-island compress
+
+  ```json
+  {}
+  ```
 
 - `phone-island-attached` The dispatch of initialize webrtc with phone-island (switch to webrtc device)
 
