@@ -42,6 +42,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 ## Listen Phone-Island Events - phone-island-*
 
+- `phone-island-expand` The event to expand phone-island
+
+  ```json
+  {}
+  ```
+
+- `phone-island-compress` The event to compress phone-island
+
+  ```json
+  {}
+  ```
+
 - `phone-island-attach` The event to initialize webrtc with phone-island
 
   ```json
@@ -57,6 +69,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
         "hold": true
     }
   }
+  ```
 
 - `phone-island-detach` The event to destroy webrtc instance with phone-island
 
@@ -71,6 +84,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
         "hold": false
     }
   }
+  ```
 
 - `phone-island-audio-input-change` The event to change default audio input device for phone island
 
@@ -87,6 +101,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
   }
   ```
+
 - `phone-island-theme-change` The event to change phone-island theme
 
   ```json
@@ -96,6 +111,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 ## Dispatch Phone-Island Events - phone-island-*
+
+- `phone-island-expanded` The dispatch of phone-island expand
+
+  ```json
+  {}
+  ```
+
+- `phone-island-compressed` The dispatch of phone-island compress
+
+  ```json
+  {}
+  ```
 
 - `phone-island-attached` The dispatch of initialize webrtc with phone-island (switch to webrtc device)
 
@@ -141,11 +168,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {}
+  ```
 
 - `phone-island-call-end` The event to end a call
 
   ```json
   {}
+  ```
 
 - `phone-island-call-hold` The event to hold a call
 
@@ -221,6 +250,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {
     "key": "1" // string - The DTMF tone key
   }
+  ```
 
 - `phone-island-call-park` The event to park a call
 
@@ -259,11 +289,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
     "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f" // string - The output deviceId obtained by getUserMediaDevices
   }
   ```
+
 - `phone-island-call-actions-open` The event to open actions view
 
   ```json
   {}
   ```
+
 - `phone-island-call-actions-close` The event to close actions view
 
   ```json
@@ -276,6 +308,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {}
+  ```
 
 - `phone-island-call-started` The dispatch of call start
 
@@ -365,39 +398,49 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {}
+  ```
 
 - `phone-island-call-parked` The dispatch of call park
 
   ```json
   {}
+  ```
 
 - `phone-island-call-listened` The dispatch of call listen
 
   ```json
   {}
+  ```
 
 - `phone-island-call-intruded` The dispatch of call intrude
 
   ```json
   {}
+  ```
 
 - `phone-island-call-audio-input-switched` The dispatch of call input switch
 
   ```json
   {}
+  ```
 
 - `phone-island-call-audio-output-switched` The dispatch of call output switch
 
   ```json
   {}
+  ```
+
 - `phone-island-call-actions-opened` The dispatch of call actions open
 
   ```json
   {}
+  ```
+
 - `phone-island-call-actions-closed` The dispatch of call actions close
 
   ```json
   {}
+  ```
 
 ## Listen Recording Events - phone-island-recording-*
 
