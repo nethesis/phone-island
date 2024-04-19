@@ -129,7 +129,7 @@ export const Socket: FC<SocketProps> = ({
                   startTime: `${getTimestampInSeconds()}`,
                 })
 
-                if (userInformation?.default_device?.type !== 'webrtc') {
+                if (userInformation?.default_device?.type === 'physical') {
                   checkDefaultDeviceConversationActive(conv)
                 }
               }

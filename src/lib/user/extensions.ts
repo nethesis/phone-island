@@ -14,7 +14,7 @@ export function getWebrtcExtensions(): UserExtensionTypes | UserExtensionTypes[]
   // Get endpoints currentUser store
   const { endpoints } = store.getState().currentUser
   if (endpoints?.extension && endpoints.extension.length > 0) {
-    const webrtcExtensions = endpoints?.extension.filter((extension) => extension.type === 'webrtc')
+    const webrtcExtensions = endpoints?.extension.filter((extension) => extension?.type === 'webrtc' || extension?.type === 'nethlink')
     return webrtcExtensions.length === 1
       ? webrtcExtensions[0]
       : webrtcExtensions.length > 1

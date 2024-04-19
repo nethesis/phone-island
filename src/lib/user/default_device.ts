@@ -8,7 +8,7 @@ import { store } from '../../store'
  */
 export function isWebRTC() {
   const { default_device } = store.getState().currentUser
-  if (default_device?.type === 'webrtc') {
+  if (default_device?.type === 'webrtc' || default_device?.type === 'nethlink') {
     return true
   }
   return false
