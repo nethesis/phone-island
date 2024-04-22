@@ -34,6 +34,7 @@ interface SocketProps {
   authToken: string
   reload: boolean
   reloadedCallback: () => void
+  uaType: string
 }
 
 export const Socket: FC<SocketProps> = ({
@@ -43,6 +44,7 @@ export const Socket: FC<SocketProps> = ({
   reload,
   reloadedCallback,
   children,
+  uaType,
 }) => {
   const dispatch = useDispatch<Dispatch>()
   const connectionCheckInterval = useRef<any>()
@@ -283,7 +285,7 @@ export const Socket: FC<SocketProps> = ({
         socket.current.emit('login', {
           accessKeyId: `${username}`,
           token: authToken,
-          uaType: 'desktop',
+          uaType: uaType,
         })
       })
 

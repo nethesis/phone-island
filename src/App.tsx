@@ -16,13 +16,19 @@ interface PhoneIslandProps {
   dataConfig: string
   i18nLoadPath?: string
   showAlways?: boolean
+  uaType: string
 }
 
 interface DeviceInputOutputTypes {
   deviceId: string
 }
 
-export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoadPath = undefined, showAlways = false }: PhoneIslandProps) => {
+export const PhoneIsland: FC<PhoneIslandProps> = ({
+  dataConfig,
+  i18nLoadPath = undefined,
+  showAlways = false,
+  uaType,
+}: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
   const USERNAME: string = CONFIG[1]
@@ -164,6 +170,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({ dataConfig, i18nLoadPath = u
               authToken={AUTH_TOKEN}
               reload={reload}
               reloadedCallback={() => setReloadedSocket(true)}
+              uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
                 <Island showAlways={showAlways} />

@@ -206,7 +206,7 @@ const CallTemplate: Story<any> = (args) => {
       />
       <button onClick={() => launchEvent()}>Launch {getEventName}</button>
 
-      <PhoneIsland dataConfig={config} showAlways={false} {...args} />
+      <PhoneIsland dataConfig={config} showAlways={false} {...args} uaType={'mobile'} />
     </div>
   )
 }
