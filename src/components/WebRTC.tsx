@@ -170,6 +170,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.log(
                             'Successfully un-registered as ' + result['username'] + '!',
                           )
+                        eventDispatch('phone-island-webrtc-unregistered', {})
                         break
 
                       case 'registered':
@@ -177,6 +178,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.log(
                             'Successfully registered as ' + result['username'] + '!',
                           )
+                        eventDispatch('phone-island-webrtc-registered', {})
                         if (!store.getState().webrtc.registered) {
                           store.dispatch.webrtc.updateWebRTC({
                             registered: true,

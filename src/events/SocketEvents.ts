@@ -33,9 +33,16 @@ export function dispatchMainPresence(event: MainPresenceTypes) {
  * @param event The extenUpdate event from socket
  */
 export function dispatchConversations(event: ExtensionTypes) {
-  const data: ConversationsEventType = {
+  const data: any = {
     [event.username]: {
-      conversations: event.conversations,
+      conversations: event?.conversations,
+      status: event?.status,
+      sipuseragent: event?.sipuseragent,
+      username: event?.username,
+      port: event?.port,
+      dnd: event?.dnd,
+      number: event?.exten,
+      ip: event?.ip,
     },
   }
   // Dispatch the event on window for external handlers

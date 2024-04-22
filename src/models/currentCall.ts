@@ -86,7 +86,8 @@ export const currentCall = createModel<RootModel>()({
       // Check call type and incoming confirmation source
       if (
         (rootState.currentUser.default_device?.type === 'webrtc' && payload.incomingWebRTC) ||
-        (rootState.currentUser.default_device?.type === 'physical' && payload.incomingSocket)
+        (rootState.currentUser.default_device?.type === 'physical' && payload.incomingSocket) ||
+        (rootState?.currentUser?.default_device?.type === 'nethlink' && payload?.incomingWebRTC)
       ) {
         payload.incoming = true
 
@@ -102,7 +103,8 @@ export const currentCall = createModel<RootModel>()({
       // Check call type and outgoing confirmation source
       if (
         (rootState.currentUser.default_device?.type === 'webrtc' && payload.outgoingWebRTC) ||
-        (rootState.currentUser.default_device?.type === 'physical' && payload.outgoingSocket)
+        (rootState.currentUser.default_device?.type === 'physical' && payload.outgoingSocket) ||
+        (rootState.currentUser.default_device?.type === 'nethlink' && payload.outgoingWebRTC)
       ) {
         payload.outgoing = true
         // Dispatch an event for outgoing call
@@ -117,7 +119,8 @@ export const currentCall = createModel<RootModel>()({
       // Check call type and accepted confirmation source
       if (
         (rootState.currentUser.default_device?.type === 'webrtc' && payload.acceptedWebRTC) ||
-        (rootState.currentUser.default_device?.type === 'physical' && payload.acceptedSocket)
+        (rootState.currentUser.default_device?.type === 'physical' && payload.acceptedSocket) ||
+        (rootState.currentUser.default_device?.type === 'nethlink' && payload.acceptedWebRTC)
       ) {
         payload.accepted = true
         eventDispatch('phone-island-call-answered', {})

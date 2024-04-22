@@ -8,7 +8,7 @@ export interface UserCachesTypes {
   operatorsAvatars: AvatarsTypes
 }
 
-export type ExtensionTypeTypes = 'webrtc' | 'physical'
+export type ExtensionTypeTypes = 'webrtc' | 'physical' | 'nethlink'
 
 export interface UserExtensionTypes {
   id: string
