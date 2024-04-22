@@ -13,11 +13,12 @@ const widgetDivs = document.querySelectorAll('.phone-island')
 widgetDivs.forEach((div) => {
   const config: string = div.getAttribute('data-config') || ''
   const showAlways: boolean = div.getAttribute('showAlways') === 'true' ? true : false
+  const uaType: string = div.getAttribute('ua-type') || ''
 
   const root = createRoot(div)
   root.render(
     <React.StrictMode>
-      <PhoneIsland dataConfig={config} showAlways={showAlways} />
+      <PhoneIsland dataConfig={config} showAlways={showAlways} uaType={uaType}/>
     </React.StrictMode>,
   )
 })
