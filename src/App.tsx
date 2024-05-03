@@ -151,6 +151,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     setTheme(theme?.selectedTheme)
   })
 
+  useEventListener('phone-island-default-device-change', (data) => {
+    store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
+    eventDispatch('phone-island-default-device-changed', {})
+  })
+
   return (
     <>
       <Provider store={store}>
@@ -162,6 +167,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           sipPort={SIP_PORT}
           reload={reload}
           reloadedCallback={() => setReloadedWebRTC(true)}
+          uaType={uaType}
         >
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket
