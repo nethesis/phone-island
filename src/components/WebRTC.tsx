@@ -23,6 +23,7 @@ interface WebRTCProps {
   sipHost: string
   sipPort: string
   reload: boolean
+  uaType: string
   reloadedCallback?: () => void
 }
 
@@ -34,6 +35,7 @@ export const WebRTC: FC<WebRTCProps> = ({
   sipHost,
   sipPort,
   reload,
+  uaType,
   reloadedCallback,
 }) => {
   // Initialize store dispatch
@@ -244,29 +246,36 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'incomingcall':
-                        // Update webrtc state
-                        dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
-                        // Check if is recording an audio through call
-                        // ...recording an audio is a request made by the user
-                        // ...it must be managed differently than an incoming call
-                        if (recording) {
-                          // Update the recorder state
-                          dispatch.recorder.setIncoming(true)
-                        } else {
-                          // Manage the incoming message as a webrtc call
-                          // Update incoming webrtc state, number and display name
-                          // ...are updated inside socket
-                          dispatch.currentCall.checkIncomingUpdatePlay({
-                            incomingWebRTC: true,
-                          })
+                        const { default_device } = store.getState().currentUser
+                        if (
+                          (uaType === 'mobile' && default_device?.type === 'nethlink') ||
+                          (uaType === 'desktop' && default_device?.type === 'webrtc')
+                        ) {
+                          // Update webrtc state
+                          dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
+                          // Check if is recording an audio through call
+                          // ...recording an audio is a request made by the user
+                          // ...it must be managed differently than an incoming call
+                          if (recording) {
+                            // Update the recorder state
+                            dispatch.recorder.setIncoming(true)
+                          } else {
+                            // Manage the incoming message as a webrtc call
+                            // Update incoming webrtc state, number and display name
+                            // ...are updated inside socket
+                            dispatch.currentCall.checkIncomingUpdatePlay({
+                              incomingWebRTC: true,
+                            })
 
-                          if (janus.current.log) {
-                            janus.current.log('Incoming call from ' + result['username'] + '!')
+                            if (janus.current.log) {
+                              janus.current.log('Incoming call from ' + result['username'] + '!')
+                            }
                           }
+
+                          // Update the webrtc last activity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
                         }
 
-                        // Update the webrtc last activity time
-                        dispatch.webrtc.updateLastActivity(new Date().getTime())
                         break
 
                       case 'accepted':
