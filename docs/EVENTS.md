@@ -110,6 +110,24 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-default-device-change` The event to change phone-island default device
+
+  ```json
+  {
+    "id": "<number>",
+    "type": "webrtc | nethlink | physical",
+    "secret": "<secret>",
+    "username": "<number>",
+    "description": "",
+    "actions": {
+        "answer": true,
+        "dtmf": true,
+        "hold": true
+    },
+    "proxy_port": null
+  }
+  ```
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-expanded` The dispatch of phone-island expand
@@ -147,7 +165,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
-- `phone-island-theme-changed-` The dispatch of change phone-island theme
+- `phone-island-theme-changed` The dispatch of change phone-island theme
+
+  ```json
+  {}
+  ```
+
+- `phone-island-default-device-changed` The dispatch of change phone-island default device
 
   ```json
   {}
