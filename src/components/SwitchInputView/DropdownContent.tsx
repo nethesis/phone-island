@@ -116,6 +116,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
     eventDispatch('phone-island-theme-change', { selectedTheme: clickedTheme })
   }
   const { transferring } = useSelector((state: RootState) => state.currentCall)
+  const { isListen } = useSelector((state: RootState) => state.listen)
 
   return (
     <>
@@ -149,85 +150,96 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
             leaveTo='transform opacity-0 scale-95'
           >
             <Menu.Items
-              className={`${
-                transferring ? 'pi-right-[1.5rem]' : 'pi-right-[4.5rem]'
-              } pi-max-h-[13.125rem] pi-z-50 pi-absolute pi-top-0  pi-mt-[-9.5rem] pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
+              className={`${transferring ? 'pi-right-[1.5rem]' : 'pi-right-[4.5rem]'} 
+              ${
+                isListen
+                  ? 'pi-max-h-[9.125rem] pi-mt-[-5.5rem]'
+                  : 'pi-max-h-[13.125rem] pi-mt-[-9.5rem]'
+              }
+               pi-z-50 pi-absolute pi-top-0   pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
               data-stop-propagation={true}
             >
               <div className='' data-stop-propagation={true}>
-                {/* Microphones */}
-                <div className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'>
-                  {t('DropdownContent.Microphones')}
-                </div>
-                {actualDevice
-                  .filter((device) => device?.kind === 'audioinput')
-                  .map((audioDevice, index) => (
-                    <Menu.Item key={index}>
-                      {({ active }) => (
-                        <div
-                          className={`pi-flex pi-py-2 pi-px-2 ${
-                            active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
-                          }`}
-                          onClick={() => handleClickAudioInput(audioDevice.deviceId)}
-                          data-stop-propagation={true}
-                        >
-                          {/* faCheck on selectedAudioInput */}
-                          {selectedAudioInput === audioDevice?.deviceId && (
-                            <FontAwesomeIcon
-                              size='lg'
-                              icon={faCheck}
-                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
-                            />
-                          )}
+                {!isListen && (
+                  <>
+                    {' '}
+                    {/* Microphones */}
+                    <div className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'>
+                      {t('DropdownContent.Microphones')}
+                    </div>
+                    {actualDevice
+                      .filter((device) => device?.kind === 'audioinput')
+                      .map((audioDevice, index) => (
+                        <Menu.Item key={index}>
+                          {({ active }) => (
+                            <div
+                              className={`pi-flex pi-py-2 pi-px-2 ${
+                                active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
+                              }`}
+                              onClick={() => handleClickAudioInput(audioDevice.deviceId)}
+                              data-stop-propagation={true}
+                            >
+                              {/* faCheck on selectedAudioInput */}
+                              {selectedAudioInput === audioDevice?.deviceId && (
+                                <FontAwesomeIcon
+                                  size='lg'
+                                  icon={faCheck}
+                                  className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
+                                />
+                              )}
 
-                          {/* faCheck if user has no selectedAudioInput and audioDevice is default */}
-                          {!selectedAudioInput && audioDevice?.deviceId === 'default' && (
-                            <FontAwesomeIcon
-                              size='lg'
-                              icon={faCheck}
-                              className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
-                            />
-                          )}
+                              {/* faCheck if user has no selectedAudioInput and audioDevice is default */}
+                              {!selectedAudioInput && audioDevice?.deviceId === 'default' && (
+                                <FontAwesomeIcon
+                                  size='lg'
+                                  icon={faCheck}
+                                  className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
+                                />
+                              )}
 
-                          <FontAwesomeIcon
-                            size='lg'
-                            icon={faMicrophone}
-                            className={`${
-                              selectedAudioInput !== null &&
-                              selectedAudioInput !== '' &&
-                              selectedAudioInput !== audioDevice?.deviceId
-                                ? 'pi-ml-6'
-                                : selectedAudioInput !== '' &&
+                              <FontAwesomeIcon
+                                size='lg'
+                                icon={faMicrophone}
+                                className={`${
                                   selectedAudioInput !== null &&
-                                  selectedAudioInput === audioDevice?.deviceId
-                                ? ''
-                                : selectedAudioInput === null && audioDevice?.deviceId !== 'default'
-                                ? 'pi-ml-6'
-                                : ''
-                            } dark:pi-text-gray-100 pi-text-gray-600 pi-mr-1`}
-                          />
-                          <div
-                            className={`${
-                              active
-                                ? 'dark:pi-text-gray-50 pi-text-gray-900'
-                                : 'dark:pi-text-gray-50 pi-text-gray-700'
-                            }`}
-                          >
-                            {audioDevice?.label || `Input device ${index + 1}`}
-                          </div>
-                        </div>
-                      )}
-                    </Menu.Item>
-                  ))}
-                {/* Divider  */}
-                <div className='pi-relative pi-py-2'>
-                  <div
-                    className='pi-absolute pi-inset-0 pi-flex pi-items-center'
-                    aria-hidden='true'
-                  >
-                    <div className='pi-w-full pi-border-t pi-border-gray-400 dark:pi-border-gray-600' />
-                  </div>
-                </div>
+                                  selectedAudioInput !== '' &&
+                                  selectedAudioInput !== audioDevice?.deviceId
+                                    ? 'pi-ml-6'
+                                    : selectedAudioInput !== '' &&
+                                      selectedAudioInput !== null &&
+                                      selectedAudioInput === audioDevice?.deviceId
+                                    ? ''
+                                    : selectedAudioInput === null &&
+                                      audioDevice?.deviceId !== 'default'
+                                    ? 'pi-ml-6'
+                                    : ''
+                                } dark:pi-text-gray-100 pi-text-gray-600 pi-mr-1`}
+                              />
+                              <div
+                                className={`${
+                                  active
+                                    ? 'dark:pi-text-gray-50 pi-text-gray-900'
+                                    : 'dark:pi-text-gray-50 pi-text-gray-700'
+                                }`}
+                              >
+                                {audioDevice?.label || `Input device ${index + 1}`}
+                              </div>
+                            </div>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    {/* Divider  */}
+                    <div className='pi-relative pi-py-2'>
+                      <div
+                        className='pi-absolute pi-inset-0 pi-flex pi-items-center'
+                        aria-hidden='true'
+                      >
+                        <div className='pi-w-full pi-border-t pi-border-gray-400 dark:pi-border-gray-600' />
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 {/* Speaker */}
                 <div
                   className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'
