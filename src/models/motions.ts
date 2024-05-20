@@ -30,6 +30,10 @@ const defaultState = {
             height: 304,
           },
         },
+        listening: {
+          width: 348,
+          height: 168,
+        },
         transfer: {
           width: 348,
           height: 236,

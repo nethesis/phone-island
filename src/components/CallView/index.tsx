@@ -40,6 +40,7 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+  const { isListen, isIntrude } = useSelector((state: RootState) => state.listen)
 
   const { t } = useTranslation()
 
@@ -139,7 +140,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} isHome/>
+                  <Timer startTime={startTime} isHome />
                 ) : intrudeListenStatus?.isIntrudeExtension ? (
                   `${intrudeListenStatus?.isIntrudeExtension}`
                 ) : (
@@ -156,7 +157,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} isHome/>
+                  <Timer startTime={startTime} isHome />
                 ) : intrudeListenStatus?.isListenExtension ? (
                   `${intrudeListenStatus?.isListenExtension}`
                 ) : (
@@ -166,14 +167,14 @@ const CallView: FC<CallViewProps> = () => {
             ) : (
               <StyledDetails>
                 <DisplayName />
-                {accepted ? <Timer startTime={startTime} isHome/> : <Number />}
+                {accepted ? <Timer startTime={startTime} isHome /> : <Number />}
               </StyledDetails>
             )
           ) : null}
           {/* The display name when collepsed */}
           {!isOpen && !accepted && <DisplayName />}
           {/* The timer when collapsed */}
-          {!isOpen && accepted && <Timer startTime={startTime} isHome/>}
+          {!isOpen && accepted && <Timer startTime={startTime} isHome />}
           {accepted && remoteAudioStream && (
             <AudioBars
               audioStream={remoteAudioStream}
@@ -183,7 +184,7 @@ const CallView: FC<CallViewProps> = () => {
           )}
         </StyledTopContent>
         {isOpen && (
-          <div className='pi-grid pi-gap-y-5'>
+          <div className={`${!(isListen || isIntrude) ? 'pi-grid pi-gap-y-5' : ''} `}>
             {accepted && <Actions />}
             <div
               className={`pi-grid ${
