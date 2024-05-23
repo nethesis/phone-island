@@ -33,6 +33,7 @@ const defaultState = {
   transferSwitching: false,
   transferCalls: new Array(),
   ownerExtension: '',
+  isRecording: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -75,6 +76,10 @@ export const currentCall = createModel<RootModel>()({
     },
     setParked: (state, payload: boolean) => {
       state.parked = payload
+      return state
+    },
+    updateRecordingStatus: (state, payload: boolean) => {
+      state.isRecording = payload
       return state
     },
     reset: () => {
@@ -165,4 +170,5 @@ export interface CurrentCallTypes {
   transferSwitching?: boolean
   transferCalls?: TransferCallsTypes[]
   ownerExtension?: string
+  isRecording?: boolean
 }

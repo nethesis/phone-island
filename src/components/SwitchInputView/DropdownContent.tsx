@@ -125,7 +125,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
           as='div'
           className='relative inline-block text-left'
           data-stop-propagation={true}
-          data-tooltip-id='tooltip-left'
+          data-tooltip-id='tooltip-left-settings-devices'
           data-tooltip-content={t('Tooltip.Settings')}
         >
           <Menu.Button
@@ -396,7 +396,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
       ) : (
         <div></div>
       )}
-      <Tooltip className='pi-z-20' id='tooltip-left' place='left' />
+      <Tooltip className='pi-z-20' id='tooltip-left-settings-devices' place='left' />
     </>
   )
 }

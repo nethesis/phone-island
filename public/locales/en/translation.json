@@ -27,7 +27,9 @@
     "Hangup and transfer": "Transfer",
     "Answer": "Answer",
     "Settings": "Settings",
-    "Record": "Record"
+    "Record": "Record",
+    "Stop recording": "Stop recording",
+    "Recording": "Recording"
   },
   "DropdownContent": {
     "Microphones": "MICROPHONES",

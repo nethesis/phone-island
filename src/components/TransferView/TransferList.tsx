@@ -135,7 +135,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               <Button
                 variant='transparent'
                 onClick={handleBackClick}
-                data-tooltip-id='transfer-list-tooltip'
+                data-tooltip-id='transfer-list-tooltip-back-to-call'
                 data-tooltip-content={t('Tooltip.Back to call') || ''}
               >
                 <FontAwesomeIcon size='xl' icon={faArrowLeft} />
@@ -180,7 +180,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     <Button
                       onClick={() => handleAttendedTransfer(searchValue.current)}
                       variant='default'
-                      data-tooltip-id='transfer-list-tooltip'
+                      data-tooltip-id='transfer-list-tooltip-call-to-transfer'
                       data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                     >
                       <FontAwesomeIcon size='xl' icon={faPhone} />
@@ -265,6 +265,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
         <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
       )}
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='left' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-call-to-transfer' place='left' />
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />
     </>

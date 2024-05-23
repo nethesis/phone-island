@@ -21,6 +21,7 @@ import {
   unmutePhysical,
   pausePhysical,
   callPhysical,
+  toggleRecord,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -244,6 +245,63 @@ export function parkCurrentCall() {
         store.dispatch.currentCall.setParked(true)
 
         eventDispatch('phone-island-call-parked', {})
+      }
+    }
+  }
+}
+
+const findFirstExtesnionNotEmpty = (data) => {
+  for (const key in data) {
+    if (Object.keys(data[key]).length !== 0) {
+      const firstEntry: any = Object.values(data[key])[0]
+      return {
+        id: firstEntry.id,
+        recording: firstEntry.recording,
+      }
+    }
+  }
+  return null
+}
+
+export async function recordCurrentCall(recordingValue: boolean) {
+  store.dispatch.currentCall.updateRecordingStatus(!recordingValue)
+  const userConversationInformations = store?.getState()?.currentUser?.conversations
+
+  const firstExtensionNotEmpty = findFirstExtesnionNotEmpty(userConversationInformations)
+
+  if (!firstExtensionNotEmpty) {
+    return
+  } else {
+    const numberToSendCall = firstExtensionNotEmpty?.id?.match(/\/(\d+)-/)
+    const endpointId = numberToSendCall[1]
+
+    const listenInformations = {
+      convid: firstExtensionNotEmpty?.id?.toString(),
+      endpointId: endpointId?.toString(),
+    }
+
+    let recordingValues = ''
+    switch (firstExtensionNotEmpty?.recording) {
+      case 'false':
+        recordingValues = 'start_record'
+        break
+      case 'true':
+        recordingValues = 'mute_record'
+        break
+      case 'mute':
+        recordingValues = 'unmute_record'
+        break
+      default:
+        recordingValues = ''
+        break
+    }
+
+    if (listenInformations) {
+      try {
+        await toggleRecord(recordingValues, listenInformations)
+      } catch (e) {
+        console.error(e)
+        return []
       }
     }
   }

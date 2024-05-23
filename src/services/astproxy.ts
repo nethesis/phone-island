@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { store } from '../store'
@@ -294,5 +294,22 @@ export async function callPhysical(to: string) {
     return true
   } catch (error: any) {
     throw new Error(error)
+  }
+}
+
+export async function toggleRecord(recordingType: any, obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/${recordingType}`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
   }
 }
