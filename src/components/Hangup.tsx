@@ -29,6 +29,13 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
     } else {
       hangupCurrentCall()
     }
+
+    // Delay the dispatch actions
+    setTimeout(() => {
+      dispatch.listen.setUpdateIntrudeStatus(false, '')
+      dispatch.listen.setUpdateListenStatus(false, '')
+    }, 2000)
+
     // Show confirmation message when a call is transferred
     if (transferring) {
       setTimeout(() => {
@@ -64,7 +71,9 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
             onClick={() => handleHangup()}
             variant='red'
             className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
-            data-tooltip-id={description && transferring ? 'tooltip-top-transfer' : 'tooltip-left-transfer'}
+            data-tooltip-id={
+              description && transferring ? 'tooltip-top-transfer' : 'tooltip-left-transfer'
+            }
             data-tooltip-content={
               description && transferring ? description : `${t('Tooltip.Hangup')}`
             }
