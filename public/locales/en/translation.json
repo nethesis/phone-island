@@ -26,7 +26,10 @@
     "Call to transfer": "Click to transfer",
     "Hangup and transfer": "Transfer",
     "Answer": "Answer",
-    "Settings": "Settings"
+    "Settings": "Settings",
+    "Record": "Record",
+    "Stop recording": "Stop recording",
+    "Recording": "Recording"
   },
   "DropdownContent": {
     "Microphones": "MICROPHONES",
@@ -39,7 +42,7 @@
     "In progress...": "In progress...",
     "Outgoing call": "Outgoing call"
   },
-  "Transfer":{
+  "Transfer": {
     "No users found": "No users found"
   }
 }

@@ -26,7 +26,10 @@
     "Call to transfer": "Clicca per trasferire",
     "Hangup and transfer": "Trasferisci",
     "Answer": "Rispondi",
-    "Settings": "Impostazioni"
+    "Settings": "Impostazioni",
+    "Record": "Registra",
+    "Stop recording": "Ferma registrazione",
+    "Recording": "Registrando"
   },
   "DropdownContent": {
     "Microphones": "MICROFONI",

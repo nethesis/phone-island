@@ -6,7 +6,13 @@ import { StyledDetails, StyledCallView, StyledTopContent } from '../../styles/Is
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone, faEarListen, faHandPointUp, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPhone,
+  faEarListen,
+  faHandPointUp,
+  faArrowLeft,
+  faCircle,
+} from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
 import Number from './Number'
@@ -28,9 +34,8 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall state
-  const { incoming, accepted, outgoing, startTime, paused, username, number } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const { incoming, accepted, outgoing, startTime, paused, username, number, isRecording } =
+    useSelector((state: RootState) => state.currentCall)
 
   const currentCallDetails: any = useSelector((state: RootState) => state.currentCall)
   // Get isOpen and view from island state
@@ -40,6 +45,7 @@ const CallView: FC<CallViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
 
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+  const { isListen, isIntrude } = useSelector((state: RootState) => state.listen)
 
   const { t } = useTranslation()
 
@@ -139,7 +145,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} isHome/>
+                  <Timer startTime={startTime} isHome />
                 ) : intrudeListenStatus?.isIntrudeExtension ? (
                   `${intrudeListenStatus?.isIntrudeExtension}`
                 ) : (
@@ -156,7 +162,7 @@ const CallView: FC<CallViewProps> = () => {
                     : ''}
                 </span>
                 {accepted ? (
-                  <Timer startTime={startTime} isHome/>
+                  <Timer startTime={startTime} isHome />
                 ) : intrudeListenStatus?.isListenExtension ? (
                   `${intrudeListenStatus?.isListenExtension}`
                 ) : (
@@ -166,24 +172,52 @@ const CallView: FC<CallViewProps> = () => {
             ) : (
               <StyledDetails>
                 <DisplayName />
-                {accepted ? <Timer startTime={startTime} isHome/> : <Number />}
+                {accepted ? <Timer startTime={startTime} isHome /> : <Number />}
               </StyledDetails>
             )
           ) : null}
           {/* The display name when collepsed */}
           {!isOpen && !accepted && <DisplayName />}
           {/* The timer when collapsed */}
-          {!isOpen && accepted && <Timer startTime={startTime} isHome/>}
-          {accepted && remoteAudioStream && (
-            <AudioBars
-              audioStream={remoteAudioStream}
-              paused={paused}
-              size={isOpen ? 'large' : 'small'}
-            />
+          {!isOpen && accepted && <Timer startTime={startTime} isHome />}
+          {accepted && isRecording ? (
+            <>
+              <div
+                className={`${
+                  !isOpen ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'
+                } pi-flex pi-justify-center pi-items-center`}
+              >
+                <div
+                  className={`${
+                    !isOpen ? 'pi-h-4 pi-w-4 pi-rounded-full' : 'pi-h-8'
+                  } pi-w-fit pi-flex pi-justify-center pi-items-center pi-gap-1 pi-overflow-hidden`}
+                >
+                  <span
+                    className={`${
+                      !isOpen ? 'pi-h-6 pi-w-6' : 'pi-w-8 pi-h-8'
+                    } pi-animate-ping pi-absolute pi-inline-flex pi-rounded-full pi-bg-red-400 pi-opacity-75 `}
+                  ></span>
+                  <FontAwesomeIcon
+                    className='pi-w-4 pi-h-6 pi-rotate-45 pi-text-red-500'
+                    icon={faCircle}
+                  ></FontAwesomeIcon>
+                </div>
+              </div>
+            </>
+          ) : accepted && remoteAudioStream ? (
+            <>
+              <AudioBars
+                audioStream={remoteAudioStream}
+                paused={paused}
+                size={isOpen ? 'large' : 'small'}
+              />
+            </>
+          ) : (
+            <></>
           )}
         </StyledTopContent>
         {isOpen && (
-          <div className='pi-grid pi-gap-y-5'>
+          <div className={`${!(isListen || isIntrude) ? 'pi-grid pi-gap-y-5' : ''} `}>
             {accepted && <Actions />}
             <div
               className={`pi-grid ${

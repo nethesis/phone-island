@@ -20,3 +20,22 @@
     @apply pi-scrollbar-thin pi-scrollbar-thumb-gray-500 pi-scrollbar-track-black pi-scrollbar-thumb-rounded-full pi-scrollbar-track-rounded-full hover:pi-scrollbar-thumb-gray-400;
   }
 }
+
+.custom-circle-dot-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-circle-dot-wrapper .fa-circle-dot {
+  color: white;
+  font-size: 24px;
+}
+
+.custom-circle-dot-wrapper .inner-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: red;
+  font-size: 12px;
+}

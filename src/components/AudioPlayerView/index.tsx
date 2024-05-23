@@ -65,7 +65,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
               variant='default'
               style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip'
+              data-tooltip-id='tooltip-pause-audio-player'
               data-tooltip-content={audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`}
             >
               {audioPlayerPlaying ? (
@@ -78,7 +78,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
         </div>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-pause-audio-player' place='bottom' />
     </div>
   )
 }

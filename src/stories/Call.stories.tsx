@@ -45,11 +45,11 @@ const CallTemplate: Story<any> = (args) => {
   }
 
   const handleListen = () => {
-    eventDispatch('phone-island-listen-call', { to: process.env.DEST_LISTEN_NUMBER })
+    eventDispatch('phone-island-call-listen', { number: process.env.DEST_LISTEN_NUMBER })
   }
 
   const handleIntrude = () => {
-    eventDispatch('phone-island-intrude-call', { to: process.env.DEST_INTRUDE_NUMBER })
+    eventDispatch('phone-island-call-intrude', { to: process.env.DEST_INTRUDE_NUMBER })
   }
 
   useEventListener('phone-island-call-ringing', () => {

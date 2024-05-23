@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -8,6 +8,7 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
   parkCurrentCall,
+  recordCurrentCall,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -21,6 +22,9 @@ import {
   faChevronDown,
   faChevronUp,
   faArrowRightArrowLeft,
+  faCircleDot,
+  faCircle,
+  faStop,
 } from '@fortawesome/free-solid-svg-icons'
 import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -37,12 +41,13 @@ import { useEventListener, eventDispatch } from '../../utils'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
-  const { paused, muted } = useSelector((state: RootState) => state.currentCall)
+  const { paused, muted, isRecording } = useSelector((state: RootState) => state.currentCall)
   const parked = useSelector((state: RootState) => state.currentCall.parked)
 
   // Get isOpen and view from island store
   const { view, actionsExpanded } = useSelector((state: RootState) => state.island)
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
+  const intrudeListenStatus = useSelector((state: RootState) => state.listen)
 
   const dispatch = useDispatch<Dispatch>()
 
@@ -120,78 +125,92 @@ const Actions: FC = () => {
   }
 
   const { t } = useTranslation()
-
   // Phone island header section
   return (
     <>
-      <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
-        <Button
-          variant='default'
-          active={paused ? true : false}
-          onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
-          data-tooltip-id='tooltip'
-          data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
-        >
-          {paused ? (
-            <FontAwesomeIcon size='xl' icon={faPlay} />
-          ) : (
-            <FontAwesomeIcon size='xl' icon={faPause} />
-          )}
-        </Button>
+      <div
+        className={`${
+          !intrudeListenStatus.isListen && !intrudeListenStatus.isIntrude
+            ? 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+            : intrudeListenStatus.isIntrude
+            ? 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+            : 'pi-hidden'
+        } `}
+      >
+        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
+          <Button
+            variant='default'
+            active={paused ? true : false}
+            onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+            data-tooltip-id='tooltip-pause'
+            data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
+          >
+            {paused ? (
+              <FontAwesomeIcon size='xl' icon={faPlay} />
+            ) : (
+              <FontAwesomeIcon size='xl' icon={faPause} />
+            )}
+          </Button>
+        )}
+        {!intrudeListenStatus.isListen && (
+          <Button
+            variant='default'
+            active={muted ? true : false}
+            onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
+            data-tooltip-id='tooltip-mute'
+            data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
+          >
+            {muted ? (
+              <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
+            ) : (
+              <FontAwesomeIcon size='xl' icon={faMicrophone} />
+            )}
+          </Button>
+        )}
 
-        <Button
-          variant='default'
-          active={muted ? true : false}
-          onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
-          data-tooltip-id='tooltip'
-          data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
-        >
-          {muted ? (
-            <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
-          ) : (
-            <FontAwesomeIcon size='xl' icon={faMicrophone} />
-          )}
-        </Button>
+        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
+          <Button
+            active={transferring}
+            onClick={transferring ? cancelTransfer : transfer}
+            variant='default'
+            data-tooltip-id='tooltip-transfer'
+            data-tooltip-content={
+              transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
+            }
+          >
+            {transferring ? (
+              <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
+            ) : (
+              <FontAwesomeIcon size='xl' className='pi-rotate-90' icon={faArrowRightArrowLeft} />
+            )}
+          </Button>
+        )}
 
-        <Button
-          active={transferring}
-          onClick={transferring ? cancelTransfer : transfer}
-          variant='default'
-          data-tooltip-id='tooltip'
-          data-tooltip-content={
-            transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
-          }
-        >
-          {transferring ? (
-            <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
-          ) : (
-            <FontAwesomeIcon size='xl' className='pi-rotate-90' icon={faArrowRightArrowLeft} />
-          )}
-        </Button>
-
-        <Button
-          active={actionsExpanded}
-          variant='transparent'
-          onClick={() => toggleActionsExpanded()}
-          data-tooltip-id='tooltip'
-          data-tooltip-content={
-            actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
-          }
-        >
-          {actionsExpanded ? (
-            <FontAwesomeIcon
-              className='pi-text-gray-700 dark:pi-text-gray-100'
-              size='xl'
-              icon={faChevronUp}
-            />
-          ) : (
-            <FontAwesomeIcon
-              size='xl'
-              className='pi-text-gray-700 dark:pi-text-gray-100'
-              icon={faChevronDown}
-            />
-          )}
-        </Button>
+        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
+          <Button
+            active={actionsExpanded}
+            variant='transparent'
+            onClick={() => toggleActionsExpanded()}
+            data-tooltip-id='tooltip-expand'
+            data-tooltip-content={
+              actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
+            }
+          >
+            {actionsExpanded ? (
+              <FontAwesomeIcon
+                className='pi-text-gray-700 dark:pi-text-gray-100'
+                size='xl'
+                icon={faChevronUp}
+              />
+            ) : (
+              <FontAwesomeIcon
+                size='xl'
+                className='pi-text-gray-700 dark:pi-text-gray-100'
+                icon={faChevronDown}
+              />
+            )}
+          </Button>
+        )}
       </div>
       {/* Actions expanded section */}
       {actionsExpanded ? (
@@ -202,16 +221,35 @@ const Actions: FC = () => {
               active={view === 'keypad'}
               variant='default'
               onClick={openKeypad}
-              data-tooltip-id='tooltip'
+              data-tooltip-id='tooltip-keyboard'
               data-tooltip-content={t('Tooltip.Keyboard') || ''}
             >
               <FontAwesomeIcon size='xl' icon={faGridRound} />
             </Button>
             <Button
+              active={isRecording}
+              data-stop-propagation={true}
+              variant='default'
+              onClick={() => recordCurrentCall(isRecording)}
+              data-tooltip-id='tooltip-record'
+              data-tooltip-content={
+                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
+              }
+            >
+              {isRecording ? (
+                <FontAwesomeIcon icon={faStop} size='xl' />
+              ) : (
+                <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
+                  <FontAwesomeIcon icon={faCircleDot} />
+                  <FontAwesomeIcon icon={faCircle} className='inner-dot' />
+                </div>
+              )}
+            </Button>
+            <Button
               active={parked}
               variant='default'
               onClick={parkCurrentCall}
-              data-tooltip-id='tooltip'
+              data-tooltip-id='tooltip-park'
               data-tooltip-content={t('Tooltip.Park') || ''}
             >
               <FontAwesomeIcon size='xl' icon={faSquareParking} />
@@ -223,7 +261,13 @@ const Actions: FC = () => {
         <></>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-transfer' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
     </>
   )
 }

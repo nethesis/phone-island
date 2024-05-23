@@ -141,7 +141,7 @@ export const Actions: FC<{}> = () => {
           onClick={handleStop}
           variant='default'
           style={{ transform: 'scale(1.15)' }}
-          data-tooltip-id='tooltip'
+          data-tooltip-id='tooltip-stop-recorder-view'
           data-tooltip-content={t('Tooltip.Stop') || ''}
         >
           {waiting ? (
@@ -156,7 +156,7 @@ export const Actions: FC<{}> = () => {
           <Button
             onClick={handleDelete}
             variant='default'
-            data-tooltip-id='tooltip'
+            data-tooltip-id='tooltip-delete-recorder-view'
             data-tooltip-content={t('Tooltip.Delete') || ''}
           >
             <FontAwesomeIcon icon={faTrash} size='xl' />
@@ -166,7 +166,7 @@ export const Actions: FC<{}> = () => {
               onClick={handlePause}
               variant='default'
               style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip'
+              data-tooltip-id='tooltip-pause-recorder-view'
               data-tooltip-content={t('Tooltip.Pause') || ''}
             >
               <FontAwesomeIcon icon={faPause} size='xl' />
@@ -176,7 +176,7 @@ export const Actions: FC<{}> = () => {
               onClick={handlePlay}
               variant='default'
               style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip'
+              data-tooltip-id='tooltip-play-recorder-view'
               data-tooltip-content={t('Tooltip.Play') || ''}
             >
               <FontAwesomeIcon icon={faPlay} size='xl' />
@@ -185,7 +185,7 @@ export const Actions: FC<{}> = () => {
           <Button
             onClick={handleSaveRecording}
             variant='green'
-            data-tooltip-id='tooltip'
+            data-tooltip-id='tooltip-confirm-record-view'
             data-tooltip-content={t('Tooltip.Confirm') || ''}
           >
             <FontAwesomeIcon icon={faCheck} size='xl' />
@@ -197,7 +197,7 @@ export const Actions: FC<{}> = () => {
           onClick={handleStart}
           variant='red'
           style={{ transform: 'scale(1.15)' }}
-          data-tooltip-id='tooltip'
+          data-tooltip-id='tooltip-start-recording-recorder-view'
           data-tooltip-content={t('Tooltip.Start recording') || ''}
           className='pi-flex pi-justify-center pi-ml-[4.7rem]'
         >
@@ -216,7 +216,13 @@ export const Actions: FC<{}> = () => {
         </div>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-start-recording-recorder-view' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-stop-recorder-view' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-play-recorder-view' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-pause-recorder-view' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-delete-recorder-view' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-confirm-record-view' place='bottom' />
+
     </div>
   )
 }

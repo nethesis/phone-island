@@ -52,11 +52,13 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
   useEventListener('phone-island-call-listen', (data: ListenIntrudeTypes) => {
     dispatch.listen.setUpdateListenStatus(true, data.number)
     eventDispatch('phone-island-call-listened', {})
+    dispatch.island.toggleActionsExpanded(false)
   })
 
   useEventListener('phone-island-call-intrude', (data: ListenIntrudeTypes) => {
     dispatch.listen.setUpdateIntrudeStatus(true, data.number)
     eventDispatch('phone-island-call-intruded', {})
+    dispatch.island.toggleActionsExpanded(false)
   })
 
   return <></>
