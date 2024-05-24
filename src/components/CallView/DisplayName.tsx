@@ -43,9 +43,10 @@ const DisplayName: FC<DisplayNameProps> = () => {
             }`}
             ref={nameText}
           >
-            {intrudeListenStatus?.isIntrudeExtension !== ''
+            {intrudeListenStatus?.isIntrudeExtension !== '' &&
+            intrudeListenStatus?.isIntrudeExtension !== undefined
               ? `${t('Common.Intrude')}` + '-' + intrudeListenStatus?.isIntrudeExtension
-              : '-'}
+              : `${t('Common.Intrude')}`}
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
@@ -60,9 +61,10 @@ const DisplayName: FC<DisplayNameProps> = () => {
             }`}
             ref={nameText}
           >
-            {intrudeListenStatus?.isListenExtension !== ''
+            {intrudeListenStatus?.isListenExtension !== '' &&
+            intrudeListenStatus?.isListenExtension !== undefined
               ? `${t('Common.Listen')}` + '-' + intrudeListenStatus?.isListenExtension
-              : '-'}
+              : `${t('Common.Listen')}`}
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
         </NameMotion>
