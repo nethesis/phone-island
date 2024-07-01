@@ -56,7 +56,7 @@
     "react-moment": "^1.1.2",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
-    "react-tooltip": "5.26",
+    "react-tooltip": "^5.27.0",
     "socket.io-client": "^4.5.3",
     "styled-components": "^5.3.6",
     "webrtc-adapter": "^8.2.0"
