@@ -29,7 +29,8 @@
     "Settings": "Settings",
     "Record": "Record",
     "Stop recording": "Stop recording",
-    "Recording": "Recording"
+    "Recording": "Recording",
+    "Interrupt recording": "Interrupt recording"
   },
   "DropdownContent": {
     "Microphones": "MICROPHONES",

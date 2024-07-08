@@ -7,7 +7,6 @@ import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
 import audioFile from '../static/test_audio'
-import { setTheme } from '../lib/darkTheme'
 
 const meta = {
   title: 'Phone Island',
@@ -175,6 +174,7 @@ const CallTemplate: Story<any> = (args) => {
       <label htmlFor='select-event'>Event name:</label>
       <select id='select-event' value={getEventName} onChange={handleEventChange}>
         <option value='phone-island-recording-open'>phone-island-recording-open</option>
+        <option value='phone-island-physical-recording-open'>phone-island-physical-recording-open</option>
         <option value='phone-island-call-keypad-send'>phone-island-call-keypad-send</option>
         <option value='phone-island-audio-player-start'>phone-island-audio-player-start</option>
         <option value='phone-island-audio-input-change'>phone-island-audio-input-change</option>
@@ -206,7 +206,7 @@ const CallTemplate: Story<any> = (args) => {
       />
       <button onClick={() => launchEvent()}>Launch {getEventName}</button>
 
-      <PhoneIsland dataConfig={config} showAlways={false} {...args} uaType={'desktop'} />
+      <PhoneIsland dataConfig={config} showAlways={false} {...args} uaType={'mobile'} />
     </div>
   )
 }

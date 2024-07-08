@@ -16,6 +16,7 @@ import { RecorderView } from './RecorderView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
 import Close from './Close'
+import { PhysicalRecorderView } from './PhysicalRecorderView'
 
 /**
  * Provides the Island logic
@@ -88,7 +89,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         showAlways ||
         activeAlertsCount > 0 ||
         view === 'player' ||
-        view === 'recorder') && (
+        view === 'recorder' ||
+        view === 'physicalPhoneRecorder') && (
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
@@ -115,6 +117,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'recorder' ? (
                   <ViewsTransition forView='recorder'>
                     <RecorderView />
+                  </ViewsTransition>
+                ) : currentView === 'physicalPhoneRecorder' ? (
+                  <ViewsTransition forView='physicalPhoneRecorder'>
+                    <PhysicalRecorderView />
                   </ViewsTransition>
                 ) : (
                   <></>
