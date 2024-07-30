@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Story, Meta } from '@storybook/react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
 import audioFile from '../static/test_audio'
+import { isWebRTC } from '../lib/user/default_device'
 
 const meta = {
   title: 'Phone Island',
@@ -49,6 +50,10 @@ const CallTemplate: Story<any> = (args) => {
 
   const handleIntrude = () => {
     eventDispatch('phone-island-call-intrude', { to: process.env.DEST_INTRUDE_NUMBER })
+  }
+
+  const handlePhysicalRecordingStart = () => {
+    eventDispatch('phone-island-physical-recording-view', {})
   }
 
   useEventListener('phone-island-call-ringing', () => {
@@ -132,8 +137,20 @@ const CallTemplate: Story<any> = (args) => {
     }
   }
 
+  const [deviceWebrtc, setDeviceWebrtc] = useState('')
+  useEffect(() => {
+    if (isWebRTC()) {
+      setDeviceWebrtc('webrtc')
+    } else {
+      setDeviceWebrtc('physical')
+    }
+  }, [])
+
   return (
     <div className='pi-flex pi-gap-2 pi-flex-col pi-w-fit'>
+      <h1 className='pi-bg-sky-600 pi-text-white'>
+        MAIN DEVICE IS : <span>{deviceWebrtc}</span>
+      </h1>
       <button onClick={() => toggleDarkTheme()}>Change theme</button>
       <button
         onClick={handleExtensionCallStart}
@@ -171,10 +188,18 @@ const CallTemplate: Story<any> = (args) => {
       >
         Reset listen and intrude store status
       </button>
+      <button
+        onClick={() => handlePhysicalRecordingStart()}
+        className='pi-flex pi-content-center pi-items-center pi-justify-center pi-font-medium pi-tracking-wide pi-transition-colors pi-duration-200 pi-transform focus:pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-bg-sky-600 pi-text-white pi-border pi-border-transparent hover:pi-bg-sky-700 focus:pi-ring-sky-500 focus:pi-ring-offset-white pi-rounded-md pi-px-3 pi-py-2 pi-text-sm pi-leading-4'
+      >
+        Start physical recording
+      </button>
       <label htmlFor='select-event'>Event name:</label>
       <select id='select-event' value={getEventName} onChange={handleEventChange}>
         <option value='phone-island-recording-open'>phone-island-recording-open</option>
-        <option value='phone-island-physical-recording-open'>phone-island-physical-recording-open</option>
+        <option value='phone-island-physical-recording-open'>
+          phone-island-physical-recording-open
+        </option>
         <option value='phone-island-call-keypad-send'>phone-island-call-keypad-send</option>
         <option value='phone-island-audio-player-start'>phone-island-audio-player-start</option>
         <option value='phone-island-audio-input-change'>phone-island-audio-input-change</option>

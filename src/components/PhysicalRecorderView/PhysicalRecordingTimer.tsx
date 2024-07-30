@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import Moment from 'react-moment'
 import { RootState, Dispatch } from '../../store'
 
-const Timer: FC<TimerProps> = () => {
+const PhysicalTimer: FC<TimerProps> = () => {
   const { startTime, currentTime, recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
     startTime: state.physicalRecorder.startTime,
@@ -40,6 +40,6 @@ const Timer: FC<TimerProps> = () => {
   )
 }
 
-export default memo(Timer)
+export default memo(PhysicalTimer)
 
 interface TimerProps {}

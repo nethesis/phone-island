@@ -31,6 +31,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   // Get isOpen from island store
   const { view } = useSelector((state: RootState) => state.island)
+  const { recording } = useSelector((state: RootState) => ({
+    recording: state.physicalRecorder.recording,
+  }))
 
   // Get activeAlertsCount from island store
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
@@ -68,6 +71,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
+
+  useEffect(() => {
+    if (recording ) {
+      dispatch.island.setIslandView('physicalPhoneRecorder')
+    }
+  }, [view])
 
   const [currentView, setCurrentView] = useState<any>('')
 

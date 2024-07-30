@@ -22,6 +22,7 @@ import {
   pausePhysical,
   callPhysical,
   toggleRecord,
+  hangupPhysicalRecordingCall,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -86,6 +87,20 @@ export function hangupCurrentCall() {
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
   }
+  // Caller close the call before the call is accepted
+  eventDispatch('phone-island-call-ended', {})
+}
+
+/**
+ * Hangup current physical recording
+ */
+export function hangupCurrentPhysicalRecording() {
+  hangupPhysicalRecordingCall()
+  store.dispatch.player.stopAudioPlayer()
+  store.dispatch.physicalRecorder.reset()
+  store.dispatch.physicalRecorder.setRecording(false)
+  store.dispatch.island.setIslandView(null)
+  store.dispatch.listen.reset()
   // Caller close the call before the call is accepted
   eventDispatch('phone-island-call-ended', {})
 }

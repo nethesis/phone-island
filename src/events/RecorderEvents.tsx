@@ -23,9 +23,14 @@ export const RecorderEvents: FC = () => {
   /**
    * Event listner for phone-island-recording-start event if physical device is main device
    */
-  useEventListener('phone-island-physical-recording-open', (data: {}) => {
+  useEventListener('phone-island-physical-recording-view', (data: {}) => {
     dispatch.island.setIslandView('physicalPhoneRecorder')
     eventDispatch('phone-island-physical-recording-opened', {})
+
+    // Start recording after 500ms
+    setTimeout(() => {
+      eventDispatch('phone-island-physical-recording-open', {})
+    }, 500)
   })
 
   return <></>
@@ -40,5 +45,16 @@ export function dispatchRecordingSave() {
   eventDispatch('phone-island-recording-saved', {
     tempFileName,
     audioFileURL,
+  })
+}
+
+/**
+ * Dispatch physical phone recording save
+ */
+export function dispatchPhysicalRecordingSave() {
+  const tempFileName = store.getState().physicalRecorder.tempFileName
+  console.log('dispatchPhysicalRecordingSave', tempFileName)
+  eventDispatch('phone-island-physical-recording-saved', {
+    tempFileName,
   })
 }

@@ -153,6 +153,9 @@ export const Socket: FC<SocketProps> = ({
                     dispatch.currentCall.updateTransferSwitching(false)
                   }
                 }
+                if (conv?.counterpartName === 'REC') {
+                  dispatch.physicalRecorder.setRecordingTempVariable(true)
+                }
               }
               // Handle outgoing call
               if (conv && !conv.connected && conv.direction === 'out') {
@@ -207,6 +210,7 @@ export const Socket: FC<SocketProps> = ({
           dispatch.player.stopAudioPlayer()
           // Reset current call info
           dispatch.currentCall.reset()
+          dispatch.physicalRecorder.setRecordingTempVariable(false)
         }
       }
     }

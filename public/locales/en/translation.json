@@ -3,7 +3,9 @@
     "Intrude": "Intrude",
     "Listen": "Listen",
     "Start recording message before": "Click the button below to start recording",
-    "Start recording message after": "You can speak in a moment..."
+    "Start recording message after": "You can speak in a moment...",
+    "Recording": "Recording",
+    "Answer phone to start recording": "Answer phone to start recording"
   },
   "Tooltip": {
     "Hangup": "Hangup",
