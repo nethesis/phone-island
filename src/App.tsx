@@ -156,6 +156,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-default-device-changed', {})
   })
 
+  useEventListener('phone-island-call-transfered-succesfully', () => {
+    console.log('Call transferred successfully')
+  })
+
+  useEventListener('phone-island-call-transfered-close', () => {
+    eventDispatch('phone-island-call-transfered-closed', {})
+    console.log('Transfer failed')
+  })
+
   return (
     <>
       <Provider store={store}>

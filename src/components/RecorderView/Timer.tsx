@@ -10,9 +10,9 @@ import { RootState, Dispatch } from '../../store'
 
 const Timer: FC<TimerProps> = () => {
   const { startTime, currentTime, recording } = useSelector((state: RootState) => ({
-    recording: state.physicalRecorder.recording,
-    startTime: state.physicalRecorder.startTime,
-    currentTime: state.physicalRecorder.currentTime,
+    recording: state.recorder.recording,
+    startTime: state.recorder.startTime,
+    currentTime: state.recorder.currentTime,
   }))
 
   const dispatch = useDispatch<Dispatch>()

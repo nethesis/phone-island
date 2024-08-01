@@ -98,19 +98,26 @@ export const PhysicalRecorderView: FC<PhysicalRecorderViewProps> = () => {
   return (
     <>
       {isOpen ? (
-        <div className='pi-mt-[3rem]'>
-          <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-2'>
-            {recordingTempVariable ? (
+        <div className=''>
+          {recordingTempVariable && (
+            <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-4 pi-pb-9'>
               <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit dark:pi-text-white'>
                 <PhysicalRecordingTimer />
               </div>
+            </div>
+          )}
+          <div className='pi-flex pi-w-full pi-justify-center pi-items-center'>
+            {recordingTempVariable ? (
+              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white'>
+                {t('Common.Close the call to stop recording')}
+              </div>
             ) : (
-              <div className='pi-font-regular pi-text-lg pi-w-fit pi-h-fit dark:pi-text-white'>
+              <div className='pi-mt-[3rem] pi-font-regular pi-text-lg pi-w-fit pi-h-fit dark:pi-text-white'>
                 {t('Common.Answer phone to start recording')}
               </div>
             )}
           </div>
-          <div className='pi-grid pi-pt-2 pi-mt-4'>
+          <div className='pi-grid pi-pt-2 pi-mt-8'>
             <div className='pi-grid pi-justify-items-center'>
               <Hangup description={t('Tooltip.Interrupt recording')} isPhysicalRecording />
             </div>

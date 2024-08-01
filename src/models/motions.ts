@@ -95,8 +95,8 @@ const defaultState = {
     // Physical Recorder View
     physicalPhoneRecorder: {
       expanded: {
-        width: 348,
-        height: 236,
+        width: 374,
+        height: 256,
       },
       collapsed: {
         width: 168,

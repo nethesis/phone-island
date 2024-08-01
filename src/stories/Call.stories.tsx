@@ -31,9 +31,15 @@ const CallTemplate: Story<any> = (args) => {
   const [getNumber, setNumber]: any = useState(process.env.DEST_NUMBER_EXTENSION)
   const [getKey, setKey]: any = useState('0')
   const [getDevice, setDevice]: any = useState('default')
+  const [logData, setLogData]: any = useState('')
 
   const handleExtensionCallStart = () => {
     eventDispatch('phone-island-call-start', { number: process.env.DEST_NUMBER_EXTENSION })
+  }
+
+  const logCallStore = () => {
+    const currentCallStoreValue = store.getState().currentCall
+    setLogData(JSON.stringify(currentCallStoreValue, null, 2))
   }
 
   const handleExternalCallStart = () => {
@@ -151,6 +157,16 @@ const CallTemplate: Story<any> = (args) => {
       <h1 className='pi-bg-sky-600 pi-text-white'>
         MAIN DEVICE IS : <span>{deviceWebrtc}</span>
       </h1>
+      <div className='pi-flex pi-items-center'>
+        <button className='pi-flex' onClick={logCallStore}>
+          call status store logs:
+        </button>
+        {logData && (
+          <pre className='pi-bg-gray-200 pi-p-2 pi-rounded pi-ml-2 pi-text-xs pi-overflow-auto'>
+            {logData}
+          </pre>
+        )}
+      </div>
       <button onClick={() => toggleDarkTheme()}>Change theme</button>
       <button
         onClick={handleExtensionCallStart}

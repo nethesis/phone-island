@@ -14,11 +14,17 @@ import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import DropdownContent from './SwitchInputView/DropdownContent'
+import { eventDispatch } from '../utils'
 
 /**
  * Return the status of the
  */
-const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description, isPhysicalRecording }) => {
+const Hangup: FC<HangupProps> = ({
+  clickCallback,
+  isDestination,
+  description,
+  isPhysicalRecording,
+}) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
   const { isOpen } = useSelector((state: RootState) => state.island)
@@ -40,6 +46,7 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description, is
     if (transferring) {
       setTimeout(() => {
         dispatch.alerts.setAlert('call_transfered')
+        eventDispatch('phone-island-call-transfered-succesfully', {})
         setTimeout(() => {
           dispatch.alerts.removeAlert('call_transfered')
         }, 2000)
@@ -68,7 +75,9 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description, is
           } `}
         >
           <Button
-            onClick={() => !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()}
+            onClick={() =>
+              !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
+            }
             variant='red'
             className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
             data-tooltip-id={
