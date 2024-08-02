@@ -325,19 +325,6 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
-
-- `phone-island-call-transfer-successfully` The event to advert if a transfer has been made successfully
-
-  ```json
-  {}
-  ```
-
-- `phone-island-call-transfer-failed` The event to advert if a transfer has failed
-
-  ```json
-  {}
-  ```
-
 ## Dispatch Call Events - phone-island-call-*
 
 - `phone-island-call-ringing` The dispatch of call ringing
@@ -413,6 +400,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-call-transfered` The dispatch of call show transfer view
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-successfully` The event to advert if a transfer has been made successfully
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-failed` The event to advert if a transfer has failed
 
   ```json
   {}
