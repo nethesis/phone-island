@@ -277,6 +277,7 @@ export const Socket: FC<SocketProps> = ({
             () => {
               // Set socket_down alert
               dispatch.alerts.setAlert('socket_down')
+              eventDispatch('phone-island-socket-disconnected', {})
               console.debug('Socket is unreachable!')
             },
             7 * 1000, // Waits for the response 7 seconds
