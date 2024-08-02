@@ -147,7 +147,7 @@ export const Socket: FC<SocketProps> = ({
                     dispatch.currentCall.updateCurrentCall({
                       transferring: false,
                     })
-                    eventDispatch('phone-island-call-transfered-close', {})
+                    eventDispatch('phone-island-call-transfer-failed', {})
                     // Reset transfer switching
                     // TODO - It needs to enhance how conversation connections (conv.connected) are updated server side
                     // TODO - The transfer end is not handled when the an user hangups or after call switch

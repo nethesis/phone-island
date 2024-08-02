@@ -46,7 +46,7 @@ const Hangup: FC<HangupProps> = ({
     if (transferring) {
       setTimeout(() => {
         dispatch.alerts.setAlert('call_transfered')
-        eventDispatch('phone-island-call-transfered-succesfully', {})
+        eventDispatch('phone-island-call-transfer-successfully', {})
         setTimeout(() => {
           dispatch.alerts.removeAlert('call_transfered')
         }, 2000)
