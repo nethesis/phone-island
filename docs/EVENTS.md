@@ -405,7 +405,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-call-transfer-successfully` The event to advert if a transfer has been made successfully
+- `phone-island-call-transfer-successfully-popup-open` The event to advert if a transfer has been made successfully and phone-island popup is open
+
+  ```json
+  {}
+  ```
+
+- `phone-island-call-transfer-successfully-popup-close` The event to advert if a transfer has been made successfully and phone-island popup is close
 
   ```json
   {}
@@ -827,6 +833,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-socket-reconnected` Indicates that websocket connection it's been reconnected
+
+  ```json
+  {}
+  ```
+
+- `phone-island-socket-disconnected-popup-open` Indicates that webscket connection missing popup appear
+
+  ```json
+  {}
+  ```
+
+- `phone-island-socket-disconnected-popup-close` Indicates that webscket connection missing popup disappear
 
   ```json
   {}

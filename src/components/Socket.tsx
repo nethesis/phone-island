@@ -269,6 +269,7 @@ export const Socket: FC<SocketProps> = ({
             () => {
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
+              eventDispatch('phone-island-socket-disconnected-popup-close', {})
               // Calculate and log latency
               const latency = Date.now() - start
               console.debug(`Socket latency: ${latency}ms`)
@@ -277,7 +278,7 @@ export const Socket: FC<SocketProps> = ({
             () => {
               // Set socket_down alert
               dispatch.alerts.setAlert('socket_down')
-              eventDispatch('phone-island-socket-disconnected', {})
+              eventDispatch('phone-island-socket-disconnected-popup-open', {})
               console.debug('Socket is unreachable!')
             },
             7 * 1000, // Waits for the response 7 seconds
