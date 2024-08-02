@@ -41,7 +41,7 @@ const defaultState = {
             width: 348,
             height: 304,
           },
-        }
+        },
       },
       collapsed: {
         width: 168,
@@ -83,6 +83,17 @@ const defaultState = {
     },
     // Recorder View
     recorder: {
+      expanded: {
+        width: 374,
+        height: 256,
+      },
+      collapsed: {
+        width: 168,
+        height: 40,
+      },
+    },
+    // Physical Recorder View
+    physicalPhoneRecorder: {
       expanded: {
         width: 374,
         height: 256,

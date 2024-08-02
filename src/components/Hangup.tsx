@@ -6,7 +6,7 @@ import { motion } from 'framer-motion/dist/framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone } from '@fortawesome/free-solid-svg-icons'
-import { hangupCurrentCall } from '../lib/phone/call'
+import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
@@ -14,11 +14,17 @@ import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import DropdownContent from './SwitchInputView/DropdownContent'
+import { eventDispatch } from '../utils'
 
 /**
  * Return the status of the
  */
-const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) => {
+const Hangup: FC<HangupProps> = ({
+  clickCallback,
+  isDestination,
+  description,
+  isPhysicalRecording,
+}) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
   const { isOpen } = useSelector((state: RootState) => state.island)
@@ -40,6 +46,7 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
     if (transferring) {
       setTimeout(() => {
         dispatch.alerts.setAlert('call_transfered')
+        eventDispatch('phone-island-call-transfer-successfully', {})
         setTimeout(() => {
           dispatch.alerts.removeAlert('call_transfered')
         }, 2000)
@@ -68,7 +75,9 @@ const Hangup: FC<HangupProps> = ({ clickCallback, isDestination, description }) 
           } `}
         >
           <Button
-            onClick={() => handleHangup()}
+            onClick={() =>
+              !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
+            }
             variant='red'
             className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
             data-tooltip-id={
@@ -114,4 +123,5 @@ interface HangupProps {
   clickCallback?: () => void
   isDestination?: boolean
   description?: any
+  isPhysicalRecording?: boolean
 }

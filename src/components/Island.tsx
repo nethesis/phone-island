@@ -16,6 +16,7 @@ import { RecorderView } from './RecorderView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
 import Close from './Close'
+import { PhysicalRecorderView } from './PhysicalRecorderView'
 
 /**
  * Provides the Island logic
@@ -30,6 +31,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   // Get isOpen from island store
   const { view } = useSelector((state: RootState) => state.island)
+  const { recording } = useSelector((state: RootState) => ({
+    recording: state.physicalRecorder.recording,
+  }))
 
   // Get activeAlertsCount from island store
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
@@ -68,6 +72,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     }
   }, [incoming, outgoing])
 
+  useEffect(() => {
+    if (recording ) {
+      dispatch.island.setIslandView('physicalPhoneRecorder')
+    }
+  }, [view])
+
   const [currentView, setCurrentView] = useState<any>('')
 
   // Handle island view change
@@ -88,7 +98,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         showAlways ||
         activeAlertsCount > 0 ||
         view === 'player' ||
-        view === 'recorder') && (
+        view === 'recorder' ||
+        view === 'physicalPhoneRecorder') && (
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
@@ -115,6 +126,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'recorder' ? (
                   <ViewsTransition forView='recorder'>
                     <RecorderView />
+                  </ViewsTransition>
+                ) : currentView === 'physicalPhoneRecorder' ? (
+                  <ViewsTransition forView='physicalPhoneRecorder'>
+                    <PhysicalRecorderView />
                   </ViewsTransition>
                 ) : (
                   <></>

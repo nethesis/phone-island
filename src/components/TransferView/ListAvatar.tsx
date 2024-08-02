@@ -26,7 +26,18 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
         <span
           style={{ right: '1px', bottom: '1px' }}
           className={`pi-absolute pi-rounded-full pi-w-3 pi-h-3 pi-z-20 ${
-            status === 'online' ? 'pi-bg-green-600' : 'pi-bg-red-600'
+            status === 'online' ||
+            status === 'voicemail' ||
+            status === 'cellphone' ||
+            status === 'callforward'
+              ? 'pi-bg-green-500'
+              : status === 'busy' || status === 'incoming' || status === 'ringing'
+              ? 'pi-bg-red-500'
+              : status === 'dnd'
+              ? 'pi-bg-gray-950'
+              : status === 'offline'
+              ? 'pi-bg-gray-500'
+              : ''
           } pi-border-2 pi-border-white`}
         ></span>
       )}

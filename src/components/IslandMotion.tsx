@@ -54,7 +54,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               width: variants.call.expanded.accepted.width,
               height: variants.call.expanded.accepted.height,
             }
-          } else if (accepted && (isListen)) {
+          } else if (accepted && isListen) {
             size = {
               width: variants.call.expanded.listening.width,
               height: variants.call.expanded.listening.height,
@@ -126,6 +126,19 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           size = {
             width: variants.recorder.collapsed.width,
             height: variants.recorder.collapsed.height,
+          }
+        }
+        break
+      case 'physicalPhoneRecorder':
+        if (isOpen) {
+          size = {
+            width: variants.physicalPhoneRecorder.expanded.width,
+            height: variants.physicalPhoneRecorder.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.physicalPhoneRecorder.collapsed.width,
+            height: variants.physicalPhoneRecorder.collapsed.height,
           }
         }
         break

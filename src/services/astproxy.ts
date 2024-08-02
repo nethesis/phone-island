@@ -157,6 +157,32 @@ export async function hangupPhysical() {
   }
 }
 
+export async function hangupPhysicalRecordingCall() {
+  // get data
+  const { ownerExtension, conversationId } = store.getState().physicalRecorder
+  // compose body
+  let body: any = {
+    convid: conversationId,
+    endpointId: ownerExtension,
+    endpointType: 'extension',
+  }
+
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/hangup`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
 export async function mutePhysical() {
   // get data
   const { ownerExtension, conversationId } = store.getState().currentCall
