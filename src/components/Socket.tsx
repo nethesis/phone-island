@@ -200,6 +200,9 @@ export const Socket: FC<SocketProps> = ({
                 dispatch.island.setIslandView('call')
               }
               break
+            case 'busy_ringing':
+              eventDispatch('phone-island-call-ringing', {})
+              break
             default:
               break
           }
