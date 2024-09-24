@@ -32,6 +32,30 @@ export function dispatchMainPresence(event: MainPresenceTypes) {
  *
  * @param event The extenUpdate event from socket
  */
+export function dispatchExtensions(event: ExtensionTypes) {
+  const data: any = {
+    [event.username]: {
+      conversations: event?.conversations,
+      status: event?.status,
+      sipuseragent: event?.sipuseragent,
+      username: event?.username,
+      port: event?.port,
+      dnd: event?.dnd,
+      number: event?.exten,
+      ip: event?.ip,
+      exten: event?.exten,
+      name: event?.name,
+    },
+  }
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-extensions-update', data)
+}
+
+/**
+ * The dispatch function for the extenUpdate event
+ *
+ * @param event The extenUpdate event from socket
+ */
 export function dispatchConversations(event: ExtensionTypes) {
   const data: any = {
     [event.username]: {
@@ -43,6 +67,8 @@ export function dispatchConversations(event: ExtensionTypes) {
       dnd: event?.dnd,
       number: event?.exten,
       ip: event?.ip,
+      exten: event?.exten,
+      name: event?.name,
     },
   }
   // Dispatch the event on window for external handlers

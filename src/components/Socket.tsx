@@ -14,6 +14,7 @@ import {
   dispatchAlreadyLogin,
   dispatchServerReload,
   dispatchParkingUpdate,
+  dispatchExtensions,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -26,6 +27,7 @@ import type {
 } from '../types'
 import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
+import { isEmpty } from '../utils/genericFunctions/isEmpty'
 
 interface SocketProps {
   children: ReactNode
@@ -314,10 +316,56 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('extenUpdate', (res: ExtensionTypes) => {
         // Update extensions and conversations in users store
         dispatch.users.updateExtension(res)
-        // Dispatch conversations event
-        dispatchConversations(res)
+
+        //retrieve all extensions from store
+        const { extensions }: any = store.getState().users
+        const deviceMap: any = {}
+
+        // Create a map of extensions for each user
+        for (const key in extensions) {
+          const user: any = extensions[key].username
+          const ext: any = extensions[key].exten
+
+          if (!deviceMap[user]) {
+            deviceMap[user] = []
+          }
+
+          deviceMap[user].push(ext)
+        }
+
+        const associatedExtensions: any = deviceMap[res.username]
+
         // Initialize conversation
-        const conv = res.conversations[Object.keys(res.conversations)[0]] || {}
+        let conv = res.conversations[Object.keys(res.conversations)[0]] || {}
+
+        // Update all extensions and send the dispatch event
+        dispatchExtensions(res)
+
+        // second step update conversation
+
+        // Check if conversation is empty
+        if (isEmpty(conv)) {
+          // Check if there is at least one conversation not empty
+          const hasNonEmptyConversation = associatedExtensions?.some((ext: any) => {
+            const extConversations = extensions[ext]?.conversations
+
+            if (!isEmpty(extConversations)) {
+              // not empty conversation found
+              return true
+            }
+
+            return false
+          })
+
+          if (!hasNonEmptyConversation) {
+            // Conversation is empty and there is no conversation for the user
+            dispatchConversations(res)
+          }
+        } else {
+          // Dispatch conversation event
+          dispatchConversations(res)
+        }
+
         // Handle only the events of the user
         if (res.username === username) {
           handleCurrentUserEvents(res, conv)
