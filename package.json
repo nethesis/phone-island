@@ -59,7 +59,7 @@
     "react-tooltip": "^5.27.1",
     "socket.io-client": "^4.5.3",
     "styled-components": "^5.3.6",
-    "webrtc-adapter": "^8.2.0"
+    "webrtc-adapter": "^9.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
