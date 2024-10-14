@@ -198,14 +198,14 @@ const Actions: FC = () => {
           >
             {actionsExpanded ? (
               <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-100'
+                className='pi-text-gray-700 dark:pi-text-gray-300'
                 size='xl'
                 icon={faChevronUp}
               />
             ) : (
               <FontAwesomeIcon
                 size='xl'
-                className='pi-text-gray-700 dark:pi-text-gray-100'
+                className='pi-text-gray-700 dark:pi-text-gray-300'
                 icon={faChevronDown}
               />
             )}
@@ -240,8 +240,8 @@ const Actions: FC = () => {
                 <FontAwesomeIcon icon={faStop} size='xl' />
               ) : (
                 <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
-                  <FontAwesomeIcon icon={faCircleDot} />
-                  <FontAwesomeIcon icon={faCircle} className='inner-dot' />
+                  <FontAwesomeIcon icon={faCircleDot} className='fa-circle-dot pi-text-white dark:pi-text-red-700' />
+                  <FontAwesomeIcon icon={faCircle} className='inner-dot pi-text-red-700 dark:pi-text-white' />
                 </div>
               )}
             </Button>

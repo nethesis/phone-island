@@ -66,6 +66,14 @@ const CallTemplate: Story<any> = (args) => {
     console.log('The call is ringing')
   })
 
+  const handleOnlineStatus = () => {
+    eventDispatch('phone-island-status-change', { status: 'online' })
+  }
+
+  const handleDndStatus = () => {
+    eventDispatch('phone-island-status-change', { status: 'dnd' })
+  }
+
   const launchEvent = () => {
     let obj = {}
 
@@ -210,6 +218,10 @@ const CallTemplate: Story<any> = (args) => {
       >
         Start physical recording
       </button>
+      <div className='pi-flex pi-space-x-4 pi-mr-8'>
+        <button onClick={handleOnlineStatus}>Set status to online</button>
+        <button onClick={handleDndStatus}>Set status to dnd</button>
+      </div>
       <label htmlFor='select-event'>Event name:</label>
       <select id='select-event' value={getEventName} onChange={handleEventChange}>
         <option value='phone-island-recording-open'>phone-island-recording-open</option>

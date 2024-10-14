@@ -135,7 +135,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
             <FontAwesomeIcon
               size='xl'
               icon={faEllipsis}
-              className='dark:pi-text-gray-100 pi-text-gray-700'
+              className='dark:pi-text-gray-300 pi-text-gray-700'
               data-stop-propagation={true}
             />
           </Menu.Button>

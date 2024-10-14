@@ -145,9 +145,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 type='text'
                 onChange={handleChange}
                 value={searchValue.current}
+                placeholder={t('Common.Search or type a contact') || ''}
                 autoFocus
                 spellCheck={false}
-                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 active:pi-border-emerald-500 focus:pi-border-emerald-500 pi-text-gray-700 dark:pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0'
+                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-200 pi-placeholder-text-xs'
               />
             </div>
           </div>
@@ -242,7 +243,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                             userEndpoints.mainPresence === 'online' &&
                             handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
                           }
-                          variant='default'
+                          variant='green'
                           disabled={userEndpoints.mainPresence !== 'online'}
                           data-tooltip-id='transfer-list-tooltip-left'
                           data-tooltip-content={t('Tooltip.Call to transfer') || ''}

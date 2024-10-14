@@ -177,6 +177,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-status-changed` The dispatch of change operator status
+
+  ```json
+  {}
+  ```
+
 
 ## Listen Call Events - phone-island-call-*
 
@@ -803,6 +809,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
   ```json
   {}
+  ```
+
+- `phone-island-status-change` The event to show transfer view
+
+  ```json
+  {
+    "status": "dnd" // string - New status of the user
+  }
   ```
 
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
