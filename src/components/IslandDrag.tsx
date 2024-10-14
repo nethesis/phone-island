@@ -85,17 +85,16 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   return (
     <motion.div
       drag
-      onPointerDown={handleStartDrag}
+      onPointerDown={(e) => controls.start(e)}
       onDragStart={handleDragStarted}
-      dragTransition={{
-        power: 0,
-      }}
+      dragTransition={{ power: 0 }}
       initial={{
         x: position?.x || startPosition.x,
         y: position?.y || startPosition.y,
       }}
       dragControls={controls}
-      dragConstraints={islandContainerRef}
+      dragListener={false}
+      dragConstraints={islandContainerRef.current}
       onDragEnd={handleDragEnd}
       ref={islandRef}
       {...longPressEvent}
