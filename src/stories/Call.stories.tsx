@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Story, Meta } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react';
 import React, { useEffect, useState } from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
@@ -9,24 +9,25 @@ import { store } from '../store'
 import audioFile from '../static/test_audio'
 import { isWebRTC } from '../lib/user/default_device'
 
-const meta = {
+const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
   component: PhoneIsland,
-  argTypes: {},
   parameters: {
     controls: { expanded: true },
   },
-}
+};
 
-export default meta as Meta
+export default meta;
 
 // Uses the configuration token from .env
 const config = process.env.CONFIG_TOKEN
 const transferNumber = process.env.DEST_TRANSFER_NUMBER
 const webrtcNumber: any = process.env.WEBRTC_NUMBER
 const physicalNumber: any = process.env.PHYSICAL_NUMBER
+type Story = StoryObj<typeof PhoneIsland>;
 
-const CallTemplate: Story<any> = (args) => {
+
+const CallTemplate = (args: any) => {
   const [getEventName, setEventName]: any = useState('phone-island-recording-open')
   const [getNumber, setNumber]: any = useState(process.env.DEST_NUMBER_EXTENSION)
   const [getKey, setKey]: any = useState('0')
@@ -264,5 +265,9 @@ const CallTemplate: Story<any> = (args) => {
   )
 }
 
-export const Call = CallTemplate.bind({})
+
+export const Call: StoryObj<typeof PhoneIsland> = {
+  render: (args) => <CallTemplate {...args} />,
+  args: {},
+};
 Call.args = {}

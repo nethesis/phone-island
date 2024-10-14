@@ -1,11 +1,11 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
 import Alert from './Alert'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { motion } from 'framer-motion'
 
 /**
  * Shows user alerts
@@ -26,13 +26,13 @@ const AlertView: FC = () => {
     >
       {/* Show alerts */}
       {Object.values(data).map(
-        (alert, index) =>
+        (alert:any, index) =>
           alert.active && (
             <Alert
               key={index}
               type='alert'
-              color={alert.success ? 'green' : alert.break ? 'red' : 'orange'}
-              message={alert.message}
+              color={alert?.success ? 'green' : alert?.break ? 'red' : 'orange'}
+              message={alert?.message}
             />
           ),
       )}

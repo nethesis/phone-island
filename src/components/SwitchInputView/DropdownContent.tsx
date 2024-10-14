@@ -17,7 +17,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
-import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { Tooltip } from 'react-tooltip'
 
 const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)

@@ -1,10 +1,10 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useState, useRef, MutableRefObject } from 'react'
 import { RootState, Dispatch } from '../store'
 import { useSelector, useDispatch } from 'react-redux'
-import { motion, useDragControls } from 'framer-motion/dist/framer-motion'
+import { motion, useDragControls } from 'framer-motion'
 import { useLongPress, useLocalStorage, styleTransformValues } from '../utils'
 import { xPosition, yPosition } from '../lib/island/island'
 
@@ -94,7 +94,7 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
       }}
       dragControls={controls}
       dragListener={false}
-      dragConstraints={islandContainerRef.current}
+      dragConstraints={islandContainerRef}
       onDragEnd={handleDragEnd}
       ref={islandRef}
       {...longPressEvent}
