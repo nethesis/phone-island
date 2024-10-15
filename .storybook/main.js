@@ -1,10 +1,12 @@
 //
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 
 module.exports = {
+  staticDirs: ['../public'],
   stories: ['../src/**/*.stories.@(ts|tsx|js|jsx)'],
+
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',
@@ -18,8 +20,18 @@ module.exports = {
       },
     },
   ],
+
   // https://storybook.js.org/docs/react/configure/typescript#mainjs-configuration
   typescript: {
-    check: true, // type-check stories during Storybook build
+    check: false, // type-check stories during Storybook build
   },
+
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {}
+  },
+
+  docs: {
+    autodocs: false
+  }
 }

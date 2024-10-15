@@ -1,10 +1,10 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC } from 'react'
 import { RootState } from '../store'
 import { useSelector } from 'react-redux'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { motion } from 'framer-motion'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
@@ -166,7 +166,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
-      className='pi-font-sans pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
+      className='pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
       animate={motionVariants}
     >
       {children && children}

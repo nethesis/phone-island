@@ -1,8 +1,8 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone } from '@fortawesome/free-solid-svg-icons'
@@ -10,7 +10,7 @@ import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
-import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { Tooltip } from 'react-tooltip'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import DropdownContent from './SwitchInputView/DropdownContent'

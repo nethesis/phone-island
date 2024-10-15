@@ -1,11 +1,11 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
 import { type TypeTypes } from '../../types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBullhorn, faVoicemail, faMusic } from '@fortawesome/free-solid-svg-icons'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 

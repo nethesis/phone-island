@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -241,7 +241,7 @@ const CallView: FC<CallViewProps> = () => {
                 <Button
                   onClick={answerIncomingCall}
                   variant='green'
-                  data-tooltip-id='tooltip-left'
+                  data-tooltip-id='tooltip-answer-left'
                   data-tooltip-content={t('Tooltip.Answer') || ''}
                 >
                   <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
@@ -251,6 +251,7 @@ const CallView: FC<CallViewProps> = () => {
           </div>
         )}
       </StyledCallView>
+      <Tooltip className='pi-z-20' id='tooltip-answer-left' place='left' />
     </div>
   )
 }

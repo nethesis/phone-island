@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
 
@@ -20,7 +20,7 @@ import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
-import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import DropdownContent from '../SwitchInputView/DropdownContent'

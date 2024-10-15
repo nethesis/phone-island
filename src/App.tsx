@@ -11,6 +11,7 @@ import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
+import { changeOperatorStatus } from './services/user'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -101,6 +102,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     setJSONItem('phone-island-audio-input-device', { deviceId: data.deviceId })
     eventDispatch('phone-island-audio-input-changed', {})
   })
+
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
     const remoteAudioElement: any = store.getState().player.remoteAudio
     // set audio output
@@ -117,6 +119,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       .catch(function (err) {
         console.error('Default audio output device change error:', err)
       })
+  })
+
+  // Listen for the operator status change
+  useEventListener('phone-island-presence-change', (data: any) => {
+    changeOperatorStatus(data)
+    eventDispatch('phone-island-presence-changed', {})
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)

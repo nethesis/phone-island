@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Nethesis S.r.l. */
+/* Copyright (C) 2024 Nethesis S.r.l. */
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
 @import url('https://rsms.me/inter/inter.css');
@@ -8,6 +8,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
   button {
     @apply pi-cursor-pointer;
   }
@@ -27,7 +30,6 @@
 }
 
 .custom-circle-dot-wrapper .fa-circle-dot {
-  color: white;
   font-size: 24px;
 }
 
@@ -36,6 +38,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: red;
   font-size: 12px;
+}
+
+input::placeholder {
+  font-size: 14px;
+  opacity: 1;
 }

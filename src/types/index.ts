@@ -1,13 +1,13 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export type * from './user'
-export type * from './avatars'
-export type * from './extensions'
-export type * from './endpoints'
-export type * from './conversation'
-export type * from './socket'
-export type * from './webrtc'
-export type * from './call'
-export type * from './player'
-export type * from './announcements'
+export * from './user'
+export * from './avatars'
+export * from './extensions'
+export * from './endpoints'
+export * from './conversation'
+export * from './socket'
+export * from './webrtc'
+export * from './call'
+export * from './player'
+export * from './announcements'

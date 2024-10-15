@@ -1,11 +1,11 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { FC, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import Timer from './Timer'
-import { motion, AnimatePresence } from 'framer-motion/dist/framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { TransferCallsTypes } from '../../models/currentCall'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
@@ -37,7 +37,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-font-sans pi-items-top ${
+          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-top ${
             isOpen ? 'pi-px-6' : 'pi-px-4'
           } pi-pt-3`}
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}

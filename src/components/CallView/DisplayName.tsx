@@ -1,9 +1,9 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { useState, useRef, useLayoutEffect, type FC } from 'react'
 import { StyledName } from '../../styles/Island.styles'
-import { motion } from 'framer-motion/dist/framer-motion'
+import { motion } from 'framer-motion'
 import { RootState } from '../../store'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'

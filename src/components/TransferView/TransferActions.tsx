@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -10,7 +10,7 @@ import { store, Dispatch } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { RootState } from '../../store'
-import { Tooltip } from 'react-tooltip/dist/react-tooltip.min.cjs'
+import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 
