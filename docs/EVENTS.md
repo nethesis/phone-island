@@ -177,7 +177,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-status-changed` The dispatch of change operator status
+- `phone-island-presence-changed` The dispatch of change operator status
 
   ```json
   {}
@@ -811,7 +811,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-status-change` The event to show transfer view
+- `phone-island-presence-change` The event to show transfer view
 
   ```json
   {

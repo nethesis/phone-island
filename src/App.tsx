@@ -122,9 +122,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   // Listen for the operator status change
-  useEventListener('phone-island-status-change', (data: any) => {
+  useEventListener('phone-island-presence-change', (data: any) => {
     changeOperatorStatus(data)
-    eventDispatch('phone-island-status-changed', {})
+    eventDispatch('phone-island-presence-changed', {})
   })
 
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)

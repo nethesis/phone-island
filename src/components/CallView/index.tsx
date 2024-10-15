@@ -241,7 +241,7 @@ const CallView: FC<CallViewProps> = () => {
                 <Button
                   onClick={answerIncomingCall}
                   variant='green'
-                  data-tooltip-id='tooltip-left'
+                  data-tooltip-id='tooltip-answer-left'
                   data-tooltip-content={t('Tooltip.Answer') || ''}
                 >
                   <FontAwesomeIcon className='pi-w-6 pi-h-6' icon={faPhone} />
@@ -251,6 +251,7 @@ const CallView: FC<CallViewProps> = () => {
           </div>
         )}
       </StyledCallView>
+      <Tooltip className='pi-z-20' id='tooltip-answer-left' place='left' />
     </div>
   )
 }
