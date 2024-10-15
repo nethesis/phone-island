@@ -63,7 +63,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "dev": "storybook dev -p 6006 -s public",
+    "dev": "storybook dev -p 6006",
     "test": "react-scripts test",
     "watch": "rollup -w -c",
     "watch:css": "npx tailwindcss -o ./dist/index.css --watch",

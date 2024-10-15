@@ -4,6 +4,7 @@
 //
 
 module.exports = {
+  staticDirs: ['../public'],
   stories: ['../src/**/*.stories.@(ts|tsx|js|jsx)'],
 
   addons: [
