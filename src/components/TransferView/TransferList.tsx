@@ -144,11 +144,11 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 data-stop-propagation={true}
                 type='text'
                 onChange={handleChange}
-                value={searchValue.current}
+                value={searchValue?.current}
                 placeholder={t('Common.Search or type a contact') || ''}
                 autoFocus
                 spellCheck={false}
-                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-sans pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-200 pi-placeholder-text-xs'
+                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
               />
             </div>
           </div>
@@ -172,7 +172,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     <ListAvatar />
                     <div
                       style={{ maxWidth: '146px' }}
-                      className='pi-h-fit pi-max-w-40 pi-font-sans pi-truncate pi-text-sm pi-font-bold'
+                      className='pi-h-fit pi-max-w-40  pi-truncate pi-text-sm pi-font-bold'
                     >
                       {searchValue.current}
                     </div>
@@ -230,7 +230,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                             ? `${t('Tooltip.Call to transfer')}`
                             : ''
                         }
-                        className={`pi-h-fit pi-font-sans pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition`}
+                        className={`pi-h-fit  pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition`}
                       >
                         {/* The user name */}
                         {userEndpoints.name}
@@ -255,7 +255,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   </div>
                 ))}
               {loaded && listUsers.length === 0 && !showCustomUser && (
-                <p className='pi-font-sans pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
+                <p className=' pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
                   {t('No users found')}
                 </p>
               )}
@@ -263,10 +263,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
           </div>
         </div>
       ) : (
-        <div className='pi-font-medium pi-text-base pi-font-sans'>Transfer</div>
+        <div className='pi-font-medium pi-text-base '>Transfer</div>
       )}
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='left' />
+      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='right' />
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-call-to-transfer' place='left' />
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
       <Tooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />

@@ -129,7 +129,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
           data-tooltip-content={t('Tooltip.Settings')}
         >
           <Menu.Button
-            className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-500 enabled:hover:pi-bg-gray-400 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 dark:pi-text-white pi-text-gray-600 pi-border pi-border-transparent focus:pi-ring-offset-gray-200 dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
+            className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-500 enabled:hover:pi-bg-gray-400 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-flex pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 dark:pi-text-white pi-text-gray-600 pi-border pi-border-transparent focus:pi-ring-offset-gray-200 dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
             data-stop-propagation={true}
           >
             <FontAwesomeIcon

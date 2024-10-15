@@ -55,7 +55,7 @@
     "react-i18next": "^12.1.5",
     "react-moment": "^1.1.2",
     "react-redux": "^8.0.5",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-tooltip": "^5.28.0",
     "socket.io-client": "^4.5.3",
     "styled-components": "^5.3.6",
@@ -134,6 +134,9 @@
     "typescript": "^4.8.4",
     "webm-duration-fix": "^1.0.4",
     "webpack": "^5.74.0"
+  },
+  "overrides": {
+    "nth-check": "^2.0.1"
   },
   "license": "GPL-3.0-or-later"
 }

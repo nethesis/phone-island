@@ -37,7 +37,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-font-sans pi-items-top ${
+          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-top ${
             isOpen ? 'pi-px-6' : 'pi-px-4'
           } pi-pt-3`}
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}

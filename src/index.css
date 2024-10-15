@@ -8,6 +8,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
   button {
     @apply pi-cursor-pointer;
   }
@@ -36,4 +39,9 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 12px;
+}
+
+input::placeholder {
+  font-size: 14px;
+  opacity: 1;
 }

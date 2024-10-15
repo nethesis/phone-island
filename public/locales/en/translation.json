@@ -7,7 +7,8 @@
     "Recording": "Recording",
     "Answer phone to start recording": "Answer phone to start recording",
     "Close the call to stop recording": "Close the call to stop recording",
-    "Search or type a contact": "Search or type a contact"
+    "Search or type a contact": "Search or type a contact",
+    "Enter a phone number": "Enter a phone number"
   },
   "Tooltip": {
     "Hangup": "Hangup",

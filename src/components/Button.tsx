@@ -18,7 +18,7 @@ export const Button: FC<ButtonProps> = ({
   ...props
 }) => {
   const classes = {
-    base: 'pi-flex pi-font-sans pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-border pi-border-transparent focus:pi-ring-offset-white dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0',
+    base: 'pi-flex pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 pi-border pi-border-transparent focus:pi-ring-offset-white dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0',
     variant: {
       red: 'dark:pi-bg-red-500 pi-bg-red-700 hover:pi-bg-red-700 dark:hover:pi-bg-red-300 focus:pi-ring-emerald-500 dark:focus:ring-emerald-300 pi-text-white dark:pi-text-gray-950',
       green: 'pi-bg-green-700 dark:pi-bg-green-500 hover:pi-bg-green-600 dark:hover:pi-bg-green-300 focus:pi-ring-green-500 focus:dark:pi-ring-200 pi-text-white dark:pi-text-gray-950',
