@@ -11,37 +11,44 @@ const defaultState: AlertsTypes = {
       active: false,
       break: true,
       message: "The browser doesn't have permission to access camera or microphone.",
+      type: 'browser_permissions',
     },
     user_permissions: {
       active: false,
       break: true,
       message: 'You must accept audio and video permissions.',
+      type: 'user_permissions',
     },
     unknown_media_permissions: {
       active: false,
       break: true,
       message: "Web Phone can't access audio or camera on this device.",
+      type: 'unknown_media_permissions',
     },
     webrtc_down: {
       active: false,
       break: true,
       message: 'Web Phone connection is down.',
+      type: 'webrtc_down',
     },
     socket_down: {
       active: false,
       break: false,
       message: 'Server connection is down.',
+      type: 'socket_down',
     },
     // Warning alerts
     busy_camera: {
       active: false,
       message: 'Camera is used by another application.',
+      type: 'busy_camera',
     },
     // Success alerts
     call_transfered: {
       active: false,
       success: true,
       message: 'Call transferred successfully.',
+      type: 'call_transfered',
     },
   },
   status: {
@@ -127,4 +134,5 @@ export interface AlertTypes {
   message: string
   break?: boolean // This means that it brokes WebRTC audio calls or Socket connection
   success?: boolean
+  type: string
 }
