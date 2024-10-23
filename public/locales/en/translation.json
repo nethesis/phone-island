@@ -46,7 +46,8 @@
   },
   "Call": {
     "In progress...": "In progress...",
-    "Outgoing call": "Outgoing call"
+    "Outgoing call": "Outgoing call",
+    "Incoming call": "Incoming call"
   },
   "Transfer": {
     "No users found": "No users found"

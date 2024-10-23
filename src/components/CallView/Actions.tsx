@@ -198,14 +198,14 @@ const Actions: FC = () => {
           >
             {actionsExpanded ? (
               <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-300'
+                className='pi-text-gray-700 dark:pi-text-gray-200'
                 size='xl'
                 icon={faChevronUp}
               />
             ) : (
               <FontAwesomeIcon
                 size='xl'
-                className='pi-text-gray-700 dark:pi-text-gray-300'
+                className='pi-text-gray-700 dark:pi-text-gray-200'
                 icon={faChevronDown}
               />
             )}

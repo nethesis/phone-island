@@ -46,7 +46,8 @@
   },
   "Call": {
     "In progress...": "In corso...",
-    "Outgoing call": "Chiamata in uscita"
+    "Outgoing call": "Chiamata in uscita",
+    "Incoming call": "Chiamata in arrivo"
   },
   "Transfer": {
     "No users found": "Nessun utente trovato"
