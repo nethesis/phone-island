@@ -27,7 +27,7 @@ export const Button: FC<ButtonProps> = ({
       neutral:
         'pi-bg-transparent enabled:hover:pi-bg-gray-500 enabled:hover:pi-border-gray-500 pi-border pi-border-gray-700 focus:pi-ring-0',
       transparent:
-        'pi-bg-transparent dark:enabled:hover:pi-bg-gray-500 enabled:hover:pi-bg-gray-400 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white',
+        'pi-bg-transparent dark:enabled:hover:pi-bg-gray-600/30 enabled:hover:pi-bg-gray-200/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white',
     },
     background: {
       base: {

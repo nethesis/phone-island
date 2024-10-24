@@ -91,22 +91,26 @@ export const Socket: FC<SocketProps> = ({
           const { extensions } = store.getState().users
           switch (res.status) {
             case 'ringing':
-              // The name and the number are updated here not in webrtc
-              dispatch.currentCall.checkIncomingUpdatePlay({
-                conversationId: conv.id,
-                displayName: getDisplayName(conv),
-                number: `${conv.counterpartNum}`,
-                incomingSocket: true,
-                username:
-                  `${
-                    extensions &&
-                    extensions[conv.counterpartNum] &&
-                    extensions[conv.counterpartNum].username
-                  }` || '',
-                ownerExtension: conv.owner,
-              })
+              // Show phone island only if conversation number is not empty
+              if (conv?.counterpartNum) {
+                // The name and the number are updated here not in webrtc
+                dispatch.currentCall.checkIncomingUpdatePlay({
+                  conversationId: conv.id,
+                  displayName: getDisplayName(conv),
+                  number: `${conv.counterpartNum}`,
+                  incomingSocket: true,
+                  username:
+                    `${
+                      extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
+                    }` || '',
+                  ownerExtension: conv.owner,
+                })
 
-              eventDispatch('phone-island-call-ringing', {})
+                eventDispatch('phone-island-call-ringing', {})
+              }
+
               break
             // @ts-ignore
             case 'busy':

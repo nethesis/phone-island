@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone } from '@fortawesome/free-solid-svg-icons'
+import { faDownLeftAndUpRightToCenter, faPhone } from '@fortawesome/free-solid-svg-icons'
 import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
@@ -75,6 +75,25 @@ const Hangup: FC<HangupProps> = ({
               : 'pi-flex pi-w-12'
           } `}
         >
+          {/* collapse phone island button */}
+          {isOpen && accepted && (
+            <div className='pi-grid pi-grid-cols-1'>
+              <Button
+                variant='transparent'
+                onClick={() => dispatch.island.handleToggleIsOpen()}
+                data-tooltip-id='tooltip-open-close-phone-island'
+                data-tooltip-content={isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''}
+                className='pi-ml-[-7.05rem]'
+              >
+                <FontAwesomeIcon
+                  size='xl'
+                  icon={faDownLeftAndUpRightToCenter}
+                  className='pi-text-gray-700 dark:pi-text-gray-200'
+                />
+              </Button>
+            </div>
+          )}
+
           <Button
             onClick={() =>
               !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
@@ -114,6 +133,7 @@ const Hangup: FC<HangupProps> = ({
       </div>
       <Tooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
       <Tooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
+      <Tooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
     </>
   )
 }
