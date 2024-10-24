@@ -109,6 +109,14 @@ export const alerts = createModel<RootModel>()({
         }
       }
     },
+    //remove all alerts
+    removeAllAlerts: (state) => {
+      for (const key in state.data) {
+        state.data[key].active = false
+      }
+      state.status.activeAlertsCount = 0
+      state.status.breakActiveAlertsCount = 0
+    },
   },
 })
 

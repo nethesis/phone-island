@@ -183,6 +183,11 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-all-alerts-removed` The dispatch of clear alerts status
+
+```json
+{}
+```
 
 ## Listen Call Events - phone-island-call-*
 

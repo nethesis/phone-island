@@ -2,18 +2,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { FC } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faCircleXmark, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
 import { t } from 'i18next'
+import { eventDispatch } from '../../utils'
 
 /**
  * Shows user alerts
  */
 const AlertView: FC = () => {
   const { data } = useSelector((state: RootState) => state.alerts)
+  const dispatch = useDispatch<Dispatch>()
 
   // Extract active alerts
   const activeAlerts = Object.values(data).filter((alert: any) => alert.active)
@@ -22,6 +24,11 @@ const AlertView: FC = () => {
   const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
 
   console.log('this is the latest alert', latestAlert?.type)
+
+  const handleClearAllAlerts = () => {
+    dispatch.alerts.removeAllAlerts()
+    eventDispatch('phone-island-all-alerts-removed', {})
+  }
 
   return (
     latestAlert && (
@@ -59,7 +66,7 @@ const AlertView: FC = () => {
         {/* Close button */}
         <Button
           variant='transparent'
-          onClick={() => console.log('Close alert')}
+          onClick={() => handleClearAllAlerts()}
           className='pi-absolute pi-right-[-0.5rem] pi-top-[41%] pi-transform pi--translate-y-1/2'
         >
           <FontAwesomeIcon icon={faTimes} className='pi-text-gray-700 dark:pi-text-gray-50' />
