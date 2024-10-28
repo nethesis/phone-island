@@ -8,8 +8,8 @@ import { RootState } from '../../store'
 
 const iconVariants = {
   open: {
-    width: '48px',
-    height: '48px',
+    width: '56px',
+    height: '56px',
     borderRadius: '26px',
   },
   closed: {
@@ -39,7 +39,7 @@ const Avatar: FC = () => {
   return (
     <>
       <motion.div
-        className='pi-relative'
+        className={`pi-relative ${isOpen ? 'pi-mt-[-0.25rem]' : ''}`}
         animate={isOpen ? 'open' : 'closed'}
         variants={iconVariants}
       >

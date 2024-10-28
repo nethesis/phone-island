@@ -130,14 +130,14 @@ const Actions: FC = () => {
     <>
       <div
         className={`${
-          !intrudeListenStatus.isListen && !intrudeListenStatus.isIntrude
+          !intrudeListenStatus?.isListen && !intrudeListenStatus?.isIntrude
             ? 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
             : intrudeListenStatus.isIntrude
             ? 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
             : 'pi-hidden'
         } `}
       >
-        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
+        {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
           <Button
             variant='default'
             active={paused ? true : false}
@@ -152,7 +152,7 @@ const Actions: FC = () => {
             )}
           </Button>
         )}
-        {!intrudeListenStatus.isListen && (
+        {!intrudeListenStatus?.isListen && (
           <Button
             variant='default'
             active={muted ? true : false}
