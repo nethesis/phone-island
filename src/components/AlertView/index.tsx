@@ -23,8 +23,6 @@ const AlertView: FC = () => {
   // Display the latest active alert
   const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
 
-  console.log('this is the latest alert', latestAlert?.type)
-
   const handleClearAllAlerts = () => {
     dispatch.alerts.removeAllAlerts()
     eventDispatch('phone-island-all-alerts-removed', {})
@@ -32,10 +30,10 @@ const AlertView: FC = () => {
 
   return (
     latestAlert && (
-      <div className='pi-relative pi-rounded-md pi-w-full pi-flex pi-mt-[-1.3rem]'>
+      <div className='pi-relative pi-rounded-md pi-w-full pi-flex pi-mt-[-1rem]'>
         <div className='pi-flex pi-items-center'>
           <div
-            className={`pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-mr-4 pi-rounded-full pi-h-10 pi-w-10 ${
+            className={`pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-mr-4 pi-rounded-full pi-h-10 pi-w-10 pi-mt-[-0.8rem] ${
               latestAlert?.type === 'call_transfered'
                 ? 'pi-bg-green-200 dark:pi-bg-green-900'
                 : 'pi-bg-rose-200 dark:pi-bg-rose-900'
@@ -67,9 +65,9 @@ const AlertView: FC = () => {
         <Button
           variant='transparent'
           onClick={() => handleClearAllAlerts()}
-          className='pi-absolute pi-right-[-0.5rem] pi-top-[41%] pi-transform pi--translate-y-1/2'
+          className='pi-absolute pi-right-[-0.5rem] pi-top-[38%] pi-transform pi--translate-y-1/2'
         >
-          <FontAwesomeIcon icon={faTimes} className='pi-text-gray-700 dark:pi-text-gray-50' />
+          <FontAwesomeIcon icon={faTimes} className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4' />
         </Button>
       </div>
     )

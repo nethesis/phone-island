@@ -54,10 +54,8 @@ export const StyledDetails = styled.div<StyledDetailsProps>`
 
 export const StyledTimer = styled.div<StyledTimerProps>`
   ${({ isOpen, size }) =>
-    size === 'large' ? (isOpen ? 'font-size: 1.25rem' : 'font-size: 1.15rem') : 'font-size: 1rem'};
+    size === 'large' ? (isOpen ? 'font-size: 1.125rem' : 'font-size: 1.125rem') : 'font-size: 1rem'};
   height: fit-content;
-  font-weight: 300;
-  color: #fff;
   letter-spacing: 0.5px;
   max-width: fit-content;
 `
@@ -71,9 +69,8 @@ export const StyledNumber = styled.div<StyledNumberProps>`
 `
 
 export const StyledName = styled.div`
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 500;
 `
 
 interface StyledCallViewProps {

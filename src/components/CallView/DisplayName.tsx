@@ -38,7 +38,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
@@ -56,7 +56,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
@@ -74,7 +74,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden '
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
