@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useState, useRef, MutableRefObject } from 'react'
-import { RootState, Dispatch } from '../store'
+import { RootState, Dispatch, store } from '../store'
 import { useSelector, useDispatch } from 'react-redux'
 import { motion, useDragControls } from 'framer-motion'
 import { useLongPress, useLocalStorage, styleTransformValues } from '../utils'
@@ -41,7 +41,9 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
 
   // Handle Island click
   const handleIslandClick = () => {
-    dispatch.island.handleToggleIsOpen()
+    // Only if phone island is close is possible to open it trough the click
+    const isPhoneIslandAlreadyOpen = store?.getState()?.island?.isOpen
+    !isPhoneIslandAlreadyOpen && dispatch.island.handleToggleIsOpen()
   }
 
   // Handles drag end event

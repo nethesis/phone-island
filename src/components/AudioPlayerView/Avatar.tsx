@@ -16,8 +16,8 @@ export const Avatar: FC<AvatarProps> = ({ type }) => {
     <motion.div
       animate={
         isOpen
-          ? { width: '48px', height: '48px', borderRadius: '12px' }
-          : { width: '24px', height: '24px', borderRadius: '6px' }
+          ? { width: '56px', height: '56px', borderRadius: '26px' }
+          : { width: '24px', height: '24px', borderRadius: '26px' }
       }
       className='pi-w-12 pi-h-12 pi-bg-gray-500 pi-rounded-xl pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-flex-grow-0'
     >

@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPhone } from '@fortawesome/free-solid-svg-icons'
+import { faDownLeftAndUpRightToCenter, faPhone } from '@fortawesome/free-solid-svg-icons'
 import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
@@ -71,16 +71,43 @@ const Hangup: FC<HangupProps> = ({
         <motion.div
           className={`${
             transferring && description
-              ? 'pi-grid pi-grid-cols-[12rem,1rem] pi-ml-4 pi-justify-start'
+              ? 'pi-grid pi-grid-cols-4 pi-ml-4 pi-justify-start'
               : 'pi-flex pi-w-12'
           } `}
         >
+          {/* collapse phone island button */}
+          {isOpen && accepted && (
+            <div className='pi-grid pi-grid-cols-1'>
+              <Button
+                variant='transparent'
+                onClick={() => dispatch.island.handleToggleIsOpen()}
+                data-tooltip-id='tooltip-open-close-phone-island'
+                data-tooltip-content={isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''}
+                className={`${
+                  transferring && description
+                    ? 'pi-ml-[-0.15rem]'
+                    : 'pi-ml-[-7.05rem]'
+                }`}
+              >
+                <FontAwesomeIcon
+                  size='xl'
+                  icon={faDownLeftAndUpRightToCenter}
+                  className='pi-text-gray-700 dark:pi-text-gray-200'
+                />
+              </Button>
+            </div>
+          )}
+
           <Button
             onClick={() =>
               !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
             }
             variant='red'
-            className='pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
+            className={`${
+              transferring && description
+                ? 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full pi-col-span-2'
+                : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
+            }`}
             data-tooltip-id={
               description && transferring ? 'tooltip-top-transfer' : 'tooltip-left-transfer'
             }
@@ -114,6 +141,7 @@ const Hangup: FC<HangupProps> = ({
       </div>
       <Tooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
       <Tooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
+      <Tooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
     </>
   )
 }

@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useEffect, type FC, type ReactNode } from 'react'
+import React, { type FC, type ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
 import AlertView from './AlertView'

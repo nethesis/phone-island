@@ -8,7 +8,14 @@ import { classNames, eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
 import { Button } from '../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faMoon, faPhone, faSun, faTimes } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCheck,
+  faDownLeftAndUpRightToCenter,
+  faMoon,
+  faPhone,
+  faSun,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
 
@@ -37,15 +44,21 @@ const CallTemplate = (args: any) => {
   const [device, setDevice] = useState('default')
   const [logData, setLogData] = useState('')
   const [userData, setUserData] = useState('')
+  const [phoneIslandData, setPhoneIslandData] = useState('')
+  const [phoneIslandWebrtc, setPhoneIslandWebrtc] = useState('')
   const [theme, setTheme] = useState('system')
 
   const [showLog, setShowLog] = useState(false)
   const [showUserData, setShowUserData] = useState({})
+  const [showPhoneIslandStatus, setShowPhoneIslandStatus] = useState(false)
+  const [showPhoneIslandWebrtc, setShowPhoneIslandWebrtc] = useState(false)
 
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
   const [showKeyboards, setShowKeyboards] = useState(false)
+
+  const [isSmallView, setIsSmallView] = useState(true)
 
   useEffect(() => {
     localStorage.setItem('phoneIslandToken', token)
@@ -83,6 +96,32 @@ const CallTemplate = (args: any) => {
       setShowUserData(true)
       const currentUserStoreData = store.getState().currentUser
       setUserData(JSON.stringify(currentUserStoreData, null, 2))
+    }
+  }
+
+  const logPhoneIslandStatus = () => {
+    //hide user informations it is already shown
+    if (showPhoneIslandStatus) {
+      setPhoneIslandData('')
+      setShowPhoneIslandStatus(false)
+      return
+    } else {
+      setShowPhoneIslandStatus(true)
+      const currentPhoneIslandStoreData = store.getState().island
+      setPhoneIslandData(JSON.stringify(currentPhoneIslandStoreData, null, 2))
+    }
+  }
+
+  const logPhoneIslandWebrtc = () => {
+    //hide user informations it is already shown
+    if (showPhoneIslandWebrtc) {
+      setPhoneIslandWebrtc('')
+      setShowPhoneIslandWebrtc(false)
+      return
+    } else {
+      setShowPhoneIslandWebrtc(true)
+      const currentPhoneIslandStoreWebrtcData = store.getState().webrtc
+      setPhoneIslandWebrtc(JSON.stringify(currentPhoneIslandStoreWebrtcData, null, 2))
     }
   }
 
@@ -171,6 +210,18 @@ const CallTemplate = (args: any) => {
     )
   }
 
+  const openOrReducePhoneIsland = () => {
+    //retrieve size value from the store
+    if (isSmallView) {
+      console.log('entrato qui', isSmallView)
+      eventDispatch('phone-island-expand', {})
+      setIsSmallView(false)
+    } else {
+      eventDispatch('phone-island-compress', {})
+      setIsSmallView(true)
+    }
+  }
+
   return (
     <>
       <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-lg pi-mx-auto pi-p-6 pi-bg-gray-100 pi-rounded-lg pi-overflow-auto pi-mt-4'>
@@ -202,6 +253,23 @@ const CallTemplate = (args: any) => {
               >
                 {showUserData ? 'Hide user data' : 'Show user data'}
               </button>
+
+              <button
+                onClick={logPhoneIslandStatus}
+                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
+              >
+                {showPhoneIslandStatus ? 'Hide phone island status' : 'Show phone island status'}
+              </button>
+
+              <button
+                onClick={logPhoneIslandWebrtc}
+                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
+              >
+                {showPhoneIslandWebrtc
+                  ? 'Hide phone island webrtc status'
+                  : 'Show phone island webrtc status'}
+              </button>
+
               <button
                 onClick={toggleTheme}
                 className='pi-btn pi-bg-gray-700 pi-text-white pi-rounded-md 
@@ -222,6 +290,18 @@ const CallTemplate = (args: any) => {
             {userData && (
               <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
                 {userData}
+              </pre>
+            )}
+
+            {phoneIslandData && (
+              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
+                {phoneIslandData}
+              </pre>
+            )}
+
+            {phoneIslandWebrtc && (
+              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
+                {phoneIslandWebrtc}
               </pre>
             )}
 
@@ -264,6 +344,18 @@ const CallTemplate = (args: any) => {
                   data-tooltip-content={t('Tooltip.Keyboard') || ''}
                 >
                   <FontAwesomeIcon size='xl' icon={faGridRound} />
+                </Button>
+
+                <Button
+                  variant='default'
+                  onClick={() => openOrReducePhoneIsland()}
+                  data-tooltip-id='tooltip-open-close-phone-island'
+                  data-tooltip-content={
+                    isSmallView ? t('Tooltip.Reduce') || '' : t('Tooltip.Open') || ''
+                  }
+                  className='pi-ml-2'
+                >
+                  <FontAwesomeIcon size='xl' icon={faDownLeftAndUpRightToCenter} />
                 </Button>
               </div>
               {showKeyboards && (

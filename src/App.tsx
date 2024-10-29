@@ -176,6 +176,10 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Transfer failed')
   })
 
+  useEventListener('phone-island-all-alerts-removed', () => {
+    console.log('All alerts removed')
+  })
+
   return (
     <>
       <Provider store={store}>

@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useEffect, useRef, useCallback } from 'react'
+import React, { type ReactNode, FC, useEffect, useRef, useCallback, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
@@ -279,6 +279,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'accepted':
+                        const acceptedTimestamp = Math.floor(Date.now() / 1000)
                         if (janus.current.log) {
                           janus.current.log(result['username'] + ' accepted the call!')
                         }
@@ -295,7 +296,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                           incoming: false,
                           incomingWebRTC: false,
                         })
-
+                        dispatch.currentCall.updateStartTime(acceptedTimestamp.toString())
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 
@@ -457,6 +458,33 @@ export const WebRTC: FC<WebRTCProps> = ({
     checkMediaPermissions()
   }, [])
 
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [connectionReturned, setConnectionReturned] = useState(false)
+
+  useEffect(() => {
+    // Event listeners for online/offline status
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isOnline) {
+      console.log('Internet connection lost.')
+      setConnectionReturned(false)
+    } else {
+      console.log('Internet connection restored.')
+      setConnectionReturned(true)
+    }
+  }, [isOnline])
+
   // Manage webrtc connections and events
   useEffect(() => {
     // Initializes the webrtc registration check interval
@@ -490,7 +518,7 @@ export const WebRTC: FC<WebRTCProps> = ({
 
   // Manage reload events
   useEffect(() => {
-    if (reload) {
+    if (reload || connectionReturned) {
       // Unregister the WebRTC extension
       unregister()
       // Detach sipcall
@@ -505,7 +533,7 @@ export const WebRTC: FC<WebRTCProps> = ({
         if (reloadedCallback) reloadedCallback()
       }, 10000)
     }
-  }, [reload])
+  }, [reload, connectionReturned])
 
   useEventListener('phone-island-attach', (data) => {
     initWebRTC()

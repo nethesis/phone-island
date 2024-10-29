@@ -15,7 +15,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
   const NameMotion = motion(StyledName)
 
   // Get the displayName of the currentCall store
-  const { displayName } = useSelector((state: RootState) => state.currentCall)
+  const { displayName, incoming } = useSelector((state: RootState) => state.currentCall)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
 
   const { t } = useTranslation()
@@ -38,7 +38,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
@@ -56,7 +56,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
@@ -74,7 +74,7 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden '
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-900 dark:pi-text-gray-200 ${
+            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
               animateText && 'animated-text'
             }`}
             ref={nameText}
@@ -83,6 +83,8 @@ const DisplayName: FC<DisplayNameProps> = () => {
               ? 'PBX'
               : displayName
               ? displayName
+              : incoming
+              ? t('Call.Incoming call') || '-'
               : t('Call.Outgoing call') || '-'}
           </div>
           <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'>

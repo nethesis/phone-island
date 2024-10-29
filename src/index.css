@@ -1,6 +1,7 @@
 /* Copyright (C) 2024 Nethesis S.r.l. */
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import url('https://rsms.me/inter/inter.css');
 
 @tailwind base;

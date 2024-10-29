@@ -82,6 +82,10 @@ export const currentCall = createModel<RootModel>()({
       state.isRecording = payload
       return state
     },
+    updateStartTime: (state, payload: string) => {
+      state.startTime = payload
+      return state
+    },
     reset: () => {
       return defaultState
     },
