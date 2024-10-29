@@ -279,6 +279,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'accepted':
+                        const acceptedTimestamp = Math.floor(Date.now() / 1000)
                         if (janus.current.log) {
                           janus.current.log(result['username'] + ' accepted the call!')
                         }
@@ -295,7 +296,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                           incoming: false,
                           incomingWebRTC: false,
                         })
-
+                        dispatch.currentCall.updateStartTime(acceptedTimestamp.toString())
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 

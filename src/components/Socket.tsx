@@ -120,7 +120,6 @@ export const Socket: FC<SocketProps> = ({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
-                  startTime: `${conv.startTime / 1000}`,
                   ownerExtension: conv.owner,
                   username:
                     `${

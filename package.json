@@ -35,7 +35,7 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@headlessui/react": "^1.7.18",
+    "@headlessui/react": "^2.2.0",
     "@nethesis/nethesis-light-svg-icons": "github:nethesis/Font-Awesome#ns-light",
     "@nethesis/nethesis-solid-svg-icons": "github:nethesis/Font-Awesome#ns-solid",
     "@rematch/core": "^2.2.0",
@@ -130,7 +130,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "storybook": "^7.6.20",
     "tailwind-scrollbar": "^3.1.0",
-    "tailwindcss": "^3.4.1",
+    "tailwindcss": "^3.4.14",
     "typescript": "^4.8.4",
     "webm-duration-fix": "^1.0.4",
     "webpack": "^5.74.0"

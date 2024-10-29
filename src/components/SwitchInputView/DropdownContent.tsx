@@ -13,7 +13,7 @@ import {
   faSun,
   faVolumeHigh,
 } from '@fortawesome/free-solid-svg-icons'
-import { Menu, Transition } from '@headlessui/react'
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
@@ -128,7 +128,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
           data-tooltip-id='tooltip-left-settings-devices'
           data-tooltip-content={t('Tooltip.Settings')}
         >
-          <Menu.Button
+          <MenuButton
             className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-600/30 enabled:hover:pi-bg-gray-200/70  dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-flex pi-font-light pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-75 dark:pi-text-white pi-text-gray-600 pi-border pi-border-transparent focus:pi-ring-offset-gray-200 dark:focus:pi-ring-offset-black pi-rounded-full pi-text-sm pi-leading-4 pi-h-12 pi-w-12 pi-col-start-auto pi-transition-color pi-shrink-0'
             data-stop-propagation={true}
           >
@@ -138,7 +138,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
               className='dark:pi-text-gray-200 pi-text-gray-700'
               data-stop-propagation={true}
             />
-          </Menu.Button>
+          </MenuButton>
 
           <Transition
             as={Fragment}
@@ -149,7 +149,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
             leaveFrom='transform opacity-100 scale-100'
             leaveTo='transform opacity-0 scale-95'
           >
-            <Menu.Items
+            <MenuItems
               className={`${transferring ? 'pi-right-[1.5rem]' : 'pi-right-[4.5rem]'} 
               ${
                 isListen
@@ -170,8 +170,8 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
                     {actualDevice
                       .filter((device) => device?.kind === 'audioinput')
                       .map((audioDevice, index) => (
-                        <Menu.Item key={index}>
-                          {({ active }) => (
+                        <MenuItem key={index}>
+                          {({ active }: any) => (
                             <div
                               className={`pi-flex pi-py-2 pi-px-2 ${
                                 active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
@@ -226,7 +226,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
                               </div>
                             </div>
                           )}
-                        </Menu.Item>
+                        </MenuItem>
                       ))}
                     {/* Divider  */}
                     <div className='pi-relative pi-py-2'>
@@ -250,8 +250,8 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
                 {actualDevice
                   .filter((device) => device?.kind === 'audiooutput')
                   .map((audioDevice, index) => (
-                    <Menu.Item key={index}>
-                      {({ active }) => (
+                    <MenuItem key={index}>
+                      {({ active }: any) => (
                         <div
                           className={`pi-flex pi-py-2 pi-px-2 ${
                             active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
@@ -307,7 +307,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
                           </div>
                         </div>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   ))}
                 {/* Divider  */}
                 <div className='pi-relative pi-py-2'>
@@ -381,16 +381,16 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
               {actualDevice
                 .filter((device) => device.kind === 'videoinput')
                 .map((videoDevice, index) => (
-                  <Menu.Item key={index}>
+                  <MenuItem key={index}>
                     {({ active }) => (
                       <div className='pi-text-gray-700'>
                         Webcam: {videoDevice.label || `Device ${index + 1}`}
                       </div>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 ))}*/}
               </div>
-            </Menu.Items>
+            </MenuItems>
           </Transition>
         </Menu>
       ) : (

@@ -34,8 +34,9 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
  */
 const CallView: FC<CallViewProps> = () => {
   // Get multiple values from currentCall state
-  const { incoming, accepted, outgoing, startTime, paused, username, number, isRecording } =
-    useSelector((state: RootState) => state.currentCall)
+  const { incoming, accepted, outgoing, startTime, paused, number, isRecording } = useSelector(
+    (state: RootState) => state.currentCall,
+  )
 
   const currentCallDetails: any = useSelector((state: RootState) => state.currentCall)
   // Get isOpen and view from island state
