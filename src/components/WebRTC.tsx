@@ -327,6 +327,8 @@ export const WebRTC: FC<WebRTCProps> = ({
                         //   })
                         //   dispatch.player.playAudio()
                         // }
+                        // Reset current call info
+                        store.dispatch.currentCall.reset()
                         if (janus.current.log)
                           janus.current.log(
                             'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
