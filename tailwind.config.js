@@ -45,4 +45,15 @@ module.exports = {
     preflight: false,
   },
   prefix: 'pi-',
+  safelist: [
+    'pi-border-4',
+    'pi-rounded-2xl',
+    'pi-p-4',
+    'pi-flex',
+    'pi-gap-5',
+    'pi-items-center',
+    'pi-border-red-600',
+    'pi-border-orange-600',
+    'pi-border-green-600',
+  ],
 }
