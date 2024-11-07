@@ -40,7 +40,7 @@ export function answerWebRTC() {
   const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
     // get current input device id from localstorage
-    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null;
+    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
 
     sipcall.createAnswer({
       jsep: jsepGlobal,
@@ -123,7 +123,7 @@ export function detach() {
   }
 }
 
-export function handleRemote(jsep) {
+export function handleRemote(jsep: any) {
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.handleRemoteJsep({

@@ -291,12 +291,14 @@ export const WebRTC: FC<WebRTCProps> = ({
                         dispatch.currentCall.checkAcceptedUpdate({
                           acceptedWebRTC: true,
                         })
-                        // Set incoming value to false
+
+                        // Set incoming value to false and set start time
                         dispatch.currentCall.updateCurrentCall({
                           incoming: false,
                           incomingWebRTC: false,
+                          startTime: acceptedTimestamp?.toString(),
                         })
-                        dispatch.currentCall.updateStartTime(acceptedTimestamp.toString())
+
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 
@@ -462,6 +464,7 @@ export const WebRTC: FC<WebRTCProps> = ({
 
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [connectionReturned, setConnectionReturned] = useState(false)
+  const wasOfflineRef = useRef(false)
 
   useEffect(() => {
     // Event listeners for online/offline status
@@ -477,13 +480,16 @@ export const WebRTC: FC<WebRTCProps> = ({
     }
   }, [])
 
+  // Reconnection management
   useEffect(() => {
     if (!isOnline) {
       console.log('Internet connection lost.')
+      wasOfflineRef.current = true
       setConnectionReturned(false)
-    } else {
+    } else if (wasOfflineRef.current) {
       console.log('Internet connection restored.')
       setConnectionReturned(true)
+      wasOfflineRef.current = false
     }
   }, [isOnline])
 

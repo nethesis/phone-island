@@ -149,10 +149,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     return {
       width: `${size.width === 0 && isAlert ? variants.alerts.width : size.width}px`,
       height: `${
+        // If there is an alert and the island is open put the correct height
         isAlert && isOpen
-          ? size.height +
-            variants.alerts.height +
-            (size.height === 0 ? padding_expanded * 2 : padding_expanded)
+          ? variants.alerts.height + (size.height === 0 ? padding_expanded * 2 : padding_expanded)
           : size.height
       }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
