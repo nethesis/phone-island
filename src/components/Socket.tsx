@@ -15,6 +15,7 @@ import {
   dispatchServerReload,
   dispatchParkingUpdate,
   dispatchExtensions,
+  dispatchUrlCall,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -402,6 +403,12 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('parkingUpdate', () => {
         // Dispatch serverReload event
         dispatchParkingUpdate()
+      })
+
+      // `callNethLink` is the socket event when user make a call or a action from NethLink and has a physical device
+      socket.current.on('callNethLink', (link, urlType) => {
+        // Dispatch phone island physical call event with the link and the urlType
+        dispatchUrlCall(link, urlType)
       })
     }
 

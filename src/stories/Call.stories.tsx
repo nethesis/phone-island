@@ -29,10 +29,6 @@ const meta: Meta<typeof PhoneIsland> = {
 
 export default meta
 
-// Uses the configuration token from .env
-const config = process.env.CONFIG_TOKEN
-type Story = StoryObj<typeof PhoneIsland>
-
 const CallTemplate = (args: any) => {
   const [eventName, setEventName] = useState('phone-island-recording-open')
   //take the number from input field
@@ -154,6 +150,11 @@ const CallTemplate = (args: any) => {
   useEventListener('phone-island-detached', () => {
     setShowUI(false)
     setToastMessage('Phone island is detached...')
+  })
+
+  useEventListener('phone-island-call-physical', (data) => {
+    console.log('Phone island physical call', data)
+    setToastMessage('Phone island physical action...')
   })
 
   const toastNotification = () => {

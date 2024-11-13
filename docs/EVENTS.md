@@ -494,6 +494,15 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-call-physical` The dispatch of physical phone call or action
+
+ ```json
+ {
+    "url": "http://username:password@physicalPhoneIp/cgi-bin/ConfigManApp.com?key=numberCalled;ENTER",
+    "urlType": "call"
+ }
+ ````
+
 ## Listen Recording Events - phone-island-recording-*
 
 - `phone-island-recording-open` The event to show the recording view.
