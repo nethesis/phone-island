@@ -30,7 +30,7 @@ const AlertView: FC = () => {
 
   return (
     latestAlert && (
-      <div className='pi-relative pi-rounded-md pi-w-full pi-flex pi-mt-[-1rem]'>
+      <div className='pi-relative pi-rounded-md pi-w-full pi-flex'>
         <div className='pi-flex pi-items-center'>
           <div
             className={`pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-mr-4 pi-rounded-full pi-h-10 pi-w-10 pi-mt-[-0.8rem] ${
