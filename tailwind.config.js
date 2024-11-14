@@ -26,9 +26,14 @@ module.exports = {
             left: '100%',
           },
         },
+        scroll: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       animation: {
         'animated-text': '3s linear 0s infinite alternate move',
+        'scroll-text': 'scroll 10s linear infinite',
         'custom-ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       fontFamily: {
