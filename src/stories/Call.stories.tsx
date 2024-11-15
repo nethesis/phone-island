@@ -152,7 +152,7 @@ const CallTemplate = (args: any) => {
     setToastMessage('Phone island is detached...')
   })
 
-  useEventListener('phone-island-call-physical', (data) => {
+  useEventListener('phone-island-action-physical', (data) => {
     console.log('Phone island physical call', data)
     setToastMessage('Phone island physical action...')
   })

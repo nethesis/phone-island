@@ -494,7 +494,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-call-physical` The dispatch of physical phone call or action
+- `phone-island-action-physical` The dispatch of physical phone call or action
 
  ```json
  {

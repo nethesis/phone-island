@@ -142,5 +142,5 @@ export function dispatchUrlCall(url: string, urlType: string) {
     url: url,
     urlType: urlType,
   }
-  eventDispatch('phone-island-call-physical', { urlCallObject })
+  eventDispatch('phone-island-action-physical', { urlCallObject })
 }
