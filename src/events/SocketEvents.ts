@@ -130,3 +130,17 @@ export function dispatchParkingUpdate() {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-parking-update', {})
 }
+
+/**
+ * The dispatch function for url physical call
+ *
+ * @param event The parking update event from socket
+ */
+export function dispatchUrlCall(url: string, urlType: string) {
+  // Dispatch the event on window for external handlers
+  let urlCallObject = {
+    url: url,
+    urlType: urlType,
+  }
+  eventDispatch('phone-island-action-physical', { urlCallObject })
+}

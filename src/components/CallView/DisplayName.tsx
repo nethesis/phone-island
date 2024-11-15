@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { RootState } from '../../store'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import TextScroll from '../TextScroll'
 
 const DisplayName: FC<DisplayNameProps> = () => {
   const [animateText, setAnimateText] = useState<boolean>(false)
@@ -22,9 +23,9 @@ const DisplayName: FC<DisplayNameProps> = () => {
 
   useLayoutEffect(() => {
     if (
-      nameContainer.current &&
-      nameText.current &&
-      nameText.current.clientWidth - nameContainer.current.clientWidth > 5
+      nameContainer?.current &&
+      nameText?.current &&
+      nameText?.current?.clientWidth - nameContainer?.current?.clientWidth > 5
     ) {
       setAnimateText(true)
     }
@@ -74,22 +75,22 @@ const DisplayName: FC<DisplayNameProps> = () => {
           className='pi-whitespace-nowrap pi-relative pi-overflow-hidden '
         >
           <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
-              animateText && 'animated-text'
+            className={`pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
+              animateText ? 'pi-animate-scroll-text' : ''
             }`}
             ref={nameText}
           >
-            {displayName && displayName === '<unknown>'
-              ? 'PBX'
-              : displayName
-              ? displayName
-              : incoming
-              ? t('Call.Incoming call') || '-'
-              : t('Call.Outgoing call') || '-'}
+            {displayName && displayName === '<unknown>' ? (
+              'PBX'
+            ) : displayName ? (
+              <TextScroll text={displayName}></TextScroll>
+            ) : incoming ? (
+              t('Call.Incoming call') || '-'
+            ) : (
+              t('Call.Outgoing call') || '-'
+            )}
           </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'>
-            {' '}
-          </div>
+          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50' />
         </NameMotion>
       )}
     </>

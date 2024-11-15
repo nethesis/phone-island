@@ -46,3 +46,23 @@ input::placeholder {
   font-size: 14px;
   opacity: 1;
 }
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.text-container {
+  width: 200px;
+  overflow: hidden;
+}
+
+.text-wrapper {
+  display: inline-block;
+  white-space: nowrap;
+  animation: scrolltext 15s linear infinite;
+}

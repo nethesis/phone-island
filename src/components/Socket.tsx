@@ -15,6 +15,7 @@ import {
   dispatchServerReload,
   dispatchParkingUpdate,
   dispatchExtensions,
+  dispatchUrlCall,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -84,6 +85,7 @@ export const Socket: FC<SocketProps> = ({
       // Handle transferring data
       const { transferring, transferSwitching, transferCalls } = store.getState().currentCall
 
+      const view = store.getState().island.view
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
         // With conversation
@@ -135,6 +137,11 @@ export const Socket: FC<SocketProps> = ({
 
                 if (userInformation?.default_device?.type === 'physical') {
                   checkDefaultDeviceConversationActive(conv)
+                }
+                if (view === 'call' && transferring) {
+                  dispatch.currentCall.updateCurrentCall({
+                    transferring: false,
+                  })
                 }
               }
               // Handle not connected calls
@@ -402,6 +409,12 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('parkingUpdate', () => {
         // Dispatch serverReload event
         dispatchParkingUpdate()
+      })
+
+      // `callNethLink` is the socket event when user make a call or a action from NethLink and has a physical device
+      socket.current.on('callNethLink', (link, urlType) => {
+        // Dispatch phone island physical call event with the link and the urlType
+        dispatchUrlCall(link, urlType)
       })
     }
 
