@@ -42,7 +42,7 @@ const AlertView: FC = () => {
             {/* Icon */}
             <FontAwesomeIcon
               icon={latestAlert?.type === 'call_transfered' ? faCircleCheck : faCircleXmark}
-              className={`pi-h-4 pi-w-4 ${
+              className={`pi-h-[1.1rem] pi-w-10 ${
                 latestAlert?.type === 'call_transfered'
                   ? 'pi-text-green-700 dark:pi-text-green-200'
                   : 'pi-text-rose-700 dark:pi-text-rose-200'
@@ -65,7 +65,7 @@ const AlertView: FC = () => {
         <Button
           variant='transparent'
           onClick={() => handleClearAllAlerts()}
-          className='pi-absolute pi-right-[-0.5rem] pi-top-[38%] pi-transform pi--translate-y-1/2'
+          className='pi-absolute pi-right-[-0.5rem] pi-top-[38%] pi-transform pi--translate-y-[57%]'
         >
           <FontAwesomeIcon icon={faTimes} className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4' />
         </Button>

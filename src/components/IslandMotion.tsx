@@ -21,6 +21,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     padding_x_collapsed,
     padding_y_collapsed,
     padding_expanded,
+    alert_padding_expanded
   } = useSelector((state: RootState) => state.motions)
 
   function getVariant() {
@@ -151,7 +152,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       height: `${
         // If there is an alert and the island is open put the correct height
         isAlert && isOpen
-          ? variants.alerts.height + (size.height === 0 ? padding_expanded * 2 : padding_expanded)
+          ? variants.alerts.height + (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
       }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,

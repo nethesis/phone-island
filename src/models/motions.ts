@@ -6,6 +6,7 @@ import type { RootModel } from '.'
 
 const defaultState = {
   padding_expanded: 24,
+  alert_padding_expanded: 2,
   padding_x_collapsed: 8,
   padding_y_collapsed: 16,
   border_radius_expanded: 20,
