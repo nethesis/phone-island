@@ -107,11 +107,11 @@ export async function parkConversation(body: {
 
 export async function answerPhysical() {
   // get data
-  const { ownerExtension } = store.getState().currentCall
+  const { default_device } = store.getState().currentUser
 
   // compose body
   let body: any = {
-    endpointId: ownerExtension,
+    endpointId: default_device?.id,
     endpointType: 'extension',
   }
 
@@ -183,7 +183,7 @@ export async function hangupPhysicalRecordingCall() {
   }
 }
 
-export async function mutePhysical() {
+export async function mutePhysical(toggleMute: boolean) {
   // get data
   const { ownerExtension, conversationId } = store.getState().currentCall
 
@@ -195,7 +195,7 @@ export async function mutePhysical() {
 
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/astproxy/mute`, {
+    const response = await fetch(`${baseURL}/astproxy/toggle_mute`, {
       method: 'POST',
       headers: { ...headers },
       body: JSON.stringify(body),
@@ -204,36 +204,7 @@ export async function mutePhysical() {
       throw new Error(response.statusText)
     }
     store.dispatch.currentCall.updateCurrentCall({
-      muted: true,
-    })
-    return true
-  } catch (error: any) {
-    throw new Error(error)
-  }
-}
-
-export async function unmutePhysical() {
-  // get data
-  const { ownerExtension, conversationId } = store.getState().currentCall
-
-  // compose body
-  let body: any = {
-    convid: conversationId,
-    endpointId: ownerExtension,
-  }
-
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/astproxy/unmute`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: JSON.stringify(body),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
-    }
-    store.dispatch.currentCall.updateCurrentCall({
-      muted: false,
+      muted: toggleMute,
     })
     return true
   } catch (error: any) {
