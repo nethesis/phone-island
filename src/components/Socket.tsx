@@ -127,6 +127,10 @@ export const Socket: FC<SocketProps> = ({
                       extensions[conv.counterpartNum].username
                     }` || '',
                 })
+                // Update the current call informations for physical devices
+                dispatch.currentCall.checkAcceptedUpdate({
+                  acceptedSocket: true,
+                })
                 // Add call to transfer calls
                 dispatch.currentCall.addTransferCalls({
                   type: 'transferred',
@@ -411,8 +415,8 @@ export const Socket: FC<SocketProps> = ({
         dispatchParkingUpdate()
       })
 
-      // `callNethLink` is the socket event when user make a call or a action from NethLink and has a physical device
-      socket.current.on('callNethLink', (link, urlType) => {
+      // `actionNethLink` is the socket event when user make a call or a action from NethLink and has a physical device
+      socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
       })

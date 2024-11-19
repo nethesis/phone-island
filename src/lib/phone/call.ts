@@ -18,7 +18,6 @@ import {
   hangupPhysical,
   answerPhysical,
   mutePhysical,
-  unmutePhysical,
   pausePhysical,
   callPhysical,
   toggleRecord,
@@ -118,7 +117,7 @@ export function muteCurrentCall() {
       })
     }
   } else {
-    mutePhysical()
+    mutePhysical(true)
   }
   eventDispatch('phone-island-call-muted', {})
 }
@@ -136,7 +135,7 @@ export function unmuteCurrentCall() {
       })
     }
   } else {
-    unmutePhysical()
+    mutePhysical(false)
   }
   eventDispatch('phone-island-call-unmuted', {})
 }
