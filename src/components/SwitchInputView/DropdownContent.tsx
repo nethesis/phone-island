@@ -153,10 +153,10 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
               className={`${transferring ? 'pi-right-[1.5rem]' : 'pi-right-[4.5rem]'} 
               ${
                 isListen
-                  ? 'pi-max-h-[9.125rem] pi-mt-[-5.5rem]'
-                  : 'pi-max-h-[13.125rem] pi-mt-[-9.5rem]'
+                  ? 'pi-max-h-[9.125rem] pi-mt-[-8.5rem]'
+                  : 'pi-max-h-[13.125rem] pi-mt-[-12.5rem]'
               }
-               pi-z-50 pi-absolute pi-top-0   pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
+               pi-z-50 pi-absolute pi-w-56 pi-origin-top-right pi-rounded-md pi-shadow-lg pi-ring-1 dark:pi-bg-gray-950 pi-bg-gray-50 pi-bg-opacity-[0.99] dark:pi-bg-opacity-[0.99] pi-ring-black pi-ring-opacity-5 pi-focus:outline-none pi-cursor-auto pi-border-gray-300 dark:pi-border-gray-600 pi-border pi-py-2 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
               data-stop-propagation={true}
             >
               <div className='' data-stop-propagation={true}>

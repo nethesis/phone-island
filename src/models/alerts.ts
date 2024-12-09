@@ -10,7 +10,7 @@ const defaultState: AlertsTypes = {
     browser_permissions: {
       active: false,
       break: true,
-      message: "The browser doesn't have permission to access camera or microphone.",
+      message: "No microphone or camera permissions.",
       type: 'browser_permissions',
     },
     user_permissions: {
@@ -22,7 +22,7 @@ const defaultState: AlertsTypes = {
     unknown_media_permissions: {
       active: false,
       break: true,
-      message: "Web Phone can't access audio or camera on this device.",
+      message: "Unknown audio or camera permissions.",
       type: 'unknown_media_permissions',
     },
     webrtc_down: {
@@ -40,7 +40,7 @@ const defaultState: AlertsTypes = {
     // Warning alerts
     busy_camera: {
       active: false,
-      message: 'Camera is used by another application.',
+      message: 'Camera is already used.',
       type: 'busy_camera',
     },
     // Success alerts

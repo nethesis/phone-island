@@ -60,12 +60,12 @@
     "socket_down": "Socket Down",
     "busy_camera": "Busy Camera",
     "call_transfered": "Call Transferred Successfully",
-    "The browser doesn't have permission to access camera or microphone.": "The browser doesn't have permission to access camera or microphone.",
-    "You must accept audio and video permissions.": "You must accept audio and video permissions.",
-    "Web Phone can't access audio or camera on this device.": "Web Phone can't access audio or camera on this device.",
+    "No microphone or camera permissions.": "No microphone/camera permissions.",
+    "You must accept audio and video permissions.": "You must accept audio/video permissions.",
+    "Unknown audio or camera permissions.": "Unknown audio/camera permissions.",
     "Web Phone connection is down.": "Web Phone connection is down.",
     "Server connection is down.": "Server connection is down.",
-    "Camera is used by another application.": "Camera is used by another application.",
+    "Camera is already used.": "Camera is already used.",
     "Call transferred successfully.": "Call transferred successfully."
   }
 }
