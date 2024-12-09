@@ -74,6 +74,12 @@ export const currentCall = createModel<RootModel>()({
         }
       }
     },
+    deleteTransferCalls: (state) => {
+      return {
+        ...state,
+        transferCalls: state.transferCalls.filter((item) => item.type !== 'transferred'),
+      }
+    },
     setParked: (state, payload: boolean) => {
       state.parked = payload
       return state
