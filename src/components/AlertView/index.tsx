@@ -33,7 +33,7 @@ const AlertView: FC = () => {
       <div className='pi-relative pi-rounded-md pi-w-full pi-flex'>
         <div className='pi-flex pi-items-center'>
           <div
-            className={`pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-mr-4 pi-rounded-full pi-h-10 pi-w-10 pi-mt-[-0.8rem] ${
+            className={`pi-flex pi-items-center pi-justify-center pi-flex-shrink-0 pi-mr-4 pi-rounded-full pi-h-10 pi-w-10 ${
               latestAlert?.type === 'call_transfered'
                 ? 'pi-bg-green-200 dark:pi-bg-green-900'
                 : 'pi-bg-rose-200 dark:pi-bg-rose-900'
@@ -52,7 +52,7 @@ const AlertView: FC = () => {
           </div>
 
           <div className='ml-3'>
-            <h3 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50 pi-dark:text-rose-100'>
+            <h3 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50 pi-dark:text-rose-100 margin-block-property'>
               {t(`Errors.${latestAlert?.type}`)}
             </h3>
             <div className='pi-text-sm pi-font-normal pi-text-gray-700 dark:pi-text-gray-200 pi-dark:text-rose-200 pi-leading-5'>
@@ -65,9 +65,12 @@ const AlertView: FC = () => {
         <Button
           variant='transparent'
           onClick={() => handleClearAllAlerts()}
-          className='pi-absolute pi-right-[-0.5rem] pi-top-[38%] pi-transform pi--translate-y-[57%]'
+          className='pi-absolute pi-right-[-1.28rem] pi-top-[8%] pi-transform pi--translate-y-[57%]'
         >
-          <FontAwesomeIcon icon={faTimes} className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4' />
+          <FontAwesomeIcon
+            icon={faTimes}
+            className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4'
+          />
         </Button>
       </div>
     )
