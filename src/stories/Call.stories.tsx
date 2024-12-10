@@ -353,7 +353,7 @@ const CallTemplate = (args: any) => {
                 >
                   <FontAwesomeIcon icon={faPhone} size='xl' />
                 </Button>
-                {/* <GlobalSearch /> */}
+                {/* Alert list to send */}
                 <div className='flex flex-1 justify-end px-4 sm:px-6'>
                   <select
                     data-stop-propagation={true}

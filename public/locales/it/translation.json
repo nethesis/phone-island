@@ -60,12 +60,12 @@
     "socket_down": "Socket non disponibile",
     "busy_camera": "Camera occupata",
     "call_transfered": "Chiamata trasferita con successo",
-    "No microphone or camera permissions.": "Autorizza microfono/camera.",
-    "Accept audio and video permissions.": "Accetta le autorizzazioni audio/video.",
-    "Unknown audio or camera permissions.": "Autorizzazioni audio/camera sconosciute.",
-    "Web Phone connection is down.": "Connessione Web Phone non disponibile.",
-    "Server connection is down.": "Connessione al server non disponibile.",
-    "Camera is already used.": "Camera già in uso.",
-    "Call transferred successfully.": "Chiamata trasferita con successo."
+    "No microphone or camera permissions.": "Autorizza microfono/camera",
+    "Accept audio and video permissions.": "Accetta le autorizzazioni audio/video",
+    "Unknown audio or camera permissions.": "Autorizzazioni audio/camera sconosciute",
+    "Web Phone connection is down.": "Connessione Web Phone non disponibile",
+    "Server connection is down.": "Connessione al server non disponibile",
+    "Camera is already used.": "Camera già in uso",
+    "Call transferred successfully.": "Chiamata trasferita con successo"
   }
 }
