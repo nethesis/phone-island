@@ -164,20 +164,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-default-device-changed', {})
   })
 
-  useEventListener('phone-island-call-transfer-successfully-popup-open', () => {
-    console.log('Call transferred successfully and popup opened')
-  })
-
-  useEventListener('phone-island-call-transfer-successfully-popup-close', () => {
-    console.log('Call transferred successfully and popup closed')
-  })
-
-  useEventListener('phone-island-call-transfer-failed', () => {
-    console.log('Transfer failed')
-  })
-
-  useEventListener('phone-island-all-alerts-removed', () => {
-    console.log('All alerts removed')
+  useEventListener('phone-island-alert', (alertType: any) => {
+    store.dispatch.alerts.setAlert(alertType.toString())
   })
 
   return (

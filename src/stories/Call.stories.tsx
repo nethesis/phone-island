@@ -223,6 +223,23 @@ const CallTemplate = (args: any) => {
     }
   }
 
+  const handleCreateEvent = (alertType: string) => {
+    eventDispatch('phone-island-alert', alertType)
+  }
+
+  const eventOptions = [
+    { value: '', label: 'Select an event' },
+    { value: 'call_transferred', label: 'Call Transferred' },
+    { value: 'busy_camera', label: 'Busy Camera' },
+    { value: 'socket_down', label: 'Socket Down' },
+    { value: 'webrtc_down', label: 'WebRTC Down' },
+    { value: 'unknown_media_permissions', label: 'Unknown Media Permissions' },
+    { value: 'user_permissions', label: 'User Permissions' },
+    { value: 'browser_permissions', label: 'Browser Permissions' },
+  ]
+
+  const [alert, setAlert] = useState('')
+
   return (
     <>
       <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-lg pi-mx-auto pi-p-6 pi-bg-gray-100 pi-rounded-lg pi-overflow-auto pi-mt-4'>
@@ -336,6 +353,28 @@ const CallTemplate = (args: any) => {
                 >
                   <FontAwesomeIcon icon={faPhone} size='xl' />
                 </Button>
+                {/* Alert list to send */}
+                <div className='flex flex-1 justify-end px-4 sm:px-6'>
+                  <select
+                    data-stop-propagation={true}
+                    onChange={(e) => setAlert(e.target.value)}
+                    value={alert}
+                    className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
+                  >
+                    {eventOptions?.map((event) => (
+                      <option key={event.value} value={event.value} disabled={event.value === ''}>
+                        {event.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    variant='default'
+                    onClick={() => handleCreateEvent(alert)}
+                    disabled={!alert}
+                  >
+                    <FontAwesomeIcon icon={faMoon} size='xl' />
+                  </Button>
+                </div>
               </div>
               <div className='pi-flex pi-justify-center pi-mt-2'>
                 <Button

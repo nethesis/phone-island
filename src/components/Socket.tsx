@@ -148,6 +148,10 @@ export const Socket: FC<SocketProps> = ({
                   })
                 }
               }
+              // Delete transfer calls if there are more than one ( in case of call switch after transfer)
+              if (transferCalls.length > 1) {
+                dispatch.currentCall.deleteTransferCalls()
+              }
               // Handle not connected calls
               else if (conv && !conv.connected) {
                 if (transferring && !transferSwitching) {
