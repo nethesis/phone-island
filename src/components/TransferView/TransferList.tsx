@@ -79,6 +79,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }
   useEventListener('phone-island-call-transfer', (data: CallStartTypes) => {
     handleAttendedTransfer(data.number)
+    eventDispatch('phone-island-call-transfer-opened', {})
   })
 
   // Initialize users list

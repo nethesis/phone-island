@@ -556,6 +556,7 @@ export const WebRTC: FC<WebRTCProps> = ({
     const transferNumber = data?.to
     dispatch.island.toggleIsOpen(true)
     handleAttendedTransfer(transferNumber)
+    eventDispatch('phone-island-call-transfer-opened', {})
   })
 
   async function handleAttendedTransfer(number: string) {
