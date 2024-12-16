@@ -16,6 +16,7 @@ import {
   dispatchParkingUpdate,
   dispatchExtensions,
   dispatchUrlCall,
+  dispatchDefaultDeviceUpdate,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -423,6 +424,12 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
+      })
+
+       // `updateDefaultDevice` is the socket event when user change the default device
+       socket.current.on('updateDefaultDevice', (extension:string) => {
+        // Dispatch phone island physical call event with the link and the urlType
+        dispatchDefaultDeviceUpdate(extension)
       })
     }
 
