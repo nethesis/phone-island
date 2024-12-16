@@ -144,3 +144,13 @@ export function dispatchUrlCall(url: string, urlType: string) {
   }
   eventDispatch('phone-island-action-physical', { urlCallObject })
 }
+
+/**
+ * The dispatch function to update the default device
+ *
+ * @param extension The default_device_update event from socket
+ */
+export function dispatchDefaultDeviceUpdate(extension: string) {
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-default-device-updated', { id: extension })
+}

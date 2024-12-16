@@ -866,14 +866,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-socket-disconnected-popup-open` Indicates that webscket connection missing popup appear
+- `phone-island-socket-disconnected-popup-open` Indicates that websocket connection missing popup appear
 
   ```json
   {}
   ```
 
-- `phone-island-socket-disconnected-popup-close` Indicates that webscket connection missing popup disappear
+- `phone-island-socket-disconnected-popup-close` Indicates that websocket connection missing popup disappear
 
   ```json
   {}
+  ```
+
+- `phone-island-default-device-updated` Indicates that user has updated the default device
+
+  ```json
+  {
+    "id": "91204"
+  }
   ```
