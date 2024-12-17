@@ -64,6 +64,7 @@
     "Accept audio and video permissions.": "Accetta le autorizzazioni audio/video",
     "Unknown audio or camera permissions.": "Autorizzazioni audio/camera sconosciute",
     "Web Phone connection is down.": "Connessione Web Phone non disponibile",
+    "NethLink connection is down.": "Connessione NethLink non disponibile",
     "Server connection is down.": "Connessione al server non disponibile",
     "Camera is already used.": "Camera già in uso",
     "Call transferred successfully.": "Chiamata trasferita con successo"

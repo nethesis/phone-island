@@ -19,6 +19,9 @@ export const currentUser = createModel<RootModel>()({
         ...payload,
       }
     },
+    updateMainPresence: (state, payload) => {
+      state.mainPresence = payload
+    },
     updateCurrentDefaultDevice: (state, payload) => {
       state.default_device = payload
     },
