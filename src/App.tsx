@@ -12,6 +12,7 @@ import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './uti
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
+import { isEmpty } from './utils/genericFunctions/isEmpty'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -166,6 +167,25 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   useEventListener('phone-island-alert', (alertType: any) => {
     store.dispatch.alerts.setAlert(alertType.toString())
+  })
+
+  useEventListener('phone-island-main-presence', (data: any) => {
+    const currentUsernameInformation: any = store.getState().currentUser?.username
+    const currentUserObject: any = store.getState().currentUser
+    let mainPresenceValueBeforeUpdate = currentUserObject?.mainPresence
+    if (
+      currentUsernameInformation !== undefined &&
+      currentUsernameInformation !== '' &&
+      !isEmpty(data[currentUsernameInformation]) &&
+      data[currentUsernameInformation]?.mainPresence !== undefined
+    ) {
+      let newMainPresenceValue = data[currentUsernameInformation]?.mainPresence
+      store.dispatch.currentUser.updateMainPresence(data[currentUsernameInformation]?.mainPresence)
+      let mainPresenceValueAfterUpdate = newMainPresenceValue
+      if (mainPresenceValueAfterUpdate === 'online' && mainPresenceValueBeforeUpdate !== 'online') {
+        eventDispatch('phone-island-call-ended', {})
+      }
+    }
   })
 
   return (
