@@ -134,16 +134,27 @@ export async function answerPhysical() {
 export async function hangupPhysical() {
   // get data
   const { ownerExtension, conversationId } = store.getState().currentCall
+  const currentUserInformation = store.getState().currentUser
   // compose body
   let body: any = {
     convid: conversationId,
     endpointId: ownerExtension,
     endpointType: 'extension',
   }
-
+  let astproxyUrl = '/astproxy/'
+  let actionUrl = ''
+  if (body?.convid !== '' && body?.convid !== undefined) {
+    actionUrl = 'hangup'
+  } else {
+    actionUrl = 'cancel'
+    // set user default device as endpointId on cancel action
+    body.endpointId = currentUserInformation?.default_device?.id
+  }
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/astproxy/hangup`, {
+    // if default device is physical check if conversation is empty or not
+    // if conversation is empty then cancel the call else hangup the call
+    const response = await fetch(`${baseURL}` + `${astproxyUrl}` + `${actionUrl}`, {
       method: 'POST',
       headers: { ...headers },
       body: JSON.stringify(body),
