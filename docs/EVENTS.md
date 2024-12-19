@@ -892,7 +892,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-internet-connected` Indicates that user has internet connectivity enabled
+- `phone-island-internet-connected` Indicates that user has no internet connectivity
 
   ```json
   {}
