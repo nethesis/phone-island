@@ -4,7 +4,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import React, { useEffect, useState } from 'react'
 import { PhoneIsland } from '../App'
-import { classNames, eventDispatch, useEventListener } from '../utils'
+import { eventDispatch, useEventListener } from '../utils'
 import { store } from '../store'
 import { Button } from '../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -15,6 +15,7 @@ import {
   faPhone,
   faSun,
   faTimes,
+  faWifi,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
@@ -240,6 +241,10 @@ const CallTemplate = (args: any) => {
 
   const [alert, setAlert] = useState('')
 
+  const handleInternetConnectionCheck = () => {
+    eventDispatch('phone-island-check-connection', {})
+  }
+
   return (
     <>
       <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-lg pi-mx-auto pi-p-6 pi-bg-gray-100 pi-rounded-lg pi-overflow-auto pi-mt-4'>
@@ -396,6 +401,14 @@ const CallTemplate = (args: any) => {
                   className='pi-ml-2'
                 >
                   <FontAwesomeIcon size='xl' icon={faDownLeftAndUpRightToCenter} />
+                </Button>
+                
+                <Button
+                  variant='default'
+                  onClick={() => handleInternetConnectionCheck()}
+                  className='pi-ml-2'
+                >
+                  <FontAwesomeIcon size='xl' icon={faWifi} />
                 </Button>
               </div>
               {showKeyboards && (

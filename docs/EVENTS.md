@@ -128,6 +128,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-check-connection` The event to manually check user internet connection
+
+  ```json
+  {}
+  ```
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-expanded` The dispatch of phone-island expand
@@ -884,4 +890,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {
     "id": "91204"
   }
+  ```
+
+- `phone-island-internet-connected` Indicates that user has internet connectivity enabled
+
+  ```json
+  {}
+  ```
+
+- `phone-island-internet-disconnected` Indicates that user has internet connectivity disabled
+
+  ```json
+  {}
   ```

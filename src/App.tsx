@@ -13,6 +13,7 @@ import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
+import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -168,6 +169,32 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-alert', (alertType: any) => {
     store.dispatch.alerts.setAlert(alertType.toString())
   })
+
+  // Manually check if internet connection is enabled or not
+  useEventListener('phone-island-check-connection', () => {
+    checkInternetConnection().then((internetIsActive) => {
+      if (internetIsActive) {
+        eventDispatch('phone-island-internet-connected', {})
+      } else {
+        eventDispatch('phone-island-internet-disconnected', {})
+      }
+    })
+  })
+
+  // Check internet connection every 5 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      checkInternetConnection().then((internetIsActive) => {
+        if (internetIsActive) {
+          eventDispatch('phone-island-internet-connected', {})
+        } else {
+          eventDispatch('phone-island-internet-disconnected', {})
+        }
+      })
+    }, 5000)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   useEventListener('phone-island-main-presence', (data: any) => {
     const currentUsernameInformation: any = store.getState().currentUser?.username
