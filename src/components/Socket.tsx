@@ -65,7 +65,7 @@ export const Socket: FC<SocketProps> = ({
     })
     eventDispatch('phone-island-call-answered', {})
 
-    // Stop the local audio element ringing
+    //to be sure that the call is not ringing anymore
     store.dispatch.player.stopAudioPlayer()
   }
 
@@ -132,6 +132,9 @@ export const Socket: FC<SocketProps> = ({
                 dispatch.currentCall.checkAcceptedUpdate({
                   acceptedSocket: true,
                 })
+                if (conv.direction === 'in') {
+                  dispatch.player.pauseAudioPlayer()
+                }
                 // Add call to transfer calls
                 dispatch.currentCall.addTransferCalls({
                   type: 'transferred',
@@ -191,6 +194,7 @@ export const Socket: FC<SocketProps> = ({
                     }` || '',
                 })
               }
+
             case 'onhold':
               // The new conversation during transferring
               const { counterpartName, counterpartNum, startTime } = conv
@@ -426,8 +430,8 @@ export const Socket: FC<SocketProps> = ({
         dispatchUrlCall(link, urlType)
       })
 
-       // `updateDefaultDevice` is the socket event when user change the default device
-       socket.current.on('updateDefaultDevice', (extension:string) => {
+      // `updateDefaultDevice` is the socket event when user change the default device
+      socket.current.on('updateDefaultDevice', (extension: string) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchDefaultDeviceUpdate(extension)
       })
