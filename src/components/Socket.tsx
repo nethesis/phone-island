@@ -132,8 +132,8 @@ export const Socket: FC<SocketProps> = ({
                 dispatch.currentCall.checkAcceptedUpdate({
                   acceptedSocket: true,
                 })
-                if (conv.direction === 'in') {
-                  dispatch.player.pauseAudioPlayer()
+                if (!isEmpty(conv) && conv?.direction !== undefined && conv?.direction === 'in') {
+                  dispatch?.player?.pauseAudioPlayer()
                 }
                 // Add call to transfer calls
                 dispatch.currentCall.addTransferCalls({

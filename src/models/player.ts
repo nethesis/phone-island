@@ -55,8 +55,8 @@ export const player = createModel<RootModel>()({
       }
     },
     pauseAudioPlayer: (state) => {
-      if (state.audioPlayer && state.audioPlayer.current) {
-        state.audioPlayer.current.pause()
+      if (state?.audioPlayer && state?.audioPlayer?.current) {
+        state?.audioPlayer?.current?.pause()
         return {
           ...state,
           audioPlayerPaused: true,
