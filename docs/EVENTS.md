@@ -128,7 +128,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-check-connection` The event to manually check user internet connection
+- `phone-island-check-connection` The event to manually check if an user has internet connection
 
   ```json
   {}
