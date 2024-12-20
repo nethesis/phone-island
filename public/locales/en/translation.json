@@ -53,20 +53,22 @@
     "No users found": "No users found"
   },
   "Errors": {
-    "browser_permissions": "Browser Permissions Error",
-    "user_permissions": "User Permissions Error",
-    "unknown_media_permissions": "Unknown Media Permissions Error",
-    "webrtc_down": "WebRTC Down",
-    "socket_down": "Socket Down",
-    "busy_camera": "Busy Camera",
-    "call_transfered": "Call Transferred Successfully",
-    "No microphone or camera permissions.": "No microphone/camera permissions",
-    "You must accept audio and video permissions.": "You must accept audio/video permissions",
-    "Unknown audio or camera permissions.": "Unknown audio/camera permissions",
-    "Web Phone connection is down.": "Web Phone connection is down",
-    "NethLink connection is down.": "NethLink connection is down",
-    "Server connection is down.": "Server connection is down",
-    "Camera is already used.": "Camera is already used",
-    "Call transferred successfully.": "Call transferred successfully"
+    "browser_permissions": "Browser permissions error",
+    "user_permissions": "Media permissions error",
+    "unknown_media_permissions": "Generic media permission error",
+    "webrtc_down": "WebRTC is unavailable",
+    "socket_down": "Socket is unavailable",
+    "busy_camera": "Webcam is already in use",
+    "call_transfered": "Transfer successful",
+    "The browser doesn't have permission to access camera or microphone.": "The browser doesn't have permission to access camera or microphone.",
+    "You must accept audio and video permissions.": "You must accept audio and video permissions.",
+    "Web Phone can't access audio or camera on this device.": "Web Phone can't access audio or camera on this device.",
+    "Web Phone connection is down.": "Web Phone not communicating with server.",
+    "NethLink connection is down.": "Server connection is unavailable.",
+    "Server connection is down.": "Server connection is unavailable.",
+    "Camera is used by another application.": "Webcam is used by another application.",
+    "Unknown audio or camera permissions.": "Microphone or Webcam is unavailable",
+    "No microphone or camera permissions.": "You must accept borwser permissions.",
+    "Call transferred successfully.": "The call is transferred successfully."
   }
 }
