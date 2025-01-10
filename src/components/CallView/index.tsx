@@ -83,12 +83,12 @@ const CallView: FC<CallViewProps> = () => {
             className={`${
               !isOpen ? 'pi-h-6 pi-w-6' : 'pi-w-8 pi-h-8'
             } pi-animate-ping pi-absolute pi-inline-flex pi-rounded-full ${
-              color === 'red' ? 'pi-bg-red-400' : 'animationDotBackgroundGreen'
+              color === 'red' ? 'pi-bg-red-400' : 'pi-bg-green-400'
             } pi-opacity-75 `}
           ></span>
           <FontAwesomeIcon
             className={`pi-w-4 pi-h-6 pi-rotate-45 ${
-              color === 'red' ? 'pi-text-red-500' : 'animationDotTextGreen'
+              color === 'red' ? 'pi-text-red-500' : 'pi-text-green-500'
             }`}
             icon={faCircle}
           ></FontAwesomeIcon>

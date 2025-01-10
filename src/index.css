@@ -71,11 +71,3 @@ input::placeholder {
   margin-block-start: 0;
   margin-block-end: 0;
 }
-
-.animationDotBackgroundGreen {
-  background-color: rgb(74, 222, 128);
-}
-
-.animationDotTextGreen {
-  color: rgb(34, 197, 94);
-}
