@@ -60,5 +60,7 @@ module.exports = {
     'pi-border-red-600',
     'pi-border-orange-600',
     'pi-border-green-600',
+    'pi-text-green-500',
+    'pi-bg-green-400',
   ],
 }

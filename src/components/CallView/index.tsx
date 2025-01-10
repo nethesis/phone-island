@@ -24,6 +24,8 @@ import Actions from './Actions'
 import Hangup from '../Hangup'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from 'react-tooltip'
+import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
+import { isPhysical } from '../../lib/user/default_device'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -52,10 +54,52 @@ const CallView: FC<CallViewProps> = () => {
   const { t } = useTranslation()
   const activeAlerts = Object.values(data).filter((alert: any) => alert.active)
   const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
+  const currentUser = useSelector((state: RootState) => state.currentUser)
+
+  const landlinePhoneDiv = () => {
+    return (
+      <div className='pi-text-gray-600 dark:pi-text-gray-300 pi-font-normal pi-text-sm pi-flex pi-items-center pi-truncate'>
+        <FontAwesomeIcon size='sm' icon={faOfficePhone} className='pi-mr-1' />
+        <span className='pi-max-w-16 pi-truncate'>
+          {currentUser?.default_device?.description || t('Common.Physical phone')}
+        </span>
+      </div>
+    )
+  }
+
+  const pulseIcon = (color: string) => {
+    return (
+      <div
+        className={`${
+          !isOpen ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'
+        } pi-flex pi-justify-center pi-items-center`}
+      >
+        <div
+          className={`${
+            !isOpen ? 'pi-h-4 pi-w-4 pi-rounded-full' : 'pi-h-8'
+          } pi-w-fit pi-flex pi-justify-center pi-items-center pi-gap-1 pi-overflow-hidden`}
+        >
+          <span
+            className={`${
+              !isOpen ? 'pi-h-6 pi-w-6' : 'pi-w-8 pi-h-8'
+            } pi-animate-ping pi-absolute pi-inline-flex pi-rounded-full ${
+              color === 'red' ? 'pi-bg-red-400' : 'pi-bg-green-400'
+            } pi-opacity-75 `}
+          ></span>
+          <FontAwesomeIcon
+            className={`pi-w-4 pi-h-6 pi-rotate-45 ${
+              color === 'red' ? 'pi-text-red-500' : 'pi-text-green-500'
+            }`}
+            icon={faCircle}
+          ></FontAwesomeIcon>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
-    {/* Avoid alert message and incoming call message for slow connections */}
+      {/* Avoid alert message and incoming call message for slow connections */}
       {latestAlert !== null ? null : (
         <div className='pi-bg-red pi-content-center pi-justify-center'>
           <StyledCallView
@@ -157,7 +201,11 @@ const CallView: FC<CallViewProps> = () => {
                         : ''}
                     </span>
                     {accepted ? (
-                      <Timer startTime={startTime} isHome />
+                      !isPhysical() ? (
+                        <Timer startTime={startTime} isHome />
+                      ) : (
+                        landlinePhoneDiv()
+                      )
                     ) : intrudeListenStatus?.isIntrudeExtension ? (
                       `${intrudeListenStatus?.isIntrudeExtension}`
                     ) : (
@@ -174,7 +222,11 @@ const CallView: FC<CallViewProps> = () => {
                         : ''}
                     </span>
                     {accepted ? (
-                      <Timer startTime={startTime} isHome />
+                      !isPhysical() ? (
+                        <Timer startTime={startTime} isHome />
+                      ) : (
+                        landlinePhoneDiv()
+                      )
                     ) : intrudeListenStatus?.isListenExtension ? (
                       `${intrudeListenStatus?.isListenExtension}`
                     ) : (
@@ -184,7 +236,15 @@ const CallView: FC<CallViewProps> = () => {
                 ) : (
                   <StyledDetails>
                     <DisplayName />
-                    {accepted ? <Timer startTime={startTime} isHome /> : <Number />}
+                    {accepted ? (
+                      !isPhysical() ? (
+                        <Timer startTime={startTime} isHome />
+                      ) : (
+                        landlinePhoneDiv()
+                      )
+                    ) : (
+                      <Number />
+                    )}
                   </StyledDetails>
                 )
               ) : null}
@@ -193,30 +253,8 @@ const CallView: FC<CallViewProps> = () => {
               {/* The timer when collapsed */}
               {!isOpen && accepted && <Timer startTime={startTime} isHome />}
               {accepted && isRecording ? (
-                <>
-                  <div
-                    className={`${
-                      !isOpen ? 'pi-h-6 pi-w-6' : 'pi-h-12 pi-w-12'
-                    } pi-flex pi-justify-center pi-items-center`}
-                  >
-                    <div
-                      className={`${
-                        !isOpen ? 'pi-h-4 pi-w-4 pi-rounded-full' : 'pi-h-8'
-                      } pi-w-fit pi-flex pi-justify-center pi-items-center pi-gap-1 pi-overflow-hidden`}
-                    >
-                      <span
-                        className={`${
-                          !isOpen ? 'pi-h-6 pi-w-6' : 'pi-w-8 pi-h-8'
-                        } pi-animate-ping pi-absolute pi-inline-flex pi-rounded-full pi-bg-red-400 pi-opacity-75 `}
-                      ></span>
-                      <FontAwesomeIcon
-                        className='pi-w-4 pi-h-6 pi-rotate-45 pi-text-red-500'
-                        icon={faCircle}
-                      ></FontAwesomeIcon>
-                    </div>
-                  </div>
-                </>
-              ) : accepted && remoteAudioStream ? (
+                pulseIcon('red')
+              ) : accepted && remoteAudioStream && !isPhysical() ? (
                 <>
                   <AudioBars
                     audioStream={remoteAudioStream}
@@ -224,6 +262,8 @@ const CallView: FC<CallViewProps> = () => {
                     size={isOpen ? 'large' : 'small'}
                   />
                 </>
+              ) : accepted && isPhysical() ? (
+                pulseIcon('green')
               ) : (
                 <></>
               )}

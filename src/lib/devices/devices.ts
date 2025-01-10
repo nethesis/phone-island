@@ -9,6 +9,7 @@ import {
 import JanusLib from '../webrtc/janus'
 import { JanusTypes } from '../../types'
 import { store } from '../../store'
+import { isPhysical } from '../user/default_device'
 
 const Janus: JanusTypes = JanusLib
 
@@ -92,8 +93,8 @@ export const checkMediaPermissions = function () {
         if (Janus.error)
           Janus.error('WebRTC: browser does not have permission to access camera or microphone')
       } else if (type === MediaPermissionsErrorType.UserPermissionDenied) {
-        // User didn't allow app to access camera or microphone
-        store.dispatch.alerts.setAlert('user_permissions')
+        // User didn't allow app to access camera or microphone only if default_device is not physical
+        if( isPhysical() ? '' : store.dispatch.alerts.setAlert('user_permissions') )
         if (Janus.error) Janus.error("WebRTC: user didn't allow app to access camera or microphone")
       } else if (type === MediaPermissionsErrorType.CouldNotStartVideoSource) {
         // Camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)

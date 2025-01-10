@@ -8,7 +8,8 @@
     "Answer phone to start recording": "Rispondi al telefono per iniziare la registrazione",
     "Close the call to stop recording": "Chiudi la chiamata per fermare la registrazione",
     "Search or type a contact": "Cerca o digita un contatto",
-    "Enter a phone number": "Inserisci un numero di telefono"
+    "Enter a phone number": "Inserisci un numero di telefono",
+    "Physical phone": "Telefono fisso"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
