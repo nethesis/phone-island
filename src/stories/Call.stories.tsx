@@ -162,7 +162,7 @@ const CallTemplate = (args: any) => {
     return (
       <div className='pi-fixed pi-bottom-4 pi-right-4 pi-bg-white pi-rounded-lg pi-shadow-lg pi-p-4 pi-flex pi-items-center pi-gap-2'>
         <div className='pi-flex pi-items-center'>
-          <FontAwesomeIcon icon={faCheck} size='lg' className='pi-text-green-600' />
+          <FontAwesomeIcon icon={faCheck} size='lg' className='pi-text-green-500 pi-bg-green-400' />
           <span className='pi-ml-2'>{toastMessage}</span>
         </div>
         <button onClick={closeToast} className='pi-text-red-600 hover:pi-text-red-800'>

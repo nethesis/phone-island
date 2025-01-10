@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { StyledTimer } from '../../styles/Island.styles'
 import Moment from 'react-moment'
+import { isPhysical } from '../../lib/user/default_device'
 
 const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
   // Get isOpen from the island store
@@ -13,7 +14,7 @@ const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
 
   return (
     <>
-      {startTime != null && (
+      {startTime != null && !isPhysical() && (
         <StyledTimer isOpen={isOpen} size={size}>
           <Moment
             date={Number(startTime)}

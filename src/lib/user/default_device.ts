@@ -13,3 +13,11 @@ export function isWebRTC() {
   }
   return false
 }
+
+export function isPhysical() {
+  const { default_device } = store.getState().currentUser
+  if (default_device?.type === 'physical') {
+    return true
+  }
+  return false
+}
