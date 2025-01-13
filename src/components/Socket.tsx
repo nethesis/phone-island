@@ -30,6 +30,7 @@ import type {
 import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
+import { isPhysical } from '../lib/user/default_device'
 
 interface SocketProps {
   children: ReactNode
@@ -67,6 +68,7 @@ export const Socket: FC<SocketProps> = ({
 
     // Stop the local audio element ringing
     store.dispatch.player.stopAudioPlayer()
+    store.dispatch.player.setAudioPlayerLoop(false)
   }
 
   const checkDefaultDeviceConversationClosed = (conv: any) => {
@@ -140,7 +142,7 @@ export const Socket: FC<SocketProps> = ({
                   startTime: `${getTimestampInSeconds()}`,
                 })
 
-                if (userInformation?.default_device?.type === 'physical') {
+                if (isPhysical()) {
                   checkDefaultDeviceConversationActive(conv)
                 }
                 if (view === 'call' && transferring) {
@@ -426,8 +428,8 @@ export const Socket: FC<SocketProps> = ({
         dispatchUrlCall(link, urlType)
       })
 
-       // `updateDefaultDevice` is the socket event when user change the default device
-       socket.current.on('updateDefaultDevice', (extension:string) => {
+      // `updateDefaultDevice` is the socket event when user change the default device
+      socket.current.on('updateDefaultDevice', (extension: string) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchDefaultDeviceUpdate(extension)
       })

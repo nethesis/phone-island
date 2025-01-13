@@ -14,6 +14,7 @@ import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { eventDispatch, useEventListener } from '../utils'
+import { isPhysical } from '../lib/user/default_device'
 
 interface WebRTCProps {
   children: ReactNode
@@ -311,33 +312,38 @@ export const WebRTC: FC<WebRTCProps> = ({
                         if (recording) {
                           dispatch.recorder.setRecording(false)
                         }
+                        if (!isPhysical() && uaType !== 'mobile') {
+                          hangupCurrentCall()
+                          sipcall.hangup()
 
-                        hangupCurrentCall()
-                        sipcall.hangup()
+                          // Stop the local audio element ringing
+                          store.dispatch.player.stopAudioPlayer()
+
+                          // Check the janus doc before enable the following
+                          // if (
+                          //   result['code'] === 486 &&
+                          //   result['event'] === 'hangup' &&
+                          //   result['reason'] === 'Busy Here'
+                          // ) {
+                          //   dispatch.player.updateAudioSource({
+                          //     src: busyRingtone,
+                          //   })
+                          //   dispatch.player.playAudio()
+                          // }
+                          // Reset current call info
+                          store.dispatch.currentCall.reset()
+                          if (janus.current.log)
+                            janus.current.log(
+                              'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
+                            )
+                          // Update webrtc lastActivity time
+                          dispatch.webrtc.updateLastActivity(new Date().getTime())
+                          // stopScreenSharingI()
+                        }
 
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 
-                        // Check the janus doc before enable the following
-                        // if (
-                        //   result['code'] === 486 &&
-                        //   result['event'] === 'hangup' &&
-                        //   result['reason'] === 'Busy Here'
-                        // ) {
-                        //   dispatch.player.updateAudioSource({
-                        //     src: busyRingtone,
-                        //   })
-                        //   dispatch.player.playAudio()
-                        // }
-                        // Reset current call info
-                        store.dispatch.currentCall.reset()
-                        if (janus.current.log)
-                          janus.current.log(
-                            'Call hung up (' + result['code'] + ' ' + result['reason'] + ')!',
-                          )
-                        // Update webrtc lastActivity time
-                        dispatch.webrtc.updateLastActivity(new Date().getTime())
-                        // stopScreenSharingI()
                         break
 
                       case 'gateway_down':
