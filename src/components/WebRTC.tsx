@@ -248,9 +248,33 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                       case 'incomingcall':
                         const { default_device } = store.getState().currentUser
+                        const { endpoints, username } = store.getState().currentUser
+                        const { extensions } = store.getState().users
+
+                        const hasOnlineNethlink = () => {
+                          if (!extensions || !username) return false
+
+                          // Get all extensions for current user
+                          const userExtensions: any = Object.values(extensions).filter(
+                            (ext) => ext?.username === username,
+                          )
+
+                          // Check if any extension is nethlink type and online
+                          return userExtensions?.some((ext) => {
+                            const endpointExtension = endpoints?.extension.find(
+                              (endpoint) => endpoint.id === ext?.exten,
+                            )
+                            return (
+                              endpointExtension?.type === 'nethlink' && ext?.status !== 'offline'
+                            )
+                          })
+                        }
+
                         if (
-                          (uaType === 'mobile' && default_device?.type === 'nethlink') ||
-                          (uaType === 'desktop' && default_device?.type === 'webrtc')
+                          (uaType === 'mobile' &&
+                            (default_device?.type === 'nethlink' || hasOnlineNethlink())) ||
+                          (uaType === 'desktop' &&
+                            (default_device?.type === 'webrtc' || !hasOnlineNethlink()))
                         ) {
                           // Update webrtc state
                           dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
