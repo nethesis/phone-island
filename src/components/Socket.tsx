@@ -432,6 +432,25 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('updateDefaultDevice', (extension: string) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchDefaultDeviceUpdate(extension)
+        // Update the internal store
+        const { extensions } = store.getState().users
+        const { endpoints } = store.getState().currentUser
+        if (!extensions || !endpoints) return
+
+        const extensionInformations: any = Object.values(extensions).filter(
+          (ext) => ext?.exten === extension,
+        )
+        if (extensionInformations.length === 0) return
+
+        let objectComplete = extensionInformations[0]
+        const endpointExtension = endpoints.extension.find(
+          (endpoint) => endpoint.id === objectComplete.exten,
+        )
+        if (endpointExtension) {
+          objectComplete = { ...objectComplete, type: endpointExtension.type }
+        }
+
+        store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
       })
     }
 
