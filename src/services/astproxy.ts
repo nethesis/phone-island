@@ -109,25 +109,28 @@ export async function answerPhysical() {
   // get data
   const { default_device } = store.getState().currentUser
 
+  let default_device_details = default_device?.id || default_device?.exten
   // compose body
-  let body: any = {
-    endpointId: default_device?.id,
-    endpointType: 'extension',
-  }
-
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/astproxy/answer`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: JSON.stringify(body),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
+  if (default_device_details !== undefined) {
+    let body: any = {
+      endpointId: default_device?.exten || default_device?.id,
+      endpointType: 'extension',
     }
-    return true
-  } catch (error: any) {
-    throw new Error(error)
+
+    try {
+      const { baseURL, headers } = store.getState().fetchDefaults
+      const response = await fetch(`${baseURL}/astproxy/answer`, {
+        method: 'POST',
+        headers: { ...headers },
+        body: JSON.stringify(body),
+      })
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      }
+      return true
+    } catch (error: any) {
+      throw new Error(error)
+    }
   }
 }
 

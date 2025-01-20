@@ -188,11 +188,12 @@ export async function blindTransfer(number: string) {
   const { conversationId } = store.getState().currentCall
   const { default_device } = store.getState().currentUser
   // Transfer the call through blind transfer
-  if (conversationId && default_device?.id && number) {
+  let default_device_details = default_device?.id || default_device?.exten
+  if (conversationId && default_device_details && number) {
     return await blindTransferRequest({
       convid: conversationId,
       to: number,
-      endpointId: default_device.id,
+      endpointId: default_device_details,
     })
   }
 }
@@ -204,12 +205,13 @@ export async function attendedTransfer(number: string) {
   // Retrieve current conversation info
   const { conversationId } = store.getState().currentCall
   const { default_device } = store.getState().currentUser
+  let default_device_details = default_device?.id || default_device?.exten
   // Transfer the call through attended transfer
-  if (conversationId && default_device?.id && number) {
+  if (conversationId && default_device_details && number) {
     return await attendedTransferRequest({
       convid: conversationId,
       to: number,
-      endpointId: default_device.id,
+      endpointId: default_device_details,
     })
   }
 }
