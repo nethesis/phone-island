@@ -94,105 +94,141 @@ export const Socket: FC<SocketProps> = ({
         // With conversation
         if (res.status) {
           const { extensions } = store.getState().users
+          const { default_device } = store.getState().currentUser
+          const { endpoints, username } = store.getState().currentUser
+          const { incoming, outgoing } = store.getState().currentCall
+
+          const hasOnlineNethlink = () => {
+            if (!extensions || !username) return false
+
+            // Get all extensions for current user
+            const userExtensions: any = Object.values(extensions).filter(
+              (ext) => ext?.username === username,
+            )
+
+            // Check if any extension is nethlink type and online
+            return userExtensions?.some((ext) => {
+              const endpointExtension = endpoints?.extension.find(
+                (endpoint) => endpoint.id === ext?.exten,
+              )
+              return endpointExtension?.type === 'nethlink' && ext?.status !== 'offline'
+            })
+          }
           switch (res.status) {
             case 'ringing':
-              // The name and the number are updated here not in webrtc
-              dispatch.currentCall.checkIncomingUpdatePlay({
-                conversationId: conv.id,
-                displayName: getDisplayName(conv),
-                number: `${conv.counterpartNum}`,
-                incomingSocket: true,
-                username:
-                  `${
-                    extensions &&
-                    extensions[conv.counterpartNum] &&
-                    extensions[conv.counterpartNum].username
-                  }` || '',
-                ownerExtension: conv.owner,
-              })
-
-              eventDispatch('phone-island-call-ringing', {})
-
-              break
-            // @ts-ignore
-            case 'busy':
-              if (conv && conv.connected) {
-                // Current call accepted and update connected call
-                dispatch.currentCall.updateCurrentCall({
+              if (
+                (uaType === 'mobile' && hasOnlineNethlink()) ||
+                (uaType === 'desktop' &&
+                  (default_device?.type === 'webrtc' ||
+                    (default_device?.type === undefined && !hasOnlineNethlink()) ||
+                    (!hasOnlineNethlink() && default_device?.type === 'physical')))
+              ) {
+                dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
-                  ownerExtension: conv.owner,
+                  incomingSocket: true,
                   username:
                     `${
                       extensions &&
                       extensions[conv.counterpartNum] &&
                       extensions[conv.counterpartNum].username
                     }` || '',
+                  ownerExtension: conv.owner,
                 })
-                // Update the current call informations for physical devices
-                dispatch.currentCall.checkAcceptedUpdate({
-                  acceptedSocket: true,
-                })
-                // Add call to transfer calls
-                dispatch.currentCall.addTransferCalls({
-                  type: 'transferred',
-                  displayName: getDisplayName(conv),
-                  number: `${conv.counterpartNum}`,
-                  startTime: `${getTimestampInSeconds()}`,
-                })
+                store.dispatch.island.setIslandView('call')
 
-                if (isPhysical()) {
-                  checkDefaultDeviceConversationActive(conv)
-                }
-                if (view === 'call' && transferring) {
+                eventDispatch('phone-island-call-ringing', {})
+              }
+              break
+            // @ts-ignore
+            case 'busy':
+              if (
+                (uaType === 'mobile' && hasOnlineNethlink()) ||
+                (uaType === 'desktop' &&
+                  (default_device?.type === 'webrtc' ||
+                    (default_device?.type === undefined && !hasOnlineNethlink()) ||
+                    (!hasOnlineNethlink() && default_device?.type === 'physical')))
+              ) {
+                if (conv && conv.connected) {
+                  // Current call accepted and update connected call
                   dispatch.currentCall.updateCurrentCall({
-                    transferring: false,
+                    conversationId: conv.id,
+                    displayName: getDisplayName(conv),
+                    number: `${conv.counterpartNum}`,
+                    ownerExtension: conv.owner,
+                    username:
+                      `${
+                        extensions &&
+                        extensions[conv.counterpartNum] &&
+                        extensions[conv.counterpartNum].username
+                      }` || '',
                   })
-                }
-              }
-              // Delete transfer calls if there are more than one ( in case of call switch after transfer)
-              if (transferCalls.length > 1) {
-                dispatch.currentCall.deleteTransferCalls()
-              }
-              // Handle not connected calls
-              else if (conv && !conv.connected) {
-                if (transferring && !transferSwitching) {
-                  // Handle hangup during transfer
-                  const inTransferCalls = transferCalls.find(
-                    (item) => item.number === conv.counterpartNum,
-                  )
-                  if (!conv.connected && inTransferCalls) {
-                    // Update transferring data for the current call
+                  // Update the current call informations for physical devices
+                  dispatch.currentCall.checkAcceptedUpdate({
+                    acceptedSocket: true,
+                  })
+                  // Add call to transfer calls
+                  dispatch.currentCall.addTransferCalls({
+                    type: 'transferred',
+                    displayName: getDisplayName(conv),
+                    number: `${conv.counterpartNum}`,
+                    startTime: `${getTimestampInSeconds()}`,
+                  })
+
+                  if (isPhysical()) {
+                    checkDefaultDeviceConversationActive(conv)
+                  }
+                  if (view === 'call' && transferring) {
                     dispatch.currentCall.updateCurrentCall({
                       transferring: false,
                     })
-                    eventDispatch('phone-island-call-transfer-failed', {})
-                    // Reset transfer switching
-                    // TODO - It needs to enhance how conversation connections (conv.connected) are updated server side
-                    // TODO - The transfer end is not handled when the an user hangups or after call switch
-                    dispatch.currentCall.updateTransferSwitching(false)
                   }
                 }
-                if (conv?.counterpartName === 'REC') {
-                  dispatch.physicalRecorder.setRecordingTempVariable(true)
+                // Delete transfer calls if there are more than one ( in case of call switch after transfer)
+                if (transferCalls.length > 1) {
+                  dispatch.currentCall.deleteTransferCalls()
+                }
+                // Handle not connected calls
+                else if (conv && !conv.connected) {
+                  if (transferring && !transferSwitching) {
+                    // Handle hangup during transfer
+                    const inTransferCalls = transferCalls.find(
+                      (item) => item.number === conv.counterpartNum,
+                    )
+                    if (!conv.connected && inTransferCalls) {
+                      // Update transferring data for the current call
+                      dispatch.currentCall.updateCurrentCall({
+                        transferring: false,
+                      })
+                      eventDispatch('phone-island-call-transfer-failed', {})
+                      // Reset transfer switching
+                      // TODO - It needs to enhance how conversation connections (conv.connected) are updated server side
+                      // TODO - The transfer end is not handled when the an user hangups or after call switch
+                      dispatch.currentCall.updateTransferSwitching(false)
+                    }
+                  }
+                  if (conv?.counterpartName === 'REC') {
+                    dispatch.physicalRecorder.setRecordingTempVariable(true)
+                  }
+                }
+                // Handle outgoing call
+                if (conv && !conv.connected && conv.direction === 'out') {
+                  // Update the current outgoing conversation
+                  dispatch.currentCall.checkOutgoingUpdate({
+                    outgoingSocket: true,
+                    displayName: getDisplayName(conv),
+                    number: `${conv.counterpartNum}`,
+                    username:
+                      `${
+                        extensions &&
+                        extensions[conv.counterpartNum] &&
+                        extensions[conv.counterpartNum].username
+                      }` || '',
+                  })
                 }
               }
-              // Handle outgoing call
-              if (conv && !conv.connected && conv.direction === 'out') {
-                // Update the current outgoing conversation
-                dispatch.currentCall.checkOutgoingUpdate({
-                  outgoingSocket: true,
-                  displayName: getDisplayName(conv),
-                  number: `${conv.counterpartNum}`,
-                  username:
-                    `${
-                      extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
-                    }` || '',
-                })
-              }
+
             case 'onhold':
               // The new conversation during transferring
               const { counterpartName, counterpartNum, startTime } = conv

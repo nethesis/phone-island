@@ -158,6 +158,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                     var event = result['event']
                     // Get the recording state
                     const { recording } = store.getState().recorder
+                    const { view } = store.getState().island
 
                     // Manage different types of events
                     switch (event) {
@@ -225,6 +226,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                         }
                         // Update webrtc lastActivity time
                         dispatch.webrtc.updateLastActivity(new Date().getTime())
+                        if (view !== 'call') {
+                          dispatch.island.setIslandView('call')
+                        }
                         break
 
                       // After an outgoing call start on 183 code, it means
@@ -271,10 +275,11 @@ export const WebRTC: FC<WebRTCProps> = ({
                         }
 
                         if (
-                          (uaType === 'mobile' &&
-                            (default_device?.type === 'nethlink' || hasOnlineNethlink())) ||
+                          (uaType === 'mobile' && hasOnlineNethlink()) ||
                           (uaType === 'desktop' &&
-                            (default_device?.type === 'webrtc' || !hasOnlineNethlink()))
+                            (default_device?.type === 'webrtc' ||
+                              (default_device?.type === undefined && !hasOnlineNethlink()) ||
+                              (!hasOnlineNethlink() && default_device?.type === 'physical')))
                         ) {
                           // Update webrtc state
                           dispatch.webrtc.updateWebRTC({ jsepGlobal: jsep })
@@ -293,12 +298,14 @@ export const WebRTC: FC<WebRTCProps> = ({
                             })
 
                             if (janus.current.log) {
+                              dispatch.currentCall.updateIncoming(true)
                               janus.current.log('Incoming call from ' + result['username'] + '!')
                             }
                           }
 
                           // Update the webrtc last activity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
+                          store.dispatch.island.setIslandView('call')
                         }
 
                         break
@@ -575,7 +582,6 @@ export const WebRTC: FC<WebRTCProps> = ({
 
   useEventListener('phone-island-attach', (data) => {
     initWebRTC()
-    store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
     eventDispatch('phone-island-attached', {})
   })
 

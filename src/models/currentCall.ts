@@ -92,6 +92,10 @@ export const currentCall = createModel<RootModel>()({
       state.startTime = payload
       return state
     },
+    updateIncoming: (state, payload: boolean) => {
+      state.incoming = payload
+      return state
+    },
     reset: () => {
       return defaultState
     },

@@ -22,6 +22,7 @@ export interface UserExtensionTypes {
     hold: boolean
   }
   proxy_port: string | null
+  exten: string
 }
 
 export interface PermissionTypes {
