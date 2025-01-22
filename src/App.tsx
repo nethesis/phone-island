@@ -96,7 +96,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   useEventListener('phone-island-detach', (data) => {
     detach()
-    store.dispatch.currentUser.updateCurrentDefaultDevice(data?.deviceInformationObject)
     eventDispatch('phone-island-detached', {})
   })
 
