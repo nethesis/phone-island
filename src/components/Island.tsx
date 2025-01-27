@@ -17,6 +17,7 @@ import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
 import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
+import { SettingsView } from './SettingsView'
 
 /**
  * Provides the Island logic
@@ -73,7 +74,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   }, [incoming, outgoing])
 
   useEffect(() => {
-    if (recording ) {
+    if (recording) {
       dispatch.island.setIslandView('physicalPhoneRecorder')
     }
   }, [view])
@@ -130,6 +131,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 ) : currentView === 'physicalPhoneRecorder' ? (
                   <ViewsTransition forView='physicalPhoneRecorder'>
                     <PhysicalRecorderView />
+                  </ViewsTransition>
+                ) : currentView === 'settings' ? (
+                  <ViewsTransition forView='settings'>
+                    <SettingsView />
                   </ViewsTransition>
                 ) : (
                   <></>

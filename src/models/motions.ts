@@ -109,6 +109,16 @@ const defaultState = {
       width: 418,
       height: 88,
     },
+    settings: {
+      expanded: {
+        width: 374,
+        height: 256,
+      },
+      collapsed: {
+        width: 168,
+        height: 40,
+      },
+    },
   },
 }
 

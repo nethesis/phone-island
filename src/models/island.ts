@@ -14,6 +14,7 @@ const defaultState: IslandTypes = {
     y: 0,
   },
   inputOutputOpened: false,
+  settingsView: 'main',
 }
 
 export const island = createModel<RootModel>()({
@@ -38,6 +39,12 @@ export const island = createModel<RootModel>()({
     toggleInputOutputOpened: (state, payload: boolean) => {
       state.inputOutputOpened = payload
       return state
+    },
+    setSettingsView: (state, payload: SettingsViewType) => {
+      state.settingsView = payload
+    },
+    resetSettingsView: (state) => {
+      state.settingsView = 'main'
     },
   },
   effects: (dispatch) => ({
@@ -64,6 +71,9 @@ type IslandViewType =
   | 'transfer'
   | 'recorder'
   | 'physicalPhoneRecorder'
+  | 'settings'
+
+type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {
   view?: IslandViewType | null
@@ -74,4 +84,5 @@ interface IslandTypes {
     y: number
   }
   inputOutputOpened: boolean
+  settingsView: string
 }
