@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, ComponentProps, Fragment, useState, useEffect } from 'react'
+import React, { type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -14,22 +14,26 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { Button } from '../Button'
+import MichrophoneView from './MichrophoneView'
+import AudioView from './AudioView'
+import ThemeView from './ThemeView'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView } = useSelector((state: RootState) => state.island)
+  console.log('this is the settingsView', settingsView)
   const dispatch = useDispatch<Dispatch>()
 
-  return (
+  // main settings view
+  const MainSettings = (
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Header */}
       <div className='pi-flex pi-items-center pi-justify-between'>
         <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
-          {t('Settings')}
+          {t('Settings.Settings')}
         </h1>
         <Button
           onClick={() => dispatch.island.setIslandView('call')}
-          variant='transparent'
-          className='pi-mr-[-1rem]'
+          variant='transparentSettings'
         >
           <FontAwesomeIcon icon={faXmark} size='lg' />
         </Button>
@@ -49,7 +53,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
               icon={faMicrophone}
               className='dark:pi-text-gray-100 pi-text-gray-600'
             />
-            <span>{t('DropdownContent.Microphones')}</span>
+            <span className='pi-ml-[0.4rem]'>{t('Settings.Microphones')}</span>
           </div>
           <FontAwesomeIcon
             icon={faChevronRight}
@@ -66,7 +70,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
               icon={faVolumeHigh}
               className='dark:pi-text-gray-100 pi-text-gray-600'
             />
-            <span>{t('DropdownContent.Speakers')}</span>
+            <span>{t('Settings.Speakers')}</span>
           </div>
           <FontAwesomeIcon
             icon={faChevronRight}
@@ -80,7 +84,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
         >
           <div className='pi-flex pi-items-center pi-gap-3'>
             <FontAwesomeIcon icon={faPalette} className='dark:pi-text-gray-100 pi-text-gray-600' />
-            <span>{t('DropdownContent.Theme')}</span>
+            <span className='pi-ml-[0.22rem]'>{t('Settings.Theme')}</span>
           </div>
           <FontAwesomeIcon
             icon={faChevronRight}
@@ -89,6 +93,25 @@ export const SettingsView: FC<SettingsViewProps> = () => {
         </button>
       </div>
     </div>
+  )
+
+  return (
+    <>
+      {(() => {
+        switch (settingsView) {
+          case 'main':
+            return MainSettings
+          case 'microphone':
+            return <MichrophoneView />
+          case 'audioInput':
+            return <AudioView />
+          case 'theme':
+            return <ThemeView />
+          default:
+            return MainSettings
+        }
+      })()}
+    </>
   )
 }
 

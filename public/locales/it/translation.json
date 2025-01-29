@@ -38,13 +38,6 @@
     "Recording": "Registrando",
     "Interrupt recording": "Interrompi registrazione"
   },
-  "DropdownContent": {
-    "Microphones": "MICROFONI",
-    "Speakers": "ALTOPARLANTI",
-    "Theme": "TEMA",
-    "Dark": "Scuro",
-    "Light": "Chiaro"
-  },
   "Call": {
     "In progress...": "In corso...",
     "Outgoing call": "Chiamata in uscita",
@@ -71,5 +64,13 @@
     "Unknown audio or camera permissions.": "Microfono o fotocamera non disponibili.",
     "No microphone or camera permissions.": "Devi accettare i permessi del browser.",
     "Call transferred successfully.": "La chiamata è stata trasferita con successo."
+  },
+  "Settings": {
+    "Theme": "Tema",
+    "Dark": "Scuro",
+    "Light": "Chiaro",
+    "Speakers": "Altoparlanti",
+    "Microphones": "Microfoni",
+    "Settings": "Impostazioni"
   }
 }

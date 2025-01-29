@@ -1,21 +1,28 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, ComponentProps, useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faMicrophone } from '@fortawesome/free-solid-svg-icons'
-import { MenuItem } from '@headlessui/react'
+import {
+  faCheck,
+  faMicrophone,
+  faXmark,
+  faAngleLeft,
+} from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
+import { Button } from '../Button'
 
-const MichrophoneView: FC<MichrophoneViewProps> = ({}) => {
+const MicrophoneView = () => {
+  const dispatch = useDispatch()
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
 
   const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
     getJSONItem('phone-island-audio-input-device').deviceId || null,
   )
+  const [actualDevices, setActualDevices]: any = useState([])
 
   const handleClickAudioInput = (audioInputDevice: string) => {
     setSelectedAudioInput(audioInputDevice)
@@ -25,16 +32,13 @@ const MichrophoneView: FC<MichrophoneViewProps> = ({}) => {
         tracks: [
           {
             type: 'audio',
-            mid: '0', // We assume mid 0 is audio
+            mid: '0',
             capture: { deviceId: { exact: audioInputDevice } },
           },
         ],
         success: function () {
           console.info('Audio input device switch success!')
-          // set device to localstorage
           setJSONItem('phone-island-audio-input-device', { deviceId: audioInputDevice })
-
-          // dispatch event
           eventDispatch('phone-island-call-audio-input-switched', {})
         },
         error: function (err) {
@@ -42,28 +46,24 @@ const MichrophoneView: FC<MichrophoneViewProps> = ({}) => {
         },
       })
     } else {
-      // set device to localstorage
       setJSONItem('phone-island-audio-input-device', { deviceId: audioInputDevice })
-
-      // dispatch event
       eventDispatch('phone-island-call-audio-input-switched', {})
     }
   }
+
   useEventListener('phone-island-call-audio-input-switch', (data: DeviceInputOutputTypes) => {
     handleClickAudioInput(data.deviceId)
   })
-
-  const [actualDevice, setActualDevice]: any = useState([])
 
   useEffect(() => {
     const checkInputOutputDevices = () => {
       navigator.mediaDevices
         .enumerateDevices()
         .then((deviceInfos) => {
-          setActualDevice(deviceInfos)
+          setActualDevices(deviceInfos)
         })
         .catch((error) => {
-          console.error('error', error)
+          console.error('Error fetching devices:', error)
         })
     }
 
@@ -76,82 +76,72 @@ const MichrophoneView: FC<MichrophoneViewProps> = ({}) => {
     }
   }, [selectedAudioInput])
 
+  const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
+
   return (
-    <>
-      {/* Microphones */}
-      <div className='pi-font-semibold dark:pi-text-gray-50 pi-text-gray-600 pi-py-1 pi-px-4'>
-        {t('DropdownContent.Microphones')}
+    <div className='pi-flex pi-flex-col pi-w-full'>
+      {/* Title */}
+      <div className='pi-flex pi-items-center pi-justify-between'>
+        <div className='pi-flex pi-items-center pi-gap-2'>
+          <Button
+            onClick={() => dispatch.island.setSettingsView('main')}
+            variant='transparentSettings'
+            className=''
+          >
+            <FontAwesomeIcon icon={faAngleLeft} size='lg' />
+          </Button>
+          <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
+            {t('Settings.Microphones')}
+          </h1>
+        </div>
+        <Button
+          onClick={() => dispatch.island.setIslandView('call')}
+          variant='transparentSettings'
+          className=''
+        >
+          <FontAwesomeIcon icon={faXmark} size='lg' />
+        </Button>
       </div>
-      {actualDevice
-        .filter((device) => device?.kind === 'audioinput')
-        .map((audioDevice, index) => (
-          <MenuItem key={index}>
-            {({ active }: any) => (
-              <div
-                className={`pi-flex pi-py-2 pi-px-2 ${
-                  active ? 'pi-bg-gray-200 dark:pi-bg-gray-700' : ''
-                }`}
-                onClick={() => handleClickAudioInput(audioDevice.deviceId)}
-                data-stop-propagation={true}
-              >
-                {/* faCheck on selectedAudioInput */}
+
+      {/* Divider */}
+      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
+      {/* Microphone List */}
+      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
+        {actualDevices
+          .filter((device) => device?.kind === 'audioinput')
+          .map((audioDevice, index) => (
+            <div
+              key={index}
+              className='pi-flex pi-items-center pi-justify-between pi-py-3 pi-px-4 pi-rounded-md hover:pi-bg-gray-100 dark:hover:pi-bg-gray-600 pi-text-gray-700 dark:pi-text-gray-200 hover:pi-text-gray-700 dark:hover:pi-text-gray-200'
+              onClick={() => handleClickAudioInput(audioDevice?.deviceId)}
+              onMouseEnter={() => setHoveredDevice(audioDevice?.deviceId)}
+              onMouseLeave={() => setHoveredDevice(null)}
+            >
+              <div className='pi-flex pi-items-center'>
+                <FontAwesomeIcon icon={faMicrophone} className=' pi-mr-2' />
+                <span>{audioDevice?.label || `Input device ${index + 1}`}</span>
+              </div>
+              <div className='pi-flex pi-items-center'>
                 {selectedAudioInput === audioDevice?.deviceId && (
                   <FontAwesomeIcon
-                    size='lg'
                     icon={faCheck}
-                    className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
+                    className={`${
+                      hoveredDevice === audioDevice?.deviceId
+                        ? 'pi-text-gray-200 dark:pi-text-gray-200'
+                        : 'pi-text-green-600 dark:pi-text-green-400'
+                    }`}
                   />
                 )}
-
-                {/* faCheck if user has no selectedAudioInput and audioDevice is default */}
-                {!selectedAudioInput && audioDevice?.deviceId === 'default' && (
-                  <FontAwesomeIcon
-                    size='lg'
-                    icon={faCheck}
-                    className='pi-text-green-600 dark:pi-text-green-400 pi-mr-2'
-                  />
-                )}
-
-                <FontAwesomeIcon
-                  size='lg'
-                  icon={faMicrophone}
-                  className={`${
-                    selectedAudioInput !== null &&
-                    selectedAudioInput !== '' &&
-                    selectedAudioInput !== audioDevice?.deviceId
-                      ? 'pi-ml-6'
-                      : selectedAudioInput !== '' &&
-                        selectedAudioInput !== null &&
-                        selectedAudioInput === audioDevice?.deviceId
-                      ? ''
-                      : selectedAudioInput === null && audioDevice?.deviceId !== 'default'
-                      ? 'pi-ml-6'
-                      : ''
-                  } dark:pi-text-gray-100 pi-text-gray-600 pi-mr-1`}
-                />
-                <div
-                  className={`${
-                    active
-                      ? 'dark:pi-text-gray-50 pi-text-gray-900'
-                      : 'dark:pi-text-gray-50 pi-text-gray-700'
-                  }`}
-                >
-                  {audioDevice?.label || `Input device ${index + 1}`}
-                </div>
               </div>
-            )}
-          </MenuItem>
-        ))}
-    </>
+            </div>
+          ))}
+      </div>
+    </div>
   )
-}
-
-interface MichrophoneViewProps extends ComponentProps<'div'> {
-  settingsViewMenuSelected?: string
 }
 
 interface DeviceInputOutputTypes {
   deviceId: string
 }
 
-export default MichrophoneView
+export default MicrophoneView

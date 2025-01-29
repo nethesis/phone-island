@@ -38,13 +38,6 @@
     "Recording": "Recording",
     "Interrupt recording": "Interrupt recording"
   },
-  "DropdownContent": {
-    "Microphones": "MICROPHONES",
-    "Speakers": "SPEAKERS",
-    "Theme": "THEME",
-    "Dark": "Dark",
-    "Light": "Light"
-  },
   "Call": {
     "In progress...": "In progress...",
     "Outgoing call": "Outgoing call",
@@ -71,5 +64,13 @@
     "Unknown audio or camera permissions.": "Microphone or Webcam is unavailable",
     "No microphone or camera permissions.": "You must accept borwser permissions.",
     "Call transferred successfully.": "The call is transferred successfully."
+  },
+  "Settings": {
+    "Theme": "Theme",
+    "Dark": "Dark",
+    "Light": "Light",
+    "Speakers": "Speakers",
+    "Microphones": "Microphones",
+    "Settings": "Settings"
   }
 }
