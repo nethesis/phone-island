@@ -21,6 +21,7 @@ import { Tooltip } from 'react-tooltip'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView } = useSelector((state: RootState) => state.island)
+  console.log('this is the settingsView', settingsView)
   const dispatch = useDispatch<Dispatch>()
 
   const SettingsMenuItem = ({ icon, label, onClick, marginLeft }) => (
