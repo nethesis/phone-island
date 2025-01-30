@@ -26,13 +26,12 @@ import {
   faCircle,
   faStop,
 } from '@fortawesome/free-solid-svg-icons'
-import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
+import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
-import { TransferActions } from '../TransferView'
 import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
@@ -45,7 +44,9 @@ const Actions: FC = () => {
   const parked = useSelector((state: RootState) => state.currentCall.parked)
 
   // Get isOpen and view from island store
-  const { view, actionsExpanded } = useSelector((state: RootState) => state.island)
+  const { view, actionsExpanded, sideViewIsVisible } = useSelector(
+    (state: RootState) => state.island,
+  )
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
 
@@ -146,9 +147,9 @@ const Actions: FC = () => {
             data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
           >
             {paused ? (
-              <FontAwesomeIcon size='xl' icon={faPlay} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPlay} />
             ) : (
-              <FontAwesomeIcon size='xl' icon={faPause} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPause} />
             )}
           </Button>
         )}
@@ -161,9 +162,9 @@ const Actions: FC = () => {
             data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
           >
             {muted ? (
-              <FontAwesomeIcon size='xl' icon={faMicrophoneSlash} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
             ) : (
-              <FontAwesomeIcon size='xl' icon={faMicrophone} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
             )}
           </Button>
         )}
@@ -179,9 +180,12 @@ const Actions: FC = () => {
             }
           >
             {transferring ? (
-              <FontAwesomeIcon className='' size='xl' icon={faArrowDownUpAcrossLine} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowDownUpAcrossLine} />
             ) : (
-              <FontAwesomeIcon size='xl' className='pi-rotate-90' icon={faArrowRightArrowLeft} />
+              <FontAwesomeIcon
+                className='pi-rotate-90 pi-h-6 pi-w-6'
+                icon={faArrowRightArrowLeft}
+              />
             )}
           </Button>
         )}
@@ -198,14 +202,12 @@ const Actions: FC = () => {
           >
             {actionsExpanded ? (
               <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-200'
-                size='xl'
+                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
                 icon={faChevronUp}
               />
             ) : (
               <FontAwesomeIcon
-                size='xl'
-                className='pi-text-gray-700 dark:pi-text-gray-200'
+                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
                 icon={faChevronDown}
               />
             )}
@@ -224,7 +226,7 @@ const Actions: FC = () => {
               data-tooltip-id='tooltip-keyboard'
               data-tooltip-content={t('Tooltip.Keyboard') || ''}
             >
-              <FontAwesomeIcon size='xl' icon={faGridRound} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faGridRound} />
             </Button>
             <Button
               active={isRecording}
@@ -237,11 +239,17 @@ const Actions: FC = () => {
               }
             >
               {isRecording ? (
-                <FontAwesomeIcon icon={faStop} size='xl' />
+                <FontAwesomeIcon icon={faStop} className='pi-h-6 pi-w-6' />
               ) : (
                 <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
-                  <FontAwesomeIcon icon={faCircleDot} className='fa-circle-dot pi-text-white dark:pi-text-red-700' />
-                  <FontAwesomeIcon icon={faCircle} className='inner-dot pi-text-red-700 dark:pi-text-white' />
+                  <FontAwesomeIcon
+                    icon={faCircleDot}
+                    className='fa-circle-dot pi-text-white dark:pi-text-red-700'
+                  />
+                  <FontAwesomeIcon
+                    icon={faCircle}
+                    className='inner-dot pi-text-red-700 dark:pi-text-white'
+                  />
                 </div>
               )}
             </Button>
@@ -252,9 +260,20 @@ const Actions: FC = () => {
               data-tooltip-id='tooltip-park'
               data-tooltip-content={t('Tooltip.Park') || ''}
             >
-              <FontAwesomeIcon size='xl' icon={faSquareParking} />
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            {transferring && <TransferActions />}
+            <Button
+              variant='default'
+              onClick={() =>
+                sideViewIsVisible
+                  ? dispatch.island.toggleSideViewVisible(false)
+                  : dispatch.island.toggleSideViewVisible(true)
+              }
+              data-tooltip-id='tooltip-park'
+              data-tooltip-content={t('Tooltip.Park') || ''}
+            >
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faOpen} />
+            </Button>
           </div>
         </>
       ) : (

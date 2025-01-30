@@ -90,9 +90,8 @@ const Hangup: FC<HangupProps> = ({
                 }`}
               >
                 <FontAwesomeIcon
-                  size='xl'
                   icon={faDownLeftAndUpRightToCenter}
-                  className='pi-text-gray-700 dark:pi-text-gray-200'
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6'
                 />
               </Button>
             </div>
@@ -139,9 +138,8 @@ const Hangup: FC<HangupProps> = ({
               }`}
             >
               <FontAwesomeIcon
-                size='xl'
                 icon={faGear}
-                className='pi-text-gray-700 dark:pi-text-gray-200'
+                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
               />
             </Button>
           )}

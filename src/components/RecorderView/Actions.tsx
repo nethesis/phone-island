@@ -159,7 +159,7 @@ export const Actions: FC<{}> = () => {
             data-tooltip-id='tooltip-delete-recorder-view'
             data-tooltip-content={t('Tooltip.Delete') || ''}
           >
-            <FontAwesomeIcon icon={faTrash} size='xl' />
+            <FontAwesomeIcon icon={faTrash} className='pi-h-6 pi-w-6' />
           </Button>
           {playing ? (
             <Button
@@ -169,7 +169,7 @@ export const Actions: FC<{}> = () => {
               data-tooltip-id='tooltip-pause-recorder-view'
               data-tooltip-content={t('Tooltip.Pause') || ''}
             >
-              <FontAwesomeIcon icon={faPause} size='xl' />
+              <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
             </Button>
           ) : (
             <Button
@@ -179,7 +179,7 @@ export const Actions: FC<{}> = () => {
               data-tooltip-id='tooltip-play-recorder-view'
               data-tooltip-content={t('Tooltip.Play') || ''}
             >
-              <FontAwesomeIcon icon={faPlay} size='xl' />
+              <FontAwesomeIcon icon={faPlay} className='pi-h-6 pi-w-6' />
             </Button>
           )}
           <Button
@@ -188,7 +188,7 @@ export const Actions: FC<{}> = () => {
             data-tooltip-id='tooltip-confirm-record-view'
             data-tooltip-content={t('Tooltip.Confirm') || ''}
           >
-            <FontAwesomeIcon icon={faCheck} size='xl' />
+            <FontAwesomeIcon icon={faCheck} className='pi-h-6 pi-w-6' />
           </Button>
         </>
       )}
@@ -204,7 +204,7 @@ export const Actions: FC<{}> = () => {
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
           ) : (
-            <FontAwesomeIcon icon={faRecordVinyl} size='xl' />
+            <FontAwesomeIcon icon={faRecordVinyl} className='pi-h-6 pi-w-6' />
           )}
         </Button>
       )}

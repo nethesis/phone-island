@@ -348,7 +348,7 @@ const CallTemplate = (args: any) => {
                   data-tooltip-id='tooltip-left'
                   data-tooltip-content={t('Tooltip.Answer') || ''}
                 >
-                  <FontAwesomeIcon icon={faPhone} size='xl' />
+                  <FontAwesomeIcon icon={faPhone} className='pi-h-6 pi-w-6' />
                 </Button>
                 <Button
                   onClick={() => eventDispatch('phone-island-call-end', {})}
@@ -356,7 +356,7 @@ const CallTemplate = (args: any) => {
                   data-tooltip-id='tooltip-left'
                   data-tooltip-content={t('Tooltip.Answer') || ''}
                 >
-                  <FontAwesomeIcon icon={faPhone} size='xl' />
+                  <FontAwesomeIcon icon={faPhone} className='pi-h-6 pi-w-6' />
                 </Button>
                 {/* Alert list to send */}
                 <div className='flex flex-1 justify-end px-4 sm:px-6'>
@@ -377,7 +377,7 @@ const CallTemplate = (args: any) => {
                     onClick={() => handleCreateEvent(alert)}
                     disabled={!alert}
                   >
-                    <FontAwesomeIcon icon={faMoon} size='xl' />
+                    <FontAwesomeIcon icon={faMoon} className='pi-h-6 pi-w-6' />
                   </Button>
                 </div>
               </div>
@@ -388,7 +388,7 @@ const CallTemplate = (args: any) => {
                   data-tooltip-id='tooltip-keyboard'
                   data-tooltip-content={t('Tooltip.Keyboard') || ''}
                 >
-                  <FontAwesomeIcon size='xl' icon={faGridRound} />
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faGridRound} />
                 </Button>
 
                 <Button
@@ -400,7 +400,7 @@ const CallTemplate = (args: any) => {
                   }
                   className='pi-ml-2'
                 >
-                  <FontAwesomeIcon size='xl' icon={faDownLeftAndUpRightToCenter} />
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faDownLeftAndUpRightToCenter} />
                 </Button>
                 
                 <Button
@@ -408,7 +408,7 @@ const CallTemplate = (args: any) => {
                   onClick={() => handleInternetConnectionCheck()}
                   className='pi-ml-2'
                 >
-                  <FontAwesomeIcon size='xl' icon={faWifi} />
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faWifi} />
                 </Button>
               </div>
               {showKeyboards && (
@@ -430,7 +430,7 @@ const CallTemplate = (args: any) => {
 
               <div className='pi-mt-4 pi-flex pi-justify-center'>
                 <Button onClick={handleEventDispatch} variant='default'>
-                  <FontAwesomeIcon icon={faCheck} size='xl' />
+                  <FontAwesomeIcon icon={faCheck} className='pi-h-6 pi-w-6' />
                 </Button>
               </div>
             </div>

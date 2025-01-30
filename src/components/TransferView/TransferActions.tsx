@@ -55,7 +55,7 @@ export const TransferActions: FC<TransferActionsProps> = () => {
           data-tooltip-id='transfer-actions-tooltip'
           data-tooltip-content={t('Tooltip.Switch call') || ''}
         >
-          <FontAwesomeIcon size='xl' icon={faArrowsRepeat} />
+          <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowsRepeat} />
         </Button>
         <div></div>
       </div>

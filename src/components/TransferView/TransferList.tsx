@@ -139,7 +139,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 data-tooltip-id='transfer-list-tooltip-back-to-call'
                 data-tooltip-content={t('Tooltip.Back to call') || ''}
               >
-                <FontAwesomeIcon size='xl' icon={faArrowLeft} />
+                <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowLeft} />
               </Button>
               <input
                 data-stop-propagation={true}
@@ -185,7 +185,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                       data-tooltip-id='transfer-list-tooltip-call-to-transfer'
                       data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                     >
-                      <FontAwesomeIcon size='xl' icon={faPhone} />
+                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                     </Button>
                   </div>
                 </div>
@@ -249,7 +249,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                           data-tooltip-id='transfer-list-tooltip-left'
                           data-tooltip-content={t('Tooltip.Call to transfer') || ''}
                         >
-                          <FontAwesomeIcon size='xl' icon={faPhone} />
+                          <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                         </Button>
                       )}
                     </div>

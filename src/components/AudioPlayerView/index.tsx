@@ -69,9 +69,9 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               data-tooltip-content={audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`}
             >
               {audioPlayerPlaying ? (
-                <FontAwesomeIcon icon={faPause} size='xl' />
+                <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
               ) : (
-                <FontAwesomeIcon icon={faPlay} size='xl' />
+                <FontAwesomeIcon icon={faPlay} className='pi-h-6 pi-w-6' />
               )}
             </Button>
           </div>

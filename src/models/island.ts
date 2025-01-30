@@ -15,6 +15,7 @@ const defaultState: IslandTypes = {
   },
   inputOutputOpened: false,
   settingsView: 'main',
+  sideViewIsVisible: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -42,6 +43,9 @@ export const island = createModel<RootModel>()({
     },
     setSettingsView: (state, payload: SettingsViewType) => {
       state.settingsView = payload
+    },
+    toggleSideViewVisible: (state, payload: boolean) => {
+      state.sideViewIsVisible = payload
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
@@ -85,4 +89,5 @@ interface IslandTypes {
   }
   inputOutputOpened: boolean
   settingsView: string
+  sideViewIsVisible: boolean
 }
