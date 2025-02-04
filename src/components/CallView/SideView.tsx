@@ -4,12 +4,23 @@ import { Dispatch, RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUpRightFromSquare, faDisplay, faRecordVinyl,faVideo } from '@fortawesome/free-solid-svg-icons'
-import { faArrowsRepeat } from '@nethesis/nethesis-solid-svg-icons'
+import {
+  faArrowUpRightFromSquare,
+  faDisplay,
+  faVideo,
+} from '@fortawesome/free-solid-svg-icons'
+import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
   const { isOpen } = useSelector((state: RootState) => state.island)
+
+  const closeSideViewAndLaunchEvent = (viewType: any) => {
+    dispatch.island.toggleSideViewVisible(false)
+    if (viewType !== null) {
+      dispatch.island.setIslandView(viewType)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -34,21 +45,30 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
           transition={{ duration: 0 }}
         >
           <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-[2.2rem]'>
+            {/* Recording button */}
             <Button variant='transparentSettings'>
-              <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faRecordVinyl} />
-              
+              <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
+            </Button>
+            {/* Video button */}
+            <Button
+              variant='transparentSettings'
+              onClick={() => closeSideViewAndLaunchEvent('video')}
+            >
+              <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
+            </Button>
+            {/* Switch device button */}
+            <Button variant='transparentSettings'>
+              <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
+            </Button>
+            {/* Share button */}
+            <Button variant='transparentSettings'>
+              <FontAwesomeIcon
+                className='pi-h-5 pi-w-5 pi-text-white'
+                icon={faArrowUpRightFromSquare}
+              />
             </Button>
             <Button variant='transparentSettings'>
-              <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faVideo} />
-            </Button>
-            <Button variant='transparentSettings'>
-              <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowsRepeat} />
-            </Button>
-            <Button variant='transparentSettings'>
-              <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowUpRightFromSquare} />
-            </Button>
-            <Button variant='transparentSettings'>
-              <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faDisplay} />
+              <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
             </Button>
           </div>
         </motion.div>
