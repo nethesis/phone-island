@@ -215,7 +215,6 @@ const CallTemplate = (args: any) => {
   const openOrReducePhoneIsland = () => {
     //retrieve size value from the store
     if (isSmallView) {
-      console.log('entrato qui', isSmallView)
       eventDispatch('phone-island-expand', {})
       setIsSmallView(false)
     } else {
@@ -246,209 +245,161 @@ const CallTemplate = (args: any) => {
   }
 
   return (
-    <>
-      <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-lg pi-mx-auto pi-p-6 pi-bg-gray-100 pi-rounded-lg pi-overflow-auto pi-mt-4'>
-        <div className='pi-flex pi-justify-center'>
-          <input
-            data-stop-propagation={true}
-            type='text'
-            onChange={(e) => setToken(e.target.value)}
-            value={token}
-            placeholder='Enter a valid token'
-            autoFocus
-            spellCheck={false}
-            className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
-          />
-        </div>
-        {showUI && (
-          <>
-            <div className='pi-flex pi-justify-between pi-gap-2'>
-              <button
-                onClick={logCallStore}
-                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
-              >
-                {showLog ? 'Hide call log' : 'Show call log'}
-              </button>
+    <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
+      {/* Token Section */}
+      <div className='pi-space-y-2 pi-w-[98rem]'>
+        <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700'>
+          Authentication Token
+        </label>
+        <input
+          type='text'
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          placeholder='Insert token'
+          className='pi-w-full pi-px-4 pi-py-3 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 focus:pi-border-emerald-500 pi-transition-colors'
+        />
+      </div>
 
-              <button
-                onClick={logUserStore}
-                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
-              >
-                {showUserData ? 'Hide user data' : 'Show user data'}
-              </button>
-
-              <button
+      {showUI && (
+        <>
+          {/* Debug Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>Debug Tools</h3>
+            <div className='pi-grid pi-grid-cols-2 md:pi-grid-cols-4 pi-gap-2'>
+              <Button variant='default' onClick={logCallStore} className='pi-text-sm pi-w-full'>
+                {showLog ? 'Hide Log' : 'Show call log'}
+              </Button>
+              <Button variant='default' onClick={logUserStore} className='pi-text-sm pi-w-full'>
+                {showUserData ? 'Hide user' : 'Show user'}
+              </Button>
+              <Button
+                variant='default'
                 onClick={logPhoneIslandStatus}
-                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
+                className='pi-text-sm pi-w-full'
               >
-                {showPhoneIslandStatus ? 'Hide phone island status' : 'Show phone island status'}
-              </button>
-
-              <button
+                {showPhoneIslandStatus ? 'Hide state' : 'Show phone island state'}
+              </Button>
+              <Button
+                variant='default'
                 onClick={logPhoneIslandWebrtc}
-                className='pi-btn pi-bg-emerald-700 pi-text-white pi-rounded-md'
+                className='pi-text-sm pi-w-full'
               >
-                {showPhoneIslandWebrtc
-                  ? 'Hide phone island webrtc status'
-                  : 'Show phone island webrtc status'}
-              </button>
+                {showPhoneIslandWebrtc ? 'Hide webrtc' : 'Show WebRTC'}
+              </Button>
+            </div>
+          </div>
 
-              <button
-                onClick={toggleTheme}
-                className='pi-btn pi-bg-gray-700 pi-text-white pi-rounded-md 
-             pi-py-2 pi-px-4 pi-flex pi-items-center 
-             hover:pi-bg-gray-800 pi-transition pi-duration-200'
+          {/* Call Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>Call check</h3>
+
+            {/* Number Input Row */}
+            <div className='pi-flex pi-gap-2 pi-mb-4'>
+              <input
+                type='text'
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                placeholder='Insert numbers'
+                className='pi-flex-1 pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500'
+              />
+              <Button
+                variant='green'
+                onClick={() => eventDispatch('phone-island-call-start', { number })}
               >
-                <FontAwesomeIcon icon={theme === 'dark' ? faSun : faMoon} className='pi-mr-2' />
-                Toggle Theme
-              </button>
+                <FontAwesomeIcon icon={faPhone} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button variant='red' onClick={() => eventDispatch('phone-island-call-end', {})}>
+                <FontAwesomeIcon icon={faPhone} className='pi-w-5 pi-h-5' />
+              </Button>
             </div>
 
-            {logData && (
-              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
-                {logData}
-              </pre>
-            )}
-
-            {userData && (
-              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
-                {userData}
-              </pre>
-            )}
-
-            {phoneIslandData && (
-              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
-                {phoneIslandData}
-              </pre>
-            )}
-
-            {phoneIslandWebrtc && (
-              <pre className='pi-bg-gray-200 pi-p-4 pi-rounded-md pi-overflow-auto pi-text-xs'>
-                {phoneIslandWebrtc}
-              </pre>
-            )}
-
-            <div className='pi-bg-white pi-rounded-lg pi-shadow-md pi-p-4'>
-              <h2 className='pi-text-xl pi-font-semibold pi-mb-2'>Call Actions</h2>
-              <label className='pi-block pi-mb-2'>Number to Call</label>
-              <div className='pi-flex pi-items-center pi-gap-2'>
-                <input
-                  data-stop-propagation={true}
-                  type='text'
-                  onChange={(e) => setNumber(e.target.value)}
-                  value={number}
-                  placeholder='Enter a number'
-                  autoFocus
-                  spellCheck={false}
-                  className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
+            {/* Utility Buttons */}
+            <div className='pi-grid pi-grid-cols-3 pi-gap-2'>
+              <Button variant='default' onClick={openKeypad}>
+                <FontAwesomeIcon icon={faGridRound} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button variant='default' onClick={openOrReducePhoneIsland}>
+                <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button variant='default' onClick={toggleTheme}>
+                <FontAwesomeIcon
+                  icon={theme === 'dark' ? faSun : faMoon}
+                  className='pi-w-5 pi-h-5'
                 />
-                <Button
-                  onClick={() => eventDispatch('phone-island-call-start', { number })}
-                  variant='green'
-                  data-tooltip-id='tooltip-left'
-                  data-tooltip-content={t('Tooltip.Answer') || ''}
-                >
-                  <FontAwesomeIcon icon={faPhone} className='pi-h-6 pi-w-6' />
-                </Button>
-                <Button
-                  onClick={() => eventDispatch('phone-island-call-end', {})}
-                  variant='red'
-                  data-tooltip-id='tooltip-left'
-                  data-tooltip-content={t('Tooltip.Answer') || ''}
-                >
-                  <FontAwesomeIcon icon={faPhone} className='pi-h-6 pi-w-6' />
-                </Button>
-                {/* Alert list to send */}
-                <div className='flex flex-1 justify-end px-4 sm:px-6'>
-                  <select
-                    data-stop-propagation={true}
-                    onChange={(e) => setAlert(e.target.value)}
-                    value={alert}
-                    className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
-                  >
-                    {eventOptions?.map((event) => (
-                      <option key={event.value} value={event.value} disabled={event.value === ''}>
-                        {event.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant='default'
-                    onClick={() => handleCreateEvent(alert)}
-                    disabled={!alert}
-                  >
-                    <FontAwesomeIcon icon={faMoon} className='pi-h-6 pi-w-6' />
-                  </Button>
+              </Button>
+            </div>
+
+            {/* DTMF Keypad */}
+            {showKeyboards && (
+              <div className='pi-mt-4 pi-p-4 pi-bg-gray-50 pi-rounded-lg'>
+                <div className='pi-grid pi-grid-cols-3 pi-gap-3'>
+                  {dtmfKeys.flat().map((key) => (
+                    <Button
+                      variant='default'
+                      key={key}
+                      onClick={() => handleDtmfButtonClick(key)}
+                      className='pi-py-3 pi-text-xl pi-font-medium'
+                    >
+                      {key}
+                    </Button>
+                  ))}
                 </div>
               </div>
-              <div className='pi-flex pi-justify-center pi-mt-2'>
-                <Button
-                  variant='default'
-                  onClick={openKeypad}
-                  data-tooltip-id='tooltip-keyboard'
-                  data-tooltip-content={t('Tooltip.Keyboard') || ''}
-                >
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faGridRound} />
-                </Button>
+            )}
+          </div>
 
-                <Button
-                  variant='default'
-                  onClick={() => openOrReducePhoneIsland()}
-                  data-tooltip-id='tooltip-open-close-phone-island'
-                  data-tooltip-content={
-                    isSmallView ? t('Tooltip.Reduce') || '' : t('Tooltip.Open') || ''
-                  }
-                  className='pi-ml-2'
-                >
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faDownLeftAndUpRightToCenter} />
-                </Button>
-                
-                <Button
-                  variant='default'
-                  onClick={() => handleInternetConnectionCheck()}
-                  className='pi-ml-2'
-                >
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faWifi} />
-                </Button>
-              </div>
-              {showKeyboards && (
-                <div className='pi-flex pi-justify-center pi-my-4'>{renderDtmfKeypad()}</div>
-              )}
-            </div>
-
-            <div className='pi-bg-white pi-rounded-lg pi-shadow-md pi-p-4'>
-              <label className='pi-block pi-mb-2'>Event Name</label>
+          {/* Event Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>
+              Events management
+            </h3>
+            <div className='pi-flex pi-gap-2'>
               <select
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                className='pi-w-full pi-px-3 pi-py-2 pi-border pi-rounded-md pi-mt-2'
+                value={alert}
+                onChange={(e) => setAlert(e.target.value)}
+                className='pi-flex-1 pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-w-max-12'
               >
-                <option value='phone-island-recording-open'>Recording Open</option>
-                <option value='phone-island-call-keypad-send'>Send Keypad</option>
-                <option value='phone-island-audio-player-start'>Start Audio</option>
+                {eventOptions.map((option) => (
+                  <option key={option.value} value={option.value} disabled={!option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
-
-              <div className='pi-mt-4 pi-flex pi-justify-center'>
-                <Button onClick={handleEventDispatch} variant='default'>
-                  <FontAwesomeIcon icon={faCheck} className='pi-h-6 pi-w-6' />
-                </Button>
-              </div>
+              <Button
+                variant='default'
+                onClick={() => handleCreateEvent(alert)}
+                disabled={!alert}
+                className='pi-min-w-[120px]'
+              >
+                Send
+              </Button>
             </div>
-          </>
-        )}
+          </div>
 
-        {token && (
-          <PhoneIsland
-            dataConfig={token.toString()}
-            showAlways={false}
-            {...args}
-            uaType={'desktop'}
-          />
-        )}
-        {/* Toast Notification */}
-        {showToast && <>{toastNotification()}</>}
-      </div>
-    </>
+          {/* Data Display */}
+          {logData && (
+            <pre className='pi-bg-gray-800 pi-text-gray-100 pi-p-4 pi-rounded-lg pi-overflow-auto pi-text-sm'>
+              {logData}
+            </pre>
+          )}
+        </>
+      )}
+
+      <PhoneIsland dataConfig={token.toString()} showAlways={false} {...args} uaType={'desktop'} />
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className='pi-fixed pi-bottom-6 pi-right-6 pi-animate-fade-in-up'>
+          <div className='pi-bg-emerald-100 pi-border-l-4 pi-border-emerald-500 pi-text-emerald-700 pi-p-4 pi-rounded-lg pi-shadow-md pi-flex pi-items-center pi-gap-3'>
+            <FontAwesomeIcon icon={faCheck} className='pi-text-emerald-600' />
+            <span>{toastMessage}</span>
+            <button onClick={closeToast} className='pi-text-emerald-600 hover:pi-text-emerald-800'>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
