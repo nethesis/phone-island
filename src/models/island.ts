@@ -76,7 +76,8 @@ type IslandViewType =
   | 'recorder'
   | 'physicalPhoneRecorder'
   | 'settings'
-
+  | 'video'
+  | 'screenShare'
 type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {

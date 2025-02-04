@@ -19,6 +19,7 @@ import IslandDrag from './IslandDrag'
 import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
+import { VideoView } from './VideoView'
 
 /**
  * Provides the Island logic
@@ -110,37 +111,26 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             <IslandMotions>
               {/* The views logic */}
               <AlertGuard>
-                {currentView === 'call' ? (
-                  <ViewsTransition forView='call'>
-                    <CallView />
-                  </ViewsTransition>
-                ) : currentView === 'keypad' ? (
-                  <ViewsTransition forView='keypad'>
-                    <KeyboardView />
-                  </ViewsTransition>
-                ) : currentView === 'transfer' ? (
-                  <ViewsTransition forView='transfer'>
-                    <TransferListView />
-                  </ViewsTransition>
-                ) : currentView === 'player' ? (
-                  <ViewsTransition forView='player'>
-                    <AudioPlayerView />
-                  </ViewsTransition>
-                ) : currentView === 'recorder' ? (
-                  <ViewsTransition forView='recorder'>
-                    <RecorderView />
-                  </ViewsTransition>
-                ) : currentView === 'physicalPhoneRecorder' ? (
-                  <ViewsTransition forView='physicalPhoneRecorder'>
-                    <PhysicalRecorderView />
-                  </ViewsTransition>
-                ) : currentView === 'settings' ? (
-                  <ViewsTransition forView='settings'>
-                    <SettingsView />
-                  </ViewsTransition>
-                ) : (
-                  <></>
-                )}
+                {(() => {
+                  const views = {
+                    call: <CallView />,
+                    keypad: <KeyboardView />,
+                    transfer: <TransferListView />,
+                    player: <AudioPlayerView />,
+                    recorder: <RecorderView />,
+                    physicalPhoneRecorder: <PhysicalRecorderView />,
+                    settings: <SettingsView />,
+                    video: <VideoView />,
+                  }
+
+                  return currentView in views ? (
+                    <ViewsTransition forView={currentView}>
+                      {views[currentView as keyof typeof views]}
+                    </ViewsTransition>
+                  ) : (
+                    <></>
+                  )
+                })()}
               </AlertGuard>
             </IslandMotions>
             <Close />

@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCheck,
   faDownLeftAndUpRightToCenter,
+  faGear,
   faMoon,
   faPhone,
   faSun,
@@ -346,6 +347,27 @@ const CallTemplate = (args: any) => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* View Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>View change</h3>
+
+            {/* Utility Buttons */}
+            <div className='pi-grid pi-grid-cols-3 pi-gap-2'>
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-view-changed', { viewType: 'call' })}
+              >
+                <FontAwesomeIcon icon={faPhone} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-view-changed', { viewType: 'settings' })}
+              >
+                <FontAwesomeIcon icon={faGear} className='pi-w-5 pi-h-5' />
+              </Button>
+            </div>
           </div>
 
           {/* Event Controls */}

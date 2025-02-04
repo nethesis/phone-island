@@ -903,3 +903,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+## Debug events
+
+- `phone-island-view-changed` Force to change phone-island view
+
+  ```json
+  {"viewType": "call"}
+  ```
+

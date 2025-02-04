@@ -36,7 +36,8 @@
     "Record": "Record",
     "Stop recording": "Stop recording",
     "Recording": "Recording",
-    "Interrupt recording": "Interrupt recording"
+    "Interrupt recording": "Interrupt recording",
+    "Other actions": "Other actions"
   },
   "Call": {
     "In progress...": "In progress...",

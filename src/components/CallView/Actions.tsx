@@ -26,7 +26,7 @@ import {
   faCircle,
   faStop,
 } from '@fortawesome/free-solid-svg-icons'
-import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
+import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
 import { sendDTMF } from '../../lib/webrtc/messages'
@@ -229,6 +229,15 @@ const Actions: FC = () => {
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faGridRound} />
             </Button>
             <Button
+              active={parked}
+              variant='default'
+              onClick={parkCurrentCall}
+              data-tooltip-id='tooltip-park'
+              data-tooltip-content={t('Tooltip.Park') || ''}
+            >
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
+            </Button>
+            <Button
               active={isRecording}
               data-stop-propagation={true}
               variant='default'
@@ -254,25 +263,19 @@ const Actions: FC = () => {
               )}
             </Button>
             <Button
-              active={parked}
-              variant='default'
-              onClick={parkCurrentCall}
-              data-tooltip-id='tooltip-park'
-              data-tooltip-content={t('Tooltip.Park') || ''}
-            >
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
-            </Button>
-            <Button
               variant='default'
               onClick={() =>
                 sideViewIsVisible
                   ? dispatch.island.toggleSideViewVisible(false)
                   : dispatch.island.toggleSideViewVisible(true)
               }
-              data-tooltip-id='tooltip-park'
-              data-tooltip-content={t('Tooltip.Park') || ''}
+              data-tooltip-id='tooltip-sideView'
+              data-tooltip-content={t('Tooltip.Other actions') || ''}
             >
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faOpen} />
+              <FontAwesomeIcon
+                className='pi-h-6 pi-w-6'
+                icon={sideViewIsVisible ? faClose : faOpen}
+              />
             </Button>
           </div>
         </>
@@ -287,6 +290,7 @@ const Actions: FC = () => {
       <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-sideView' place='bottom' />
     </>
   )
 }

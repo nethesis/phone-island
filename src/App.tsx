@@ -128,6 +128,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-presence-changed', {})
   })
 
+  useEventListener('phone-island-view-changed', (data) => {
+    const viewType = data?.viewType
+    store.dispatch.island.setIslandView(viewType)
+  })
+
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)
   const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
 
