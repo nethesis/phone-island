@@ -219,6 +219,31 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     }
   })
 
+  useEventListener('phone-island-call-status', () => {
+    const callInformation = store.getState().currentCall
+    console.log('Call status debug informations: ', callInformation)
+  })
+
+  useEventListener('phone-island-user-status', () => {
+    const userInformation = store.getState().currentUser
+    console.log('User status debug informations: ', userInformation)
+  })
+
+  useEventListener('phone-island-status', () => {
+    const phoneIslandInformation = store.getState().island
+    console.log('Phone island status debug informations: ', phoneIslandInformation)
+  })
+
+  useEventListener('phone-island-webrtc-status', () => {
+    const webrtcInformation = store.getState().webrtc
+    console.log('Webrtc status debug informations: ', webrtcInformation)
+  })
+
+  useEventListener('phone-island-player-status', () => {
+    const playerInformation = store.getState().player
+    console.log('Player status debug informations: ', playerInformation)
+  })
+
   return (
     <>
       <Provider store={store}>

@@ -32,14 +32,12 @@ const meta: Meta<typeof PhoneIsland> = {
 export default meta
 
 const CallTemplate = (args: any) => {
-  const [eventName, setEventName] = useState('phone-island-recording-open')
   //take the number from input field
   const [number, setNumber] = useState('*43')
   const [token, setToken] = useState(() => {
     return localStorage.getItem('phoneIslandToken') || ''
   })
   const [key, setKey] = useState('0')
-  const [device, setDevice] = useState('default')
   const [logData, setLogData] = useState('')
   const [userData, setUserData] = useState('')
   const [phoneIslandData, setPhoneIslandData] = useState('')
@@ -133,10 +131,6 @@ const CallTemplate = (args: any) => {
     setShowToast(false)
   }
 
-  const handleEventDispatch = () => {
-    eventDispatch(eventName, { number, key, deviceId: device })
-  }
-
   useEventListener('phone-island-call-ringing', () => {
     setShowToast(true)
     setToastMessage('The call is ringing...')
@@ -158,20 +152,6 @@ const CallTemplate = (args: any) => {
     console.log('Phone island physical call', data)
     setToastMessage('Phone island physical action...')
   })
-
-  const toastNotification = () => {
-    return (
-      <div className='pi-fixed pi-bottom-4 pi-right-4 pi-bg-white pi-rounded-lg pi-shadow-lg pi-p-4 pi-flex pi-items-center pi-gap-2'>
-        <div className='pi-flex pi-items-center'>
-          <FontAwesomeIcon icon={faCheck} size='lg' className='pi-text-green-500 pi-bg-green-400' />
-          <span className='pi-ml-2'>{toastMessage}</span>
-        </div>
-        <button onClick={closeToast} className='pi-text-red-600 hover:pi-text-red-800'>
-          <FontAwesomeIcon icon={faTimes} size='lg' />
-        </button>
-      </div>
-    )
-  }
 
   useEffect(() => {
     if (showToast) {
@@ -267,25 +247,41 @@ const CallTemplate = (args: any) => {
           <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
             <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>Debug Tools</h3>
             <div className='pi-grid pi-grid-cols-2 md:pi-grid-cols-4 pi-gap-2'>
-              <Button variant='default' onClick={logCallStore} className='pi-text-sm pi-w-full'>
-                {showLog ? 'Hide Log' : 'Show call log'}
-              </Button>
-              <Button variant='default' onClick={logUserStore} className='pi-text-sm pi-w-full'>
-                {showUserData ? 'Hide user' : 'Show user'}
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-call-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Call status
               </Button>
               <Button
                 variant='default'
-                onClick={logPhoneIslandStatus}
+                onClick={() => eventDispatch('phone-island-user-status', {})}
                 className='pi-text-sm pi-w-full'
               >
-                {showPhoneIslandStatus ? 'Hide state' : 'Show phone island state'}
+                User status
               </Button>
               <Button
                 variant='default'
-                onClick={logPhoneIslandWebrtc}
+                onClick={() => eventDispatch('phone-island-status', {})}
                 className='pi-text-sm pi-w-full'
               >
-                {showPhoneIslandWebrtc ? 'Hide webrtc' : 'Show WebRTC'}
+                Phone island status
+              </Button>
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-webrtc-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Webrtc status
+              </Button>
+              {/* Check player status */}
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-player-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Player status
               </Button>
             </div>
           </div>

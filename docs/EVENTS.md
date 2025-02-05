@@ -912,3 +912,32 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {"viewType": "call"}
   ```
 
+- `phone-island-call-status` Retrieve all informations about call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-user-status` Retrieve all informations about main user
+
+  ```json
+  {}
+  ```
+
+- `phone-island-status` Retrieve all information about phone island
+
+  ```json
+  {}
+  ```
+
+- `phone-island-webrtc-status` Retrieve all information about webrtc
+
+  ```json
+  {}
+  ```
+
+- `phone-island-player-status` Retrieve all information about audio player
+
+  ```json
+  {}
+  ```
