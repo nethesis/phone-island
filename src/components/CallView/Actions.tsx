@@ -25,6 +25,7 @@ import {
   faCircleDot,
   faCircle,
   faStop,
+  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -54,6 +55,10 @@ const Actions: FC = () => {
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
+    // Check if sideView is visible and close it
+    if (sideViewIsVisible) {
+      dispatch.island.toggleSideViewVisible(false)
+    }
     eventDispatch('phone-island-call-keypad-opened', {})
   }
   useEventListener('phone-island-call-keypad-open', () => {
@@ -63,6 +68,10 @@ const Actions: FC = () => {
   function transfer() {
     // Open the transfer view
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    // Check if sideView is visible and close it
+    if (sideViewIsVisible) {
+      dispatch.island.toggleSideViewVisible(false)
+    }
     eventDispatch('phone-island-call-transfer-opened', {})
   }
   useEventListener('phone-island-call-transfer-open', () => {
@@ -237,7 +246,7 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            <Button
+            {/* <Button
               active={isRecording}
               data-stop-propagation={true}
               variant='default'
@@ -261,6 +270,18 @@ const Actions: FC = () => {
                   />
                 </div>
               )}
+            </Button> */}
+            <Button
+              active={isRecording}
+              data-stop-propagation={true}
+              variant='default'
+              onClick={() => recordCurrentCall(isRecording)}
+              data-tooltip-id='tooltip-record'
+              data-tooltip-content={
+                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
+              }
+            >
+              <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
             </Button>
             <Button
               variant='default'
@@ -290,7 +311,7 @@ const Actions: FC = () => {
       <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-sideView' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-sideView' place='left' />
     </>
   )
 }

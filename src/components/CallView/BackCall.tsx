@@ -37,7 +37,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className={`pi-absolute pi-w-full pi-bg-gray-500 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-top ${
+          className={`pi-absolute pi-w-full pi-bg-gray-700 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-top ${
             isOpen ? 'pi-px-6' : 'pi-px-4'
           } pi-pt-3`}
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}
@@ -59,7 +59,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
             >
               {transferring ? transferringName : displayName}
             </div>
-            <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-500'></div>
+            <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
           <div className=''>
             <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />

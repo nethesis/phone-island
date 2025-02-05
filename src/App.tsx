@@ -244,6 +244,26 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Player status debug informations: ', playerInformation)
   })
 
+  useEventListener('phone-island-test-video', () => {
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    sipcall.createOffer({
+      media: {
+        audioSend: true,
+        audioRecv: true,
+        videoRecv: true,
+        addVideo: true,
+      },
+      success: function (jsep) {
+        // Janus.debug(jsep);
+        sipcall.send({ message: { request: 'update' }, jsep: jsep })
+        console.log('you have just enabled video')
+      },
+      error: function (error) {
+        console.error('WebRTC error... ' + JSON.stringify(error))
+      },
+    })
+  })
+
   return (
     <>
       <Provider store={store}>
