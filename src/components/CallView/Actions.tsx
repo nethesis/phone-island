@@ -259,7 +259,7 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            <Button
+            {/* <Button
               active={isRecording}
               data-stop-propagation={true}
               variant='default'
@@ -283,6 +283,18 @@ const Actions: FC = () => {
                   />
                 </div>
               )}
+            </Button> */}
+            <Button
+              active={isRecording}
+              data-stop-propagation={true}
+              variant='default'
+              onClick={() => recordCurrentCall(isRecording)}
+              data-tooltip-id='tooltip-record'
+              data-tooltip-content={
+                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
+              }
+            >
+              <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
             </Button>
             {/* Hidden waiting for other actions to be implemented */}
             {/* <Button
