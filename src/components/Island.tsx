@@ -143,8 +143,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
-        <video muted={true} autoPlay ref={localVideo}></video>
-        <video autoPlay muted={true} ref={remoteVideo}></video>
+        <video muted={true} autoPlay ref={localVideo} className='pi-w-96 pi-h-96'></video>
+        <video autoPlay muted={true} ref={remoteVideo} className='pi-w-96 pi-h-96'></video>
       </div>
     </div>
   )

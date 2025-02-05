@@ -203,6 +203,38 @@ export function call(sipURI: string, mediaObj: object) {
   })
 }
 
+export function video(sipURI: string, mediaObj: object) {
+  return new Promise((resolve, reject) => {
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    if (sipURI && mediaObj) {
+      sipcall.createOffer({
+        media: mediaObj,
+        success: function (jsep: any) {
+          // @ts-ignore
+          Janus.debug('Got SDP!')
+          // @ts-ignore
+          Janus.debug(jsep)
+          sipcall.send({
+            message: {
+              request: 'call',
+              uri: sipURI,
+            },
+            jsep: jsep,
+          })
+          resolve(true)
+        },
+        error: function (error) {
+          // @ts-ignore
+          Janus.error('WebRTC error...', error)
+          // @ts-ignore
+          Janus.error('WebRTC error call on createOffer: ', error)
+          reject(false)
+        },
+      })
+    }
+  })
+}
+
 /**
  * Mute current call so the counterpart can't listen the current user
  * @returns The muted status
