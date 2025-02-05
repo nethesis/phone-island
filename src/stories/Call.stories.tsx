@@ -226,6 +226,10 @@ const CallTemplate = (args: any) => {
     eventDispatch('phone-island-check-connection', {})
   }
 
+  const testVideo = () => {
+    eventDispatch('phone-island-test-video', {})
+  }
+
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
@@ -284,6 +288,17 @@ const CallTemplate = (args: any) => {
               >
                 Player status
               </Button>
+              
+
+
+              <Button
+                variant='red'
+                onClick={() => testVideo()}
+                className='pi-text-sm pi-w-full'
+              >
+                Enable video
+              </Button>
+
             </div>
           </div>
 
