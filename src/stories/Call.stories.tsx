@@ -9,6 +9,7 @@ import { store } from '../store'
 import { Button } from '../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faBullhorn,
   faCheck,
   faDownLeftAndUpRightToCenter,
   faGear,
@@ -362,6 +363,21 @@ const CallTemplate = (args: any) => {
                 onClick={() => eventDispatch('phone-island-view-changed', { viewType: 'settings' })}
               >
                 <FontAwesomeIcon icon={faGear} className='pi-w-5 pi-h-5' />
+              </Button>
+            </div>
+          </div>
+
+          {/* Audio Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>Audio change</h3>
+
+            {/* Utility Buttons */}
+            <div className='pi-grid pi-grid-cols-3 pi-gap-2'>
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-player-force-stop', {})}
+              >
+                <FontAwesomeIcon icon={faBullhorn} className='pi-w-5 pi-h-5' />
               </Button>
             </div>
           </div>

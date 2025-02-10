@@ -941,3 +941,9 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+- `phone-island-player-force-stop` Force to stop all audio
+
+  ```json
+  {}
+  ```

@@ -37,7 +37,8 @@
     "Stop recording": "Stop recording",
     "Recording": "Recording",
     "Interrupt recording": "Interrupt recording",
-    "Other actions": "Other actions"
+    "Other actions": "Other actions",
+    "Conference": "Add participant for conference call"
   },
   "Call": {
     "In progress...": "In progress...",

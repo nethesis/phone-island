@@ -37,7 +37,8 @@
     "Stop recording": "Ferma registrazione",
     "Recording": "Registrando",
     "Interrupt recording": "Interrompi registrazione",
-    "Other actions": "Altre azioni"
+    "Other actions": "Altre azioni",
+    "Conference": "Aggiungi partecipante per chiamata in conferenza"
   },
   "Call": {
     "In progress...": "In corso...",

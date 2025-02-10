@@ -244,6 +244,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Player status debug informations: ', playerInformation)
   })
 
+  useEventListener('phone-island-player-force-stop', () => {
+    store.dispatch.player.reset()
+    console.log('Audio player is interrupted')
+  })
+
   return (
     <>
       <Provider store={store}>
