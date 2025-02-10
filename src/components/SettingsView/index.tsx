@@ -23,14 +23,24 @@ export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView } = useSelector((state: RootState) => state.island)
   const dispatch = useDispatch<Dispatch>()
 
-  const SettingsMenuItem = ({ icon, label, onClick, marginLeft = '0' }) => (
+  const SettingsMenuItem = ({ icon, label, onClick, marginLeft }) => (
     <button
       onClick={onClick}
       className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
     >
       <div className='pi-flex pi-items-center pi-gap-3'>
         <FontAwesomeIcon icon={icon} className='dark:pi-text-gray-100 pi-text-gray-600' />
-        <span className={`pi-ml-[${marginLeft}rem]`}>{label}</span>
+        <span
+          className={`${
+            marginLeft === 'audio'
+              ? ''
+              : marginLeft === 'microphone'
+              ? 'pi-ml-[0.4rem]'
+              : 'pi-ml-[0.2rem]'
+          }`}
+        >
+          {label}
+        </span>
       </div>
       <FontAwesomeIcon icon={faChevronRight} className='dark:pi-text-gray-100 pi-text-gray-600' />
     </button>
@@ -63,18 +73,19 @@ export const SettingsView: FC<SettingsViewProps> = () => {
           icon={faMicrophone}
           label={t('Settings.Microphones')}
           onClick={() => dispatch.island.setSettingsView('microphone')}
-          marginLeft='0.4'
+          marginLeft='microphone'
         />
         <SettingsMenuItem
           icon={faVolumeHigh}
           label={t('Settings.Speakers')}
           onClick={() => dispatch.island.setSettingsView('audioInput')}
+          marginLeft='audio'
         />
         <SettingsMenuItem
           icon={faPalette}
           label={t('Settings.Theme')}
           onClick={() => dispatch.island.setSettingsView('theme')}
-          marginLeft='0.22'
+          marginLeft='theme'
         />
       </div>
     </div>

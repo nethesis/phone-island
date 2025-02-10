@@ -23,6 +23,9 @@ import {
   faChevronUp,
   faArrowRightArrowLeft,
   faUserPlus,
+  faStop,
+  faCircleDot,
+  faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -256,7 +259,7 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            {/* <Button
+            <Button
               active={isRecording}
               data-stop-propagation={true}
               variant='default'
@@ -280,8 +283,9 @@ const Actions: FC = () => {
                   />
                 </div>
               )}
-            </Button> */}
-            <Button
+            </Button>
+            {/* Hidden waiting for other actions to be implemented */}
+            {/* <Button
               data-stop-propagation={true}
               variant='default'
               onClick={() => addUserConference()}
@@ -289,8 +293,8 @@ const Actions: FC = () => {
               data-tooltip-content={t('Tooltip.Conference') || ''}
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button>
-            <Button
+            </Button> */}
+            {/* <Button
               variant='default'
               onClick={() =>
                 sideViewIsVisible
@@ -304,7 +308,7 @@ const Actions: FC = () => {
                 className='pi-h-6 pi-w-6'
                 icon={sideViewIsVisible ? faClose : faOpen}
               />
-            </Button>
+            </Button> */}
           </div>
         </>
       ) : (

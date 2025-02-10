@@ -83,7 +83,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
           </motion.div>
         )}
       </AnimatePresence>
-      <Tooltip className='pi-z-20' id='tooltip-record' place='left' />
+      {/* <Tooltip className='pi-z-20' id='tooltip-record' place='left' /> */}
       <Tooltip className='pi-z-20' id='tooltip-video' place='left' />
     </>
   )
