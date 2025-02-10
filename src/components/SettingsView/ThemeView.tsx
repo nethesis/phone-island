@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faXmark, faMoon, faSun, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
-import { Button } from '../Button'
+import { SettingsHeader } from './SettingsHeader'
 
 const ThemeView = () => {
-  const dispatch = useDispatch()
   const handleSelectTheme = (clickedTheme: string) => {
     eventDispatch('phone-island-theme-change', { selectedTheme: clickedTheme })
   }
@@ -22,22 +21,7 @@ const ThemeView = () => {
   return (
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Title */}
-      <div className='pi-flex pi-items-center pi-justify-between'>
-        <div className='pi-flex pi-items-center pi-gap-2'>
-          <Button
-            onClick={() => dispatch.island.setSettingsView('main')}
-            variant='transparentSettings'
-          >
-            <FontAwesomeIcon icon={faAngleLeft} size='lg' />
-          </Button>
-          <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
-            {t('Settings.Theme')}
-          </h1>
-        </div>
-        <Button onClick={() => dispatch.island.setIslandView('call')} variant='transparentSettings'>
-          <FontAwesomeIcon icon={faXmark} size='lg' />
-        </Button>
-      </div>
+      <SettingsHeader title={t('Settings.Theme')} tooltipPrefix='theme' />
 
       {/* Divider */}
       <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
@@ -49,7 +33,7 @@ const ThemeView = () => {
         ].map(({ id, icon, label }) => (
           <div
             key={id}
-            className='pi-flex pi-items-center pi-py-3 pi-px-4 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700'
+            className='pi-flex pi-items-center pi-justify-between pi-py-3 pi-px-4 pi-rounded-md hover:pi-bg-gray-100 dark:hover:pi-bg-gray-600 pi-text-gray-700 dark:pi-text-gray-200'
             onClick={() => handleSelectTheme(id)}
             onMouseEnter={() => setHoveredDevice(id)}
             onMouseLeave={() => setHoveredDevice(null)}
@@ -69,7 +53,7 @@ const ThemeView = () => {
                 icon={faCheck}
                 className={`${
                   hoveredDevice === id
-                    ? 'pi-text-gray-200 dark:pi-text-gray-200'
+                    ? 'pi-text-gray-500 dark:pi-text-gray-200'
                     : 'pi-text-green-600 dark:pi-text-green-400'
                 }`}
               />

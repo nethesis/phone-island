@@ -9,7 +9,9 @@
     "Close the call to stop recording": "Chiudi la chiamata per fermare la registrazione",
     "Search or type a contact": "Cerca o digita un contatto",
     "Enter a phone number": "Inserisci un numero di telefono",
-    "Physical phone": "Telefono fisso"
+    "Physical phone": "Telefono fisso",
+    "Close": "Chiudi",
+    "Back":"Indietro"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
@@ -38,7 +40,9 @@
     "Recording": "Registrando",
     "Interrupt recording": "Interrompi registrazione",
     "Other actions": "Altre azioni",
-    "Conference": "Aggiungi partecipante per chiamata in conferenza"
+    "Conference": "Aggiungi partecipante per chiamata in conferenza",
+    "Go to settings": "Vai alle impostazioni",
+    "Enable camera": "Abilita video"
   },
   "Call": {
     "In progress...": "In corso...",

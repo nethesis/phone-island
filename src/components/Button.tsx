@@ -6,7 +6,14 @@ import { classNames } from '../utils'
 
 interface ButtonProps extends ComponentPropsWithRef<'button'> {
   children: ReactNode
-  variant: 'red' | 'green' | 'default' | 'neutral' | 'transparent' | 'transparentSettings'
+  variant:
+    | 'red'
+    | 'green'
+    | 'default'
+    | 'neutral'
+    | 'transparent'
+    | 'transparentSideView'
+    | 'transparentSettings'
   active?: boolean
 }
 
@@ -29,8 +36,10 @@ export const Button: FC<ButtonProps> = ({
         'pi-bg-transparent enabled:hover:pi-bg-gray-500 enabled:hover:pi-border-gray-500 pi-border pi-border-gray-700 focus:pi-ring-0 pi-h-12 pi-w-12 pi-rounded-full',
       transparent:
         'pi-bg-transparent dark:enabled:hover:pi-bg-gray-600/30 enabled:hover:pi-bg-gray-200/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white pi-h-12 pi-w-12 pi-rounded-full',
-      transparentSettings:
+      transparentSideView:
         'pi-bg-transparent dark:enabled:hover:pi-bg-gray-600 enabled:hover:pi-bg-gray-600 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white pi-h-8 pi-w-8 pi-rounded',
+      transparentSettings:
+        'pi-bg-transparent dark:hover:pi-bg-gray-600 hover:pi-bg-gray-300 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white pi-h-8 pi-w-8 pi-rounded',
     },
     background: {
       base: {

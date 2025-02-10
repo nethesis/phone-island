@@ -2,21 +2,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faCheck,
-  faMicrophone,
-  faXmark,
-  faAngleLeft,
-} from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faMicrophone } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
-import { Button } from '../Button'
+import { SettingsHeader } from './SettingsHeader'
 
 const MicrophoneView = () => {
-  const dispatch = useDispatch()
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
 
   const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
@@ -81,27 +75,7 @@ const MicrophoneView = () => {
   return (
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Title */}
-      <div className='pi-flex pi-items-center pi-justify-between'>
-        <div className='pi-flex pi-items-center pi-gap-2'>
-          <Button
-            onClick={() => dispatch.island.setSettingsView('main')}
-            variant='transparentSettings'
-            className=''
-          >
-            <FontAwesomeIcon icon={faAngleLeft} size='lg' />
-          </Button>
-          <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
-            {t('Settings.Microphones')}
-          </h1>
-        </div>
-        <Button
-          onClick={() => dispatch.island.setIslandView('call')}
-          variant='transparentSettings'
-          className=''
-        >
-          <FontAwesomeIcon icon={faXmark} size='lg' />
-        </Button>
-      </div>
+      <SettingsHeader title={t('Settings.Microphones')} tooltipPrefix='microphone' />
 
       {/* Divider */}
       <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
@@ -127,7 +101,7 @@ const MicrophoneView = () => {
                     icon={faCheck}
                     className={`${
                       hoveredDevice === audioDevice?.deviceId
-                        ? 'pi-text-gray-200 dark:pi-text-gray-200'
+                        ? 'pi-text-gray-500 dark:pi-text-gray-200'
                         : 'pi-text-green-600 dark:pi-text-green-400'
                     }`}
                   />

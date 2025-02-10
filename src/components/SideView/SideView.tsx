@@ -48,7 +48,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
             <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-[2.2rem]'>
               {/* Recording button */}
               <Button
-                variant='transparentSettings'
+                variant='transparentSideView'
                 data-tooltip-id='tooltip-record'
                 data-tooltip-content={
                   isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
@@ -58,7 +58,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               </Button>
               {/* Video button */}
               <Button
-                variant='transparentSettings'
+                variant='transparentSideView'
                 onClick={() => closeSideViewAndLaunchEvent('video')}
                 data-tooltip-id='tooltip-video'
                 data-tooltip-content={t('Tooltip.Enable camera') || ''}
@@ -66,17 +66,17 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
               </Button>
               {/* Switch device button */}
-              <Button variant='transparentSettings'>
+              <Button variant='transparentSideView'>
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
               </Button>
               {/* Share button */}
-              <Button variant='transparentSettings'>
+              <Button variant='transparentSideView'>
                 <FontAwesomeIcon
                   className='pi-h-5 pi-w-5 pi-text-white'
                   icon={faArrowUpRightFromSquare}
                 />
               </Button>
-              <Button variant='transparentSettings'>
+              <Button variant='transparentSideView'>
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
               </Button>
             </div>

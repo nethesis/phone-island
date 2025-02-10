@@ -17,11 +17,24 @@ import { Button } from '../Button'
 import MichrophoneView from './MichrophoneView'
 import AudioView from './AudioView'
 import ThemeView from './ThemeView'
+import { Tooltip } from 'react-tooltip'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView } = useSelector((state: RootState) => state.island)
-  console.log('this is the settingsView', settingsView)
   const dispatch = useDispatch<Dispatch>()
+
+  const SettingsMenuItem = ({ icon, label, onClick, marginLeft = '0' }) => (
+    <button
+      onClick={onClick}
+      className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
+    >
+      <div className='pi-flex pi-items-center pi-gap-3'>
+        <FontAwesomeIcon icon={icon} className='dark:pi-text-gray-100 pi-text-gray-600' />
+        <span className={`pi-ml-[${marginLeft}rem]`}>{label}</span>
+      </div>
+      <FontAwesomeIcon icon={faChevronRight} className='dark:pi-text-gray-100 pi-text-gray-600' />
+    </button>
+  )
 
   // main settings view
   const MainSettings = (
@@ -34,6 +47,8 @@ export const SettingsView: FC<SettingsViewProps> = () => {
         <Button
           onClick={() => dispatch.island.setIslandView('call')}
           variant='transparentSettings'
+          data-tooltip-id='tooltip-close-settings'
+          data-tooltip-content={t('Common.Close') || ''}
         >
           <FontAwesomeIcon icon={faXmark} size='lg' />
         </Button>
@@ -44,53 +59,23 @@ export const SettingsView: FC<SettingsViewProps> = () => {
 
       {/* Menu Items */}
       <div className='pi-flex pi-flex-col pi-mt-2'>
-        <button
+        <SettingsMenuItem
+          icon={faMicrophone}
+          label={t('Settings.Microphones')}
           onClick={() => dispatch.island.setSettingsView('microphone')}
-          className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
-        >
-          <div className='pi-flex pi-items-center pi-gap-3'>
-            <FontAwesomeIcon
-              icon={faMicrophone}
-              className='dark:pi-text-gray-100 pi-text-gray-600'
-            />
-            <span className='pi-ml-[0.4rem]'>{t('Settings.Microphones')}</span>
-          </div>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            className='dark:pi-text-gray-100 pi-text-gray-600'
-          />
-        </button>
-
-        <button
+          marginLeft='0.4'
+        />
+        <SettingsMenuItem
+          icon={faVolumeHigh}
+          label={t('Settings.Speakers')}
           onClick={() => dispatch.island.setSettingsView('audioInput')}
-          className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
-        >
-          <div className='pi-flex pi-items-center pi-gap-3'>
-            <FontAwesomeIcon
-              icon={faVolumeHigh}
-              className='dark:pi-text-gray-100 pi-text-gray-600'
-            />
-            <span>{t('Settings.Speakers')}</span>
-          </div>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            className='dark:pi-text-gray-100 pi-text-gray-600'
-          />
-        </button>
-
-        <button
+        />
+        <SettingsMenuItem
+          icon={faPalette}
+          label={t('Settings.Theme')}
           onClick={() => dispatch.island.setSettingsView('theme')}
-          className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
-        >
-          <div className='pi-flex pi-items-center pi-gap-3'>
-            <FontAwesomeIcon icon={faPalette} className='dark:pi-text-gray-100 pi-text-gray-600' />
-            <span className='pi-ml-[0.22rem]'>{t('Settings.Theme')}</span>
-          </div>
-          <FontAwesomeIcon
-            icon={faChevronRight}
-            className='dark:pi-text-gray-100 pi-text-gray-600'
-          />
-        </button>
+          marginLeft='0.22'
+        />
       </div>
     </div>
   )
@@ -111,6 +96,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
             return MainSettings
         }
       })()}
+      <Tooltip className='pi-z-20' id='tooltip-close-settings' place='bottom' />
     </>
   )
 }

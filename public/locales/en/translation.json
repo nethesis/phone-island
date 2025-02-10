@@ -9,7 +9,9 @@
     "Close the call to stop recording": "Close the call to stop recording",
     "Search or type a contact": "Search or type a contact",
     "Enter a phone number": "Enter a phone number",
-    "Physical phone": "Physical phone"
+    "Physical phone": "Physical phone",
+    "Close": "Close",
+    "Back":"Back"
   },
   "Tooltip": {
     "Hangup": "Hangup",
@@ -38,7 +40,9 @@
     "Recording": "Recording",
     "Interrupt recording": "Interrupt recording",
     "Other actions": "Other actions",
-    "Conference": "Add participant for conference call"
+    "Conference": "Add participant for conference call",
+    "Go to settings": "Go to settings",
+    "Enable camera": "Enable camera"
   },
   "Call": {
     "In progress...": "In progress...",
