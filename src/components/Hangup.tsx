@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownLeftAndUpRightToCenter, faPhone } from '@fortawesome/free-solid-svg-icons'
+import { faDownLeftAndUpRightToCenter, faGear, faPhone } from '@fortawesome/free-solid-svg-icons'
 import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
@@ -82,17 +82,16 @@ const Hangup: FC<HangupProps> = ({
                 variant='transparent'
                 onClick={() => dispatch.island.handleToggleIsOpen()}
                 data-tooltip-id='tooltip-open-close-phone-island'
-                data-tooltip-content={isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''}
+                data-tooltip-content={
+                  isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''
+                }
                 className={`${
-                  transferring && description
-                    ? 'pi-ml-[-0.15rem]'
-                    : 'pi-ml-[-7.05rem]'
+                  transferring && description ? 'pi-ml-[-0.15rem]' : 'pi-ml-[-7.05rem]'
                 }`}
               >
                 <FontAwesomeIcon
-                  size='xl'
                   icon={faDownLeftAndUpRightToCenter}
-                  className='pi-text-gray-700 dark:pi-text-gray-200'
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6'
                 />
               </Button>
             </div>
@@ -127,21 +126,29 @@ const Hangup: FC<HangupProps> = ({
             )}
           </Button>
           {isOpen && accepted && (
-            <div
+            <Button
+              variant='transparent'
+              onClick={() => dispatch.island.setIslandView('settings')}
+              data-tooltip-id='tooltip-settings-view'
+              data-tooltip-content={t('Tooltip.Go to settings') || ''}
               className={`${
                 transferring && description
                   ? 'pi-grid pi-grid-cols-1 pi-ml-8'
                   : 'pi-flex pi-items-center pi-justify-end pi-ml-16'
               }`}
             >
-              <DropdownContent data-stop-propagation={true}></DropdownContent>
-            </div>
+              <FontAwesomeIcon
+                icon={faGear}
+                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+              />
+            </Button>
           )}
         </motion.div>
       </div>
       <Tooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
       <Tooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
       <Tooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
+      <Tooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
     </>
   )
 }

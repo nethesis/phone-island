@@ -21,7 +21,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     padding_x_collapsed,
     padding_y_collapsed,
     padding_expanded,
-    alert_padding_expanded
+    alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
 
   function getVariant() {
@@ -143,6 +143,45 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           }
         }
         break
+      case 'settings':
+        if (isOpen) {
+          size = {
+            width: variants.settings.expanded.width,
+            height: variants.settings.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.settings.collapsed.width,
+            height: variants.settings.collapsed.height,
+          }
+        }
+        break
+      case 'video':
+        if (isOpen) {
+          size = {
+            width: variants.video.expanded.width,
+            height: variants.video.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.video.collapsed.width,
+            height: variants.video.collapsed.height,
+          }
+        }
+        break
+      case 'conference':
+        if (isOpen) {
+          size = {
+            width: variants.video.expanded.width,
+            height: variants.video.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.video.collapsed.width,
+            height: variants.video.collapsed.height,
+          }
+        }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0
@@ -152,7 +191,8 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       height: `${
         // If there is an alert and the island is open put the correct height
         isAlert && isOpen
-          ? variants.alerts.height + (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
+          ? variants.alerts.height +
+            (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
       }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,

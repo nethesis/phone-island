@@ -14,6 +14,9 @@ const defaultState: IslandTypes = {
     y: 0,
   },
   inputOutputOpened: false,
+  settingsView: 'main',
+  sideViewIsVisible: false,
+  isConferenceList: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -38,6 +41,18 @@ export const island = createModel<RootModel>()({
     toggleInputOutputOpened: (state, payload: boolean) => {
       state.inputOutputOpened = payload
       return state
+    },
+    setSettingsView: (state, payload: SettingsViewType) => {
+      state.settingsView = payload
+    },
+    toggleSideViewVisible: (state, payload: boolean) => {
+      state.sideViewIsVisible = payload
+    },
+    toggleConferenceList: (state, payload: boolean) => {
+      state.isConferenceList = payload
+    },
+    resetSettingsView: (state) => {
+      state.settingsView = 'main'
     },
   },
   effects: (dispatch) => ({
@@ -64,6 +79,11 @@ type IslandViewType =
   | 'transfer'
   | 'recorder'
   | 'physicalPhoneRecorder'
+  | 'settings'
+  | 'video'
+  | 'screenShare'
+  | 'conference'
+type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {
   view?: IslandViewType | null
@@ -74,4 +94,7 @@ interface IslandTypes {
     y: number
   }
   inputOutputOpened: boolean
+  settingsView: string
+  sideViewIsVisible: boolean
+  isConferenceList: boolean
 }

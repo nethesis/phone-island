@@ -10,6 +10,7 @@ import KeyboardView from './KeypadView'
 import AudioPlayerView from './AudioPlayerView'
 import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
+import SideView from './SideView/SideView'
 import ViewsTransition from './ViewsTransition'
 import { TransferListView } from './TransferView'
 import { RecorderView } from './RecorderView'
@@ -17,6 +18,8 @@ import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
 import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
+import { SettingsView } from './SettingsView'
+import { VideoView } from './VideoView'
 
 /**
  * Provides the Island logic
@@ -30,7 +33,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   )
 
   // Get isOpen from island store
-  const { view } = useSelector((state: RootState) => state.island)
+  const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -73,7 +76,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   }, [incoming, outgoing])
 
   useEffect(() => {
-    if (recording ) {
+    if (recording) {
       dispatch.island.setIslandView('physicalPhoneRecorder')
     }
   }, [view])
@@ -104,36 +107,30 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
             <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
+            <SideView isVisible={sideViewIsVisible} />
             <IslandMotions>
               {/* The views logic */}
               <AlertGuard>
-                {currentView === 'call' ? (
-                  <ViewsTransition forView='call'>
-                    <CallView />
-                  </ViewsTransition>
-                ) : currentView === 'keypad' ? (
-                  <ViewsTransition forView='keypad'>
-                    <KeyboardView />
-                  </ViewsTransition>
-                ) : currentView === 'transfer' ? (
-                  <ViewsTransition forView='transfer'>
-                    <TransferListView />
-                  </ViewsTransition>
-                ) : currentView === 'player' ? (
-                  <ViewsTransition forView='player'>
-                    <AudioPlayerView />
-                  </ViewsTransition>
-                ) : currentView === 'recorder' ? (
-                  <ViewsTransition forView='recorder'>
-                    <RecorderView />
-                  </ViewsTransition>
-                ) : currentView === 'physicalPhoneRecorder' ? (
-                  <ViewsTransition forView='physicalPhoneRecorder'>
-                    <PhysicalRecorderView />
-                  </ViewsTransition>
-                ) : (
-                  <></>
-                )}
+                {(() => {
+                  const views = {
+                    call: <CallView />,
+                    keypad: <KeyboardView />,
+                    transfer: <TransferListView />,
+                    player: <AudioPlayerView />,
+                    recorder: <RecorderView />,
+                    physicalPhoneRecorder: <PhysicalRecorderView />,
+                    settings: <SettingsView />,
+                    video: <VideoView />,
+                  }
+
+                  return currentView in views ? (
+                    <ViewsTransition forView={currentView}>
+                      {views[currentView as keyof typeof views]}
+                    </ViewsTransition>
+                  ) : (
+                    <></>
+                  )
+                })()}
               </AlertGuard>
             </IslandMotions>
             <Close />

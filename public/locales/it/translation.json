@@ -9,7 +9,9 @@
     "Close the call to stop recording": "Chiudi la chiamata per fermare la registrazione",
     "Search or type a contact": "Cerca o digita un contatto",
     "Enter a phone number": "Inserisci un numero di telefono",
-    "Physical phone": "Telefono fisso"
+    "Physical phone": "Telefono fisso",
+    "Close": "Chiudi",
+    "Back":"Indietro"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
@@ -36,14 +38,11 @@
     "Record": "Registra",
     "Stop recording": "Ferma registrazione",
     "Recording": "Registrando",
-    "Interrupt recording": "Interrompi registrazione"
-  },
-  "DropdownContent": {
-    "Microphones": "MICROFONI",
-    "Speakers": "ALTOPARLANTI",
-    "Theme": "TEMA",
-    "Dark": "Scuro",
-    "Light": "Chiaro"
+    "Interrupt recording": "Interrompi registrazione",
+    "Other actions": "Altre azioni",
+    "Conference": "Aggiungi partecipante per chiamata in conferenza",
+    "Go to settings": "Vai alle impostazioni",
+    "Enable camera": "Abilita video"
   },
   "Call": {
     "In progress...": "In corso...",
@@ -71,5 +70,13 @@
     "Unknown audio or camera permissions.": "Microfono o fotocamera non disponibili.",
     "No microphone or camera permissions.": "Devi accettare i permessi del browser.",
     "Call transferred successfully.": "La chiamata è stata trasferita con successo."
+  },
+  "Settings": {
+    "Theme": "Tema",
+    "Dark": "Scuro",
+    "Light": "Chiaro",
+    "Speakers": "Altoparlanti",
+    "Microphones": "Microfoni",
+    "Settings": "Impostazioni"
   }
 }

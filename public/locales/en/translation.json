@@ -9,7 +9,9 @@
     "Close the call to stop recording": "Close the call to stop recording",
     "Search or type a contact": "Search or type a contact",
     "Enter a phone number": "Enter a phone number",
-    "Physical phone": "Physical phone"
+    "Physical phone": "Physical phone",
+    "Close": "Close",
+    "Back":"Back"
   },
   "Tooltip": {
     "Hangup": "Hangup",
@@ -36,14 +38,11 @@
     "Record": "Record",
     "Stop recording": "Stop recording",
     "Recording": "Recording",
-    "Interrupt recording": "Interrupt recording"
-  },
-  "DropdownContent": {
-    "Microphones": "MICROPHONES",
-    "Speakers": "SPEAKERS",
-    "Theme": "THEME",
-    "Dark": "Dark",
-    "Light": "Light"
+    "Interrupt recording": "Interrupt recording",
+    "Other actions": "Other actions",
+    "Conference": "Add participant for conference call",
+    "Go to settings": "Go to settings",
+    "Enable camera": "Enable camera"
   },
   "Call": {
     "In progress...": "In progress...",
@@ -71,5 +70,13 @@
     "Unknown audio or camera permissions.": "Microphone or Webcam is unavailable",
     "No microphone or camera permissions.": "You must accept borwser permissions.",
     "Call transferred successfully.": "The call is transferred successfully."
+  },
+  "Settings": {
+    "Theme": "Theme",
+    "Dark": "Dark",
+    "Light": "Light",
+    "Speakers": "Speakers",
+    "Microphones": "Microphones",
+    "Settings": "Settings"
   }
 }

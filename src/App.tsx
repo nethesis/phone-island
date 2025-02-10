@@ -128,6 +128,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-presence-changed', {})
   })
 
+  useEventListener('phone-island-view-changed', (data) => {
+    const viewType = data?.viewType
+    store.dispatch.island.setIslandView(viewType)
+  })
+
   const [firstRenderI18n, setFirstRenderI18n] = useState(true)
   const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
 
@@ -212,6 +217,36 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
         eventDispatch('phone-island-call-ended', {})
       }
     }
+  })
+
+  useEventListener('phone-island-call-status', () => {
+    const callInformation = store.getState().currentCall
+    console.log('Call status debug informations: ', callInformation)
+  })
+
+  useEventListener('phone-island-user-status', () => {
+    const userInformation = store.getState().currentUser
+    console.log('User status debug informations: ', userInformation)
+  })
+
+  useEventListener('phone-island-status', () => {
+    const phoneIslandInformation = store.getState().island
+    console.log('Phone island status debug informations: ', phoneIslandInformation)
+  })
+
+  useEventListener('phone-island-webrtc-status', () => {
+    const webrtcInformation = store.getState().webrtc
+    console.log('Webrtc status debug informations: ', webrtcInformation)
+  })
+
+  useEventListener('phone-island-player-status', () => {
+    const playerInformation = store.getState().player
+    console.log('Player status debug informations: ', playerInformation)
+  })
+
+  useEventListener('phone-island-player-force-stop', () => {
+    store.dispatch.player.reset()
+    console.log('Audio player is interrupted')
   })
 
   return (

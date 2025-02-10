@@ -85,30 +85,40 @@ export const checkMediaPermissions = function () {
       // Can successfully access camera and microphone streams
       // Save permissions state on rematch to get access globally on the app
     })
-    .catch((err: MediaPermissionsError) => {
-      const { type, name, message } = err
-      if (type === MediaPermissionsErrorType.SystemPermissionDenied) {
-        // browser does not have permission to access camera or microphone
-        store.dispatch.alerts.setAlert('browser_permissions')
-        if (Janus.error)
-          Janus.error('WebRTC: browser does not have permission to access camera or microphone')
-      } else if (type === MediaPermissionsErrorType.UserPermissionDenied) {
-        // User didn't allow app to access camera or microphone only if default_device is not physical
-        if( isPhysical() ? '' : store.dispatch.alerts.setAlert('user_permissions') )
-        if (Janus.error) Janus.error("WebRTC: user didn't allow app to access camera or microphone")
-      } else if (type === MediaPermissionsErrorType.CouldNotStartVideoSource) {
-        // Camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)
-        // (mostly Windows specific problem)
-        store.dispatch.alerts.setAlert('busy_camera')
-        if (Janus.error)
-          Janus.error(
+    .catch((err: any) => {
+      const { type } = err
+
+      // Define error mappings for different types of media permission errors
+      const errorMap: any = {
+        [MediaPermissionsErrorType.SystemPermissionDenied]: {
+          alert: 'browser_permissions',
+          message: 'WebRTC: browser does not have permission to access camera or microphone',
+        },
+        [MediaPermissionsErrorType.UserPermissionDenied]: {
+          alert: 'user_permissions',
+          message: "WebRTC: user didn't allow app to access camera or microphone",
+        },
+        [MediaPermissionsErrorType.CouldNotStartVideoSource]: {
+          alert: 'busy_camera',
+          message:
             'WebRTC: camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)',
-          )
-      } else {
-        // Not all error types are handled by this library
-        store.dispatch.alerts.setAlert('unknown_media_permissions')
-        if (Janus.error)
-          Janus.error("WebRTC: can't access audio or camere on this device. unknown error")
+        },
+      }
+
+      // Get error details from map or use default error
+      const error = errorMap[type] ?? {
+        alert: 'unknown_media_permissions',
+        message: "WebRTC: can't access audio or camera on this device. unknown error",
+      }
+
+      // Display alert if not a physical device
+      if (!isPhysical()) {
+        store.dispatch.alerts.setAlert(error.alert)
+      }
+
+      // Log error message if Janus logger is available
+      if (Janus.error) {
+        Janus.error(error.message)
       }
     })
 }

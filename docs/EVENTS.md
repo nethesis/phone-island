@@ -903,3 +903,47 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+## Debug events
+
+- `phone-island-view-changed` Force to change phone-island view
+
+  ```json
+  {"viewType": "call"}
+  ```
+
+- `phone-island-call-status` Retrieve all informations about call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-user-status` Retrieve all informations about main user
+
+  ```json
+  {}
+  ```
+
+- `phone-island-status` Retrieve all information about phone island
+
+  ```json
+  {}
+  ```
+
+- `phone-island-webrtc-status` Retrieve all information about webrtc
+
+  ```json
+  {}
+  ```
+
+- `phone-island-player-status` Retrieve all information about audio player
+
+  ```json
+  {}
+  ```
+
+- `phone-island-player-force-stop` Force to stop all audio
+
+  ```json
+  {}
+  ```
