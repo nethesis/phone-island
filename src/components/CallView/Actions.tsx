@@ -22,9 +22,7 @@ import {
   faChevronDown,
   faChevronUp,
   faArrowRightArrowLeft,
-  faCircleDot,
-  faCircle,
-  faStop,
+  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -44,7 +42,7 @@ const Actions: FC = () => {
   const parked = useSelector((state: RootState) => state.currentCall.parked)
 
   // Get isOpen and view from island store
-  const { view, actionsExpanded, sideViewIsVisible } = useSelector(
+  const { view, actionsExpanded, sideViewIsVisible, isConferenceList } = useSelector(
     (state: RootState) => state.island,
   )
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
@@ -54,6 +52,10 @@ const Actions: FC = () => {
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
+    // Check if sideView is visible and close it
+    if (sideViewIsVisible) {
+      dispatch.island.toggleSideViewVisible(false)
+    }
     eventDispatch('phone-island-call-keypad-opened', {})
   }
   useEventListener('phone-island-call-keypad-open', () => {
@@ -63,8 +65,13 @@ const Actions: FC = () => {
   function transfer() {
     // Open the transfer view
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    // Check if sideView is visible and close it
+    if (sideViewIsVisible) {
+      dispatch.island.toggleSideViewVisible(false)
+    }
     eventDispatch('phone-island-call-transfer-opened', {})
   }
+
   useEventListener('phone-island-call-transfer-open', () => {
     transfer()
   })
@@ -123,6 +130,18 @@ const Actions: FC = () => {
       dispatch.island.toggleActionsExpanded(true)
       eventDispatch('phone-island-call-actions-opened', {})
     }
+  }
+
+  const addUserConference = () => {
+    // Update island store and set conference list view to true
+    dispatch.island.toggleConferenceList(isConferenceList ? false : true)
+    // Set the island view to transfer list
+    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    // Check if sideView is visible and close it
+    if (sideViewIsVisible) {
+      dispatch.island.toggleSideViewVisible(false)
+    }
+    eventDispatch('phone-island-call-conference-list-opened', {})
   }
 
   const { t } = useTranslation()
@@ -237,7 +256,7 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            <Button
+            {/* <Button
               active={isRecording}
               data-stop-propagation={true}
               variant='default'
@@ -261,6 +280,15 @@ const Actions: FC = () => {
                   />
                 </div>
               )}
+            </Button> */}
+            <Button
+              data-stop-propagation={true}
+              variant='default'
+              onClick={() => addUserConference()}
+              data-tooltip-id='tooltip-conference'
+              data-tooltip-content={t('Tooltip.Conference') || ''}
+            >
+              <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
             </Button>
             <Button
               variant='default'
@@ -289,8 +317,9 @@ const Actions: FC = () => {
       <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-conference' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-sideView' place='bottom' />
+      <Tooltip className='pi-z-20' id='tooltip-sideView' place='left' />
     </>
   )
 }

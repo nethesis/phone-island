@@ -129,7 +129,17 @@ const defaultState = {
         width: 168,
         height: 40,
       },
-    }
+    },
+    conference: {
+      expanded: {
+        width: 348,
+        height: 304,
+      },
+      collapsed: {
+        width: 168,
+        height: 40,
+      },
+    },
   },
 }
 

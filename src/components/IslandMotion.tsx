@@ -169,6 +169,19 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           }
         }
         break
+      case 'conference':
+        if (isOpen) {
+          size = {
+            width: variants.video.expanded.width,
+            height: variants.video.expanded.height,
+          }
+        } else {
+          size = {
+            width: variants.video.collapsed.width,
+            height: variants.video.collapsed.height,
+          }
+        }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0

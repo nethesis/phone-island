@@ -16,6 +16,7 @@ const defaultState: IslandTypes = {
   inputOutputOpened: false,
   settingsView: 'main',
   sideViewIsVisible: false,
+  isConferenceList: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -46,6 +47,9 @@ export const island = createModel<RootModel>()({
     },
     toggleSideViewVisible: (state, payload: boolean) => {
       state.sideViewIsVisible = payload
+    },
+    toggleConferenceList: (state, payload: boolean) => {
+      state.isConferenceList = payload
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
@@ -78,6 +82,7 @@ type IslandViewType =
   | 'settings'
   | 'video'
   | 'screenShare'
+  | 'conference'
 type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {
@@ -91,4 +96,5 @@ interface IslandTypes {
   inputOutputOpened: boolean
   settingsView: string
   sideViewIsVisible: boolean
+  isConferenceList: boolean
 }
