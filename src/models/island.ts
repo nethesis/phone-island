@@ -83,6 +83,7 @@ type IslandViewType =
   | 'video'
   | 'screenShare'
   | 'conference'
+  | 'switchDevice'
 type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {
