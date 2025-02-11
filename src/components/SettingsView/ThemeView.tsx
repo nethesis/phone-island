@@ -22,9 +22,6 @@ const ThemeView = () => {
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Title */}
       <SettingsHeader title={t('Settings.Theme')} tooltipPrefix='theme' />
-
-      {/* Divider */}
-      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
       {/* Microphone List */}
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
         {[

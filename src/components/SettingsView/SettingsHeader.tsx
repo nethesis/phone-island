@@ -40,6 +40,8 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({ title, tooltipPr
           <FontAwesomeIcon icon={faXmark} size='lg' />
         </Button>
       </div>
+      {/* Divider */}
+      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-1' />
       <Tooltip className='pi-z-20' id={`tooltip-back-${tooltipPrefix}-settings`} place='bottom' />
       <Tooltip className='pi-z-20' id={`tooltip-close-${tooltipPrefix}-settings`} place='bottom' />
     </>

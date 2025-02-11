@@ -65,7 +65,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
       </div>
 
       {/* Divider */}
-      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
+      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-1' />
 
       {/* Menu Items */}
       <div className='pi-flex pi-flex-col pi-mt-2'>
