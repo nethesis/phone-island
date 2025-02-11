@@ -67,8 +67,6 @@ const AudioView = () => {
       {/* Title */}
       <SettingsHeader title={t('Settings.Speakers')} tooltipPrefix='audio' />
 
-      {/* Divider */}
-      <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
       {/* Microphone List */}
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
         {actualDevice
