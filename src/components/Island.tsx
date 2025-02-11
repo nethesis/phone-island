@@ -20,6 +20,7 @@ import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
 import { VideoView } from './VideoView'
+import { SwitchDeviceView } from './SwitchDeviceView'
 
 /**
  * Provides the Island logic
@@ -121,6 +122,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                     physicalPhoneRecorder: <PhysicalRecorderView />,
                     settings: <SettingsView />,
                     video: <VideoView />,
+                    switchDevice: <SwitchDeviceView />,
                   }
 
                   return currentView in views ? (

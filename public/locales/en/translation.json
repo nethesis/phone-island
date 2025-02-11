@@ -11,7 +11,7 @@
     "Enter a phone number": "Enter a phone number",
     "Physical phone": "Physical phone",
     "Close": "Close",
-    "Back":"Back"
+    "Back": "Back"
   },
   "Tooltip": {
     "Hangup": "Hangup",
@@ -42,7 +42,8 @@
     "Other actions": "Other actions",
     "Conference": "Add participant for conference call",
     "Go to settings": "Go to settings",
-    "Enable camera": "Enable camera"
+    "Enable camera": "Enable camera",
+    "Switch device": "Switch device"
   },
   "Call": {
     "In progress...": "In progress...",
