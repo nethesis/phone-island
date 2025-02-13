@@ -250,35 +250,29 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-test-video', () => {
-    console.log('## test video start', new Date().toTimeString()) ////
-
     const { sipcall }: { sipcall: any } = store.getState().webrtc
 
-    // let tracks = [{ type: 'audio', capture: true, recv: true }] ////
-    // // if(doVideo) { ////
-    // tracks.push({ type: 'video', capture: true, recv: true })
-    // // } ////
+    sipcall.unmuteVideo() ////
 
-    sipcall.createOffer({
-      // tracks: tracks, ////
-      media: {
-        // audioSend: true, ////
-        // audioRecv: true,
-        // videoRecv: true,
-        addVideo: true,
-      },
-      success: function (jsep) {
-        // Janus.debug(jsep);
+    // sipcall.createOffer({ ////
+    //   media: {
+    //     // audioSend: true, ////
+    //     // audioRecv: true,
+    //     // videoRecv: true,
+    //     addVideo: true,
+    //   },
+    //   success: function (jsep) {
+    //     // Janus.debug(jsep);
 
-        sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
-        console.log('@@ you have just enabled video')
+    //     sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
+    //     console.log('@@ you have just enabled video')
 
-        // sipcall.unmuteVideo() ////
-      },
-      error: function (error) {
-        console.error('WebRTC error... ' + JSON.stringify(error))
-      },
-    })
+    //     // sipcall.unmuteVideo() ////
+    //   },
+    //   error: function (error) {
+    //     console.error('WebRTC error... ' + JSON.stringify(error))
+    //   },
+    // })
   })
 
   return (
