@@ -26,11 +26,15 @@ export const loadI18n = (loadPath?: string) => {
       } : {}),
       fallbackLng,
       load: 'languageOnly',
-      debug: true,
+      debug: false, // <-- disable default console.log
       detection: options,
       interpolation: {
         escapeValue: false,
       },
+      saveMissing: true, // must be enabled
+      missingKeyHandler: (lng, ns, key, fallbackValue) => {
+        console.warn(lng, ns, key, fallbackValue)
+      }
     })
 }
 

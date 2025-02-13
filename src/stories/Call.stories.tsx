@@ -34,7 +34,7 @@ export default meta
 
 const CallTemplate = (args: any) => {
   //take the number from input field
-  const [number, setNumber] = useState('*43')
+  const [number, setNumber] = useState('269') //// *43
   const [token, setToken] = useState(() => {
     return localStorage.getItem('phoneIslandToken') || ''
   })
@@ -231,9 +231,9 @@ const CallTemplate = (args: any) => {
   }
 
   return (
-    <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
+    <div className='pi-flex pi-flex-col pi-gap-4 pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
-      <div className='pi-space-y-2 pi-w-[98rem]'>
+      <div className='pi-space-y-2'>
         <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700'>
           Authentication Token
         </label>
@@ -242,7 +242,7 @@ const CallTemplate = (args: any) => {
           value={token}
           onChange={(e) => setToken(e.target.value)}
           placeholder='Insert token'
-          className='pi-w-full pi-px-4 pi-py-3 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 focus:pi-border-emerald-500 pi-transition-colors'
+          className='pi-w-full pi-pl-4 pi-py-3 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 focus:pi-border-emerald-500 pi-transition-colors'
         />
       </div>
 
@@ -288,17 +288,10 @@ const CallTemplate = (args: any) => {
               >
                 Player status
               </Button>
-              
 
-
-              <Button
-                variant='red'
-                onClick={() => testVideo()}
-                className='pi-text-sm pi-w-full'
-              >
+              <Button variant='red' onClick={() => testVideo()} className='pi-text-sm pi-w-full'>
                 Enable video
               </Button>
-
             </div>
           </div>
 
