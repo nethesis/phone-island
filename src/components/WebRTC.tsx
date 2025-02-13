@@ -48,6 +48,11 @@ export const WebRTC: FC<WebRTCProps> = ({
   // Initialize Janus from Janus library
   const janus = useRef<JanusTypes>(JanusLib)
 
+  let localTracks = {}
+  let localVideos = 0
+  let remoteTracks = {}
+  let remoteVideos = 0
+
   // Initializes the webrtc connection and handlers
   const initWebRTC = useCallback(() => {
     janus.current.init({
@@ -124,6 +129,10 @@ export const WebRTC: FC<WebRTCProps> = ({
                   }
                 },
                 onmessage: function (msg, jsep) {
+                  console.log('@@ onmessage, msg', msg, 'jsep', jsep) ////
+
+                  console.log('@@ jsep.sdp', jsep?.sdp) ////
+
                   // Get webrtc state
                   const { sipcall }: { sipcall: any } = store.getState().webrtc
 
@@ -156,6 +165,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                   ) {
                     // Get event data
                     var event = result['event']
+
+                    console.log('@@ event:', event) ////
+
                     // Get the recording state
                     const { recording } = store.getState().recorder
                     const { view } = store.getState().island
@@ -382,84 +394,361 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                         break
 
-                      default:
+                      case 'updatingcall': ////
+                        ////
+                        let tracks = [
+                          { type: 'audio', capture: true, recv: true },
+                          { type: 'video', capture: true, recv: true },
+                        ]
+                        sipcall.createAnswer({
+                          jsep: jsep,
+                          tracks: tracks,
+                          success: function (jsep) {
+                            let body = { request: 'update' }
+                            sipcall.send({ message: body, jsep: jsep })
+                          },
+                          error: function (error) {
+                            if (janus.current.error) {
+                              janus.current.error('WebRTC error:', error)
+                            }
+                          },
+                        })
+                        break
+
+                      default: ////
+                        ////
+                        console.log('@@ event not handled:', event)
                         break
                     }
                   }
                 },
-                onlocalstream: function (stream) {
-                  // const localVideoElement = store.getState().player.localVideo
+                onlocaltrack: function (track, on) {
+                  console.log('@@ onlocalstream', track, on) ////
+
                   if (janus.current.debug) {
-                    janus.current.debug(' ::: Got a local stream :::')
-                    janus.current.debug(stream)
+                    janus.current.debug('Local track ' + (on ? 'added' : 'removed') + ':', track)
                   }
 
-                  // Get local video element
-                  const localVideoElement = store.getState().player.localVideo
-
-                  // Get audio and video tracks from stream
-                  const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
-                  const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
-
-                  if (janus.current.attachMediaStream) {
-                    // Initialize the new media stream for local audio
-                    if (audioTracks && audioTracks.length > 0) {
-                      const audioStream: MediaStream = new MediaStream(audioTracks)
-
-                      // Save the new audio stream to the store
-                      store.dispatch.webrtc.updateLocalAudioStream(audioStream)
-                    } else {
-                      console.warn('No audio tracks on local stream')
-                    }
-                    // Initialize the new media stream for local video
-                    if (videoTracks && videoTracks.length > 0) {
-                      const videoStream: MediaStream = new MediaStream(videoTracks)
-
-                      if (localVideoElement && localVideoElement.current) {
-                        janus.current.attachMediaStream(localVideoElement.current, videoStream)
+                  // We use the track ID as name of the element, but it may contain invalid characters
+                  let trackId = track.id.replace(/[{}]/g, '')
+                  if (!on) {
+                    // Track removed, get rid of the stream and the rendering
+                    let stream = localTracks[trackId]
+                    if (stream) {
+                      try {
+                        let tracks = stream.getTracks()
+                        for (let i in tracks) {
+                          let mst = tracks[i]
+                          if (mst) mst.stop()
+                        }
+                      } catch (e: any) {
+                        if (janus.current.error) {
+                          janus.current.error('Error removing track:', e)
+                        }
                       }
-                    } else {
-                      console.warn('No video tracks on local stream')
+                    }
+                    if (track.kind === 'video') {
+                      // $('#myvideot' + trackId).remove() ////
+                      localVideos--
+                      if (localVideos === 0) {
+                        // No video, at least for now: show a placeholder
+                        ////
+                        // if ($('#videoleft .no-video-container').length === 0) {
+                        //   $('#videoleft').append(
+                        //     '<div class="no-video-container">' +
+                        //       '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+                        //       '<span class="no-video-text">No webcam available</span>' +
+                        //       '</div>',
+                        //   )
+                        // }
+                      }
+                    }
+                    delete localTracks[trackId]
+                    return
+                  }
+                  // If we're here, a new track was added
+                  let stream = localTracks[trackId]
+                  if (stream) {
+                    // We've been here already
+                    return
+                  }
+                  ////
+                  // if ($('#videoleft video').length === 0) {
+                  //   $('#videos').removeClass('hide')
+                  // }
+                  if (track.kind === 'audio') {
+                    // We ignore local audio tracks, they'd generate echo anyway
+
+                    //// TODO need to check if this is correct or even needed
+                    stream = new MediaStream([track])
+
+                    // Save the new audio stream to the store
+                    store.dispatch.webrtc.updateLocalAudioStream(stream)
+
+                    if (localVideos === 0) {
+                      // No video, at least for now: show a placeholder
+                      ////
+                      // if ($('#videoleft .no-video-container').length === 0) {
+                      //   $('#videoleft').append(
+                      //     '<div class="no-video-container">' +
+                      //       '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+                      //       '<span class="no-video-text">No webcam available</span>' +
+                      //       '</div>',
+                      //   )
+                      // }
+                    }
+                  } else {
+                    // New video track: create a stream out of it
+                    localVideos++
+                    ////
+                    // $('#videoleft .no-video-container').remove()
+                    stream = new MediaStream([track])
+                    localTracks[trackId] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created local stream:', stream)
+                    }
+                    ////
+                    // $('#videoleft').append(
+                    //   '<video class="rounded centered" id="myvideot' +
+                    //     trackId +
+                    //     '" width="100%" height="100%" autoplay playsinline muted="muted"/>',
+                    // )
+
+                    const localVideoElement = store.getState().player.localVideo
+
+                    if (
+                      janus.current.attachMediaStream &&
+                      localVideoElement &&
+                      localVideoElement.current
+                    ) {
+                      janus.current.attachMediaStream(localVideoElement.current, stream)
                     }
                   }
+                  ////
+                  // if (
+                  //   sipcall.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+                  //   sipcall.webrtcStuff.pc.iceConnectionState !== 'connected'
+                  // ) {
+                  //   $('#videoleft')
+                  //     .parent()
+                  //     .block({
+                  //       message: '<b>Calling...</b>',
+                  //       css: {
+                  //         border: 'none',
+                  //         backgroundColor: 'transparent',
+                  //         color: 'white',
+                  //       },
+                  //     })
+                  // }
                 },
-                onremotestream: function (stream: MediaStream) {
+                onremotetrack: function (track, mid, on) {
                   if (janus.current.debug) {
-                    janus.current.debug(' ::: Got a remote stream :::')
+                    janus.current.debug(
+                      'Remote track (mid=' + mid + ') ' + (on ? 'added' : 'removed') + ':',
+                      track,
+                    )
                   }
+
                   // Stop the local audio element ringing
                   store.dispatch.player.stopAudioPlayer()
 
-                  // Get remote audio and video elements
-                  const remoteAudioElement = store.getState().player.remoteAudio
-                  const remoteVideoElement = store.getState().player.remoteVideo
-
-                  // Get audio and video from stream
-                  const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
-                  const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
-
-                  if (janus.current.attachMediaStream) {
-                    // Initialize the new media stream for remote audio
-                    if (audioTracks && audioTracks.length > 0) {
-                      const audioStream: MediaStream = new MediaStream(audioTracks)
-
-                      if (remoteAudioElement && remoteAudioElement.current) {
-                        janus.current.attachMediaStream(remoteAudioElement.current, audioStream)
+                  if (!on) {
+                    // Track removed, get rid of the stream and the rendering
+                    ////
+                    // $('#peervideom' + mid).remove()
+                    if (track.kind === 'video') {
+                      remoteVideos--
+                      if (remoteVideos === 0) {
+                        // No video, at least for now: show a placeholder
+                        ////
+                        // if ($('#videoright .no-video-container').length === 0) {
+                        //   $('#videoright').append(
+                        //     '<div class="no-video-container">' +
+                        //       '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+                        //       '<span class="no-video-text">No remote video available</span>' +
+                        //       '</div>',
+                        //   )
+                        // }
                       }
-                      // Save the new audio stream to the store
-                      store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
-                    } else {
-                      console.warn('No audio tracks on remote stream')
                     }
-                    // Initialize the new media stream for remote video
-                    if (videoTracks && videoTracks.length > 0) {
-                      const videoStream: MediaStream = new MediaStream(videoTracks)
+                    delete remoteTracks[mid]
+                    return
+                  }
+                  // If we're here, a new track was added
+                  ////
+                  // if ($('#videoright audio').length === 0 && $('#videoright video').length === 0) {
+                  //   $('#videos').removeClass('hide')
+                  //   $('#videoright')
+                  //     .parent()
+                  //     .find('span')
+                  //     .html(
+                  //       'Send DTMF: <span id="dtmf" class="btn-group btn-group-xs"></span>' +
+                  //         '<span id="ctrls" class="top-right btn-group btn-group-xs">' +
+                  //         '<button id="msg" title="Send message" class="btn btn-info"><i class="fa-solid fa-envelope"></i></button>' +
+                  //         '<button id="info" title="Send INFO" class="btn btn-info"><i class="fa-solid fa-info"></i></button>' +
+                  //         '<button id="transfer" title="Transfer call" class="btn btn-info"><i class="fa-solid fa-share"></i></button>' +
+                  //         '</span>',
+                  //     )
+                  //   for (let i = 0; i < 12; i++) {
+                  //     if (i < 10)
+                  //       $('#dtmf').append('<button class="btn btn-info dtmf">' + i + '</button>')
+                  //     else if (i == 10)
+                  //       $('#dtmf').append('<button class="btn btn-info dtmf">#</button>')
+                  //     else if (i == 11)
+                  //       $('#dtmf').append('<button class="btn btn-info dtmf">*</button>')
+                  //   }
+                  //   $('#dtmf .dtmf').click(function () {
+                  //     // Send DTMF tone (inband)
+                  //     sipcall.dtmf({ dtmf: { tones: $(this).text() } })
+                  //     // Notice you can also send DTMF tones using SIP INFO
+                  //     // 		sipcall.send({message: {request: "dtmf_info", digit: $(this).text()}});
+                  //   })
+                  //   $('#msg').click(function () {
+                  //     bootbox.prompt('Insert message to send', function (result) {
+                  //       if (result && result !== '') {
+                  //         // Send the message
+                  //         let msg = { request: 'message', content: result }
+                  //         sipcall.send({ message: msg })
+                  //       }
+                  //     })
+                  //   })
+                  //   $('#info').click(function () {
+                  //     bootbox.dialog({
+                  //       message:
+                  //         'Type: <input class="form-control" type="text" id="type" placeholder="e.g., application/xml">' +
+                  //         '<br/>Content: <input class="form-control" type="text" id="content" placeholder="e.g., <message>hi</message>">',
+                  //       title: 'Insert the type and content to send',
+                  //       buttons: {
+                  //         cancel: {
+                  //           label: 'Cancel',
+                  //           className: 'btn-secondary',
+                  //           callback: function () {
+                  //             // Do nothing
+                  //           },
+                  //         },
+                  //         ok: {
+                  //           label: 'OK',
+                  //           className: 'btn-primary',
+                  //           callback: function () {
+                  //             // Send the INFO
+                  //             let type = $('#type').val()
+                  //             let content = $('#content').val()
+                  //             if (type === '' || content === '') return
+                  //             let msg = { request: 'info', type: type, content: content }
+                  //             sipcall.send({ message: msg })
+                  //           },
+                  //         },
+                  //       },
+                  //     })
+                  //   })
+                  //   $('#transfer').click(function () {
+                  //     bootbox.dialog({
+                  //       message:
+                  //         '<input class="form-control" type="text" id="transferto" placeholder="e.g., sip:goofy@example.com">',
+                  //       title: 'Insert the address to transfer the call to',
+                  //       buttons: {
+                  //         cancel: {
+                  //           label: 'Cancel',
+                  //           className: 'btn-secondary',
+                  //           callback: function () {
+                  //             // Do nothing
+                  //           },
+                  //         },
+                  //         blind: {
+                  //           label: 'Blind transfer',
+                  //           className: 'btn-info',
+                  //           callback: function () {
+                  //             // Start a blind transfer
+                  //             let address = $('#transferto').val()
+                  //             if (address === '') return
+                  //             let msg = { request: 'transfer', uri: address }
+                  //             sipcall.send({ message: msg })
+                  //           },
+                  //         },
+                  //         attended: {
+                  //           label: 'Attended transfer',
+                  //           className: 'btn-primary',
+                  //           callback: function () {
+                  //             // Start an attended transfer
+                  //             let address = $('#transferto').val()
+                  //             if (address === '') return
+                  //             // Add the call-id to replace to the transfer
+                  //             let msg = {
+                  //               request: 'transfer',
+                  //               uri: address,
+                  //               replace: sipcall.callId,
+                  //             }
+                  //             sipcall.send({ message: msg })
+                  //           },
+                  //         },
+                  //       },
+                  //     })
+                  //   })
+                  // }
+                  if (track.kind === 'audio') {
+                    // New audio track: create a stream out of it, and use a hidden <audio> element
+                    let stream = new MediaStream([track])
+                    remoteTracks[mid] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created remote audio stream: ' + stream)
+                    }
+                    ////
+                    // $('#videoright').append(
+                    //   '<audio class="hide" id="peervideom' + mid + '" autoplay playsinline/>',
+                    // )
 
-                      if (remoteVideoElement && remoteVideoElement.current) {
-                        janus.current.attachMediaStream(remoteVideoElement.current, videoStream)
-                      }
-                    } else {
-                      console.warn('No video tracks on remote stream')
+                    ////
+                    // Janus.attachMediaStream($('#peervideom' + mid).get(0), stream)
+
+                    const remoteAudioElement = store.getState().player.remoteAudio
+
+                    if (
+                      remoteAudioElement &&
+                      remoteAudioElement.current &&
+                      janus.current.attachMediaStream
+                    ) {
+                      janus.current.attachMediaStream(remoteAudioElement.current, stream)
+                    }
+                    // Save the new audio stream to the store
+                    store.dispatch.webrtc.updateRemoteAudioStream(stream)
+
+                    if (remoteVideos === 0) {
+                      // No video, at least for now: show a placeholder
+                      ////
+                      // if ($('#videoright .no-video-container').length === 0) {
+                      //   $('#videoright').append(
+                      //     '<div class="no-video-container">' +
+                      //       '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+                      //       '<span class="no-video-text">No remote video available</span>' +
+                      //       '</div>',
+                      //   )
+                      // }
+                    }
+                  } else {
+                    // New video track: create a stream out of it
+                    remoteVideos++
+                    ////
+                    // $('#videoright .no-video-container').remove()
+                    let stream = new MediaStream([track])
+                    remoteTracks[mid] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created remote video stream:' + stream)
+                    }
+                    ////
+                    // $('#videoright').append(
+                    //   '<video class="rounded centered" id="peervideom' +
+                    //     mid +
+                    //     '" width="100%" height="100%" autoplay playsinline/>',
+                    // )
+
+                    const remoteVideoElement = store.getState().player.remoteVideo
+
+                    if (
+                      janus.current.attachMediaStream &&
+                      remoteVideoElement &&
+                      remoteVideoElement.current
+                    ) {
+                      janus.current.attachMediaStream(remoteVideoElement.current, stream)
                     }
                   }
                 },
@@ -468,11 +757,12 @@ export const WebRTC: FC<WebRTCProps> = ({
                     janus.current.log(' ::: janus Got a cleanup notification :::')
                   }
                 },
-                detached: function () {
-                  if (janus.current.warn) {
-                    janus.current.warn('SIP plugin handle detached from the plugin itself')
-                  }
-                },
+                //// can be removed, not present in new version
+                // detached: function () {
+                //   if (janus.current.warn) {
+                //     janus.current.warn('SIP plugin handle detached from the plugin itself')
+                //   }
+                // },
               })
             }
           },

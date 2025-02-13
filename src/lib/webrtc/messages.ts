@@ -21,6 +21,17 @@ export function register({
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   const { name } = store.getState().currentUser
   if (sipcall) {
+    console.log('###', {
+      request: 'register',
+      username: `sip:${sipExten}@${sipHost}`,
+      display_name: name || '',
+      secret: sipSecret,
+      proxy: `sip:${sipHost}:${sipPort}`,
+      outbound_proxy: `sip:${sipHost}:${sipPort}`,
+      sips: false,
+      refresh: false,
+    }) ////
+
     sipcall.send({
       message: {
         request: 'register',
@@ -42,26 +53,45 @@ export function answerWebRTC() {
     // get current input device id from localstorage
     let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
 
+    //// check if video is enabled
+    let tracks = [
+      {
+        type: 'audio',
+        recv: true,
+        // mid: '0', // We assume mid 0 is audio ////
+        // capture: { deviceId: { exact: currentDeviceInputId } }, ////
+        capture: true,
+      },
+      { type: 'video', capture: true, recv: true },
+    ]
+
     sipcall.createAnswer({
       jsep: jsepGlobal,
-      media: {
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          googEchoCancellation: true,
-          googAutoGainControl: true,
-          googNoiseSuppression: true,
-          googHighpassFilter: true,
-          googTypingNoiseDetection: true,
-          googNoiseReduction: true,
-          volume: 1.0,
-          deviceId: currentDeviceInputId,
-        },
-        videoSend: false,
-        videoRecv: false,
-      },
+      tracks: tracks,
+      //// remove media?
+      // media: {
+      //   audio: {
+      //     echoCancellation: true,
+      //     noiseSuppression: true,
+      //     autoGainControl: true,
+      //     googEchoCancellation: true,
+      //     googAutoGainControl: true,
+      //     googNoiseSuppression: true,
+      //     googHighpassFilter: true,
+      //     googTypingNoiseDetection: true,
+      //     googNoiseReduction: true,
+      //     volume: 1.0,
+      //     deviceId: currentDeviceInputId,
+      //   },
+      //   // videoSend: false, ////
+      //   // videoRecv: false,
+      //   // videoSend: false,
+      //   // videoRecv: false,
+      // },
       success: (jsep) => {
+        sipcall.doAudio = true ////
+        sipcall.doVideo = true ////
+
         sipcall.send({
           message: {
             request: 'accept',
@@ -128,7 +158,9 @@ export function handleRemote(jsep: any) {
   if (sipcall) {
     sipcall.handleRemoteJsep({
       jsep: jsep,
-      error: function () {
+      error: function (error) {
+        console.error('WebRTC error... ' + JSON.stringify(error))
+
         var hangup = {
           request: 'hangup',
         }
@@ -175,8 +207,32 @@ export function call(sipURI: string, mediaObj: object) {
   return new Promise((resolve, reject) => {
     const { sipcall }: { sipcall: any } = store.getState().webrtc
     if (sipURI && mediaObj) {
+      // @ts-ignore
+      console.log('### mediaObj.audio.deviceId', mediaObj.audio.deviceId) ////
+
+      // @ts-ignore
+      const deviceId = mediaObj.audio.deviceId
+
+      sipcall.doAudio = true
+      sipcall.doVideo = true ////
+      ////
+      let tracks: any[] = [
+        {
+          type: 'audio',
+          capture: true,
+          // capture: { ////
+          //   deviceId: { exact: deviceId },
+          //   // mid: '0', // We assume mid 0 is audio ////
+          // },
+          recv: true,
+        },
+      ]
+      // if(doVideo) ////
+      tracks.push({ type: 'video', capture: true, recv: true })
+
       sipcall.createOffer({
-        media: mediaObj,
+        tracks: tracks,
+        // media: mediaObj, ////
         success: function (jsep: any) {
           // @ts-ignore
           Janus.debug('Got SDP!')
