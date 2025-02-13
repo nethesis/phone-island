@@ -32,7 +32,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  // Get isOpen from island store
   const { view, sideViewIsVisible, avoidToShow } = useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
@@ -53,15 +52,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
-  const localVideo = useRef<HTMLVideoElement>(null)
-  const remoteVideo = useRef<HTMLVideoElement>(null)
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
       audioPlayer: audioPlayer,
       localAudio: localAudio,
-      localVideo: localVideo,
-      remoteVideo: remoteVideo,
       remoteAudio: remoteAudio,
     })
   }, [])
@@ -143,8 +138,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
-        <video muted={true} autoPlay ref={localVideo} className='pi-w-96 pi-h-96'></video>
-        <video autoPlay muted={true} ref={remoteVideo} className='pi-w-96 pi-h-96'></video>
       </div>
     </div>
   )

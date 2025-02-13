@@ -9,8 +9,9 @@
 # production
 /build
 /dist
+nethesis-phone-island-*.tgz
 
-# delopment
+# development
 /widget-example/static
 
 # misc

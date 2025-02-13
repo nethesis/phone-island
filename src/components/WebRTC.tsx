@@ -48,6 +48,11 @@ export const WebRTC: FC<WebRTCProps> = ({
   // Initialize Janus from Janus library
   const janus = useRef<JanusTypes>(JanusLib)
 
+  let localTracks = {}
+  let localVideos = 0
+  let remoteTracks = {}
+  let remoteVideos = 0
+
   // Initializes the webrtc connection and handlers
   const initWebRTC = useCallback(() => {
     janus.current.init({
@@ -156,6 +161,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                   ) {
                     // Get event data
                     var event = result['event']
+
                     // Get the recording state
                     const { recording } = store.getState().recorder
                     const { view } = store.getState().island
@@ -383,95 +389,155 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                         break
 
+                      case 'info':
+                        // Check if it's a keyframe request (see: https://github.com/meetecho/janus-gateway/pull/3517)
+                        if (
+                          result['type'] === 'application/media_control+xml' &&
+                          result['content'].includes('<picture_fast_update')
+                        ) {
+                          sipcall.send({
+                            message: { request: 'keyframe', user: true, peer: true },
+                          })
+                        }
+                        break
+
                       default:
+                        if (janus.current.debug) {
+                          janus.current.debug('Event not handled:', event)
+                        }
                         break
                     }
                   }
                 },
-                onlocalstream: function (stream) {
-                  // const localVideoElement = store.getState().player.localVideo
+                onlocaltrack: function (track, on) {
                   if (janus.current.debug) {
-                    janus.current.debug(' ::: Got a local stream :::')
-                    janus.current.debug(stream)
+                    janus.current.debug('Local track ' + (on ? 'added' : 'removed') + ':', track)
                   }
 
-                  // Get local video element
-                  const localVideoElement = store.getState().player.localVideo
-
-                  // Get audio and video tracks from stream
-                  const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
-                  const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
-
-                  if (janus.current.attachMediaStream) {
-                    // Initialize the new media stream for local audio
-                    if (audioTracks && audioTracks.length > 0) {
-                      const audioStream: MediaStream = new MediaStream(audioTracks)
-
-                      // Save the new audio stream to the store
-                      store.dispatch.webrtc.updateLocalAudioStream(audioStream)
-                    } else {
-                      console.warn('No audio tracks on local stream')
-                    }
-                    // Initialize the new media stream for local video
-                    if (videoTracks && videoTracks.length > 0) {
-                      const videoStream: MediaStream = new MediaStream(videoTracks)
-
-                      if (localVideoElement && localVideoElement.current) {
-                        janus.current.attachMediaStream(localVideoElement.current, videoStream)
+                  // We use the track ID as name of the element, but it may contain invalid characters
+                  let trackId = track.id.replace(/[{}]/g, '')
+                  if (!on) {
+                    // Track removed, get rid of the stream and the rendering
+                    let stream = localTracks[trackId]
+                    if (stream) {
+                      try {
+                        let tracks = stream.getTracks()
+                        for (let i in tracks) {
+                          let mst = tracks[i]
+                          if (mst) mst.stop()
+                        }
+                      } catch (e: any) {
+                        if (janus.current.error) {
+                          janus.current.error('Error removing track:', e)
+                        }
                       }
-                    } else {
-                      console.warn('No video tracks on local stream')
+                    }
+                    if (track.kind === 'video') {
+                      localVideos--
+                    }
+                    delete localTracks[trackId]
+                    return
+                  }
+                  // If we're here, a new track was added
+                  let stream = localTracks[trackId]
+                  if (stream) {
+                    // We've been here already
+                    return
+                  }
+                  if (track.kind === 'audio') {
+                    // We ignore local audio tracks, they'd generate echo anyway
+
+                    stream = new MediaStream([track])
+
+                    // Save the new audio stream to the store
+                    store.dispatch.webrtc.updateLocalAudioStream(stream)
+                  } else {
+                    // New video track: create a stream out of it
+                    localVideos++
+                    stream = new MediaStream([track])
+
+                    // Save the new video stream to the store
+                    store.dispatch.webrtc.updateLocalVideoStream(stream)
+
+                    localTracks[trackId] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created local stream:', stream)
+                    }
+                    const localVideoElement = store.getState().player.localVideo
+
+                    if (
+                      janus.current.attachMediaStream &&
+                      localVideoElement &&
+                      localVideoElement.current
+                    ) {
+                      janus.current.attachMediaStream(localVideoElement.current, stream)
                     }
                   }
                 },
-                onremotestream: function (stream: MediaStream) {
+                onremotetrack: function (track, mid, on) {
                   if (janus.current.debug) {
-                    janus.current.debug(' ::: Got a remote stream :::')
+                    janus.current.debug(
+                      'Remote track (mid=' + mid + ') ' + (on ? 'added' : 'removed') + ':',
+                      track,
+                    )
                   }
+
                   // Stop the local audio element ringing
                   store.dispatch.player.stopAudioPlayer()
 
-                  // Get remote audio and video elements
-                  const remoteAudioElement = store.getState().player.remoteAudio
-                  const remoteVideoElement = store.getState().player.remoteVideo
-
-                  // Get audio and video from stream
-                  const audioTracks: MediaStreamTrack[] = stream.getAudioTracks()
-                  const videoTracks: MediaStreamTrack[] = stream.getVideoTracks()
-
-                  if (janus.current.attachMediaStream) {
-                    // Initialize the new media stream for remote audio
-                    if (audioTracks && audioTracks.length > 0) {
-                      const audioStream: MediaStream = new MediaStream(audioTracks)
-
-                      if (remoteAudioElement && remoteAudioElement.current) {
-                        janus.current.attachMediaStream(remoteAudioElement.current, audioStream)
-                      }
-                      // Save the new audio stream to the store
-                      store.dispatch.webrtc.updateRemoteAudioStream(audioStream)
-                    } else {
-                      console.warn('No audio tracks on remote stream')
+                  if (!on) {
+                    // Track removed, get rid of the stream and the rendering
+                    if (track.kind === 'video') {
+                      remoteVideos--
                     }
-                    // Initialize the new media stream for remote video
-                    if (videoTracks && videoTracks.length > 0) {
-                      const videoStream: MediaStream = new MediaStream(videoTracks)
+                    delete remoteTracks[mid]
+                    return
+                  }
 
-                      if (remoteVideoElement && remoteVideoElement.current) {
-                        janus.current.attachMediaStream(remoteVideoElement.current, videoStream)
-                      }
-                    } else {
-                      console.warn('No video tracks on remote stream')
+                  if (track.kind === 'audio') {
+                    // New audio track: create a stream out of it, and use a hidden <audio> element
+                    let stream = new MediaStream([track])
+                    remoteTracks[mid] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created remote audio stream: ' + stream)
+                    }
+                    const remoteAudioElement = store.getState().player.remoteAudio
+
+                    if (
+                      remoteAudioElement &&
+                      remoteAudioElement.current &&
+                      janus.current.attachMediaStream
+                    ) {
+                      janus.current.attachMediaStream(remoteAudioElement.current, stream)
+                    }
+                    // Save the new audio stream to the store
+                    store.dispatch.webrtc.updateRemoteAudioStream(stream)
+                  } else {
+                    // New video track: create a stream out of it
+                    remoteVideos++
+                    let stream = new MediaStream([track])
+
+                    // Save the new video stream to the store
+                    store.dispatch.webrtc.updateRemoteVideoStream(stream)
+
+                    remoteTracks[mid] = stream
+                    if (janus.current.debug) {
+                      janus.current.debug('Created remote video stream:' + stream)
+                    }
+                    const remoteVideoElement = store.getState().player.remoteVideo
+
+                    if (
+                      janus.current.attachMediaStream &&
+                      remoteVideoElement &&
+                      remoteVideoElement.current
+                    ) {
+                      janus.current.attachMediaStream(remoteVideoElement.current, stream)
                     }
                   }
                 },
                 oncleanup: function () {
                   if (janus.current.log) {
                     janus.current.log(' ::: janus Got a cleanup notification :::')
-                  }
-                },
-                detached: function () {
-                  if (janus.current.warn) {
-                    janus.current.warn('SIP plugin handle detached from the plugin itself')
                   }
                 },
               })

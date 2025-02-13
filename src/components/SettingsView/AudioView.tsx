@@ -75,7 +75,7 @@ const AudioView = () => {
           .map((audioDevice, index) => (
             <div
               key={index}
-              className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
+              className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md pi-cursor-pointer'
               onClick={() => handleClickAudioOutput(audioDevice?.deviceId)}
               onMouseEnter={() => setHoveredDevice(audioDevice?.deviceId)}
               onMouseLeave={() => setHoveredDevice(null)}

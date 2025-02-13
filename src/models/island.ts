@@ -19,6 +19,7 @@ const defaultState: IslandTypes = {
   isConferenceList: false,
   previousView: null,
   avoidToShow: false,
+  isFullScreen: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -60,6 +61,12 @@ export const island = createModel<RootModel>()({
     resetSettingsView: (state) => {
       state.settingsView = 'main'
     },
+    setFullScreen: (state, payload: boolean) => {
+      return {
+        ...state,
+        isFullScreen: payload,
+      }
+    },
   },
   effects: (dispatch) => ({
     handleToggleIsOpen: (_: void, rootState) => {
@@ -93,7 +100,7 @@ type IslandViewType =
   | 'screenShare'
   | 'conference'
   | 'switchDevice'
-type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
+type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
 
 interface IslandTypes {
   view?: IslandViewType | null
@@ -109,4 +116,5 @@ interface IslandTypes {
   isConferenceList: boolean
   previousView?: IslandViewType | null
   avoidToShow?: boolean
+  isFullScreen: boolean
 }

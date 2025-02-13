@@ -7,8 +7,12 @@ import { store } from '../../store'
  * Checks if back call view is active
  */
 export function isBackCallActive() {
-  const { view }: any = store.getState().island
+  const { view, isOpen }: any = store.getState().island
   const { transferring } = store.getState().currentCall
 
-  return ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) || transferring
+  return (
+    ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) ||
+    (view === 'video' && isOpen) ||
+    transferring
+  )
 }

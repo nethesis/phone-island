@@ -31,6 +31,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     let size: SizeTypes = {
       width: 0,
       height: 0,
+      padding: padding_expanded,
     }
 
     switch (view) {
@@ -94,12 +95,25 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             }
         break
 
+      case 'video':
+        if (isOpen) {
+          size = {
+            width: variants.video.expanded.width,
+            height: variants.video.expanded.height,
+            padding: 0,
+          }
+        } else {
+          size = {
+            width: variants.video.collapsed.width,
+            height: variants.video.collapsed.height,
+          }
+        }
+        break
       case 'transfer':
       case 'player':
       case 'recorder':
       case 'physicalPhoneRecorder':
       case 'settings':
-      case 'video':
       case 'conference':
         size = isOpen
           ? {
@@ -138,7 +152,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
       padding: isOpen
-        ? `${padding_expanded}px`
+        ? size.padding != undefined
+          ? size.padding
+          : `${padding_expanded}px`
         : `${padding_x_collapsed}px ${padding_y_collapsed}px`,
     }
   }, [
@@ -194,7 +210,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
-      className='pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
+      className={`${
+        isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
+      } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}
     >
       {children}
@@ -209,6 +227,7 @@ interface IslandMotionProps {
 type SizeTypes = {
   width: number
   height: number
+  padding?: number
 }
 
 export default IslandMotion

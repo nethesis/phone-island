@@ -30,10 +30,11 @@ import { sendDTMF } from '../../lib/webrtc/messages'
 import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { useTranslation } from 'react-i18next'
-import { isWebRTC } from '../../lib/user/default_device'
-import { sendPhysicalDTMF } from '../../services/astproxy'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import TransferButton from '../TransferButton'
+import { isWebRTC } from '../../lib/user/default_device'
+import { sendPhysicalDTMF } from '../../services/astproxy'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -188,26 +189,7 @@ const Actions: FC = () => {
           </Button>
         )}
 
-        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
-          <Button
-            active={transferring}
-            onClick={transferring ? cancelTransfer : transfer}
-            variant='default'
-            data-tooltip-id='tooltip-transfer'
-            data-tooltip-content={
-              transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
-            }
-          >
-            {transferring ? (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowDownUpAcrossLine} />
-            ) : (
-              <FontAwesomeIcon
-                className='pi-rotate-90 pi-h-6 pi-w-6'
-                icon={faArrowRightArrowLeft}
-              />
-            )}
-          </Button>
-        )}
+        <TransferButton />
 
         {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
           <Button

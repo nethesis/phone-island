@@ -45,7 +45,10 @@
     "Enable camera": "Abilita video",
     "Switch device": "Cambia dispositivo",
     "Reload": "Ricarica",
-    "Close alert": "Chiudi avviso"
+    "Close alert": "Chiudi avviso",
+    "Disable camera": "Disabilita video",
+    "Enter fullscreen": "Vai a schermo intero",
+    "Exit fullscreen": "Esci da schermo intero"
   },
   "Call": {
     "In progress...": "In corso...",
@@ -81,6 +84,7 @@
     "Light": "Chiaro",
     "Speakers": "Altoparlanti",
     "Microphones": "Microfoni",
+    "Cameras": "Video",
     "Settings": "Impostazioni"
   },
   "Switch device": {

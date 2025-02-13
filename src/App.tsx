@@ -14,6 +14,7 @@ import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
+import { JanusTrack } from './types/webrtc'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -100,6 +101,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-audio-input-change', (data: DeviceInputOutputTypes) => {
     setJSONItem('phone-island-audio-input-device', { deviceId: data.deviceId })
     eventDispatch('phone-island-audio-input-changed', {})
+  })
+
+  useEventListener('phone-island-video-input-change', (data: DeviceInputOutputTypes) => {
+    setJSONItem('phone-island-video-input-device', { deviceId: data.deviceId })
+    eventDispatch('phone-island-video-input-changed', {})
   })
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
@@ -284,26 +290,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       height: '0px',
     }
     eventDispatch('phone-island-size-change', { sizeInformation })
-  })
-
-  useEventListener('phone-island-test-video', () => {
-    const { sipcall }: { sipcall: any } = store.getState().webrtc
-    sipcall.createOffer({
-      media: {
-        audioSend: true,
-        audioRecv: true,
-        videoRecv: true,
-        addVideo: true,
-      },
-      success: function (jsep) {
-        // Janus.debug(jsep);
-        sipcall.send({ message: { request: 'update' }, jsep: jsep })
-        console.log('you have just enabled video')
-      },
-      error: function (error) {
-        console.error('WebRTC error... ' + JSON.stringify(error))
-      },
-    })
+    eventDispatch('phone-island-sideview-close', {})
   })
 
   return (
