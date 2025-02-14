@@ -924,6 +924,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-all-users-status` Retrieve all informations about all users
+
+  ```json
+  {}
+  ```
+
 - `phone-island-status` Retrieve all information about phone island
 
   ```json

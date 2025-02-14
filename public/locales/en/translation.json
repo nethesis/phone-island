@@ -79,5 +79,9 @@
     "Speakers": "Speakers",
     "Microphones": "Microphones",
     "Settings": "Settings"
+  },
+  "Switch device": {
+    "Switch device": "Switch device",
+    "Switch information": "The call will continue in the selected device."
   }
 }
