@@ -182,6 +182,19 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           }
         }
         break
+        case 'switchDevice':
+          if (isOpen) {
+            size = {
+              width: variants.switchDevice.expanded.width,
+              height: variants.switchDevice.expanded.height,
+            }
+          } else {
+            size = {
+              width: variants.video.collapsed.width,
+              height: variants.video.collapsed.height,
+            }
+          }
+          break
     }
 
     const isAlert: boolean = activeAlertsCount > 0

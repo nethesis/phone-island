@@ -140,6 +140,16 @@ const defaultState = {
         height: 40,
       },
     },
+    switchDevice: {
+      expanded: {
+        width: 348,
+        height: 304,
+      },
+      collapsed: {
+        width: 168,
+        height: 40,
+      },
+    },
   },
 }
 

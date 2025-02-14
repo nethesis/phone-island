@@ -264,6 +264,13 @@ const CallTemplate = (args: any) => {
               </Button>
               <Button
                 variant='default'
+                onClick={() => eventDispatch('phone-island-all-users-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                All users status
+              </Button>
+              <Button
+                variant='default'
                 onClick={() => eventDispatch('phone-island-status', {})}
                 className='pi-text-sm pi-w-full'
               >

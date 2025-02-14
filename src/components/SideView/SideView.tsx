@@ -66,7 +66,12 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
               </Button>
               {/* Switch device button */}
-              <Button variant='transparentSideView'>
+              <Button
+                variant='transparentSideView'
+                data-tooltip-id='tooltip-switch-device'
+                data-tooltip-content={t('Tooltip.Switch device') || ''}
+                onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
+              >
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
               </Button>
               {/* Share button */}
@@ -85,6 +90,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
       </AnimatePresence>
       {/* <Tooltip className='pi-z-20' id='tooltip-record' place='left' /> */}
       <Tooltip className='pi-z-20' id='tooltip-video' place='left' />
+      <Tooltip className='pi-z-20' id='tooltip-switch-device' place='left' />
     </>
   )
 }
