@@ -389,10 +389,22 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                         break
 
-                      case 'updatingcall': ////
+                      //// is this case needed?
+                      case 'updatingcall':
+                        if (janus.current.debug) {
+                          janus.current.debug('Got re-INVITE')
+                        }
+
+                        console.log("@@@ received 'updatingcall'", result) ////
+
+                        const doAudio = jsep.sdp.indexOf('m=audio ') > -1
+                        const doVideo = jsep.sdp.indexOf('m=video ') > -1
+
+                        console.log('@@@ updatingcall, doAudio', doAudio, 'doVideo', doVideo) ////
+
                         sipcall.createAnswer({
                           jsep: jsep,
-                          media: { audio: true, video: true }, ////
+                          media: { audio: doAudio, video: doVideo },
                           success: function (jsep) {
                             let body = { request: 'update' }
                             sipcall.send({ message: body, jsep: jsep })
