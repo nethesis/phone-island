@@ -23,7 +23,7 @@ i18next
         translation: translationEN,
       },
     },
-    lng: 'it',
+    lng: 'en',
     fallbackLng: ['en'],
     load: 'languageOnly',
     debug: true,

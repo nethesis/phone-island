@@ -11,7 +11,7 @@
     "Enter a phone number": "Inserisci un numero di telefono",
     "Physical phone": "Telefono fisso",
     "Close": "Chiudi",
-    "Back":"Indietro"
+    "Back": "Indietro"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
@@ -79,5 +79,9 @@
     "Speakers": "Altoparlanti",
     "Microphones": "Microfoni",
     "Settings": "Impostazioni"
+  },
+  "Switch device": {
+    "Switch device": "Cambia dispositivo",
+    "Switch information": "La chiamata continuerà sul dispositivo selezionato."
   }
 }

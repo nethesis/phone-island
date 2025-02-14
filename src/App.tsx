@@ -5,7 +5,6 @@ import { store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 import loadI18n from './lib/i18n'
-import i18next, { i18n } from 'i18next'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
@@ -227,6 +226,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-user-status', () => {
     const userInformation = store.getState().currentUser
     console.log('User status debug informations: ', userInformation)
+  })
+
+  useEventListener('phone-island-all-users-status', () => {
+    const allUsersInformation = store.getState().users
+    console.log('Users status debug informations: ', allUsersInformation)
   })
 
   useEventListener('phone-island-status', () => {
