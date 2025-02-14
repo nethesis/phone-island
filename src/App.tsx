@@ -249,30 +249,41 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Audio player is interrupted')
   })
 
-  useEventListener('phone-island-test-video', () => {
+  useEventListener('phone-island-test-video', (data: any) => {
+    console.log('@@@ phone-island-test-video', data) ////
+
     const { sipcall }: { sipcall: any } = store.getState().webrtc
 
-    sipcall.unmuteVideo() ////
+    // sipcall.unmuteVideo() ////
 
-    // sipcall.createOffer({ ////
-    //   media: {
-    //     // audioSend: true, ////
-    //     // audioRecv: true,
-    //     // videoRecv: true,
-    //     addVideo: true,
-    //   },
-    //   success: function (jsep) {
-    //     // Janus.debug(jsep);
+    //// copied from old cti, is this correct?
+    const mediaObj: any = {
+      audioSend: true,
+      audioRecv: true,
+      videoRecv: true,
+    }
 
-    //     sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
-    //     console.log('@@ you have just enabled video')
+    if (data.enableVideo) {
+      mediaObj.addVideo = true
+    } else {
+      mediaObj.removeVideo = true
+    }
 
-    //     // sipcall.unmuteVideo() ////
-    //   },
-    //   error: function (error) {
-    //     console.error('WebRTC error... ' + JSON.stringify(error))
-    //   },
-    // })
+    sipcall.createOffer({
+      media: mediaObj,
+      success: function (jsep) {
+        // Janus.debug(jsep);
+
+        sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
+
+        console.log('@@@ set video', data.enableVideo)
+
+        // sipcall.unmuteVideo() ////
+      },
+      error: function (error) {
+        console.error('WebRTC error... ' + JSON.stringify(error))
+      },
+    })
   })
 
   return (

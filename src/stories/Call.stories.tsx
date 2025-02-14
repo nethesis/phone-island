@@ -34,7 +34,7 @@ export default meta
 
 const CallTemplate = (args: any) => {
   //take the number from input field
-  const [number, setNumber] = useState('269') //// *43
+  const [number, setNumber] = useState('*43') //// *43
   const [token, setToken] = useState(() => {
     return localStorage.getItem('phoneIslandToken') || ''
   })
@@ -226,8 +226,14 @@ const CallTemplate = (args: any) => {
     eventDispatch('phone-island-check-connection', {})
   }
 
+  ////
   const testVideo = () => {
-    eventDispatch('phone-island-test-video', {})
+    eventDispatch('phone-island-test-video', { enableVideo: true })
+  }
+
+  ////
+  const disableVideo = () => {
+    eventDispatch('phone-island-test-video', { enableVideo: false })
   }
 
   return (
@@ -291,6 +297,10 @@ const CallTemplate = (args: any) => {
 
               <Button variant='red' onClick={() => testVideo()} className='pi-text-sm pi-w-full'>
                 Enable video
+              </Button>
+
+              <Button variant='red' onClick={() => disableVideo()} className='pi-text-sm pi-w-full'>
+                Disable video
               </Button>
             </div>
           </div>
