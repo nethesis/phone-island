@@ -1,15 +1,18 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { useState, type FC } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleInfo, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faCircleInfo, faMobile, faUser, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { Button } from '../Button'
 import { Tooltip } from 'react-tooltip'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
+import { blindTransferFunction } from '../../lib/phone/call'
+import { faArrowsRepeat, faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
+import { eventDispatch } from '../../utils'
 
 export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -29,6 +32,20 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     return !activeConversationDevices.has(device?.id) && userStatus === 'online'
   })
 
+  const blindTransferOnSelectedDevice = (deviceNumber: any) => {
+    if (deviceNumber !== '') {
+      blindTransferFunction(deviceNumber)
+      eventDispatch('phone-island-call-switched', {})
+    }
+  }
+
+  const transferCallOnDevice = (deviceInformation: any) => {
+    setSelectedSwitchDevices(deviceInformation?.id)
+  }
+
+  const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
+  const [selectedSwitchDevices, setSelectedSwitchDevices]: any = useState('')
+
   return (
     <>
       <div className='pi-flex pi-flex-col pi-w-full'>
@@ -40,7 +57,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
             </h1>
             <FontAwesomeIcon
               icon={faCircleInfo}
-              className='pi-flex pi-w-4 pi-h-4 pi-text-indigo-800'
+              className='pi-flex pi-w-4 pi-h-4 pi-text-indigo-800 dark:pi-text-indigo-300'
               data-tooltip-id='tooltip-switch-information'
               data-tooltip-content={t('Switch device.Switch information') || ''}
             />
@@ -52,7 +69,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
             data-tooltip-id='tooltip-close-settings'
             data-tooltip-content={t('Common.Close') || ''}
           >
-            <FontAwesomeIcon icon={faXmark} size='lg' />
+            <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5' />
           </Button>
         </div>
 
@@ -60,27 +77,61 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
 
         {/* Devices List */}
-        <div className='pi-flex pi-flex-col pi-mt-2 pi-max-h-[300px] pi-overflow-y-auto pi-space-y-2'>
-          {filteredDevices.map((device) => (
+        <div className='pi-flex pi-flex-col pi-mt-2 pi-h-[150px] pi-overflow-y-auto pi-space-y-2 pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
+          {filteredDevices.map((device: any) => (
             <div
-              key={device.id}
-              className='pi-flex pi-items-center pi-space-x-3 pi-px-4 pi-py-2 pi-rounded-lg pi-bg-gray-100 dark:pi-bg-gray-800 pi-cursor-pointer pi-transition pi-duration-200 hover:pi-bg-indigo-200 dark:hover:pi-bg-indigo-700'
+              key={device?.id}
+              className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
+              onClick={() => transferCallOnDevice(device)}
+              onMouseEnter={() => setHoveredDevice(device?.id)}
+              onMouseLeave={() => setHoveredDevice(null)}
             >
-              <FontAwesomeIcon
-                icon={faCircleInfo}
-                className='pi-text-gray-600 dark:pi-text-gray-300'
-              />
-
-              <div className='pi-flex pi-flex-col'>
-                <span className='pi-text-sm pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
-                  {device.username}
+              <div className='pi-flex pi-items-center pi-max-w-60 pi-truncate'>
+                <FontAwesomeIcon
+                  icon={
+                    device?.type === 'mobile'
+                      ? faMobile
+                      : device?.type === 'physical'
+                      ? faOfficePhone
+                      : faUser
+                  }
+                  className='pi-mr-2 pi-w-5 pi-h-5'
+                />
+                <span className='pi-truncate'>
+                  {device?.type === 'mobile'
+                    ? t('Phone Island.Mobile app')
+                    : device?.type === 'physical'
+                    ? device?.description
+                    : '-'}
                 </span>
-                <span className='pi-text-xs pi-text-gray-500 dark:pi-text-gray-400'>
-                  {device.type}
-                </span>
+              </div>
+              <div className='pi-flex pi-items-center'>
+                {selectedSwitchDevices === device?.id && (
+                  <FontAwesomeIcon
+                    icon={faCheck}
+                    className={`${
+                      hoveredDevice === device?.id
+                        ? 'pi-text-gray-700 dark:pi-text-gray-200'
+                        : 'pi-text-emerald-700 dark:pi-text-emerald-500'
+                    } pi-w-5 pi-h-5`}
+                  />
+                )}
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Centered Button */}
+        <div className='pi-flex pi-justify-center'>
+          <Button
+            disabled={selectedSwitchDevices === ''}
+            variant='gray'
+            className='pi-font-medium pi-text-sm pi-leading-5'
+            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices)}
+          >
+            <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
+            <span>{t('Phone Island.Switch device')}</span>
+          </Button>
         </div>
       </div>
       <Tooltip className='pi-z-20' id='tooltip-close-settings' place='bottom' />

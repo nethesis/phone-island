@@ -107,7 +107,15 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
-            <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
+            <BackCall
+              isVisible={
+                view === 'keypad' ||
+                view === 'transfer' ||
+                view === 'settings' ||
+                view === 'switchDevice' ||
+                transferring
+              }
+            />
             <SideView isVisible={sideViewIsVisible} />
             <IslandMotions>
               {/* The views logic */}
