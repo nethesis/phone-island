@@ -22,7 +22,7 @@ const ThemeView = () => {
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Title */}
       <SettingsHeader title={t('Settings.Theme')} tooltipPrefix='theme' />
-      {/* Microphone List */}
+      {/* Theme List */}
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
         {[
           { id: 'dark', icon: faMoon, label: 'Settings.Dark' },
@@ -30,17 +30,13 @@ const ThemeView = () => {
         ].map(({ id, icon, label }) => (
           <div
             key={id}
-            className='pi-flex pi-items-center pi-justify-between pi-py-3 pi-px-4 pi-rounded-md hover:pi-bg-gray-100 dark:hover:pi-bg-gray-600 pi-text-gray-700 dark:pi-text-gray-200'
+            className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
             onClick={() => handleSelectTheme(id)}
             onMouseEnter={() => setHoveredDevice(id)}
             onMouseLeave={() => setHoveredDevice(null)}
             data-stop-propagation={true}
           >
-            <FontAwesomeIcon
-              size='lg'
-              icon={icon}
-              className='pi-mr-3 dark:pi-text-gray-100 pi-text-gray-600'
-            />
+            <FontAwesomeIcon icon={icon} className='pi-mr-2 pi-w-5 pi-h-5' />
             <div className={`${icon === faMoon ? 'pi-ml-[0.2rem]' : ''} pi-flex-grow`}>
               {t(label)}
             </div>
@@ -50,9 +46,9 @@ const ThemeView = () => {
                 icon={faCheck}
                 className={`${
                   hoveredDevice === id
-                    ? 'pi-text-gray-500 dark:pi-text-gray-200'
-                    : 'pi-text-green-600 dark:pi-text-green-400'
-                }`}
+                    ? 'pi-text-gray-700 dark:pi-text-gray-200'
+                    : 'pi-text-emerald-700 dark:pi-text-emerald-500'
+                } pi-w-5 pi-h-5`}
               />
             )}
           </div>

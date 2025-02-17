@@ -83,5 +83,9 @@
   "Switch device": {
     "Switch device": "Switch device",
     "Switch information": "The call will continue in the selected device."
+  },
+  "Phone Island": {
+    "Mobile app": "Mobile app",
+    "Switch device": "Switch device"
   }
 }

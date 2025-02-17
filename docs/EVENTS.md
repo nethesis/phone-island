@@ -904,6 +904,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-call-switched` Indicates that user has a switched call to another devices
+
+  ```json
+  {}
+  ```
+
 ## Debug events
 
 - `phone-island-view-changed` Force to change phone-island view

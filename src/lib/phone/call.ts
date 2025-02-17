@@ -183,7 +183,7 @@ export function unpauseCurrentCall() {
 /**
  * Transfer the current call through a blind transfer (not in use)
  */
-export async function blindTransfer(number: string) {
+export async function blindTransferFunction(number: string) {
   // Retrieve current conversation info
   const { conversationId } = store.getState().currentCall
   const { default_device } = store.getState().currentUser
