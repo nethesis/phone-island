@@ -17,6 +17,7 @@ const defaultState: IslandTypes = {
   settingsView: 'main',
   sideViewIsVisible: false,
   isConferenceList: false,
+  previousView: null,
 }
 
 export const island = createModel<RootModel>()({
@@ -26,6 +27,7 @@ export const island = createModel<RootModel>()({
       return {
         ...state,
         view: payload,
+        previousView: state?.view,
       }
     },
     toggleIsOpen: (state, payload: boolean) => {
@@ -98,4 +100,5 @@ interface IslandTypes {
   settingsView: string
   sideViewIsVisible: boolean
   isConferenceList: boolean
+  previousView?: IslandViewType | null
 }

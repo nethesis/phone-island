@@ -17,10 +17,8 @@ import {
   faPhone,
   faSun,
   faTimes,
-  faWifi,
 } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
-import { faGridRound } from '@nethesis/nethesis-solid-svg-icons'
+import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 
 const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
@@ -38,17 +36,7 @@ const CallTemplate = (args: any) => {
   const [token, setToken] = useState(() => {
     return localStorage.getItem('phoneIslandToken') || ''
   })
-  const [key, setKey] = useState('0')
-  const [logData, setLogData] = useState('')
-  const [userData, setUserData] = useState('')
-  const [phoneIslandData, setPhoneIslandData] = useState('')
-  const [phoneIslandWebrtc, setPhoneIslandWebrtc] = useState('')
   const [theme, setTheme] = useState('system')
-
-  const [showLog, setShowLog] = useState(false)
-  const [showUserData, setShowUserData] = useState({})
-  const [showPhoneIslandStatus, setShowPhoneIslandStatus] = useState(false)
-  const [showPhoneIslandWebrtc, setShowPhoneIslandWebrtc] = useState(false)
 
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
@@ -67,58 +55,6 @@ const CallTemplate = (args: any) => {
       eventDispatch('phone-island-call-keypad-close', {})
     } else {
       eventDispatch('phone-island-call-keypad-open', {})
-    }
-  }
-
-  const logCallStore = () => {
-    //hide the log if it is already shown
-    if (showLog) {
-      setLogData('')
-      setShowLog(false)
-      return
-    } else {
-      setShowLog(true)
-      const currentCallStoreValue = store.getState().currentCall
-      setLogData(JSON.stringify(currentCallStoreValue, null, 2))
-    }
-  }
-
-  const logUserStore = () => {
-    //hide user informations it is already shown
-    if (showUserData) {
-      setUserData('')
-      setShowUserData(false)
-      return
-    } else {
-      setShowUserData(true)
-      const currentUserStoreData = store.getState().currentUser
-      setUserData(JSON.stringify(currentUserStoreData, null, 2))
-    }
-  }
-
-  const logPhoneIslandStatus = () => {
-    //hide user informations it is already shown
-    if (showPhoneIslandStatus) {
-      setPhoneIslandData('')
-      setShowPhoneIslandStatus(false)
-      return
-    } else {
-      setShowPhoneIslandStatus(true)
-      const currentPhoneIslandStoreData = store.getState().island
-      setPhoneIslandData(JSON.stringify(currentPhoneIslandStoreData, null, 2))
-    }
-  }
-
-  const logPhoneIslandWebrtc = () => {
-    //hide user informations it is already shown
-    if (showPhoneIslandWebrtc) {
-      setPhoneIslandWebrtc('')
-      setShowPhoneIslandWebrtc(false)
-      return
-    } else {
-      setShowPhoneIslandWebrtc(true)
-      const currentPhoneIslandStoreWebrtcData = store.getState().webrtc
-      setPhoneIslandWebrtc(JSON.stringify(currentPhoneIslandStoreWebrtcData, null, 2))
     }
   }
 
@@ -172,26 +108,7 @@ const CallTemplate = (args: any) => {
   ]
 
   const handleDtmfButtonClick = (key: string) => {
-    setKey(key)
     eventDispatch('phone-island-call-keypad-send', { key })
-  }
-
-  const renderDtmfKeypad = () => {
-    return (
-      <div className='pi-bg-white pi-rounded-lg pi-shadow-md pi-p-4'>
-        <div className='pi-grid pi-grid-cols-3 pi-gap-2'>
-          {dtmfKeys.map((row, rowIndex) => (
-            <React.Fragment key={rowIndex}>
-              {row.map((key) => (
-                <Button key={key} onClick={() => handleDtmfButtonClick(key)} variant='default'>
-                  {key}
-                </Button>
-              ))}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    )
   }
 
   const openOrReducePhoneIsland = () => {
@@ -221,10 +138,6 @@ const CallTemplate = (args: any) => {
   ]
 
   const [alert, setAlert] = useState('')
-
-  const handleInternetConnectionCheck = () => {
-    eventDispatch('phone-island-check-connection', {})
-  }
 
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
@@ -371,6 +284,12 @@ const CallTemplate = (args: any) => {
               >
                 <FontAwesomeIcon icon={faGear} className='pi-w-5 pi-h-5' />
               </Button>
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-view-changed', { viewType: 'settings' })}
+              >
+                <FontAwesomeIcon icon={faOpen} className='pi-w-5 pi-h-5' />
+              </Button>
             </div>
           </div>
 
@@ -417,12 +336,6 @@ const CallTemplate = (args: any) => {
             </div>
           </div>
 
-          {/* Data Display */}
-          {logData && (
-            <pre className='pi-bg-gray-800 pi-text-gray-100 pi-p-4 pi-rounded-lg pi-overflow-auto pi-text-sm'>
-              {logData}
-            </pre>
-          )}
         </>
       )}
 

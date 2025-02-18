@@ -21,7 +21,7 @@ import ThemeView from './ThemeView'
 import { Tooltip } from 'react-tooltip'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
-  const { settingsView } = useSelector((state: RootState) => state.island)
+  const { settingsView, previousView } = useSelector((state: RootState) => state.island)
   const dispatch = useDispatch<Dispatch>()
 
   const SettingsMenuItem = ({ icon, label, onClick }) => (
@@ -42,11 +42,9 @@ export const SettingsView: FC<SettingsViewProps> = () => {
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Header */}
       <div className='pi-flex pi-items-center pi-justify-between pi-text-gray-900 dark:pi-text-gray-50'>
-        <h1 className='pi-text-lg pi-font-medium pi-leading-7'>
-          {t('Settings.Settings')}
-        </h1>
+        <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{t('Settings.Settings')}</h1>
         <Button
-          onClick={() => dispatch.island.setIslandView('call')}
+          onClick={() => dispatch.island.setIslandView(`${previousView || 'call'}`)}
           variant='transparentSettings'
           data-tooltip-id='tooltip-close-settings'
           data-tooltip-content={t('Common.Close') || ''}

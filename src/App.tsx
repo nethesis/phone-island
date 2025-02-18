@@ -253,6 +253,16 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Audio player is interrupted')
   })
 
+  useEventListener('phone-island-sideview-open', () => {
+    store.dispatch.island.toggleSideViewVisible(true)
+    eventDispatch('phone-island-sideview-opened', {})
+  })
+
+  useEventListener('phone-island-sideview-close', () => {
+    store.dispatch.island.toggleSideViewVisible(false)
+    eventDispatch('phone-island-sideview-closed', {})
+  })
+
   return (
     <>
       <Provider store={store}>

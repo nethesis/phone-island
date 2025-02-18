@@ -57,7 +57,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-keypad-opened', {})
   }
@@ -70,7 +70,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-transfer-opened', {})
   }
@@ -142,7 +142,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-conference-list-opened', {})
   }
@@ -298,8 +298,8 @@ const Actions: FC = () => {
               variant='default'
               onClick={() =>
                 sideViewIsVisible
-                  ? dispatch.island.toggleSideViewVisible(false)
-                  : dispatch.island.toggleSideViewVisible(true)
+                  ? eventDispatch('phone-island-sideview-close', {})
+                  : eventDispatch('phone-island-sideview-open', {})
               }
               data-tooltip-id='tooltip-sideView'
               data-tooltip-content={t('Tooltip.Other actions') || ''}
