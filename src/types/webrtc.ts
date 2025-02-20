@@ -16,3 +16,13 @@ export interface JanusTypes extends JanusLibTypes {
   ) => void
   destroy?: () => void
 }
+
+export interface JanusTrack {
+  type: string
+  capture?: boolean
+  recv?: boolean
+  add?: boolean
+  replace?: boolean
+  remove?: boolean
+  mid?: string
+}
