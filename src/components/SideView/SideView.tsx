@@ -12,8 +12,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from 'react-tooltip'
 import { recordCurrentCall } from '../../lib/phone/call'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -101,9 +101,9 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
           </motion.div>
         )}
       </AnimatePresence>
-      <Tooltip className='pi-z-20' id='tooltip-record' place='left' />
-      <Tooltip className='pi-z-20' id='tooltip-video' place='left' />
-      <Tooltip className='pi-z-20' id='tooltip-switch-device' place='left' />
+      <CustomThemedTooltip id='tooltip-record' place='left' />
+      <CustomThemedTooltip id='tooltip-video' place='left' />
+      <CustomThemedTooltip id='tooltip-switch-device' place='left' />
     </>
   )
 }
