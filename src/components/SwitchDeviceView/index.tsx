@@ -21,30 +21,33 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const allUsersInformation: any = useSelector((state: RootState) => state?.users)
 
   // Extract devices with active conversations:
-  const activeConversationDevices = new Set(
-    Object.keys(userInformation?.conversations || {}).filter(
-      (key) => !isEmpty(userInformation.conversations[key]),
-    ),
+  // Get IDs of devices with active conversations
+  const activeConversationIds = Object.keys(userInformation?.conversations || {}).filter(
+    (id) => !isEmpty(userInformation.conversations[id])
   )
-  // A device will be in the list only if it is online and not in an active conversation
-  const filteredDevices = (userInformation?.endpoints?.extension || []).filter((device) => {
-    const userStatus = allUsersInformation?.extensions[device?.id]?.status
-    return !activeConversationDevices.has(device?.id) && userStatus === 'online'
-  })
 
-  const blindTransferOnSelectedDevice = (deviceNumber: any) => {
-    if (deviceNumber !== '') {
-      blindTransferFunction(deviceNumber)
+  // Filter online devices that are not in conversations
+  const filteredDevices = userInformation?.endpoints?.extension?.filter((device) => 
+    allUsersInformation?.extensions[device?.id]?.status === 'online' && 
+    !activeConversationIds.includes(device?.id)
+  ) || []
+
+  const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
+  const [selectedSwitchDevices, setSelectedSwitchDevices] = useState('')
+
+  // Get the first device ID with active conversation
+  const extensionInCall = activeConversationIds[0]
+
+  const transferCallOnDevice = (device: any) => {
+    setSelectedSwitchDevices(device.id)
+  }
+
+  const blindTransferOnSelectedDevice = (deviceNumber: string, endpointIdInConversation: string) => {
+    if (deviceNumber && endpointIdInConversation) {
+      blindTransferFunction(deviceNumber, endpointIdInConversation)
       eventDispatch('phone-island-call-switched', {})
     }
   }
-
-  const transferCallOnDevice = (deviceInformation: any) => {
-    setSelectedSwitchDevices(deviceInformation?.id)
-  }
-
-  const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
-  const [selectedSwitchDevices, setSelectedSwitchDevices]: any = useState('')
 
   return (
     <>
@@ -127,7 +130,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
             disabled={selectedSwitchDevices === ''}
             variant='gray'
             className='pi-font-medium pi-text-sm pi-leading-5'
-            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices)}
+            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices, extensionInCall)}
           >
             <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
             <span>{t('Phone Island.Switch device')}</span>
