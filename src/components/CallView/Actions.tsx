@@ -8,7 +8,6 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
   parkCurrentCall,
-  recordCurrentCall,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,9 +22,6 @@ import {
   faChevronUp,
   faArrowRightArrowLeft,
   faUserPlus,
-  faStop,
-  faCircleDot,
-  faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -260,40 +256,15 @@ const Actions: FC = () => {
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
             <Button
-              active={isRecording}
               data-stop-propagation={true}
-              variant='default'
-              onClick={() => recordCurrentCall(isRecording)}
-              data-tooltip-id='tooltip-record'
-              data-tooltip-content={
-                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
-              }
-            >
-              {isRecording ? (
-                <FontAwesomeIcon icon={faStop} className='pi-h-6 pi-w-6' />
-              ) : (
-                <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
-                  <FontAwesomeIcon
-                    icon={faCircleDot}
-                    className='fa-circle-dot pi-text-white dark:pi-text-red-700'
-                  />
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    className='inner-dot pi-text-red-700 dark:pi-text-white'
-                  />
-                </div>
-              )}
-            </Button>
-            {/* Hidden waiting for other actions to be implemented */}
-            {/* <Button
-              data-stop-propagation={true}
+              disabled={true}
               variant='default'
               onClick={() => addUserConference()}
               data-tooltip-id='tooltip-conference'
               data-tooltip-content={t('Tooltip.Conference') || ''}
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button> */}
+            </Button>
             <Button
               variant='default'
               onClick={() =>
@@ -320,7 +291,6 @@ const Actions: FC = () => {
       <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-conference' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-sideView' place='left' />
