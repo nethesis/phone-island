@@ -1,8 +1,19 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+
+// Common dimensions
+const commonCollapsed = {
+  width: 168,
+  height: 40,
+}
+
+const commonExpanded = {
+  width: 348,
+  height: 304,
+}
 
 const defaultState = {
   padding_expanded: 24,
@@ -12,143 +23,60 @@ const defaultState = {
   border_radius_expanded: 20,
   border_radius_collapsed: 99,
   variants: {
-    // Call View
     call: {
       expanded: {
-        incoming: {
-          width: 418,
-          height: 96,
-        },
-        outgoing: {
-          width: 418,
-          height: 96,
-        },
+        incoming: { width: 418, height: 96 },
+        outgoing: { width: 418, height: 96 },
         accepted: {
           width: 348,
           height: 236,
-          actionsExpanded: {
-            width: 348,
-            height: 304,
-          },
+          actionsExpanded: commonExpanded,
         },
-        listening: {
-          width: 348,
-          height: 168,
-        },
+        listening: { width: 348, height: 168 },
         transfer: {
           width: 348,
           height: 236,
-          actionsExpanded: {
-            width: 348,
-            height: 304,
-          },
+          actionsExpanded: commonExpanded,
         },
       },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      collapsed: commonCollapsed,
     },
-    // Keypad View
     keypad: {
-      expanded: {
-        width: 338,
-        height: 400,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: { width: 338, height: 400 },
+      collapsed: commonCollapsed,
     },
-    // Transfer View
     transfer: {
-      expanded: {
-        width: 408,
-        height: 410,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: { width: 408, height: 410 },
+      collapsed: commonCollapsed,
     },
-    // Audio Player View
     player: {
-      expanded: {
-        width: 374,
-        height: 236,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: { width: 374, height: 236 },
+      collapsed: commonCollapsed,
     },
-    // Recorder View
     recorder: {
-      expanded: {
-        width: 374,
-        height: 256,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: { width: 374, height: 256 },
+      collapsed: commonCollapsed,
     },
-    // Physical Recorder View
     physicalPhoneRecorder: {
-      expanded: {
-        width: 374,
-        height: 256,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: { width: 374, height: 256 },
+      collapsed: commonCollapsed,
     },
-    // Alerts Section
-    alerts: {
-      width: 418,
-      height: 88,
-    },
+    alerts: { width: 418, height: 88 },
     settings: {
-      expanded: {
-        width: 348,
-        height: 304,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: commonExpanded,
+      collapsed: commonCollapsed,
     },
-    // Check video dimension in figma file
     video: {
-      expanded: {
-        width: 348,
-        height: 304,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: commonExpanded,
+      collapsed: commonCollapsed,
     },
     conference: {
-      expanded: {
-        width: 348,
-        height: 304,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: commonExpanded,
+      collapsed: commonCollapsed,
     },
     switchDevice: {
-      expanded: {
-        width: 348,
-        height: 304,
-      },
-      collapsed: {
-        width: 168,
-        height: 40,
-      },
+      expanded: commonExpanded,
+      collapsed: commonCollapsed,
     },
   },
 }

@@ -263,6 +263,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-sideview-closed', {})
   })
 
+  useEventListener('phone-island-size-change', (args: any) => {
+    let resizeInformationObject = {
+      ...args,
+    }
+    eventDispatch('phone-island-size-changed', { resizeInformationObject })
+  })
+
   return (
     <>
       <Provider store={store}>
