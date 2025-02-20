@@ -331,8 +331,8 @@ export const Socket: FC<SocketProps> = ({
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
               // Calculate and log latency
               const latency = Date.now() - start
-              console.debug(`Socket latency: ${latency}ms`)
-              console.debug('Socket is reachable!')
+              // console.debug(`Socket latency: ${latency}ms`) ////
+              // console.debug('Socket is reachable!')
             },
             () => {
               // Set socket_down alert

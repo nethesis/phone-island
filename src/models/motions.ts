@@ -122,8 +122,8 @@ const defaultState = {
     // Check video dimension in figma file
     video: {
       expanded: {
-        width: 348,
-        height: 304,
+        width: 600,
+        height: 480,
       },
       collapsed: {
         width: 168,

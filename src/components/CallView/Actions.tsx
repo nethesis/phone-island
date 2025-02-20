@@ -306,7 +306,7 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
             </Button> */}
-            {/* <Button
+            <Button
               variant='default'
               onClick={() =>
                 sideViewIsVisible
@@ -320,7 +320,7 @@ const Actions: FC = () => {
                 className='pi-h-6 pi-w-6'
                 icon={sideViewIsVisible ? faClose : faOpen}
               />
-            </Button> */}
+            </Button>
           </div>
         </>
       ) : (
