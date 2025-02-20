@@ -5,8 +5,8 @@ name: Publish Node.js Package to NPM
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   cdn-publish:
@@ -40,16 +40,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           persist-credentials: false
-      - name:  'Version Bump'
-        uses:  'phips28/gh-action-bump-version@master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_USER: NethBot
-          GITHUB_EMAIL: NethBot@users.noreply.github.com
-        with:
-          version-type:  'patch'
-          commit-message: 'package.json: version bump to {{version}}'
-      - name: 'Publish to npm repository'
+      - name: 'Prepare node setup'
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -58,6 +49,11 @@ jobs:
         run: npm ci
       - name: Run build
         run: npm run build
-      - run: npm run release
+      - name: Publish module
+        run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - name: Install NS8 Release Module Extension
+        run: gh extension install NethServer/gh-ns8-release-module
+      - name: Create Release
+        run: gh ns8-release-module create --repo ${{ github.repository }} --release-name ${{ github.ref }}

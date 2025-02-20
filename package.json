@@ -77,7 +77,11 @@
     "release:widget": "np patch",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "bump": "node bump-version.js",
-    "build-pack": "npm run bump && npm run build && npm pack"
+    "build-pack": "npm run bump && npm run build && npm pack",
+    "publish:minor": "npm version minor --allow-same-version -m v%s --force",
+    "publish:major": "npm version major --allow-same-version -m v%s --force",
+    "publish:patch": "npm version patch --allow-same-version -m v%s --force",
+    "postversion": "git add . &&  git push --follow-tags && git push --tags"
   },
   "browserslist": {
     "production": [
