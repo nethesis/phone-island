@@ -13,6 +13,7 @@ import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
+import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -264,9 +265,28 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-size-change', (args: any) => {
-    let resizeInformationObject = {
-      ...args,
+    const { sideViewIsVisible } = store.getState().island
+
+    // Get current dimensions from args
+    const { motionVariants } = args
+    const width = parseInt(motionVariants.width)
+    const height = parseInt(motionVariants.height)
+
+    // Calculate new dimensions based on conditions
+    const adjustedDimensions = {
+      width: width + (sideViewIsVisible ? 42 : 0),
+      height: height + (isBackCallActive() ? 40 : 0)
     }
+
+    // Create the resize information object
+    const resizeInformationObject = {
+      motionVariants: {
+        ...motionVariants,
+        width: `${adjustedDimensions.width}px`,
+        height: `${adjustedDimensions.height}px`,
+      },
+    }
+
     eventDispatch('phone-island-size-changed', { resizeInformationObject })
   })
 

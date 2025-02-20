@@ -21,6 +21,7 @@ import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
 import { VideoView } from './VideoView'
 import { SwitchDeviceView } from './SwitchDeviceView'
+import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
 
 /**
  * Provides the Island logic
@@ -107,15 +108,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
-            <BackCall
-              isVisible={
-                view === 'keypad' ||
-                view === 'transfer' ||
-                view === 'settings' ||
-                view === 'switchDevice' ||
-                transferring
-              }
-            />
+            <BackCall isVisible={isBackCallActive()} />
             <SideView isVisible={sideViewIsVisible} />
             <IslandMotions>
               {/* The views logic */}

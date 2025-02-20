@@ -973,3 +973,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+## Resize informations events
+
+- `phone-island-size-change` Get phone-island resize informations
+
+```json
+{
+  "width": "348px",
+  "height": "304px",
+  "borderRadius": "20px",
+  "padding": "24px"
+}
+```
