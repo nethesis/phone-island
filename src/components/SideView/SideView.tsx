@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState } from '../../store'
+import { Dispatch, RootState, store } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,6 +8,7 @@ import { faArrowUpRightFromSquare, faDisplay, faVideo } from '@fortawesome/free-
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from 'react-tooltip'
+import { eventDispatch } from '../../utils'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -20,6 +21,15 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
     if (viewType !== null) {
       dispatch.island.setIslandView(viewType)
     }
+  }
+
+  const goToVideoView = () => {
+    closeSideViewAndLaunchEvent('video')
+
+    setTimeout(() => {
+      store.dispatch.currentCall.setVideoEnabled(true)
+      eventDispatch('phone-island-toggle-video', { enableVideo: true })
+    }, 250)
   }
 
   return (
@@ -59,7 +69,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               {/* Video button */}
               <Button
                 variant='transparentSideView'
-                onClick={() => closeSideViewAndLaunchEvent('video')}
+                onClick={() => goToVideoView()}
                 data-tooltip-id='tooltip-video'
                 data-tooltip-content={t('Tooltip.Enable camera') || ''}
               >

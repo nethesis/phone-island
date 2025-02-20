@@ -1,7 +1,7 @@
 import React, { type FC, useState, useEffect } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
-import { Provider } from 'react-redux'
-import { store } from './store'
+import { Provider, useSelector } from 'react-redux'
+import { RootState, store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 import loadI18n from './lib/i18n'
@@ -249,12 +249,18 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Audio player is interrupted')
   })
 
-  useEventListener('phone-island-test-video', (data: any) => {
-    console.log('@@@ phone-island-test-video', data) ////
+  useEventListener('phone-island-toggle-video', (data: any) => {
+    console.log('@@@ phone-island-toggle-video', data) ////
 
     const { sipcall }: { sipcall: any } = store.getState().webrtc
+    // const { isVideoCall } = store.getState().currentCall ////
 
-    // sipcall.unmuteVideo() ////
+    //// remove?
+    // if (data.enableVideo) {
+    //   sipcall.unmuteVideo() ////
+    // } else {
+    //   sipcall.muteVideo() ////
+    // }
 
     //// copied from old cti, is this correct?
     const mediaObj: any = {
@@ -264,10 +270,22 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     }
 
     if (data.enableVideo) {
-      mediaObj.addVideo = true
+      ////
+      // if (!isVideoCall) {
+      //   mediaObj.addVideo = true
+
+      //   // set isVideoCall to true
+      //   store.dispatch.currentCall.setVideoCall(true)
+      // }
+
+      mediaObj.addVideo = true ////
+      // mediaObj.videoSend = true //// ////
     } else {
       mediaObj.removeVideo = true
+      // mediaObj.videoSend = false //// ////
     }
+
+    console.log('@@@ create offer with', mediaObj) ////
 
     sipcall.createOffer({
       media: mediaObj,

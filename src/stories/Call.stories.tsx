@@ -228,12 +228,12 @@ const CallTemplate = (args: any) => {
 
   ////
   const testVideo = () => {
-    eventDispatch('phone-island-test-video', { enableVideo: true })
+    eventDispatch('phone-island-toggle-video', { enableVideo: true })
   }
 
   ////
   const disableVideo = () => {
-    eventDispatch('phone-island-test-video', { enableVideo: false })
+    eventDispatch('phone-island-toggle-video', { enableVideo: false })
   }
 
   return (

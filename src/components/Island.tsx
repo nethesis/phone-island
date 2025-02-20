@@ -106,7 +106,11 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <>
           <IslandDrag islandContainerRef={islandContainerRef}>
             {/* Add background call visibility logic */}
-            <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
+            <BackCall
+              isVisible={
+                view === 'keypad' || view === 'transfer' || view === 'video' || transferring
+              }
+            />
             <SideView isVisible={sideViewIsVisible} />
             <IslandMotions>
               {/* The views logic */}
@@ -141,8 +145,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>
         <audio autoPlay ref={remoteAudio}></audio>
-        <video muted={true} autoPlay ref={localVideo} className='pi-w-96 pi-h-96'></video>
-        <video autoPlay muted={true} ref={remoteVideo} className='pi-w-96 pi-h-96'></video>
+        {/* <video muted={true} autoPlay ref={localVideo} className='pi-w-96 pi-h-96'></video> //// 
+        <video autoPlay muted={true} ref={remoteVideo} className='pi-w-96 pi-h-96'></video> */}
       </div>
     </div>
   )
