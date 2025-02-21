@@ -162,8 +162,11 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   ])
 
   useEffect(() => {
+    let sizeInformation: any = {}
+    sizeInformation.width = motionVariants?.width
+    sizeInformation.height = motionVariants?.height
     eventDispatch('phone-island-size-change', {
-      motionVariants,
+      sizeInformation,
     })
   }, [
     motionVariants,
