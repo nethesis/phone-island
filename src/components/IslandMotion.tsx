@@ -7,9 +7,23 @@ import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { eventDispatch } from '../utils'
 
+const animationVariants = {
+  initial: {
+    scale: 1,
+    y: 0,
+  },
+  animate: {
+    scale: [1, 1.02, 1],
+    y: [0, -5, 0],
+    transition: {
+      duration: 0.1,
+    },
+  },
+}
+
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
-  const { incoming, outgoing, accepted, transferring, incomingSocket, incomingWebRTC } =
+  const { incoming, outgoing, accepted, transferring, incomingWebRTC, incomingSocket } =
     useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
   const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
@@ -159,6 +173,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     padding_expanded,
     alert_padding_expanded,
     incomingWebRTC,
+    incomingSocket,
   ])
 
   useEffect(() => {
@@ -188,12 +203,14 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
     sideViewIsVisible,
     incomingSocket,
+    incomingWebRTC,
   ])
 
   return (
     <motion.div
       className='pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
       animate={motionVariants}
+      variants={animationVariants}
     >
       {children}
     </motion.div>
