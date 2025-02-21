@@ -31,7 +31,9 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     userInformation?.endpoints?.extension?.filter(
       (device) =>
         allUsersInformation?.extensions[device?.id]?.status === 'online' &&
-        !activeConversationIds.includes(device?.id),
+        !activeConversationIds.includes(device?.id) &&
+        device?.type !== 'webrtc' &&
+        device?.type !== 'nethlink',
     ) || []
 
   const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
@@ -51,6 +53,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     if (deviceNumber && endpointIdInConversation) {
       blindTransferFunction(deviceNumber, endpointIdInConversation)
       eventDispatch('phone-island-call-switched', {})
+      dispatch.island.toggleAvoidToShow(true)
     }
   }
 

@@ -18,6 +18,7 @@ const defaultState: IslandTypes = {
   sideViewIsVisible: false,
   isConferenceList: false,
   previousView: null,
+  avoidToShow: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -52,6 +53,9 @@ export const island = createModel<RootModel>()({
     },
     toggleConferenceList: (state, payload: boolean) => {
       state.isConferenceList = payload
+    },
+    toggleAvoidToShow: (state, payload: boolean) => {
+      state.avoidToShow = payload
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
@@ -101,4 +105,5 @@ interface IslandTypes {
   sideViewIsVisible: boolean
   isConferenceList: boolean
   previousView?: IslandViewType | null
+  avoidToShow?: boolean
 }
