@@ -17,7 +17,7 @@ import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/r
 import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
-import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
@@ -396,7 +396,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
       ) : (
         <div></div>
       )}
-      <Tooltip className='pi-z-20' id='tooltip-left-settings-devices' place='left' />
+      <CustomThemedTooltip id='tooltip-left-settings-devices' place='left' />
     </>
   )
 }

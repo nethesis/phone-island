@@ -8,11 +8,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faCircleInfo, faMobile, faUser, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { Button } from '../Button'
-import { Tooltip } from 'react-tooltip'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 import { blindTransferFunction } from '../../lib/phone/call'
 import { faArrowsRepeat, faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -23,14 +23,16 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   // Extract devices with active conversations:
   // Get IDs of devices with active conversations
   const activeConversationIds = Object.keys(userInformation?.conversations || {}).filter(
-    (id) => !isEmpty(userInformation.conversations[id])
+    (id) => !isEmpty(userInformation.conversations[id]),
   )
 
   // Filter online devices that are not in conversations
-  const filteredDevices = userInformation?.endpoints?.extension?.filter((device) => 
-    allUsersInformation?.extensions[device?.id]?.status === 'online' && 
-    !activeConversationIds.includes(device?.id)
-  ) || []
+  const filteredDevices =
+    userInformation?.endpoints?.extension?.filter(
+      (device) =>
+        allUsersInformation?.extensions[device?.id]?.status === 'online' &&
+        !activeConversationIds.includes(device?.id),
+    ) || []
 
   const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
   const [selectedSwitchDevices, setSelectedSwitchDevices] = useState('')
@@ -42,7 +44,10 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     setSelectedSwitchDevices(device.id)
   }
 
-  const blindTransferOnSelectedDevice = (deviceNumber: string, endpointIdInConversation: string) => {
+  const blindTransferOnSelectedDevice = (
+    deviceNumber: string,
+    endpointIdInConversation: string,
+  ) => {
     if (deviceNumber && endpointIdInConversation) {
       blindTransferFunction(deviceNumber, endpointIdInConversation)
       eventDispatch('phone-island-call-switched', {})
@@ -137,8 +142,8 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
           </Button>
         </div>
       </div>
-      <Tooltip className='pi-z-20' id='tooltip-close-settings' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-switch-information' place='bottom' />
+      <CustomThemedTooltip id='tooltip-close-settings' place='bottom' />
+      <CustomThemedTooltip id='tooltip-switch-information' place='bottom' />
     </>
   )
 }

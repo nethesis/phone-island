@@ -5,7 +5,6 @@ import type { Meta, StoryObj } from '@storybook/react'
 import React, { useEffect, useState } from 'react'
 import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
-import { store } from '../store'
 import { Button } from '../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -335,7 +334,6 @@ const CallTemplate = (args: any) => {
               </Button>
             </div>
           </div>
-
         </>
       )}
 

@@ -10,9 +10,9 @@ import { store, Dispatch } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import outgoingRingtone from '../../static/outgoing_ringtone'
 import { RootState } from '../../store'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const TransferActions: FC<TransferActionsProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -59,7 +59,7 @@ export const TransferActions: FC<TransferActionsProps> = () => {
         </Button>
         <div></div>
       </div>
-      <Tooltip className='pi-z-1000' id='transfer-actions-tooltip' place='bottom' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-actions-tooltip' place='bottom' />
     </>
   )
 }

@@ -18,7 +18,7 @@ import { Button } from '../Button'
 import MichrophoneView from './MicrophoneView'
 import AudioView from './AudioView'
 import ThemeView from './ThemeView'
-import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView, previousView } = useSelector((state: RootState) => state.island)
@@ -93,7 +93,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
             return MainSettings
         }
       })()}
-      <Tooltip className='pi-z-20' id='tooltip-close-settings' place='bottom' />
+      <CustomThemedTooltip id='tooltip-close-settings' place='bottom' />
     </>
   )
 }

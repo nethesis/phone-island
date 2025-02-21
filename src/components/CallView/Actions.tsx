@@ -29,11 +29,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -286,14 +286,14 @@ const Actions: FC = () => {
         <></>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip-transfer' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-conference' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-sideView' place='left' />
+      <CustomThemedTooltip id='tooltip-transfer' place='bottom' />
+      <CustomThemedTooltip id='tooltip-pause' place='bottom' />
+      <CustomThemedTooltip id='tooltip-mute' place='bottom' />
+      <CustomThemedTooltip id='tooltip-expand' place='bottom' />
+      <CustomThemedTooltip id='tooltip-keyboard' place='bottom' />
+      <CustomThemedTooltip id='tooltip-conference' place='bottom' />
+      <CustomThemedTooltip id='tooltip-park' place='bottom' />
+      <CustomThemedTooltip id='tooltip-sideView' place='left' />
     </>
   )
 }

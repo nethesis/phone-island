@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
 import { Dispatch } from '../../store'
-import { Tooltip } from 'react-tooltip'
 import { t } from 'i18next'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 interface SettingsHeaderProps {
   title: string
@@ -40,8 +40,8 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({ title, tooltipPr
       </div>
       {/* Divider */}
       <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-1' />
-      <Tooltip className='pi-z-20' id={`tooltip-back-${tooltipPrefix}-settings`} place='bottom' />
-      <Tooltip className='pi-z-20' id={`tooltip-close-${tooltipPrefix}-settings`} place='bottom' />
+      <CustomThemedTooltip id={`tooltip-back-${tooltipPrefix}-settings`} place='bottom' />
+      <CustomThemedTooltip id={`tooltip-close-${tooltipPrefix}-settings`} place='bottom' />
     </>
   )
 }

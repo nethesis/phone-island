@@ -10,11 +10,10 @@ import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
-import { Tooltip } from 'react-tooltip'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
-import DropdownContent from './SwitchInputView/DropdownContent'
 import { eventDispatch } from '../utils'
+import { CustomThemedTooltip } from './CustomThemedTooltip'
 
 /**
  * Return the status of the
@@ -153,10 +152,10 @@ const Hangup: FC<HangupProps> = ({
           )}
         </motion.div>
       </div>
-      <Tooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
-      <Tooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
-      <Tooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
-      <Tooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
     </>
   )
 }

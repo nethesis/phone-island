@@ -79,6 +79,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
               </Button>
               {/* Switch device button */}
+
               <Button
                 variant='transparentSideView'
                 data-tooltip-id='tooltip-switch-device'
@@ -87,16 +88,17 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               >
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
               </Button>
+              {/* Hidden at the moment waiting for implementation */}
               {/* Share button */}
-              <Button variant='transparentSideView'>
+              {/* <Button variant='transparentSideView' disabled>
                 <FontAwesomeIcon
                   className='pi-h-5 pi-w-5 pi-text-white'
                   icon={faArrowUpRightFromSquare}
                 />
               </Button>
-              <Button variant='transparentSideView'>
+              <Button variant='transparentSideView' disabled>
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
-              </Button>
+              </Button> */}
             </div>
           </motion.div>
         )}
