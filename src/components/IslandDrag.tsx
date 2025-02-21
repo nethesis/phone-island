@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Nethesis S.r.l.
+// Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useState, useRef, MutableRefObject } from 'react'
@@ -32,6 +32,10 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
     phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
   )
 
+  // Handles the drag started event
+  function handleStartDrag(event) {
+    controls.start(event)
+  }
   // Handles log press event
   const handleLongPress = () => {}
 
@@ -83,20 +87,22 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   return (
     <motion.div
       drag
-      dragConstraints={islandContainerRef}
+      onPointerDown={(e) => controls.start(e)}
       onDragStart={handleDragStarted}
-      dragMomentum={false}
       dragTransition={{ power: 0 }}
       initial={{
         x: position?.x || startPosition.x,
-        y: position?.y || startPosition.y
+        y: position?.y || startPosition.y,
       }}
+      dragControls={controls}
+      dragListener={false}
+      dragConstraints={islandContainerRef}
       onDragEnd={handleDragEnd}
       ref={islandRef}
       {...longPressEvent}
       className='pi-absolute'
     >
-      {children}
+      {children && children}
     </motion.div>
   )
 }
