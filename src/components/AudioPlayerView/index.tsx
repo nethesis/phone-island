@@ -10,9 +10,9 @@ import Progress from './Progress'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
@@ -66,7 +66,9 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
               variant='default'
               style={{ transform: 'scale(1.15)' }}
               data-tooltip-id='tooltip-pause-audio-player'
-              data-tooltip-content={audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`}
+              data-tooltip-content={
+                audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`
+              }
             >
               {audioPlayerPlaying ? (
                 <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
@@ -78,7 +80,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
         </div>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip-pause-audio-player' place='bottom' />
+      <CustomThemedTooltip id='tooltip-pause-audio-player' place='bottom' />
     </div>
   )
 }

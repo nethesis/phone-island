@@ -839,6 +839,26 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-call-switched` Indicates that user has a switched call to another devices
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-opened` Indicates that phone island right menu is open
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-closed` Indicates that phone island right menu is close
+
+  ```json
+  {}
+  ```
+
+
+
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
 
@@ -924,6 +944,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-all-users-status` Retrieve all informations about all users
+
+  ```json
+  {}
+  ```
+
 - `phone-island-status` Retrieve all information about phone island
 
   ```json
@@ -947,3 +973,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+## Resize informations events
+
+- `phone-island-size-change` Get phone-island resize informations
+
+```json
+{
+  "width": "348px",
+  "height": "304px",
+  "borderRadius": "20px",
+  "padding": "24px"
+}
+```

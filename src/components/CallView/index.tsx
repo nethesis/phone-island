@@ -23,9 +23,9 @@ import Avatar from './Avatar'
 import Actions from './Actions'
 import Hangup from '../Hangup'
 import { useTranslation } from 'react-i18next'
-import { Tooltip } from 'react-tooltip'
 import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -303,7 +303,7 @@ const CallView: FC<CallViewProps> = () => {
               </div>
             )}
           </StyledCallView>
-          <Tooltip className='pi-z-20' id='tooltip-answer-left' place='left' />
+          <CustomThemedTooltip id='tooltip-answer-left' place='left' />
         </div>
       )}
     </>
