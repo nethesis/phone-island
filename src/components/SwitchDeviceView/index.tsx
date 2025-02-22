@@ -6,16 +6,17 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faCircleInfo, faMobile, faUser, faXmark } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { Button } from '../Button'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 import { blindTransferFunction } from '../../lib/phone/call'
 import { faArrowsRepeat, faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useTranslation } from 'react-i18next'
 
 export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
+  const { t } = useTranslation()
 
   const userInformation = useSelector((state: RootState) => state?.currentUser)
   const allUsersInformation: any = useSelector((state: RootState) => state?.users)
@@ -85,7 +86,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         </div>
 
         {/* Divider */}
-        <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-[-0.5rem]' />
+        <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-1' />
 
         {/* Devices List */}
         <div className='pi-flex pi-flex-col pi-mt-2 pi-h-[150px] pi-overflow-y-auto pi-space-y-2 pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>

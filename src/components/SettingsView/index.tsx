@@ -13,15 +13,16 @@ import {
   faVolumeHigh,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { Button } from '../Button'
 import MichrophoneView from './MicrophoneView'
 import AudioView from './AudioView'
 import ThemeView from './ThemeView'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useTranslation } from 'react-i18next'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView, previousView } = useSelector((state: RootState) => state.island)
+  const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
 
   const SettingsMenuItem = ({ icon, label, onClick }) => (

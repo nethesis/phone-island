@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
 import { Dispatch } from '../../store'
-import { t } from 'i18next'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useTranslation } from 'react-i18next'
 
 interface SettingsHeaderProps {
   title: string
@@ -14,6 +14,7 @@ interface SettingsHeaderProps {
 
 export const SettingsHeader: React.FC<SettingsHeaderProps> = ({ title, tooltipPrefix }) => {
   const dispatch = useDispatch<Dispatch>()
+    const { t } = useTranslation()
 
   return (
     <>

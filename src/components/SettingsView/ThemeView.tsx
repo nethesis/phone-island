@@ -6,14 +6,15 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
 import { SettingsHeader } from './SettingsHeader'
+import { useTranslation } from 'react-i18next'
 
 const ThemeView = () => {
   const handleSelectTheme = (clickedTheme: string) => {
     eventDispatch('phone-island-theme-change', { selectedTheme: clickedTheme })
   }
+  const { t } = useTranslation()
 
   const { theme } = useSelector((state: RootState) => state.darkTheme)
   const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)

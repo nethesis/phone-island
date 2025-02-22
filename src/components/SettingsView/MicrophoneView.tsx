@@ -6,12 +6,13 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faMicrophone } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
 import { SettingsHeader } from './SettingsHeader'
+import { useTranslation } from 'react-i18next'
 
 const MicrophoneView = () => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
+  const { t } = useTranslation()
 
   const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
     getJSONItem('phone-island-audio-input-device').deviceId || null,

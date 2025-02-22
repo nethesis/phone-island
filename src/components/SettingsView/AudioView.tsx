@@ -6,12 +6,14 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
 import { SettingsHeader } from './SettingsHeader'
+import { useTranslation } from 'react-i18next'
 
 const AudioView = () => {
   const remoteAudioElement: any = useSelector((state: RootState) => state.player.remoteAudio)
+
+  const { t } = useTranslation()
 
   const [selectedAudioOutput, setSelectedAudioOutput] = useState<string | null>(
     getJSONItem('phone-island-audio-output-device').deviceId || null,

@@ -402,7 +402,7 @@ export const Socket: FC<SocketProps> = ({
           // Avoid to show phone island in case of answer from physical or mobile device
           store.dispatch.island.toggleAvoidToShow(true)
           // Launch an event to advert the user that the call it's answered from another device
-          eventDispatch('phone-island-call-answered-from-another-device', {extensionType})
+          eventDispatch('phone-island-call-answered-from-another-device', { extensionType })
         }
       })
 

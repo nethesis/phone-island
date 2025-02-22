@@ -7,9 +7,8 @@ import { Dispatch, RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faCircleXmark, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
-import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
-import { store } from '../../store'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Shows user alerts
@@ -18,6 +17,7 @@ const AlertView: FC = () => {
   const { data } = useSelector((state: RootState) => state.alerts)
   const { default_device } = useSelector((state: RootState) => state.currentUser)
   const dispatch = useDispatch<Dispatch>()
+  const { t } = useTranslation()
 
   // Extract active alerts
   const activeAlerts = Object.values(data).filter((alert: any) => alert.active)

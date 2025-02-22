@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
-import loadI18n from './lib/i18n'
+import { initI18n } from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
@@ -17,7 +17,6 @@ import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 
 interface PhoneIslandProps {
   dataConfig: string
-  i18nLoadPath?: string
   showAlways?: boolean
   uaType: string
 }
@@ -28,7 +27,6 @@ interface DeviceInputOutputTypes {
 
 export const PhoneIsland: FC<PhoneIslandProps> = ({
   dataConfig,
-  i18nLoadPath = undefined,
   showAlways = false,
   uaType,
 }: PhoneIslandProps) => {
@@ -139,7 +137,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   //initialize i18n
   useEffect(() => {
     if (firstRenderI18n) {
-      loadI18n(i18nLoadPath)
+      initI18n()
       setFirstRenderI18n(false)
     }
   }, [firstRenderI18n])

@@ -5,6 +5,7 @@ import postcss from 'rollup-plugin-postcss'
 import babel from '@rollup/plugin-babel'
 import { terser } from 'rollup-plugin-terser'
 import { getFiles } from './scripts/buildUtils'
+import json from '@rollup/plugin-json'
 
 export default {
   input: ['./src/index.ts', ...getFiles('./src/components', ['.js', '.ts', '.jsx', '.tsx'])],
@@ -19,6 +20,10 @@ export default {
     },
   ],
   plugins: [
+    json({
+      include: ['public/locales/**/*.json'],
+      compact: true
+    }),
     resolve({
       browser: true,
     }),
