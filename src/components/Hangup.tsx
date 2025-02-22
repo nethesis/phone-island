@@ -10,11 +10,10 @@ import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
-import { Tooltip } from 'react-tooltip'
 import { hangupAllExtensions } from '../lib/phone/call'
 import { useTranslation } from 'react-i18next'
-import DropdownContent from './SwitchInputView/DropdownContent'
 import { eventDispatch } from '../utils'
+import { CustomThemedTooltip } from './CustomThemedTooltip'
 
 /**
  * Return the status of the
@@ -27,7 +26,7 @@ const Hangup: FC<HangupProps> = ({
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
-  const { isOpen } = useSelector((state: RootState) => state.island)
+  const { isOpen, sideViewIsVisible } = useSelector((state: RootState) => state.island)
 
   function handleHangup() {
     if (incoming) {
@@ -56,6 +55,14 @@ const Hangup: FC<HangupProps> = ({
   }
 
   const { t } = useTranslation()
+
+  // Close side view and open settings view
+  const closeSideViewOpenSettings = () => {
+    if (sideViewIsVisible) {
+      eventDispatch('phone-island-sideview-close', {})
+    }
+    dispatch.island.setIslandView('settings')
+  }
 
   // Phone island footer section
   return (
@@ -128,7 +135,7 @@ const Hangup: FC<HangupProps> = ({
           {isOpen && accepted && (
             <Button
               variant='transparent'
-              onClick={() => dispatch.island.setIslandView('settings')}
+              onClick={() => closeSideViewOpenSettings()}
               data-tooltip-id='tooltip-settings-view'
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
               className={`${
@@ -145,10 +152,10 @@ const Hangup: FC<HangupProps> = ({
           )}
         </motion.div>
       </div>
-      <Tooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
-      <Tooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
-      <Tooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
-      <Tooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-left-transfer' place='left' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
     </>
   )
 }

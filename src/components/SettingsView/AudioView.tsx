@@ -66,21 +66,20 @@ const AudioView = () => {
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Title */}
       <SettingsHeader title={t('Settings.Speakers')} tooltipPrefix='audio' />
-
-      {/* Microphone List */}
+      {/* Audio List */}
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
         {actualDevice
           .filter((device) => device?.kind === 'audioinput')
           .map((audioDevice, index) => (
             <div
               key={index}
-              className='pi-flex pi-items-center pi-justify-between pi-py-3 pi-px-4 pi-rounded-md hover:pi-bg-gray-100 dark:hover:pi-bg-gray-600 pi-text-gray-700 dark:pi-text-gray-200'
+              className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
               onClick={() => handleClickAudioOutput(audioDevice?.deviceId)}
               onMouseEnter={() => setHoveredDevice(audioDevice?.deviceId)}
               onMouseLeave={() => setHoveredDevice(null)}
             >
               <div className='pi-flex pi-items-center'>
-                <FontAwesomeIcon icon={faVolumeHigh} className='pi-mr-2' />
+                <FontAwesomeIcon icon={faVolumeHigh} className='pi-mr-2 pi-w-5 pi-h-5' />
                 <span>{audioDevice?.label || `Input device ${index + 1}`}</span>
               </div>
               <div className='pi-flex pi-items-center'>
@@ -89,9 +88,9 @@ const AudioView = () => {
                     icon={faCheck}
                     className={`${
                       hoveredDevice === audioDevice?.deviceId
-                        ? 'pi-text-gray-500 dark:pi-text-gray-200'
-                        : 'pi-text-green-600 dark:pi-text-green-400'
-                    }`}
+                        ? 'pi-text-gray-700 dark:pi-text-gray-200'
+                        : 'pi-text-emerald-700 dark:pi-text-emerald-500'
+                    } pi-w-5 pi-h-5`}
                   />
                 )}
               </div>

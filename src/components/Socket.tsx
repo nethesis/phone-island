@@ -128,6 +128,7 @@ export const Socket: FC<SocketProps> = ({
                   displayName: getDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   incomingSocket: true,
+                  incoming: true,
                   username:
                     `${
                       extensions &&
@@ -217,6 +218,7 @@ export const Socket: FC<SocketProps> = ({
                   // Update the current outgoing conversation
                   dispatch.currentCall.checkOutgoingUpdate({
                     outgoingSocket: true,
+                    outgoing: true,
                     displayName: getDisplayName(conv),
                     number: `${conv.counterpartNum}`,
                     username:
@@ -365,6 +367,43 @@ export const Socket: FC<SocketProps> = ({
         store.dispatch.users.updateEndpointMainPresence({ ...res.mainPresence })
         // Dispatch dispatchMainPresence Event
         dispatchMainPresence(res)
+      })
+
+      socket.current.on('extenHangup', (res: any) => {
+        // Get user extensions
+        const userExtensions = userInformation?.endpoints?.extension || []
+
+        // Find the extension type based on callerNum
+        const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
+        const extensionType: any = connectedExtension?.type
+
+        // If cause is normal_clearing and extension is physical or mobile
+        if (
+          res.cause === 'normal_clearing' &&
+          (extensionType === 'physical' || extensionType === 'mobile')
+        ) {
+          // Reset phone island visibility after 2 seconds to avoid glitches
+          setTimeout(() => {
+            store.dispatch.island.toggleAvoidToShow(false)
+          }, 500)
+        }
+      })
+
+      socket.current.on('extenConnected', (res: { extenConnected: string }) => {
+        // Get the current user's extensions
+        const userExtensions = userInformation?.endpoints?.extension || []
+
+        // Find the extension type
+        const connectedExtension = userExtensions.find((ext) => ext.id === res.extenConnected)
+        const extensionType = connectedExtension?.type
+
+        // Reset only if the extension type is not webrtc or nethlink
+        if (extensionType && extensionType !== 'webrtc' && extensionType !== 'nethlink') {
+          // Avoid to show phone island in case of answer from physical or mobile device
+          store.dispatch.island.toggleAvoidToShow(true)
+          // Launch an event to advert the user that the call it's answered from another device
+          eventDispatch('phone-island-call-answered-from-another-device', {extensionType})
+        }
       })
 
       socket.current.on('extenUpdate', (res: ExtensionTypes) => {
