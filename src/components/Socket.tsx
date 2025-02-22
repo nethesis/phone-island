@@ -389,6 +389,23 @@ export const Socket: FC<SocketProps> = ({
         }
       })
 
+      socket.current.on('extenConnected', (res: { extenConnected: string }) => {
+        // Get the current user's extensions
+        const userExtensions = userInformation?.endpoints?.extension || []
+
+        // Find the extension type
+        const connectedExtension = userExtensions.find((ext) => ext.id === res.extenConnected)
+        const extensionType = connectedExtension?.type
+
+        // Reset only if the extension type is not webrtc or nethlink
+        if (extensionType && extensionType !== 'webrtc' && extensionType !== 'nethlink') {
+          // Avoid to show phone island in case of answer from physical or mobile device
+          store.dispatch.island.toggleAvoidToShow(true)
+          // Launch an event to advert the user that the call it's answered from another device
+          eventDispatch('phone-island-call-answered-from-another-device', {extensionType})
+        }
+      })
+
       socket.current.on('extenUpdate', (res: ExtensionTypes) => {
         // Update extensions and conversations in users store
         dispatch.users.updateExtension(res)

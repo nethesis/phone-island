@@ -924,6 +924,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+-`phone-island-call-answered-from-another-device` Indicates that call it's been managed from another devide
+
+```json
+{
+  "extensionType": "mobile"
+}
+```
+
 ## Debug events
 
 - `phone-island-view-changed` Force to change phone-island view
