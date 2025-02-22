@@ -72,6 +72,9 @@ export const island = createModel<RootModel>()({
         dispatch.island.toggleIsOpen(true)
       } else {
         eventDispatch('phone-island-' + (rootState.island.isOpen ? 'compressed' : 'expanded'), {})
+        if (rootState.island.isOpen) {
+          eventDispatch('phone-island-sideview-close', {})
+        }
         dispatch.island.toggleIsOpen(!rootState.island.isOpen)
       }
     },

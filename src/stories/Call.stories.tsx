@@ -142,6 +142,19 @@ const CallTemplate = (args: any) => {
 
   const [alert, setAlert] = useState('')
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        eventDispatch('phone-island-call-start', { number })
+      } else if (e.key === 'Delete') {
+        eventDispatch('phone-island-call-end', {})
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [number])
+
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}

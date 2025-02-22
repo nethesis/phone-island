@@ -22,8 +22,19 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
   /**
    * Event listner for phone-island-call-* events
    */
+  // Clean up phone number from unwanted characters
+  const sanitizePhoneNumber = (number: string): string => {
+    return (
+      number
+        // Remove whitespace from both ends of the string
+        .trim()
+        // Remove all whitespace characters from the string
+        .replace(/\s+/g, '')
+    )
+  }
+
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
-    const number = data.number.replace(/\s/g, '')
+    const number = sanitizePhoneNumber(data.number)
     callNumber(number, sipHost)
   })
   useEventListener('phone-island-call-hold', () => {

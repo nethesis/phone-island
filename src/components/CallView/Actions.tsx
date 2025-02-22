@@ -125,6 +125,7 @@ const Actions: FC = () => {
     if (actionsExpanded) {
       dispatch.island.toggleActionsExpanded(false)
       eventDispatch('phone-island-call-actions-closed', {})
+      eventDispatch('phone-island-sideview-close', {})
     } else {
       dispatch.island.toggleActionsExpanded(true)
       eventDispatch('phone-island-call-actions-opened', {})
