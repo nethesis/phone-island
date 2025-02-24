@@ -385,7 +385,8 @@ export const Socket: FC<SocketProps> = ({
           (res.cause === 'normal_clearing' &&
             (extensionType === 'physical' || extensionType === 'mobile')) ||
           res?.cause === 'user_busy' ||
-          res?.cause === 'not_defined'
+          res?.cause === 'not_defined' ||
+          res?.cause === 'call_rejected'
         ) {
           // Reset phone island visibility after 2 seconds to avoid glitches
           setTimeout(() => {

@@ -43,7 +43,9 @@
     "Conference": "Add participant for conference call",
     "Go to settings": "Go to settings",
     "Enable camera": "Enable camera",
-    "Switch device": "Switch device"
+    "Switch device": "Switch device",
+    "Reload": "Reload",
+    "Close alert": "Close alert"
   },
   "Call": {
     "In progress...": "In progress...",

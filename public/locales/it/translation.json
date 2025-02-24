@@ -43,7 +43,9 @@
     "Conference": "Aggiungi partecipante per chiamata in conferenza",
     "Go to settings": "Vai alle impostazioni",
     "Enable camera": "Abilita video",
-    "Switch device": "Cambia dispositivo"
+    "Switch device": "Cambia dispositivo",
+    "Reload": "Ricarica",
+    "Close alert": "Chiudi avviso"
   },
   "Call": {
     "In progress...": "In corso...",

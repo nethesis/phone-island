@@ -7,8 +7,9 @@ import { Dispatch, RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faCircleXmark, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
+import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
-import { useTranslation } from 'react-i18next'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 /**
  * Shows user alerts
@@ -17,7 +18,6 @@ const AlertView: FC = () => {
   const { data } = useSelector((state: RootState) => state.alerts)
   const { default_device } = useSelector((state: RootState) => state.currentUser)
   const dispatch = useDispatch<Dispatch>()
-  const { t } = useTranslation()
 
   // Extract active alerts
   const activeAlerts = Object.values(data).filter((alert: any) => alert.active)
@@ -28,6 +28,10 @@ const AlertView: FC = () => {
   const handleClearAllAlerts = () => {
     dispatch.alerts.removeAllAlerts()
     eventDispatch('phone-island-all-alerts-removed', {})
+  }
+
+  const reloadPhoneIsland = () => {
+    window.location.reload()
   }
 
   return (
@@ -72,14 +76,25 @@ const AlertView: FC = () => {
         {/* Close button */}
         <Button
           variant='transparent'
-          onClick={() => handleClearAllAlerts()}
+          onClick={() =>
+            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+              ? reloadPhoneIsland()
+              : handleClearAllAlerts()
+          }
           className='pi-absolute pi-right-[-1.28rem] pi-top-[8%] pi-transform pi--translate-y-[57%]'
+          data-tooltip-id='tooltip-close-alert'
+          data-tooltip-content={
+            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+              ? `${t('Tooltip.Reload')}`
+              : `${t('Tooltip.Close alert')}`
+          }
         >
           <FontAwesomeIcon
             icon={faTimes}
             className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4'
           />
         </Button>
+        <CustomThemedTooltip id='tooltip-close-alert' place='left' />
       </div>
     )
   )
