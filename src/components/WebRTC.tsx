@@ -294,6 +294,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                             // Update incoming webrtc state, number and display name
                             // ...are updated inside socket
                             dispatch.currentCall.checkIncomingUpdatePlay({
+                              incoming: true,
                               incomingWebRTC: true,
                             })
 

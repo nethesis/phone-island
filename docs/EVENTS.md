@@ -134,6 +134,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-sideview-open` The event to manually open phone island right menu
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-close` The event to manually close phone island right menu
+
+  ```json
+  {}
+  ```
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-expanded` The dispatch of phone-island expand
@@ -356,10 +368,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-call-answered` The dispatch of call answer
+- `phone-island-call-answered` The dispatch of call answer ( if not empty call it's been answered from another device )
 
   ```json
-  {}
+  {
+    "extensionType": "mobile"
+  }  
   ```
 
 - `phone-island-call-ended` The dispatch of call end
@@ -923,14 +937,6 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
-
--`phone-island-call-answered-from-another-device` Indicates that call it's been managed from another devide
-
-```json
-{
-  "extensionType": "mobile"
-}
-```
 
 ## Debug events
 

@@ -370,17 +370,22 @@ export const Socket: FC<SocketProps> = ({
       })
 
       socket.current.on('extenHangup', (res: any) => {
+        const { endpoints } = store.getState().currentUser
+
         // Get user extensions
-        const userExtensions = userInformation?.endpoints?.extension || []
+        const userExtensions = endpoints?.extension || []
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
         const extensionType: any = connectedExtension?.type
 
         // If cause is normal_clearing and extension is physical or mobile
+        // Clean phone-island visibility also after user_busy ( useful for physical devices )
         if (
-          res.cause === 'normal_clearing' &&
-          (extensionType === 'physical' || extensionType === 'mobile')
+          (res.cause === 'normal_clearing' &&
+            (extensionType === 'physical' || extensionType === 'mobile')) ||
+          res?.cause === 'user_busy' ||
+          res?.cause === 'not_defined'
         ) {
           // Reset phone island visibility after 2 seconds to avoid glitches
           setTimeout(() => {
@@ -389,20 +394,29 @@ export const Socket: FC<SocketProps> = ({
         }
       })
 
+      // Avoid to show phone island if call is connected with other extension
       socket.current.on('extenConnected', (res: { extenConnected: string }) => {
         // Get the current user's extensions
-        const userExtensions = userInformation?.endpoints?.extension || []
+
+        const { default_device, endpoints } = store.getState().currentUser
+        const userExtensions = endpoints?.extension || []
 
         // Find the extension type
         const connectedExtension = userExtensions.find((ext) => ext.id === res.extenConnected)
-        const extensionType = connectedExtension?.type
+        const extensionType: any = connectedExtension?.type
 
         // Reset only if the extension type is not webrtc or nethlink
-        if (extensionType && extensionType !== 'webrtc' && extensionType !== 'nethlink') {
+        // ( avoid to not show phone island if default is physical and extensionType is physical)
+        if (
+          ((default_device?.type === 'webrtc' || default_device?.type === 'nethlink') &&
+            extensionType &&
+            (extensionType === 'mobile' || extensionType === 'physical')) ||
+          (default_device?.type === 'physical' && extensionType && extensionType !== 'physical')
+        ) {
           // Avoid to show phone island in case of answer from physical or mobile device
           store.dispatch.island.toggleAvoidToShow(true)
           // Launch an event to advert the user that the call it's answered from another device
-          eventDispatch('phone-island-call-answered-from-another-device', { extensionType })
+          eventDispatch('phone-island-call-answered', { extensionType })
         }
       })
 

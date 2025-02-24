@@ -18,7 +18,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
   const { t } = useTranslation()
 
-  const userInformation = useSelector((state: RootState) => state?.currentUser)
+  const userInformation: any = useSelector((state: RootState) => state?.currentUser)
   const allUsersInformation: any = useSelector((state: RootState) => state?.users)
 
   // Extract devices with active conversations:
@@ -38,13 +38,16 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     ) || []
 
   const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
-  const [selectedSwitchDevices, setSelectedSwitchDevices] = useState('')
+  const [selectedSwitchDevices, setSelectedSwitchDevices] = useState({ id: '', type: '' })
 
   // Get the first device ID with active conversation
   const extensionInCall = activeConversationIds[0]
 
   const transferCallOnDevice = (device: any) => {
-    setSelectedSwitchDevices(device.id)
+    setSelectedSwitchDevices({
+      id: device?.id,
+      type: device?.type,
+    })
   }
 
   const blindTransferOnSelectedDevice = (
@@ -54,7 +57,17 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     if (deviceNumber && endpointIdInConversation) {
       blindTransferFunction(deviceNumber, endpointIdInConversation)
       eventDispatch('phone-island-call-switched', {})
-      dispatch.island.toggleAvoidToShow(true)
+      // dispatch.island.toggleAvoidToShow(true)
+      // Not avoid to show only if selectedDevice is physical and default device is physical else avoid to show
+      if (
+        selectedSwitchDevices?.type == 'physical' &&
+        userInformation?.default_device?.type === 'physical'
+      ) {
+        eventDispatch('phone-island-call-switched', {})
+        dispatch.island.toggleAvoidToShow(false)
+      } else {
+        dispatch.island.toggleAvoidToShow(true)
+      }
     }
   }
 
@@ -118,7 +131,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
                 </span>
               </div>
               <div className='pi-flex pi-items-center'>
-                {selectedSwitchDevices === device?.id && (
+                {selectedSwitchDevices.id === device?.id && (
                   <FontAwesomeIcon
                     icon={faCheck}
                     className={`${
@@ -136,10 +149,10 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         {/* Centered Button */}
         <div className='pi-flex pi-justify-center'>
           <Button
-            disabled={selectedSwitchDevices === ''}
+            disabled={selectedSwitchDevices.id === ''}
             variant='gray'
             className='pi-font-medium pi-text-sm pi-leading-5'
-            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices, extensionInCall)}
+            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices?.id, extensionInCall)}
           >
             <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
             <span>{t('Phone Island.Switch device')}</span>

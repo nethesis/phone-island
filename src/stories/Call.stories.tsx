@@ -89,7 +89,7 @@ const CallTemplate = (args: any) => {
     setToastMessage('Phone island physical action...')
   })
 
-  useEventListener('phone-island-call-answered-from-another-device', (deviceType: any) => {
+  useEventListener('phone-island-call-answered', (deviceType: any) => {
     setToastMessage(`Call answered from: ${deviceType?.extensionType}`)
   })
 
