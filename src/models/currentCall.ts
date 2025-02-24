@@ -35,7 +35,7 @@ const defaultState = {
   ownerExtension: '',
   isRecording: false,
   isVideoEnabled: false,
-  isVideoCall: false, //// remove
+  isVideoCall: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -105,11 +105,10 @@ export const currentCall = createModel<RootModel>()({
       state.isVideoEnabled = payload
       return state
     },
-    //// remove
     setVideoCall: (state, payload: boolean) => {
       state.isVideoCall = payload
       return state
-    },
+    }
   },
   effects: (dispatch) => ({
     checkIncomingUpdatePlay: (payload: CurrentCallTypes, rootState) => {
@@ -197,5 +196,5 @@ export interface CurrentCallTypes {
   ownerExtension?: string
   isRecording?: boolean
   isVideoEnabled?: boolean
-  isVideoCall?: boolean //// remove
+  isVideoCall?: boolean
 }

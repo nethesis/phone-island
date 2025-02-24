@@ -28,7 +28,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
 
     setTimeout(() => {
       store.dispatch.currentCall.setVideoEnabled(true)
-      eventDispatch('phone-island-toggle-video', { enableVideo: true, addVideoTrack: true })
+      eventDispatch('phone-island-toggle-video', { enableVideo: true })
     }, 250)
   }
 

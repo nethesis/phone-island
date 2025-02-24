@@ -14,7 +14,6 @@ import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
-import { JanusTrack } from './types/webrtc'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -256,8 +255,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     const { sipcall }: { sipcall: any } = store.getState().webrtc
     // const { isVideoCall } = store.getState().currentCall ////
 
-    console.log('@@@ sipcall.getLocalTracks()', sipcall.getLocalTracks()) ////
-
     //// remove?
     // if (data.enableVideo) {
     //   sipcall.unmuteVideo() ////
@@ -265,60 +262,39 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     //   sipcall.muteVideo() ////
     // }
 
-    ////
-    // const mediaObj: any = {
-    //   audioSend: true,
-    //   audioRecv: true,
-    //   videoRecv: true,
-    // }
-
-    ////
-    // if (data.enableVideo) {
-    //   mediaObj.addVideo = true
-    // } else {
-    //   mediaObj.removeVideo = true
-    // }
-
-    //// TODO use add: and remove: (see https://github.com/meetecho/janus-gateway/pull/3003)
-    // let tracks = [{ type: 'audio', capture: true, recv: true }] ////
-    const tracks: JanusTrack[] = []
-
-    if (data.enableVideo) {
-      //// TODO choose specific input device
-      //  { type: 'video', capture: { deviceId: { exact: videoDeviceId },
-      // 		width: { ideal: width }, height: { ideal: height }}, recv: true, simulcast: doSimulcast },
-
-      const track: JanusTrack = { type: 'video', capture: true, recv: true }
-
-      if (data.addVideoTrack) {
-        // add video track
-        track.add = true
-
-        console.log('@@@## add video track') ////
-      } else {
-        // replace video track (video track has been previously added and removed)
-        track.replace = true
-        track.mid = '1'
-
-        console.log('@@@## replace video track') ////
-      }
-      tracks.push(track)
-    } else {
-      tracks.push({ type: 'video', mid: '1', remove: true })
+    //// copied from old cti, is this correct?
+    const mediaObj: any = {
+      audioSend: true,
+      audioRecv: true,
+      videoRecv: true,
     }
 
-    console.log('@@@ create offer with', tracks) ////
+    if (data.enableVideo) {
+      ////
+      // if (!isVideoCall) {
+      //   mediaObj.addVideo = true
+
+      //   // set isVideoCall to true
+      //   store.dispatch.currentCall.setVideoCall(true)
+      // }
+
+      mediaObj.addVideo = true ////
+      // mediaObj.videoSend = true //// ////
+    } else {
+      mediaObj.removeVideo = true
+      // mediaObj.videoSend = false //// ////
+    }
+
+    console.log('@@@ create offer with', mediaObj) ////
 
     sipcall.createOffer({
-      // media: mediaObj, ////
-      tracks: tracks,
+      media: mediaObj,
       success: function (jsep) {
         // Janus.debug(jsep);
 
-        //// 0.x
-        // sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
+        sipcall.send({ message: { request: 'update', update: true }, jsep: jsep })
 
-        sipcall.send({ message: { request: 'update' }, jsep: jsep })
+        console.log('@@@ set video', data.enableVideo)
 
         // sipcall.unmuteVideo() ////
       },

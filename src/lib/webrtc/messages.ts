@@ -55,39 +55,26 @@ export function answerWebRTC() {
     // get current input device id from localstorage
     let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
 
-    const tracks: any[] = []
-
-    if (currentDeviceInputId) {
-      tracks.push({
-        type: 'audio',
-        capture: { deviceId: { exact: currentDeviceInputId } },
-        recv: true,
-      })
-    } else {
-      tracks.push({ type: 'audio', capture: true, recv: true })
-    }
-
     sipcall.createAnswer({
       jsep: jsepGlobal,
-      tracks: tracks,
-      // media: { ////
-      //   audio: {
-      //     echoCancellation: true,
-      //     noiseSuppression: true,
-      //     autoGainControl: true,
-      //     googEchoCancellation: true,
-      //     googAutoGainControl: true,
-      //     googNoiseSuppression: true,
-      //     googHighpassFilter: true,
-      //     googTypingNoiseDetection: true,
-      //     googNoiseReduction: true,
-      //     volume: 1.0,
-      //     deviceId: currentDeviceInputId,
-      //   },
-      //   // video is initially disabled
-      //   videoSend: false,
-      //   videoRecv: false,
-      // },
+      media: {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          googEchoCancellation: true,
+          googAutoGainControl: true,
+          googNoiseSuppression: true,
+          googHighpassFilter: true,
+          googTypingNoiseDetection: true,
+          googNoiseReduction: true,
+          volume: 1.0,
+          deviceId: currentDeviceInputId,
+        },
+        // video is initially disabled
+        videoSend: false,
+        videoRecv: false,
+      },
       success: (jsep) => {
         // sipcall.doAudio = true ////
         // sipcall.doVideo = true ////
@@ -181,132 +168,98 @@ export function callSipURI(sipURI: string) {
     // get current input device id from localstorage
     let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
 
-    const tracks: any[] = []
-
-    if (currentDeviceInputId) {
-      tracks.push({
-        type: 'audio',
-        capture: { deviceId: { exact: currentDeviceInputId } },
-        recv: true,
-      })
-    } else {
-      tracks.push({ type: 'audio', capture: true, recv: true })
-    }
-
-    await call(sipURI, tracks)
-
-    // await call(sipURI, { ////
-    //   audio: {
-    //     echoCancellation: true,
-    //     noiseSuppression: true,
-    //     autoGainControl: true,
-    //     googEchoCancellation: true,
-    //     googAutoGainControl: true,
-    //     googNoiseSuppression: true,
-    //     googHighpassFilter: true,
-    //     googTypingNoiseDetection: true,
-    //     googNoiseReduction: true,
-    //     volume: 1.0,
-    //     deviceId: currentDeviceInputId,
-    //   },
-    //   audioSend: true,
-    //   audioRecv: true,
-    //   // video is initially disabled
-    //   videoSend: false,
-    //   videoRecv: false,
-    // })
-  })
-}
-
-export function call(sipURI: string, tracks: any[]) {
-  console.log('@@@ call, tracks', tracks) ////
-
-  return new Promise((resolve, reject) => {
-    const { sipcall }: { sipcall: any } = store.getState().webrtc
-    // sipcall.doAudio = true
-    // sipcall.doVideo = true ////
-
-    sipcall.createOffer({
-      // media: mediaObj, ////
-      tracks: tracks, ////
-      // media: {
-      //   ////
-      //   audio: {
-      //     echoCancellation: true,
-      //     noiseSuppression: true,
-      //     autoGainControl: true,
-      //     googEchoCancellation: true,
-      //     googAutoGainControl: true,
-      //     googNoiseSuppression: true,
-      //     googHighpassFilter: true,
-      //     googTypingNoiseDetection: true,
-      //     googNoiseReduction: true,
-      //     volume: 1.0,
-      //     deviceId: currentDeviceInputId,
-      //   },
-      //   audioSend: true,
-      //   audioRecv: true,
-      //   // video is initially disabled
-      //   videoSend: false,
-      //   videoRecv: false,
-      // }, ////
-      success: function (jsep: any) {
-        // @ts-ignore
-        Janus.debug('Got SDP!')
-        // @ts-ignore
-        Janus.debug(jsep)
-        sipcall.send({
-          message: {
-            request: 'call',
-            uri: sipURI,
-          },
-          jsep: jsep,
-        })
-        resolve(true)
+    await call(sipURI, {
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        googEchoCancellation: true,
+        googAutoGainControl: true,
+        googNoiseSuppression: true,
+        googHighpassFilter: true,
+        googTypingNoiseDetection: true,
+        googNoiseReduction: true,
+        volume: 1.0,
+        deviceId: currentDeviceInputId,
       },
-      error: function (error) {
-        // @ts-ignore
-        Janus.error('WebRTC error...', error)
-        // @ts-ignore
-        Janus.error('WebRTC error call on createOffer: ', error)
-        reject(false)
-      },
+      audioSend: true,
+      audioRecv: true,
+      // video is initially disabled
+      videoSend: false,
+      videoRecv: false,
     })
   })
 }
 
+export function call(sipURI: string, mediaObj: object) {
+  console.log('@@@ call!') ////
+
+  return new Promise((resolve, reject) => {
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    if (sipURI && mediaObj) {
+      // sipcall.doAudio = true
+      // sipcall.doVideo = true ////
+
+      sipcall.createOffer({
+        media: mediaObj,
+        success: function (jsep: any) {
+          // @ts-ignore
+          Janus.debug('Got SDP!')
+          // @ts-ignore
+          Janus.debug(jsep)
+          sipcall.send({
+            message: {
+              request: 'call',
+              uri: sipURI,
+            },
+            jsep: jsep,
+          })
+          resolve(true)
+        },
+        error: function (error) {
+          // @ts-ignore
+          Janus.error('WebRTC error...', error)
+          // @ts-ignore
+          Janus.error('WebRTC error call on createOffer: ', error)
+          reject(false)
+        },
+      })
+    }
+  })
+}
+
 //// remove?
-// export function video(sipURI: string, mediaObj: object) {
-//   return new Promise((resolve, reject) => {
-//     const { sipcall }: { sipcall: any } = store.getState().webrtc
-//     if (sipURI && mediaObj) {
-//       sipcall.createOffer({
-//         media: mediaObj,
-//         success: function (jsep: any) {
-//           // @ts-ignore
-//           Janus.debug('Got SDP!')
-//           // @ts-ignore
-//           Janus.debug(jsep)
-//           sipcall.send({
-//             message: {
-//               request: 'call',
-//               uri: sipURI,
-//             },
-//             jsep: jsep,
-//           })
-//           resolve(true)
-//         },
-//         error: function (error) {
-//           // @ts-ignore
-//           Janus.error('WebRTC error...', error)
-//           // @ts-ignore
-//           Janus.error('WebRTC error call on createOffer: ', error)
-//           reject(false)
-//         },
-//       })
-//     }
-//   })
-// }
+export function video(sipURI: string, mediaObj: object) {
+  return new Promise((resolve, reject) => {
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    if (sipURI && mediaObj) {
+      sipcall.createOffer({
+        media: mediaObj,
+        success: function (jsep: any) {
+          // @ts-ignore
+          Janus.debug('Got SDP!')
+          // @ts-ignore
+          Janus.debug(jsep)
+          sipcall.send({
+            message: {
+              request: 'call',
+              uri: sipURI,
+            },
+            jsep: jsep,
+          })
+          resolve(true)
+        },
+        error: function (error) {
+          // @ts-ignore
+          Janus.error('WebRTC error...', error)
+          // @ts-ignore
+          Janus.error('WebRTC error call on createOffer: ', error)
+          reject(false)
+        },
+      })
+    }
+  })
+}
 
 /**
  * Mute current call so the counterpart can't listen the current user
