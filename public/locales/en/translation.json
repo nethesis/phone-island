@@ -61,18 +61,19 @@
     "unknown_media_permissions": "Generic media permission error",
     "webrtc_down": "WebRTC is unavailable",
     "socket_down": "Socket is unavailable",
-    "busy_camera": "Webcam is already in use",
+    "busy_camera": "Webcam is busy",
     "call_transfered": "Transfer successful",
     "The browser doesn't have permission to access camera or microphone.": "The browser doesn't have permission to access camera or microphone.",
-    "You must accept audio and video permissions.": "You must accept audio and video permissions.",
+    "You must accept audio and video permissions.": "You must accept audio and video.",
     "Web Phone can't access audio or camera on this device.": "Web Phone can't access audio or camera on this device.",
     "Web Phone connection is down.": "Web Phone not communicating with server.",
     "NethLink connection is down.": "Server connection is unavailable.",
     "Server connection is down.": "Server connection is unavailable.",
     "Camera is used by another application.": "Webcam is used by another application.",
     "Unknown audio or camera permissions.": "Microphone or Webcam is unavailable",
-    "No microphone or camera permissions.": "You must accept borwser permissions.",
-    "Call transferred successfully.": "The call is transferred successfully."
+    "No microphone or camera permissions.": "You must accept browser permissions.",
+    "Call transferred successfully.": "The call is transferred successfully.",
+    "Camera is already used.": "Webcam is already in use."
   },
   "Settings": {
     "Theme": "Theme",

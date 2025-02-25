@@ -14,12 +14,17 @@ import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { getAvailableDevices } from '../../utils/deviceUtils'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
+  const userInformation = useSelector((state: RootState) => state.currentUser)
+  const allUsersInformation = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
+
+  const availableDevices = getAvailableDevices(userInformation, allUsersInformation)
 
   const closeSideViewAndLaunchEvent = (viewType: any) => {
     dispatch.island.toggleSideViewVisible(false)
@@ -78,16 +83,17 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               >
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
               </Button>
-              {/* Switch device button */}
-
-              <Button
-                variant='transparentSideView'
-                data-tooltip-id='tooltip-switch-device'
-                data-tooltip-content={t('Tooltip.Switch device') || ''}
-                onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
-              >
-                <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
-              </Button>
+              {/* Switch device button - show only if there are available devices */}
+              {availableDevices?.length > 0 && (
+                <Button
+                  variant='transparentSideView'
+                  data-tooltip-id='tooltip-switch-device'
+                  data-tooltip-content={t('Tooltip.Switch device') || ''}
+                  onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
+                >
+                  <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
+                </Button>
+              )}
               {/* Hidden at the moment waiting for implementation */}
               {/* Share button */}
               {/* <Button variant='transparentSideView' disabled>

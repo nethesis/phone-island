@@ -61,10 +61,10 @@
     "unknown_media_permissions": "Errore generico nei permessi",
     "webrtc_down": "WebRTC non disponibile",
     "socket_down": "Socket non disponibile",
-    "busy_camera": "La webcam è già in uso",
+    "busy_camera": "Webcam occupata",
     "call_transfered": "Trasferimento riuscito",
     "The browser doesn't have permission to access camera or microphone.": "Il browser non ha il permesso di accedere alla fotocamera o al microfono.",
-    "You must accept audio and video permissions.": "Devi accettare i permessi per audio e video.",
+    "You must accept audio and video permissions.": "Devi accettare i permessi audio e video.",
     "Web Phone can't access audio or camera on this device.": "Il Web Phone non può accedere all'audio o alla fotocamera su questo dispositivo.",
     "Web Phone connection is down.": "Il Web Phone non comunica con il server.",
     "NethLink connection is down.": "NethLink non disponibile.",
@@ -72,7 +72,8 @@
     "Camera is used by another application.": "La fotocamera è utilizzata da un'altra applicazione.",
     "Unknown audio or camera permissions.": "Microfono o fotocamera non disponibili.",
     "No microphone or camera permissions.": "Devi accettare i permessi del browser.",
-    "Call transferred successfully.": "La chiamata è stata trasferita con successo."
+    "Call transferred successfully.": "La chiamata è stata trasferita con successo.",
+    "Camera is already used.": "La Webcamz è già in uso."
   },
   "Settings": {
     "Theme": "Tema",
