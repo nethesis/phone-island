@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useRef } from 'react'
+import React, { type FC, useEffect, useRef, useState } from 'react'
 import { Button } from '../Button'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../store'
@@ -21,7 +21,6 @@ import Hangup from '../Hangup'
 import { muteCurrentCall, recordCurrentCall, unmuteCurrentCall } from '../../lib/phone/call'
 import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
-import TransferButton from '../TransferButton'
 import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
@@ -38,7 +37,8 @@ export const VideoView: FC<VideoViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { variants } = useSelector((state: RootState) => state.motions)
-
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const videoViewRef = useRef(null)
   const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
   const remoteAudio = useRef<HTMLAudioElement>(null)
@@ -60,8 +60,11 @@ export const VideoView: FC<VideoViewProps> = () => {
   useEffect(() => {
     updateVideoStreams()
 
+    // register for full screen change
+    addEventListener('fullscreenchange', handleFullscreenChange)
+
     return () => {
-      console.log('## useEffect videoview return') ////
+      removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [])
 
@@ -71,6 +74,24 @@ export const VideoView: FC<VideoViewProps> = () => {
 
     updateVideoStreams()
   }, [isOpen])
+
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement)
+  }
+
+  const toggleFullScreen = () => {
+    // const elem = document.getElementById('video-view') ////
+
+    if (document.fullscreenElement) {
+      // exit full screen
+      document.exitFullscreen()
+    } else {
+      // enter full screen
+      if (videoViewRef.current) {
+        ;(videoViewRef.current as HTMLElement).requestFullscreen()
+      }
+    }
+  }
 
   const updateVideoStreams = () => {
     const localVideoElement = store.getState().player.localVideo
@@ -119,25 +140,15 @@ export const VideoView: FC<VideoViewProps> = () => {
     eventDispatch('phone-island-toggle-video', { enableVideo: !isVideoEnabled })
   }
 
-  const openFullScreen = () => {
-    const elem: any = document.getElementById('video-view')
-
-    if (elem?.requestFullscreen) {
-      elem.requestFullscreen()
-    } else if (elem?.webkitRequestFullscreen) {
-      /* Safari */
-      elem.webkitRequestFullscreen()
-    } else if (elem?.msRequestFullscreen) {
-      /* IE11 */
-      elem.msRequestFullscreen()
-    }
-  }
-
   return (
     <>
       {isOpen ? (
-        <div id='video-view'>
-          <div className={`pi-flex pi-relative pi-h-[${variants.video.expanded.height}px]`}>
+        <div ref={videoViewRef}>
+          <div
+            className={`pi-flex pi-relative pi-justify-center ${
+              isFullscreen ? 'pi-h-screen' : `pi-h-[${variants.video.expanded.height}px]`
+            } `}
+          >
             {/* remote video */}
             <video
               autoPlay
@@ -154,7 +165,7 @@ export const VideoView: FC<VideoViewProps> = () => {
             ></video>
           </div>
 
-          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/50 pi-w-full pi-p-6'>
+          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/50 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl'>
             <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-4'>
               {/* mute button */}
               {!intrudeListenStatus?.isListen && (
@@ -173,7 +184,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 </Button>
               )}
 
-              {/* //// remove button */}
+              {/* //// remove button? */}
               {/* video button */}
               <Button
                 variant='default'
@@ -191,7 +202,7 @@ export const VideoView: FC<VideoViewProps> = () => {
               {/* fullscreen */}
               <Button
                 variant='default'
-                onClick={() => openFullScreen()}
+                onClick={() => toggleFullScreen()}
                 data-tooltip-id='tooltip-record ////'
                 data-tooltip-content={t('Tooltip.////') || ''}
               >

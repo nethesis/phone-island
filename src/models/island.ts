@@ -17,6 +17,7 @@ const defaultState: IslandTypes = {
   settingsView: 'main',
   sideViewIsVisible: false,
   isConferenceList: false,
+  isFullScreen: false, //// remove?
 }
 
 export const island = createModel<RootModel>()({
@@ -53,6 +54,13 @@ export const island = createModel<RootModel>()({
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
+    },
+    setFullScreen: (state, payload: boolean) => {
+      //// remove?
+      return {
+        ...state,
+        isFullScreen: payload,
+      }
     },
   },
   effects: (dispatch) => ({
@@ -97,4 +105,5 @@ interface IslandTypes {
   settingsView: string
   sideViewIsVisible: boolean
   isConferenceList: boolean
+  isFullScreen: boolean
 }
