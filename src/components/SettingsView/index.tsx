@@ -55,8 +55,9 @@ export const SettingsView: FC<SettingsViewProps> = () => {
         <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
           {t('Settings.Settings')}
         </h1>
+        {/* //// revert to: onClick={() => dispatch.island.setIslandView('call')} */}
         <Button
-          onClick={() => dispatch.island.setIslandView('call')}
+          onClick={() => dispatch.island.setIslandView('video')}
           variant='transparentSettings'
           data-tooltip-id='tooltip-close-settings'
           data-tooltip-content={t('Common.Close') || ''}

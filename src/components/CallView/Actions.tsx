@@ -23,21 +23,14 @@ import {
   faChevronUp,
   faArrowRightArrowLeft,
   faUserPlus,
-  faStop,
-  faCircleDot,
-  faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
-import { sendDTMF } from '../../lib/webrtc/messages'
-import { store } from '../../store'
-import outgoingRingtone from '../../static/outgoing_ringtone'
 import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
-import { isWebRTC } from '../../lib/user/default_device'
-import { sendPhysicalDTMF } from '../../services/astproxy'
 import { useEventListener, eventDispatch } from '../../utils'
+import TransferButton from '../TransferButton'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -64,58 +57,6 @@ const Actions: FC = () => {
   useEventListener('phone-island-call-keypad-open', () => {
     openKeypad()
   })
-
-  function transfer() {
-    // Open the transfer view
-    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
-    // Check if sideView is visible and close it
-    if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
-    }
-    eventDispatch('phone-island-call-transfer-opened', {})
-  }
-
-  useEventListener('phone-island-call-transfer-open', () => {
-    transfer()
-  })
-  useEventListener('phone-island-call-transfer-cancel', () => {
-    cancelTransfer()
-  })
-
-  // Cancels the current transfer through dtmfs
-  function cancelTransfer() {
-    if (isWebRTC()) {
-      sendDTMF('*')
-    } else {
-      sendPhysicalDTMF('*')
-    }
-
-    const { audioPlayerPlaying } = store.getState().player
-    // Check if the local audio is already playing and start playing
-    if (!audioPlayerPlaying) {
-      dispatch.player.updateStartAudioPlayer({
-        src: outgoingRingtone,
-        loop: true,
-      })
-    }
-    setTimeout(() => {
-      if (isWebRTC()) {
-        sendDTMF('1')
-      } else {
-        sendPhysicalDTMF('1')
-      }
-
-      dispatch.player.stopAudioPlayer()
-      // The workarround to disable transfer because of the wrong conv.connection value from ws
-      if (transferring) {
-        setTimeout(() => {
-          dispatch.currentCall.updateTransferring(false)
-        }, 500)
-      }
-
-      eventDispatch('phone-island-call-transfer-canceled', {})
-    }, 500)
-  }
 
   useEventListener('phone-island-call-actions-open', () => {
     dispatch.island.toggleActionsExpanded(true)
@@ -191,26 +132,7 @@ const Actions: FC = () => {
           </Button>
         )}
 
-        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
-          <Button
-            active={transferring}
-            onClick={transferring ? cancelTransfer : transfer}
-            variant='default'
-            data-tooltip-id='tooltip-transfer'
-            data-tooltip-content={
-              transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
-            }
-          >
-            {transferring ? (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowDownUpAcrossLine} />
-            ) : (
-              <FontAwesomeIcon
-                className='pi-rotate-90 pi-h-6 pi-w-6'
-                icon={faArrowRightArrowLeft}
-              />
-            )}
-          </Button>
-        )}
+        <TransferButton />
 
         {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
           <Button

@@ -32,8 +32,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     (state: RootState) => state.currentCall,
   )
 
-  // Get isOpen from island store
-  const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
+  const { view, sideViewIsVisible, isOpen } = useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -108,7 +107,10 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
             {/* Add background call visibility logic */}
             <BackCall
               isVisible={
-                view === 'keypad' || view === 'transfer' || view === 'video' || transferring
+                view === 'keypad' ||
+                view === 'transfer' ||
+                (view === 'video' && isOpen) ||
+                transferring
               }
             />
             <SideView isVisible={sideViewIsVisible} />

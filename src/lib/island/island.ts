@@ -39,5 +39,6 @@ export function backToCallView() {
   const { view } = store.getState().island
   eventDispatch(`phone-island-call-${view}-closed`, {})
 
-  store.dispatch.island.setIslandView('call')
+  // store.dispatch.island.setIslandView('call') ////
+  store.dispatch.island.setIslandView('video') ////
 }

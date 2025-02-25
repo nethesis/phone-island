@@ -469,6 +469,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                       const videoStream: MediaStream = new MediaStream(videoTracks)
 
                       if (localVideoElement && localVideoElement.current) {
+                        // save stream to store
+                        store.dispatch.webrtc.updateLocalVideoStream(videoStream)
+                        // attach stream to html element
                         janus.current.attachMediaStream(localVideoElement.current, videoStream)
                       }
                     } else {
@@ -511,8 +514,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                       const videoStream: MediaStream = new MediaStream(videoTracks)
 
                       if (remoteVideoElement && remoteVideoElement.current) {
-                        console.log('@@ onremotestream, videoStream', videoStream) ////
-
+                        // save stream to store
+                        store.dispatch.webrtc.updateRemoteVideoStream(videoStream)
+                        // attach stream to html element
                         janus.current.attachMediaStream(remoteVideoElement.current, videoStream)
                       }
                     } else {
