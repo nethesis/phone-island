@@ -199,7 +199,7 @@ export const Actions: FC<{}> = () => {
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip-start-recording-recorder-view'
           data-tooltip-content={t('Tooltip.Start recording') || ''}
-          className='pi-flex pi-justify-center pi-ml-[4.7rem]'
+          className='pi-flex pi-justify-center pi-ml-20'
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />

@@ -38,9 +38,7 @@ const ThemeView = () => {
             data-stop-propagation={true}
           >
             <FontAwesomeIcon icon={icon} className='pi-mr-2 pi-w-5 pi-h-5' />
-            <div className={`${icon === faMoon ? 'pi-ml-[0.2rem]' : ''} pi-flex-grow`}>
-              {t(label)}
-            </div>
+            <div className='pi-ml-1 pi-flex-grow'>{t(label)}</div>
             {theme === id && (
               <FontAwesomeIcon
                 size='lg'

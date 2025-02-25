@@ -51,7 +51,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
             }}
             transition={{ duration: 0 }}
           >
-            <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-[2.2rem]'>
+            <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-9'>
               {/* Recording button */}
               <Button
                 active={isRecording}

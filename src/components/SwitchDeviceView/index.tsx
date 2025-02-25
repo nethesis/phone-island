@@ -101,8 +101,8 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         {/* Divider */}
         <div className='pi-border-t pi-border-gray-300 dark:pi-border-gray-600 pi-mt-1' />
 
-        {/* Devices List */}
-        <div className='pi-flex pi-flex-col pi-mt-2 pi-h-[150px] pi-overflow-y-auto pi-space-y-2 pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
+        {/* Devices List*/}
+        <div className='pi-flex pi-flex-col pi-mt-2 pi-max-h-32 pi-overflow-y-auto pi-space-y-2 pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
           {filteredDevices.map((device: any) => (
             <div
               key={device?.id}
@@ -147,12 +147,14 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         </div>
 
         {/* Centered Button */}
-        <div className='pi-flex pi-justify-center'>
+        <div className='pi-flex pi-justify-center pi-mt-3'>
           <Button
             disabled={selectedSwitchDevices.id === ''}
             variant='gray'
             className='pi-font-medium pi-text-sm pi-leading-5'
-            onClick={() => blindTransferOnSelectedDevice(selectedSwitchDevices?.id, extensionInCall)}
+            onClick={() =>
+              blindTransferOnSelectedDevice(selectedSwitchDevices?.id, extensionInCall)
+            }
           >
             <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
             <span>{t('Phone Island.Switch device')}</span>

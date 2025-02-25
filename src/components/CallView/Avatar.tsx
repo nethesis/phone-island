@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -39,7 +39,7 @@ const Avatar: FC = () => {
   return (
     <>
       <motion.div
-        className={`pi-relative ${isOpen ? 'pi-mt-[-0.25rem]' : ''}`}
+        className={`pi-relative ${isOpen ? 'pi--mt-1' : ''}`}
         animate={isOpen ? 'open' : 'closed'}
         variants={iconVariants}
       >

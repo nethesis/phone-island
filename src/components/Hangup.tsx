@@ -92,9 +92,7 @@ const Hangup: FC<HangupProps> = ({
                 data-tooltip-content={
                   isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''
                 }
-                className={`${
-                  transferring && description ? 'pi-ml-[-0.15rem]' : 'pi-ml-[-7.05rem]'
-                }`}
+                className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon
                   icon={faDownLeftAndUpRightToCenter}
@@ -140,13 +138,17 @@ const Hangup: FC<HangupProps> = ({
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
               className={`${
                 transferring && description
-                  ? 'pi-grid pi-grid-cols-1 pi-ml-8'
-                  : 'pi-flex pi-items-center pi-justify-end pi-ml-16'
-              }`}
+                  ? 'pi-ml-5'
+                  : 'pi-justify-end pi-ml-16'
+              } pi-flex pi-items-center`}
             >
               <FontAwesomeIcon
                 icon={faGear}
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+                className={`${
+                  transferring && description
+                    ? 'pi-mr-2'
+                    : 'pi-ml-16'
+                }pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6`}
               />
             </Button>
           )}
