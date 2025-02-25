@@ -74,15 +74,16 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
                 )}
               </Button>
+              {/* Hidden at the moment waiting for implementation */}
               {/* Video button */}
-              <Button
+              {/* <Button
                 variant='transparentSideView'
                 onClick={() => closeSideViewAndLaunchEvent('video')}
                 data-tooltip-id='tooltip-video'
                 data-tooltip-content={t('Tooltip.Enable camera') || ''}
               >
                 <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
-              </Button>
+              </Button> */}
               {/* Switch device button - show only if there are available devices */}
               {availableDevices?.length > 0 && (
                 <Button
