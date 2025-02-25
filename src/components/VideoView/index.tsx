@@ -13,9 +13,10 @@ import {
   faMicrophone,
   faMicrophoneSlash,
   faStop,
+  faVideo,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
-import { useIsomorphicLayoutEffect } from '../../utils'
+import { eventDispatch, useIsomorphicLayoutEffect } from '../../utils'
 import Hangup from '../Hangup'
 import { muteCurrentCall, recordCurrentCall, unmuteCurrentCall } from '../../lib/phone/call'
 import { JanusTypes } from '../../types/webrtc'
@@ -30,12 +31,13 @@ export interface VideoViewProps {}
 
 export const VideoView: FC<VideoViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
-  const { muted, startTime, isRecording, paused } = useSelector(
+  const { muted, startTime, isRecording, paused, isVideoEnabled } = useSelector(
     (state: RootState) => state.currentCall,
   )
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
+  const { variants } = useSelector((state: RootState) => state.motions)
 
   const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
@@ -110,12 +112,12 @@ export const VideoView: FC<VideoViewProps> = () => {
     }
   }
 
-  ////
-  // const toggleVideo = () => {
-  //   const { isVideoEnabled } = store.getState().currentCall
-  //   store.dispatch.currentCall.setVideoEnabled(!isVideoEnabled)
-  //   eventDispatch('phone-island-toggle-video', { enableVideo: !isVideoEnabled })
-  // }
+  //// remove
+  const toggleVideo = () => {
+    const { isVideoEnabled } = store.getState().currentCall
+    store.dispatch.currentCall.setVideoEnabled(!isVideoEnabled)
+    eventDispatch('phone-island-toggle-video', { enableVideo: !isVideoEnabled })
+  }
 
   const openFullScreen = () => {
     const elem: any = document.getElementById('video-view')
@@ -133,31 +135,15 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   return (
     <>
-      {/* <div className='pi-bg-red pi-content-center  //// pi-justify-center'>
-              <StyledCallView
-                incoming={incoming}
-                accepted={accepted}
-                outgoing={outgoing}
-                isOpen={isOpen}
-              ></StyledCallView>
-    <StyledTopContent
-                        isOpen={isOpen}
-                        incoming={incoming}
-                        accepted={accepted}
-                        outgoing={outgoing}
-                      >
-
-
-                      </StyledTopContent> */}
       {isOpen ? (
         <div id='video-view'>
-          <div className='pi-flex pi-flex-col pi-relative'>
+          <div className={`pi-flex pi-relative pi-h-[${variants.video.expanded.height}px]`}>
             {/* remote video */}
             <video
               autoPlay
               muted={true}
               ref={remoteVideo}
-              className='pi-rounded-3xl bg-gray-500 pi-max-h-[18rem]'
+              className='pi-rounded-2xl bg-gray-500'
             ></video>
             {/* local video */}
             <video
@@ -168,72 +154,88 @@ export const VideoView: FC<VideoViewProps> = () => {
             ></video>
           </div>
 
-          <div className='pi-flex pi-items-center pi-gap-6'>
-            {/* mute button */}
-            {!intrudeListenStatus?.isListen && (
+          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/50 pi-w-full pi-p-6'>
+            <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-4'>
+              {/* mute button */}
+              {!intrudeListenStatus?.isListen && (
+                <Button
+                  variant='default'
+                  active={muted ? true : false}
+                  onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
+                  data-tooltip-id='tooltip-mute'
+                  data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
+                >
+                  {muted ? (
+                    <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
+                  ) : (
+                    <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
+                  )}
+                </Button>
+              )}
+
+              {/* //// remove button */}
+              {/* video button */}
               <Button
                 variant='default'
-                active={muted ? true : false}
-                onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
-                data-tooltip-id='tooltip-mute'
-                data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
+                onClick={() => toggleVideo()}
+                data-tooltip-id='tooltip-toggle-video'
+                data-tooltip-content={
+                  isVideoEnabled ? t('Tooltip.Disable video') : t('Tooltip.Enable video')
+                }
               >
-                {muted ? (
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
+                <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideo} />
+              </Button>
+
+              {/* //// kebab button */}
+
+              {/* fullscreen */}
+              <Button
+                variant='default'
+                onClick={() => openFullScreen()}
+                data-tooltip-id='tooltip-record ////'
+                data-tooltip-content={t('Tooltip.////') || ''}
+              >
+                <FontAwesomeIcon icon={faExpand} className='pi-h-6 pi-w-6' />
+              </Button>
+
+              {/* record call */}
+              <Button
+                active={isRecording}
+                data-stop-propagation={true}
+                variant='default'
+                onClick={() => recordCurrentCall(isRecording)}
+                data-tooltip-id='tooltip-record'
+                data-tooltip-content={
+                  isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
+                }
+              >
+                {isRecording ? (
+                  <FontAwesomeIcon icon={faStop} className='pi-h-6 pi-w-6' />
                 ) : (
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
+                  <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
+                    <FontAwesomeIcon
+                      icon={faCircleDot}
+                      className='fa-circle-dot pi-text-white dark:pi-text-red-700'
+                    />
+                    <FontAwesomeIcon
+                      icon={faCircle}
+                      className='inner-dot pi-text-red-700 dark:pi-text-white'
+                    />
+                  </div>
                 )}
               </Button>
-            )}
-            {/* //// kebab button */}
-
-            {/* fullscreen */}
-            <Button
-              variant='default'
-              onClick={() => openFullScreen()}
-              data-tooltip-id='tooltip-record ////'
-              data-tooltip-content={t('Tooltip.////') || ''}
-            >
-              <FontAwesomeIcon icon={faExpand} className='pi-h-6 pi-w-6' />
-            </Button>
-
-            {/* record call */}
-            <Button
-              active={isRecording}
-              data-stop-propagation={true}
-              variant='default'
-              onClick={() => recordCurrentCall(isRecording)}
-              data-tooltip-id='tooltip-record'
-              data-tooltip-content={
-                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
-              }
-            >
-              {isRecording ? (
-                <FontAwesomeIcon icon={faStop} className='pi-h-6 pi-w-6' />
-              ) : (
-                <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
-                  <FontAwesomeIcon
-                    icon={faCircleDot}
-                    className='fa-circle-dot pi-text-white dark:pi-text-red-700'
-                  />
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    className='inner-dot pi-text-red-700 dark:pi-text-white'
-                  />
-                </div>
-              )}
-            </Button>
-            {/* transfer */}
-            <TransferButton />
+              {/* transfer */}
+              {/* <TransferButton /> //// remove */}
+            </div>
+            <Hangup />
           </div>
-          <Hangup />
         </div>
       ) : (
         // collapsed view
         <>
           <div className='pi-flex pi-justify-between pi-items-center'>
             <Avatar />
-            <Timer startTime={startTime} isHome />
+            <Timer startTime={startTime} />
             {!isOpen && remoteAudioStream && !isPhysical() && (
               <AudioBars
                 audioStream={remoteAudioStream}

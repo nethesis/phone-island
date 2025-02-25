@@ -29,6 +29,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     let size: SizeTypes = {
       width: 0,
       height: 0,
+      padding: padding_expanded,
     }
     switch (view) {
       case 'call':
@@ -161,6 +162,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           size = {
             width: variants.video.expanded.width,
             height: variants.video.expanded.height,
+            padding: 0,
           }
         } else {
           size = {
@@ -197,7 +199,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       }px`,
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
       padding: isOpen
-        ? `${padding_expanded}px`
+        ? size.padding != undefined
+          ? size.padding
+          : `${padding_expanded}px`
         : `${padding_x_collapsed}px ${padding_y_collapsed}px`,
     }
   }
@@ -221,6 +225,7 @@ export interface IslandMotionProps {
 type SizeTypes = {
   width: number
   height: number
+  padding?: number
 }
 
 export default IslandMotion
