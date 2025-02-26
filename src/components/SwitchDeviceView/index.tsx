@@ -14,6 +14,7 @@ import { eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { useTranslation } from 'react-i18next'
 import { getAvailableDevices } from '../../utils/deviceUtils'
+import { changeDefaultDevice } from '../../services/user'
 
 export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -43,23 +44,51 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     })
   }
 
+  const setMainDeviceId = async (device: any) => {
+    let deviceExtension: any = {}
+    if (device) {
+      deviceExtension.id = device?.id
+      try {
+        await changeDefaultDevice(deviceExtension)
+        dispatch.user.updateDefaultDevice(device)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
+
   const blindTransferOnSelectedDevice = (
-    deviceNumber: string,
     endpointIdInConversation: string,
   ) => {
-    if (deviceNumber && endpointIdInConversation) {
-      blindTransferFunction(deviceNumber, endpointIdInConversation)
-      eventDispatch('phone-island-call-switched', {})
-      // dispatch.island.toggleAvoidToShow(true)
-      // Not avoid to show only if selectedDevice is physical and default device is physical else avoid to show
+    if (selectedSwitchDevices?.id && endpointIdInConversation) {
       if (
         selectedSwitchDevices?.type == 'physical' &&
         userInformation?.default_device?.type === 'physical'
       ) {
-        eventDispatch('phone-island-call-switched', {})
         dispatch.island.toggleAvoidToShow(false)
-      } else {
+        blindTransferFunction(selectedSwitchDevices?.id, endpointIdInConversation)
+        eventDispatch('phone-island-call-switched', {})
+      } else if (
+        selectedSwitchDevices?.type === 'physical' &&
+        userInformation?.default_device?.type === 'nethlink'
+      ) {
+        dispatch.island.toggleAvoidToShow(false)
+        setMainDeviceId(selectedSwitchDevices)
+        dispatch.currentUser.updateCurrentDefaultDevice(selectedSwitchDevices)
+        eventDispatch('phone-island-default-device-changed', {})
+        setTimeout(() => {
+          blindTransferFunction(selectedSwitchDevices?.id, endpointIdInConversation)
+          eventDispatch('phone-island-call-switched', {})
+        }, 500)
+        eventDispatch('phone-island-call-switched', {})
+      } else if (
+        selectedSwitchDevices?.type === 'mobile' ||
+        (selectedSwitchDevices?.type === 'physical' &&
+          userInformation?.default_device?.type !== 'nethlink')
+      ) {
         dispatch.island.toggleAvoidToShow(true)
+        blindTransferFunction(selectedSwitchDevices?.id, endpointIdInConversation)
+        eventDispatch('phone-island-call-switched', {})
       }
     }
   }
@@ -142,11 +171,11 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
         {/* Centered Button */}
         <div className='pi-flex pi-justify-center pi-mt-2'>
           <Button
-            disabled={selectedSwitchDevices.id === ''}
+            disabled={selectedSwitchDevices?.id === ''}
             variant='gray'
             className='pi-font-medium pi-text-sm pi-leading-5'
             onClick={() =>
-              blindTransferOnSelectedDevice(selectedSwitchDevices?.id, extensionInCall)
+              blindTransferOnSelectedDevice(extensionInCall)
             }
           >
             <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
