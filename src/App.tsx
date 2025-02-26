@@ -268,19 +268,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     // Get current dimensions from args
     const { sizeInformation } = args
 
-    // Calculate extra row dimension ( side view and back call )
-    const extraDimension = {
-      right: `${sideViewIsVisible ? 42 : 0}px`,
-      top: `${isBackCallActive() ? 40 : 0}px`,
-    }
-
-    // Create the resize information object
-    const sizes = {
+    // // Calculate extra row dimension ( side view and back call )
+    const updatedSizeInformation = {
       ...sizeInformation,
-      extraDimension,
+      right: sideViewIsVisible ? '42px' : '0px',
+      top: isBackCallActive() ? '40px' : '0px',
     }
-
-    eventDispatch('phone-island-size-changed', { sizes })
+    console.log('Updated size information: ', updatedSizeInformation)
+    eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
   })
 
   // Listen for the call end event and set the island size to 0
