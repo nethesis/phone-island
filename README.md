@@ -148,7 +148,13 @@ As you can see the app/component can be built in two ways.
 - The widget files built with Parcel
 
 ```
-npm build-pack
+npm run build-pack
 ```
 
 It's useful to create a new local version of phone-island that could be imported in any project with some debug command
+
+```
+npm run revert-bump
+```
+
+It's useful to delete all .tgz created with npm run build-pack command, and reset git version to the original one

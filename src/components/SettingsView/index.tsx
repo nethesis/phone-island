@@ -6,43 +6,35 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faAngleRight,
   faChevronRight,
   faMicrophone,
   faPalette,
   faVolumeHigh,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
-import { t } from 'i18next'
 import { Button } from '../Button'
-import MichrophoneView from './MichrophoneView'
+import MichrophoneView from './MicrophoneView'
 import AudioView from './AudioView'
 import ThemeView from './ThemeView'
-import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useTranslation } from 'react-i18next'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
-  const { settingsView } = useSelector((state: RootState) => state.island)
+  const { settingsView, previousView } = useSelector((state: RootState) => state.island)
+  const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
 
-  const SettingsMenuItem = ({ icon, label, onClick, marginLeft }) => (
+  const SettingsMenuItem = ({ icon, label, onClick }) => (
     <button
       onClick={onClick}
-      className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 dark:hover:pi-text-gray-50 hover:pi-text-gray-900 dark:pi-text-gray-50 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
+      className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md'
     >
       <div className='pi-flex pi-items-center pi-gap-3'>
-        <FontAwesomeIcon icon={icon} className='dark:pi-text-gray-100 pi-text-gray-600' />
-        <span
-          className={`${
-            marginLeft === 'audio'
-              ? ''
-              : marginLeft === 'microphone'
-              ? 'pi-ml-[0.4rem]'
-              : 'pi-ml-[0.2rem]'
-          }`}
-        >
-          {label}
-        </span>
+        <FontAwesomeIcon icon={icon} className='pi-w-5 pi-h-5' />
+        <span>{label}</span>
       </div>
-      <FontAwesomeIcon icon={faChevronRight} className='dark:pi-text-gray-100 pi-text-gray-600' />
+      <FontAwesomeIcon icon={faAngleRight} className='pi-w-5 pi-h-5' />
     </button>
   )
 
@@ -50,17 +42,15 @@ export const SettingsView: FC<SettingsViewProps> = () => {
   const MainSettings = (
     <div className='pi-flex pi-flex-col pi-w-full'>
       {/* Header */}
-      <div className='pi-flex pi-items-center pi-justify-between'>
-        <h1 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50'>
-          {t('Settings.Settings')}
-        </h1>
+      <div className='pi-flex pi-items-center pi-justify-between pi-text-gray-900 dark:pi-text-gray-50'>
+        <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{t('Settings.Settings')}</h1>
         <Button
-          onClick={() => dispatch.island.setIslandView('call')}
+          onClick={() => dispatch.island.setIslandView(`${previousView || 'call'}`)}
           variant='transparentSettings'
           data-tooltip-id='tooltip-close-settings'
           data-tooltip-content={t('Common.Close') || ''}
         >
-          <FontAwesomeIcon icon={faXmark} size='lg' />
+          <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5' />
         </Button>
       </div>
 
@@ -73,19 +63,16 @@ export const SettingsView: FC<SettingsViewProps> = () => {
           icon={faMicrophone}
           label={t('Settings.Microphones')}
           onClick={() => dispatch.island.setSettingsView('microphone')}
-          marginLeft='microphone'
         />
         <SettingsMenuItem
           icon={faVolumeHigh}
           label={t('Settings.Speakers')}
           onClick={() => dispatch.island.setSettingsView('audioInput')}
-          marginLeft='audio'
         />
         <SettingsMenuItem
           icon={faPalette}
           label={t('Settings.Theme')}
           onClick={() => dispatch.island.setSettingsView('theme')}
-          marginLeft='theme'
         />
       </div>
     </div>
@@ -107,7 +94,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
             return MainSettings
         }
       })()}
-      <Tooltip className='pi-z-20' id='tooltip-close-settings' place='bottom' />
+      <CustomThemedTooltip id='tooltip-close-settings' place='bottom' />
     </>
   )
 }

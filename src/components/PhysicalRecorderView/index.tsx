@@ -112,7 +112,7 @@ export const PhysicalRecorderView: FC<PhysicalRecorderViewProps> = () => {
                 {t('Common.Close the call to stop recording')}
               </div>
             ) : (
-              <div className='pi-mt-[3rem] pi-font-regular pi-text-lg pi-w-fit pi-h-fit dark:pi-text-white'>
+              <div className='pi-mt-12 pi-font-regular pi-text-lg pi-w-fit pi-h-fit dark:pi-text-white'>
                 {t('Common.Answer phone to start recording')}
               </div>
             )}

@@ -1,37 +1,42 @@
 import i18next from 'i18next'
-import Backend from 'i18next-http-backend'
-import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+import en from '../../public/locales/en/translation.json'
+import it from '../../public/locales/it/translation.json'
 
-const fallbackLng = ['en']
+let isInitialized = false
 
-const options = {
-  // User language is detected from the navigator
-  order: ['navigator'],
-}
-
-export const loadI18n = (loadPath?: string) => {
-  if (typeof window === 'undefined') {
-    return
+export const initI18n = () => {
+  if (isInitialized) {
+    return Promise.resolve()
   }
-  i18next
-    .use(Backend)
+
+  const i18nConfig = {
+    resources: {
+      en: { translations: en },
+      it: { translations: it }
+    },
+    fallbackLng: 'en',
+    ns: ['translations'],
+    defaultNS: 'translations',
+    interpolation: {
+      escapeValue: false
+    },
+    detection: {
+      order: ['navigator']
+    },
+    react: {
+      useSuspense: false
+    },
+    supportedLngs: ['en', 'it']
+  }
+
+  isInitialized = true
+  return i18next
     .use(LanguageDetector)
     .use(initReactI18next)
-    .init({
-      ...(loadPath ? {
-        backend: {
-          loadPath
-        }
-      } : {}),
-      fallbackLng,
-      load: 'languageOnly',
-      debug: true,
-      detection: options,
-      interpolation: {
-        escapeValue: false,
-      },
-    })
+    .init(i18nConfig)
 }
 
-export default loadI18n
+// Esportiamo una nuova istanza di i18next per phone-island
+export default i18next.createInstance()

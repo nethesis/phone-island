@@ -12,10 +12,10 @@ import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
-import { Tooltip } from 'react-tooltip'
 import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -266,11 +266,11 @@ export const TransferListView: FC<TransferListViewProps> = () => {
       ) : (
         <div className='pi-font-medium pi-text-base '>Transfer</div>
       )}
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='right' />
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-call-to-transfer' place='left' />
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
-      <Tooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='right' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-call-to-transfer' place='left' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
+      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />
     </>
   )
 }

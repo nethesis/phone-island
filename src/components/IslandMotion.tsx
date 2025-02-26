@@ -1,18 +1,20 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC } from 'react'
+import React, { type ReactNode, FC, useMemo, useEffect } from 'react'
 import { RootState } from '../store'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
+import { eventDispatch } from '../utils'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
-  const { incoming, outgoing, accepted, transferring } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const { incoming, outgoing, accepted, transferring, incomingWebRTC, incomingSocket } =
+    useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
-  const { view, isOpen, actionsExpanded } = useSelector((state: RootState) => state.island)
+  const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
+    (state: RootState) => state.island,
+  )
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
   const {
     variants,
@@ -24,12 +26,13 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
 
-  function getVariant() {
+  const motionVariants = useMemo(() => {
     // Initial size
     let size: SizeTypes = {
       width: 0,
       height: 0,
     }
+
     switch (view) {
       case 'call':
         if (isOpen) {
@@ -78,109 +81,47 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           }
         }
         break
+
       case 'keypad':
-        if (isOpen) {
-          size = {
-            width: variants.keypad.expanded.width,
-            height: variants.keypad.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.transfer.collapsed.width,
-            height: variants.transfer.collapsed.height,
-          }
-        }
+        size = isOpen
+          ? {
+              width: variants.keypad.expanded.width,
+              height: variants.keypad.expanded.height,
+            }
+          : {
+              width: variants.transfer.collapsed.width,
+              height: variants.transfer.collapsed.height,
+            }
         break
+
       case 'transfer':
-        if (isOpen) {
-          size = {
-            width: variants.transfer.expanded.width,
-            height: variants.transfer.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.transfer.collapsed.width,
-            height: variants.transfer.collapsed.height,
-          }
-        }
-        break
       case 'player':
-        if (isOpen) {
-          size = {
-            width: variants.player.expanded.width,
-            height: variants.player.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.player.collapsed.width,
-            height: variants.player.collapsed.height,
-          }
-        }
-        break
       case 'recorder':
-        if (isOpen) {
-          size = {
-            width: variants.recorder.expanded.width,
-            height: variants.recorder.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.recorder.collapsed.width,
-            height: variants.recorder.collapsed.height,
-          }
-        }
-        break
       case 'physicalPhoneRecorder':
-        if (isOpen) {
-          size = {
-            width: variants.physicalPhoneRecorder.expanded.width,
-            height: variants.physicalPhoneRecorder.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.physicalPhoneRecorder.collapsed.width,
-            height: variants.physicalPhoneRecorder.collapsed.height,
-          }
-        }
-        break
       case 'settings':
-        if (isOpen) {
-          size = {
-            width: variants.settings.expanded.width,
-            height: variants.settings.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.settings.collapsed.width,
-            height: variants.settings.collapsed.height,
-          }
-        }
-        break
       case 'video':
-        if (isOpen) {
-          size = {
-            width: variants.video.expanded.width,
-            height: variants.video.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.video.collapsed.width,
-            height: variants.video.collapsed.height,
-          }
-        }
-        break
       case 'conference':
-        if (isOpen) {
-          size = {
-            width: variants.video.expanded.width,
-            height: variants.video.expanded.height,
-          }
-        } else {
-          size = {
-            width: variants.video.collapsed.width,
-            height: variants.video.collapsed.height,
-          }
-        }
+        size = isOpen
+          ? {
+              width: variants[view].expanded.width,
+              height: variants[view].expanded.height,
+            }
+          : {
+              width: variants[view].collapsed.width,
+              height: variants[view].collapsed.height,
+            }
+        break
+
+      case 'switchDevice':
+        size = isOpen
+          ? {
+              width: variants.switchDevice.expanded.width,
+              height: variants.switchDevice.expanded.height,
+            }
+          : {
+              width: variants.video.collapsed.width,
+              height: variants.video.collapsed.height,
+            }
         break
     }
 
@@ -200,21 +141,68 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         ? `${padding_expanded}px`
         : `${padding_x_collapsed}px ${padding_y_collapsed}px`,
     }
-  }
+  }, [
+    view,
+    isOpen,
+    accepted,
+    transferring,
+    actionsExpanded,
+    isListen,
+    incoming,
+    outgoing,
+    activeAlertsCount,
+    variants,
+    border_radius_collapsed,
+    border_radius_expanded,
+    padding_x_collapsed,
+    padding_y_collapsed,
+    padding_expanded,
+    alert_padding_expanded,
+    incomingWebRTC,
+    incomingSocket,
+  ])
 
-  const motionVariants = getVariant()
+  useEffect(() => {
+    let sizeInformation: any = {}
+    sizeInformation.width = motionVariants?.width
+    sizeInformation.height = motionVariants?.height
+    eventDispatch('phone-island-size-change', {
+      sizeInformation,
+    })
+  }, [
+    motionVariants,
+    view,
+    isOpen,
+    accepted,
+    transferring,
+    actionsExpanded,
+    isListen,
+    incoming,
+    outgoing,
+    activeAlertsCount,
+    variants,
+    border_radius_collapsed,
+    border_radius_expanded,
+    padding_x_collapsed,
+    padding_y_collapsed,
+    padding_expanded,
+    alert_padding_expanded,
+    sideViewIsVisible,
+    incomingSocket,
+    incomingWebRTC,
+  ])
 
   return (
     <motion.div
       className='pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
       animate={motionVariants}
     >
-      {children && children}
+      {children}
     </motion.div>
   )
 }
 
-export interface IslandMotionProps {
+interface IslandMotionProps {
   children: ReactNode
 }
 

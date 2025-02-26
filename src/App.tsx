@@ -4,8 +4,7 @@ import { Provider } from 'react-redux'
 import { store } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
-import loadI18n from './lib/i18n'
-import i18next, { i18n } from 'i18next'
+import { initI18n } from './lib/i18n'
 
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
@@ -14,10 +13,10 @@ import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
+import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 
 interface PhoneIslandProps {
   dataConfig: string
-  i18nLoadPath?: string
   showAlways?: boolean
   uaType: string
 }
@@ -28,7 +27,6 @@ interface DeviceInputOutputTypes {
 
 export const PhoneIsland: FC<PhoneIslandProps> = ({
   dataConfig,
-  i18nLoadPath = undefined,
   showAlways = false,
   uaType,
 }: PhoneIslandProps) => {
@@ -139,7 +137,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   //initialize i18n
   useEffect(() => {
     if (firstRenderI18n) {
-      loadI18n(i18nLoadPath)
+      initI18n()
       setFirstRenderI18n(false)
     }
   }, [firstRenderI18n])
@@ -229,6 +227,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('User status debug informations: ', userInformation)
   })
 
+  useEventListener('phone-island-all-users-status', () => {
+    const allUsersInformation = store.getState().users
+    console.log('Users status debug informations: ', allUsersInformation)
+  })
+
   useEventListener('phone-island-status', () => {
     const phoneIslandInformation = store.getState().island
     console.log('Phone island status debug informations: ', phoneIslandInformation)
@@ -247,6 +250,46 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-player-force-stop', () => {
     store.dispatch.player.reset()
     console.log('Audio player is interrupted')
+  })
+
+  useEventListener('phone-island-sideview-open', () => {
+    store.dispatch.island.toggleSideViewVisible(true)
+    eventDispatch('phone-island-sideview-opened', {})
+  })
+
+  useEventListener('phone-island-sideview-close', () => {
+    store.dispatch.island.toggleSideViewVisible(false)
+    eventDispatch('phone-island-sideview-closed', {})
+  })
+
+  useEventListener('phone-island-size-change', (args: any) => {
+    const { sideViewIsVisible } = store.getState().island
+
+    // Get current dimensions from args
+    const { sizeInformation } = args
+
+    // Calculate extra row dimension ( side view and back call )
+    const extraDimension = {
+      right: `${sideViewIsVisible ? 42 : 0}px`,
+      top: `${isBackCallActive() ? 40 : 0}px`,
+    }
+
+    // Create the resize information object
+    const sizes = {
+      ...sizeInformation,
+      extraDimension,
+    }
+
+    eventDispatch('phone-island-size-changed', { sizes })
+  })
+
+  // Listen for the call end event and set the island size to 0
+  useEventListener('phone-island-call-ended', () => {
+    const sizeInformation: any = {
+      width: '0px',
+      height: '0px',
+    }
+    eventDispatch('phone-island-size-change', { sizeInformation })
   })
 
   return (

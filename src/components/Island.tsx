@@ -20,6 +20,8 @@ import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
 import { VideoView } from './VideoView'
+import { SwitchDeviceView } from './SwitchDeviceView'
+import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
 
 /**
  * Provides the Island logic
@@ -28,12 +30,10 @@ import { VideoView } from './VideoView'
  */
 export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
-  const { incoming, accepted, outgoing, transferring } = useSelector(
-    (state: RootState) => state.currentCall,
-  )
+  const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
   // Get isOpen from island store
-  const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
+  const { view, sideViewIsVisible, avoidToShow } = useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -102,41 +102,43 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         activeAlertsCount > 0 ||
         view === 'player' ||
         view === 'recorder' ||
-        view === 'physicalPhoneRecorder') && (
-        <>
-          <IslandDrag islandContainerRef={islandContainerRef}>
-            {/* Add background call visibility logic */}
-            <BackCall isVisible={view === 'keypad' || view === 'transfer' || transferring} />
-            <SideView isVisible={sideViewIsVisible} />
-            <IslandMotions>
-              {/* The views logic */}
-              <AlertGuard>
-                {(() => {
-                  const views = {
-                    call: <CallView />,
-                    keypad: <KeyboardView />,
-                    transfer: <TransferListView />,
-                    player: <AudioPlayerView />,
-                    recorder: <RecorderView />,
-                    physicalPhoneRecorder: <PhysicalRecorderView />,
-                    settings: <SettingsView />,
-                    video: <VideoView />,
-                  }
+        view === 'physicalPhoneRecorder') &&
+        !avoidToShow && (
+          <>
+            <IslandDrag islandContainerRef={islandContainerRef}>
+              {/* Add background call visibility logic */}
+              <BackCall isVisible={isBackCallActive()} />
+              <SideView isVisible={sideViewIsVisible} />
+              <IslandMotions>
+                {/* The views logic */}
+                <AlertGuard>
+                  {(() => {
+                    const views = {
+                      call: <CallView />,
+                      keypad: <KeyboardView />,
+                      transfer: <TransferListView />,
+                      player: <AudioPlayerView />,
+                      recorder: <RecorderView />,
+                      physicalPhoneRecorder: <PhysicalRecorderView />,
+                      settings: <SettingsView />,
+                      video: <VideoView />,
+                      switchDevice: <SwitchDeviceView />,
+                    }
 
-                  return currentView in views ? (
-                    <ViewsTransition forView={currentView}>
-                      {views[currentView as keyof typeof views]}
-                    </ViewsTransition>
-                  ) : (
-                    <></>
-                  )
-                })()}
-              </AlertGuard>
-            </IslandMotions>
-            <Close />
-          </IslandDrag>
-        </>
-      )}
+                    return currentView in views ? (
+                      <ViewsTransition forView={currentView}>
+                        {views[currentView as keyof typeof views]}
+                      </ViewsTransition>
+                    ) : (
+                      <></>
+                    )
+                  })()}
+                </AlertGuard>
+              </IslandMotions>
+              <Close />
+            </IslandDrag>
+          </>
+        )}
       <div className='pi-hidden'>
         <audio loop={audioPlayerLoop} ref={audioPlayer}></audio>
         <audio muted={true} ref={localAudio}></audio>

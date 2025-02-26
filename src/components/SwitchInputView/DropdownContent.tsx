@@ -14,13 +14,14 @@ import {
   faVolumeHigh,
 } from '@fortawesome/free-solid-svg-icons'
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
-import { t } from 'i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
-import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useTranslation } from 'react-i18next'
 
 const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
   const { sipcall }: any = useSelector((state: RootState) => state.webrtc)
+  const { t } = useTranslation()
   const remoteAudioElement: any = useSelector((state: RootState) => state.player.remoteAudio)
 
   const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
@@ -396,7 +397,7 @@ const DropdownContent: FC<DropdownContentProps> = ({ isTransferView }) => {
       ) : (
         <div></div>
       )}
-      <Tooltip className='pi-z-20' id='tooltip-left-settings-devices' place='left' />
+      <CustomThemedTooltip id='tooltip-left-settings-devices' place='left' />
     </>
   )
 }

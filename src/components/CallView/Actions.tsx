@@ -8,7 +8,6 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
   parkCurrentCall,
-  recordCurrentCall,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,9 +22,6 @@ import {
   faChevronUp,
   faArrowRightArrowLeft,
   faUserPlus,
-  faStop,
-  faCircleDot,
-  faCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -33,11 +29,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { store } from '../../store'
 import outgoingRingtone from '../../static/outgoing_ringtone'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const Actions: FC = () => {
   // Get multiple values from currentCall store
@@ -57,7 +53,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-keypad-opened', {})
   }
@@ -70,7 +66,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-transfer-opened', {})
   }
@@ -129,6 +125,7 @@ const Actions: FC = () => {
     if (actionsExpanded) {
       dispatch.island.toggleActionsExpanded(false)
       eventDispatch('phone-island-call-actions-closed', {})
+      eventDispatch('phone-island-sideview-close', {})
     } else {
       dispatch.island.toggleActionsExpanded(true)
       eventDispatch('phone-island-call-actions-opened', {})
@@ -142,7 +139,7 @@ const Actions: FC = () => {
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
-      dispatch.island.toggleSideViewVisible(false)
+      eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-conference-list-opened', {})
   }
@@ -260,46 +257,21 @@ const Actions: FC = () => {
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
             <Button
-              active={isRecording}
               data-stop-propagation={true}
-              variant='default'
-              onClick={() => recordCurrentCall(isRecording)}
-              data-tooltip-id='tooltip-record'
-              data-tooltip-content={
-                isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
-              }
-            >
-              {isRecording ? (
-                <FontAwesomeIcon icon={faStop} className='pi-h-6 pi-w-6' />
-              ) : (
-                <div className='custom-circle-dot-wrapper' data-stop-propagation={true}>
-                  <FontAwesomeIcon
-                    icon={faCircleDot}
-                    className='fa-circle-dot pi-text-white dark:pi-text-red-700'
-                  />
-                  <FontAwesomeIcon
-                    icon={faCircle}
-                    className='inner-dot pi-text-red-700 dark:pi-text-white'
-                  />
-                </div>
-              )}
-            </Button>
-            {/* Hidden waiting for other actions to be implemented */}
-            {/* <Button
-              data-stop-propagation={true}
+              disabled={true}
               variant='default'
               onClick={() => addUserConference()}
               data-tooltip-id='tooltip-conference'
               data-tooltip-content={t('Tooltip.Conference') || ''}
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button> */}
-            {/* <Button
+            </Button>
+            <Button
               variant='default'
               onClick={() =>
                 sideViewIsVisible
-                  ? dispatch.island.toggleSideViewVisible(false)
-                  : dispatch.island.toggleSideViewVisible(true)
+                  ? eventDispatch('phone-island-sideview-close', {})
+                  : eventDispatch('phone-island-sideview-open', {})
               }
               data-tooltip-id='tooltip-sideView'
               data-tooltip-content={t('Tooltip.Other actions') || ''}
@@ -308,22 +280,21 @@ const Actions: FC = () => {
                 className='pi-h-6 pi-w-6'
                 icon={sideViewIsVisible ? faClose : faOpen}
               />
-            </Button> */}
+            </Button>
           </div>
         </>
       ) : (
         <></>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip-transfer' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-keyboard' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-conference' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-park' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-sideView' place='left' />
+      <CustomThemedTooltip id='tooltip-transfer' place='bottom' />
+      <CustomThemedTooltip id='tooltip-pause' place='bottom' />
+      <CustomThemedTooltip id='tooltip-mute' place='bottom' />
+      <CustomThemedTooltip id='tooltip-expand' place='bottom' />
+      <CustomThemedTooltip id='tooltip-keyboard' place='bottom' />
+      <CustomThemedTooltip id='tooltip-conference' place='bottom' />
+      <CustomThemedTooltip id='tooltip-park' place='bottom' />
+      <CustomThemedTooltip id='tooltip-sideView' place='left' />
     </>
   )
 }

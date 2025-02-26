@@ -17,6 +17,8 @@ const defaultState: IslandTypes = {
   settingsView: 'main',
   sideViewIsVisible: false,
   isConferenceList: false,
+  previousView: null,
+  avoidToShow: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -26,6 +28,7 @@ export const island = createModel<RootModel>()({
       return {
         ...state,
         view: payload,
+        previousView: state?.view,
       }
     },
     toggleIsOpen: (state, payload: boolean) => {
@@ -51,6 +54,9 @@ export const island = createModel<RootModel>()({
     toggleConferenceList: (state, payload: boolean) => {
       state.isConferenceList = payload
     },
+    toggleAvoidToShow: (state, payload: boolean) => {
+      state.avoidToShow = payload
+    },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
     },
@@ -66,6 +72,9 @@ export const island = createModel<RootModel>()({
         dispatch.island.toggleIsOpen(true)
       } else {
         eventDispatch('phone-island-' + (rootState.island.isOpen ? 'compressed' : 'expanded'), {})
+        if (rootState.island.isOpen) {
+          eventDispatch('phone-island-sideview-close', {})
+        }
         dispatch.island.toggleIsOpen(!rootState.island.isOpen)
       }
     },
@@ -83,6 +92,7 @@ type IslandViewType =
   | 'video'
   | 'screenShare'
   | 'conference'
+  | 'switchDevice'
 type SettingsViewType = 'microphone' | 'audioInput' | 'theme' | 'main'
 
 interface IslandTypes {
@@ -97,4 +107,6 @@ interface IslandTypes {
   settingsView: string
   sideViewIsVisible: boolean
   isConferenceList: boolean
+  previousView?: IslandViewType | null
+  avoidToShow?: boolean
 }

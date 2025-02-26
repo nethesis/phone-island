@@ -104,8 +104,8 @@ export const currentCall = createModel<RootModel>()({
     checkIncomingUpdatePlay: (payload: CurrentCallTypes, rootState) => {
       // Check call type and incoming confirmation source
       if (
-        (rootState.currentUser.default_device?.type === 'webrtc' && payload.incomingWebRTC) ||
-        (rootState.currentUser.default_device?.type === 'physical' && payload.incomingSocket) ||
+        (rootState?.currentUser?.default_device?.type === 'webrtc' && payload?.incomingWebRTC) ||
+        (rootState?.currentUser?.default_device?.type === 'physical' && payload?.incomingSocket) ||
         (rootState?.currentUser?.default_device?.type === 'nethlink' && payload?.incomingWebRTC)
       ) {
         payload.incoming = true

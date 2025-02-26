@@ -5,11 +5,16 @@ import React, { FC } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faCircleXmark, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
+import {
+  faTimes,
+  faCircleXmark,
+  faCircleCheck,
+  faArrowRotateRight,
+} from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
 import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
-import { store } from '../../store'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 /**
  * Shows user alerts
@@ -30,6 +35,10 @@ const AlertView: FC = () => {
     eventDispatch('phone-island-all-alerts-removed', {})
   }
 
+  const reloadPhoneIsland = () => {
+    window.location.reload()
+  }
+
   return (
     latestAlert && (
       <div className='pi-relative pi-rounded-md pi-w-full pi-flex'>
@@ -44,7 +53,7 @@ const AlertView: FC = () => {
             {/* Icon */}
             <FontAwesomeIcon
               icon={latestAlert?.type === 'call_transfered' ? faCircleCheck : faCircleXmark}
-              className={`pi-h-[1.1rem] pi-w-10 ${
+              className={`pi-h-5 pi-w-10 ${
                 latestAlert?.type === 'call_transfered'
                   ? 'pi-text-green-700 dark:pi-text-green-200'
                   : 'pi-text-rose-700 dark:pi-text-rose-200'
@@ -72,14 +81,29 @@ const AlertView: FC = () => {
         {/* Close button */}
         <Button
           variant='transparent'
-          onClick={() => handleClearAllAlerts()}
-          className='pi-absolute pi-right-[-1.28rem] pi-top-[8%] pi-transform pi--translate-y-[57%]'
+          onClick={() =>
+            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+              ? reloadPhoneIsland()
+              : handleClearAllAlerts()
+          }
+          className='pi-absolute pi--right-6 pi-transform pi--translate-y-1/2'
+          data-tooltip-id='tooltip-close-alert'
+          data-tooltip-content={
+            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+              ? `${t('Tooltip.Reload')}`
+              : `${t('Tooltip.Close alert')}`
+          }
         >
           <FontAwesomeIcon
-            icon={faTimes}
+            icon={
+              default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+                ? faArrowRotateRight
+                : faTimes
+            }
             className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4'
           />
         </Button>
+        <CustomThemedTooltip id='tooltip-close-alert' place='left' />
       </div>
     )
   )

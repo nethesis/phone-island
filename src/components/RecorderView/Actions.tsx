@@ -20,10 +20,10 @@ import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import DropdownContent from '../SwitchInputView/DropdownContent'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -199,7 +199,7 @@ export const Actions: FC<{}> = () => {
           style={{ transform: 'scale(1.15)' }}
           data-tooltip-id='tooltip-start-recording-recorder-view'
           data-tooltip-content={t('Tooltip.Start recording') || ''}
-          className='pi-flex pi-justify-center pi-ml-[4.7rem]'
+          className='pi-flex pi-justify-center pi-ml-20'
         >
           {waiting ? (
             <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
@@ -209,20 +209,17 @@ export const Actions: FC<{}> = () => {
         </Button>
       )}
       {!recording && !recorded && (
-        <div
-          className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'
-        >
+        <div className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'>
           <DropdownContent data-stop-propagation={true}></DropdownContent>
         </div>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip-start-recording-recorder-view' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-stop-recorder-view' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-play-recorder-view' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-pause-recorder-view' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-delete-recorder-view' place='bottom' />
-      <Tooltip className='pi-z-20' id='tooltip-confirm-record-view' place='bottom' />
-
+      <CustomThemedTooltip id='tooltip-start-recording-recorder-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-stop-recorder-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-play-recorder-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-pause-recorder-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-delete-recorder-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-confirm-record-view' place='bottom' />
     </div>
   )
 }

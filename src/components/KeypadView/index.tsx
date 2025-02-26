@@ -11,11 +11,11 @@ import Actions from './Actions'
 import { sendDTMF } from '../../lib/webrtc/messages'
 import { backToCallView } from '../../lib/island/island'
 import { playDtmfAudio } from '../../lib/phone/call'
-import { Tooltip } from 'react-tooltip'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
 import { useEventListener, eventDispatch } from '../../utils'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 const DTMF_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '#']
 
@@ -81,7 +81,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
       ) : (
         <div className='pi-font-medium pi-text-base'>Keypad</div>
       )}
-      <Tooltip className='pi-z-1000' id='keyboard-tooltip' place='right' />
+      <CustomThemedTooltip className='pi-z-1000' id='keyboard-tooltip' place='right' />
     </>
   )
 }

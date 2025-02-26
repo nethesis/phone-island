@@ -81,7 +81,8 @@
     "publish:minor": "npm version minor --allow-same-version -m v%s --force",
     "publish:major": "npm version major --allow-same-version -m v%s --force",
     "publish:patch": "npm version patch --allow-same-version -m v%s --force",
-    "postversion": "git add . &&  git push --follow-tags && git push --tags"
+    "postversion": "git add . &&  git push --follow-tags && git push --tags",
+    "revert-bump": "node revert-bump.js"
   },
   "browserslist": {
     "production": [
@@ -101,6 +102,7 @@
     "@parcel/transformer-typescript-types": "^2.8.0",
     "@rollup/plugin-babel": "^6.0.2",
     "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^9.0.2",
     "@storybook/addon-actions": "7.6.20",

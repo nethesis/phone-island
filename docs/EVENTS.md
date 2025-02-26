@@ -134,6 +134,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-sideview-open` The event to manually open phone island right menu
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-close` The event to manually close phone island right menu
+
+  ```json
+  {}
+  ```
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-expanded` The dispatch of phone-island expand
@@ -356,10 +368,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-call-answered` The dispatch of call answer
+- `phone-island-call-answered` The dispatch of call answer ( if not empty call it's been answered from another device )
 
   ```json
-  {}
+  {
+    "extensionType": "mobile"
+  }  
   ```
 
 - `phone-island-call-ended` The dispatch of call end
@@ -839,6 +853,26 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-call-switched` Indicates that user has a switched call to another devices
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-opened` Indicates that phone island right menu is open
+
+  ```json
+  {}
+  ```
+
+- `phone-island-sideview-closed` Indicates that phone island right menu is close
+
+  ```json
+  {}
+  ```
+
+
+
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
 
@@ -924,6 +958,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-all-users-status` Retrieve all informations about all users
+
+  ```json
+  {}
+  ```
+
 - `phone-island-status` Retrieve all information about phone island
 
   ```json
@@ -947,3 +987,16 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+## Resize informations events
+
+- `phone-island-size-change` Get phone-island resize informations
+
+```json
+{
+  "width": "348px",
+  "height": "304px",
+  "borderRadius": "20px",
+  "padding": "24px"
+}
+```
