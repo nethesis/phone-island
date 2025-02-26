@@ -55,5 +55,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
       - name: Install NS8 Release Module Extension
         run: gh extension install NethServer/gh-ns8-release-module
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Create Release
         run: gh ns8-release-module create --repo ${{ github.repository }} --release-name ${{ github.ref }}
+        env:
+          GH_TOKEN: ${{ github.token }}
