@@ -45,16 +45,23 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               borderTopRightRadius: '20px',
               borderBottomRightRadius: '20px',
               width: '80px',
+              transformOrigin: 'right',
             }}
-            initial={{ x: 0 }}
-            animate={{ x: 4 }}
+            initial={{ x: -76 }}
+            animate={{ 
+              x: 4,
+              transition: {
+                duration: 0.2,
+                ease: "easeOut"
+              }
+            }}
             exit={{
-              x: 0,
-              transitionEnd: {
-                display: 'none',
-              },
+              x: -76,
+              transition: {
+                duration: 0.2,
+                ease: "easeIn"
+              }
             }}
-            transition={{ duration: 0 }}
           >
             <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-9'>
               {/* Recording button */}
