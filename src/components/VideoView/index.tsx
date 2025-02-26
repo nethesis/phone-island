@@ -12,19 +12,29 @@ import {
   faExpand,
   faMicrophone,
   faMicrophoneSlash,
+  faPause,
+  faPlay,
   faStop,
   faVideo,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { eventDispatch, useIsomorphicLayoutEffect } from '../../utils'
 import Hangup from '../Hangup'
-import { muteCurrentCall, recordCurrentCall, unmuteCurrentCall } from '../../lib/phone/call'
+import {
+  muteCurrentCall,
+  pauseCurrentCall,
+  recordCurrentCall,
+  unmuteCurrentCall,
+  unpauseCurrentCall,
+} from '../../lib/phone/call'
 import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
 import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
+import { Tooltip } from 'react-tooltip'
+import TransferButton from '../TransferButton'
 
 export interface VideoViewProps {}
 
@@ -133,9 +143,8 @@ export const VideoView: FC<VideoViewProps> = () => {
     }
   }
 
-  //// remove
   const toggleVideo = () => {
-    const { isVideoEnabled } = store.getState().currentCall
+    // const { isVideoEnabled } = store.getState().currentCall ////
     store.dispatch.currentCall.setVideoEnabled(!isVideoEnabled)
     eventDispatch('phone-island-toggle-video', { enableVideo: !isVideoEnabled })
   }
@@ -150,23 +159,18 @@ export const VideoView: FC<VideoViewProps> = () => {
             } `}
           >
             {/* remote video */}
-            <video
-              autoPlay
-              muted={true}
-              ref={remoteVideo}
-              className='pi-rounded-2xl bg-gray-500'
-            ></video>
+            <video autoPlay muted={true} ref={remoteVideo} className='pi-rounded-2xl'></video>
             {/* local video */}
             <video
               muted={true}
               autoPlay
               ref={localVideo}
-              className='pi-max-w-32 pi-max-h-32 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg bg-gray-500'
+              className='pi-max-w-32 pi-max-h-32 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg'
             ></video>
           </div>
 
-          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/50 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl'>
-            <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-4'>
+          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl'>
+            <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-5'>
               {/* mute button */}
               {!intrudeListenStatus?.isListen && (
                 <Button
@@ -191,25 +195,25 @@ export const VideoView: FC<VideoViewProps> = () => {
                 onClick={() => toggleVideo()}
                 data-tooltip-id='tooltip-toggle-video'
                 data-tooltip-content={
-                  isVideoEnabled ? t('Tooltip.Disable video') : t('Tooltip.Enable video')
+                  isVideoEnabled ? t('Tooltip.Disable camera') : t('Tooltip.Enable camera')
                 }
               >
                 <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideo} />
               </Button>
 
-              {/* //// kebab button */}
-
               {/* fullscreen */}
               <Button
                 variant='default'
                 onClick={() => toggleFullScreen()}
-                data-tooltip-id='tooltip-record ////'
-                data-tooltip-content={t('Tooltip.////') || ''}
+                data-tooltip-id='tooltip-toggle-fullscreen'
+                data-tooltip-content={
+                  isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
+                }
               >
                 <FontAwesomeIcon icon={faExpand} className='pi-h-6 pi-w-6' />
               </Button>
 
-              {/* record call */}
+              {/* record */}
               <Button
                 active={isRecording}
                 data-stop-propagation={true}
@@ -235,18 +239,42 @@ export const VideoView: FC<VideoViewProps> = () => {
                   </div>
                 )}
               </Button>
+
+              {/* hold */}
+              {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
+                <Button
+                  variant='default'
+                  active={paused ? true : false}
+                  onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+                  data-tooltip-id='tooltip-pause'
+                  data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
+                >
+                  {paused ? (
+                    <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPlay} />
+                  ) : (
+                    <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPause} />
+                  )}
+                </Button>
+              )}
+
               {/* transfer */}
-              {/* <TransferButton /> //// remove */}
+              <TransferButton />
             </div>
-            <Hangup />
+            <Hangup buttonsVariant='default' />
           </div>
+          {/* Buttons tooltips */}
+          <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
+          <Tooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
+          <Tooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
+          <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+          <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
         </div>
       ) : (
         // collapsed view
         <>
           <div className='pi-flex pi-justify-between pi-items-center'>
             <Avatar />
-            <Timer startTime={startTime} />
+            <Timer startTime={startTime} isHome />
             {!isOpen && remoteAudioStream && !isPhysical() && (
               <AudioBars
                 audioStream={remoteAudioStream}

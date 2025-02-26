@@ -331,6 +331,8 @@ export const WebRTC: FC<WebRTCProps> = ({
                           acceptedWebRTC: true,
                         })
 
+                        console.log('### UPDATING START TIME', msg) ////
+
                         // Set incoming value to false and set start time
                         dispatch.currentCall.updateCurrentCall({
                           incoming: false,

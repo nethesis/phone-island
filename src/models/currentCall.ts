@@ -42,6 +42,15 @@ export const currentCall = createModel<RootModel>()({
   state: defaultState,
   reducers: {
     updateCurrentCall: (state, payload: CurrentCallTypes) => {
+      console.log('### updateCurrentCall', payload) ////
+
+      if (Number(payload.startTime) && state.startTime) {
+        // avoid updating startTime if it's already set (e.g. while switching to a video call)
+        delete payload.startTime
+
+        console.log('### REMOVED startTime') ////
+      }
+
       return {
         ...state,
         ...payload,
@@ -91,6 +100,8 @@ export const currentCall = createModel<RootModel>()({
       return state
     },
     updateStartTime: (state, payload: string) => {
+      console.log('### updateStartTime', payload) ////
+
       state.startTime = payload
       return state
     },

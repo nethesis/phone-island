@@ -296,11 +296,11 @@ const CallTemplate = (args: any) => {
               </Button>
 
               <Button variant='red' onClick={() => testVideo()} className='pi-text-sm pi-w-full'>
-                Enable video
+                Enable camera
               </Button>
 
               <Button variant='red' onClick={() => disableVideo()} className='pi-text-sm pi-w-full'>
-                Disable video
+                Disable camera
               </Button>
             </div>
           </div>

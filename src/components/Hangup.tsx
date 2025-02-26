@@ -24,6 +24,7 @@ const Hangup: FC<HangupProps> = ({
   isDestination,
   description,
   isPhysicalRecording,
+  buttonsVariant = 'transparent',
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
@@ -79,7 +80,7 @@ const Hangup: FC<HangupProps> = ({
           {isOpen && accepted && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
-                variant='transparent'
+                variant={buttonsVariant}
                 onClick={() => dispatch.island.handleToggleIsOpen()}
                 data-tooltip-id='tooltip-open-close-phone-island'
                 data-tooltip-content={
@@ -89,10 +90,7 @@ const Hangup: FC<HangupProps> = ({
                   transferring && description ? 'pi-ml-[-0.15rem]' : 'pi-ml-[-7.05rem]'
                 }`}
               >
-                <FontAwesomeIcon
-                  icon={faDownLeftAndUpRightToCenter}
-                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6'
-                />
+                <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
               </Button>
             </div>
           )}
@@ -127,7 +125,7 @@ const Hangup: FC<HangupProps> = ({
           </Button>
           {isOpen && accepted && (
             <Button
-              variant='transparent'
+              variant={buttonsVariant}
               onClick={() => dispatch.island.setIslandView('settings')}
               data-tooltip-id='tooltip-settings-view'
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
@@ -137,10 +135,7 @@ const Hangup: FC<HangupProps> = ({
                   : 'pi-flex pi-items-center pi-justify-end pi-ml-16'
               }`}
             >
-              <FontAwesomeIcon
-                icon={faGear}
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-              />
+              <FontAwesomeIcon icon={faGear} className='pi-h-6 pi-w-6' />
             </Button>
           )}
         </motion.div>
@@ -160,4 +155,12 @@ interface HangupProps {
   isDestination?: boolean
   description?: any
   isPhysicalRecording?: boolean
+  buttonsVariant?:
+    | 'transparent'
+    | 'default'
+    | 'red'
+    | 'green'
+    | 'neutral'
+    | 'transparentSideView'
+    | 'transparentSettings'
 }

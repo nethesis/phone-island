@@ -12,8 +12,13 @@ import { sendPhysicalDTMF } from '../services/astproxy'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { faArrowDownUpAcrossLine, faArrowRightArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
+import { PlacesType, Tooltip } from 'react-tooltip'
 
-export const TransferButton: FC = () => {
+interface TrasferButtonProps {
+  tooltipPlace?: PlacesType
+}
+
+export const TransferButton: FC<TrasferButtonProps> = ({ tooltipPlace = 'bottom' }) => {
   const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
   const dispatch = useDispatch<Dispatch>()
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
@@ -69,21 +74,27 @@ export const TransferButton: FC = () => {
   return (
     <>
       {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
-        <Button
-          active={transferring}
-          onClick={transferring ? cancelTransfer : transfer}
-          variant='default'
-          data-tooltip-id='tooltip-transfer'
-          data-tooltip-content={
-            transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
-          }
-        >
-          {transferring ? (
-            <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowDownUpAcrossLine} />
-          ) : (
-            <FontAwesomeIcon className='pi-rotate-90 pi-h-6 pi-w-6' icon={faArrowRightArrowLeft} />
-          )}
-        </Button>
+        <>
+          <Button
+            active={transferring}
+            onClick={transferring ? cancelTransfer : transfer}
+            variant='default'
+            data-tooltip-id='tooltip-transfer'
+            data-tooltip-content={
+              transferring ? `${t('Tooltip.Cancel transfer')}` : `${t('Tooltip.Transfer')}`
+            }
+          >
+            {transferring ? (
+              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faArrowDownUpAcrossLine} />
+            ) : (
+              <FontAwesomeIcon
+                className='pi-rotate-90 pi-h-6 pi-w-6'
+                icon={faArrowRightArrowLeft}
+              />
+            )}
+          </Button>
+          <Tooltip className='pi-z-20' id='tooltip-transfer' place={tooltipPlace} />
+        </>
       )}
     </>
   )

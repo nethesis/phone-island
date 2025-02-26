@@ -276,7 +276,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     const mediaObj: any = {
       audioSend: true,
       audioRecv: true,
-      videoRecv: true,
+      videoRecv: true, //// ?
     }
 
     if (data.enableVideo) {

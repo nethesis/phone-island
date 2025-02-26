@@ -249,7 +249,6 @@ const Actions: FC = () => {
         <></>
       )}
       {/* Buttons tooltips */}
-      <Tooltip className='pi-z-20' id='tooltip-transfer' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
       <Tooltip className='pi-z-20' id='tooltip-expand' place='bottom' />

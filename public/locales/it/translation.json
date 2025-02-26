@@ -42,7 +42,10 @@
     "Other actions": "Altre azioni",
     "Conference": "Aggiungi partecipante per chiamata in conferenza",
     "Go to settings": "Vai alle impostazioni",
-    "Enable camera": "Abilita video"
+    "Enable camera": "Abilita video",
+    "Disable camera": "Disabilita video",
+    "Enter fullscreen": "Vai a schermo intero",
+    "Exit fullscreen": "Esci da schermo intero"
   },
   "Call": {
     "In progress...": "In corso...",
