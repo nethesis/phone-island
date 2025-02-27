@@ -82,7 +82,8 @@
     "publish:minor": "npm version minor --allow-same-version -m v%s --force",
     "publish:major": "npm version major --allow-same-version -m v%s --force",
     "publish:patch": "npm version patch --allow-same-version -m v%s --force",
-    "postversion": "git push --tags",
+    "preversion": "npm run build:widget && git add dist-widget/index.widget.js dist-widget/index.widget.css && git commit -m 'chore(widget): release for jsDelivr'",
+    "postversion": "git push origin main --tags",
     "revert-bump": "node revert-bump.js"
   },
   "browserslist": {

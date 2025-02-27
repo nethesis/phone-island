@@ -9,30 +9,7 @@ on:
       - '**'
 
 jobs:
-  cdn-publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout source code'
-        uses: 'actions/checkout@v3'
-        with:
-          ref: ${{ github.ref }}
-          persist-credentials: false
-      - name: Install dependencies
-        run: npm ci
-      - name: Run widget build
-        run: npm run build:widget
-      - name: 'Commit and publish to cdn'
-        uses: EndBug/add-and-commit@v4
-        with:
-          author_name: NethBot
-          author_email: NethBot@users.noreply.github.com
-          message: 'widget: release for jsDelivr'
-          add: 'dist-widget/ --force'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   npm-publish:
-    needs: cdn-publish
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout source code'
@@ -43,7 +20,7 @@ jobs:
       - name: 'Prepare node setup'
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
           registry-url: https://registry.npmjs.org/
       - name: Install dependencies
         run: npm ci
