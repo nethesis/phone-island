@@ -210,7 +210,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
-      className='pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs pi-cursor-pointer dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow'
+      className={`${
+        !isOpen && 'pi-cursor-pointer'
+      } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}
     >
       {children && children}

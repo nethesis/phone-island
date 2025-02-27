@@ -16,6 +16,7 @@ import {
   faPlay,
   faStop,
   faVideo,
+  faVideoSlash,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { eventDispatch, useIsomorphicLayoutEffect } from '../../utils'
@@ -35,6 +36,7 @@ import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
 import { Tooltip } from 'react-tooltip'
 import TransferButton from '../TransferButton'
+import ActionsDropdown from './ActionsDropdown'
 
 export interface VideoViewProps {}
 
@@ -48,6 +50,9 @@ export const VideoView: FC<VideoViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { variants } = useSelector((state: RootState) => state.motions)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isVideoUiShown, setVideoUiShown] = useState(false)
+  const videoUiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const videoViewRef = useRef(null)
   const audioPlayer = useRef<HTMLAudioElement>(null)
   const localAudio = useRef<HTMLAudioElement>(null)
@@ -75,13 +80,16 @@ export const VideoView: FC<VideoViewProps> = () => {
 
     return () => {
       removeEventListener('fullscreenchange', handleFullscreenChange)
+
+      // clear timeout
+      if (videoUiTimeoutRef.current) {
+        clearTimeout(videoUiTimeoutRef.current)
+      }
     }
   }, [])
 
   // isOpen changed
   useEffect(() => {
-    console.log('## isOpen changed', isOpen) ////
-
     updateVideoStreams()
   }, [isOpen])
 
@@ -112,13 +120,6 @@ export const VideoView: FC<VideoViewProps> = () => {
     // local video stream
 
     if (localVideoElement?.current) {
-      console.log(
-        '## attached! localVideoElement.current',
-        localVideoElement.current,
-        'localVideoStream',
-        localVideoStream,
-      ) ////
-
       if (janus.current.attachMediaStream) {
         janus.current.attachMediaStream(localVideoElement.current, localVideoStream as MediaStream)
       }
@@ -127,13 +128,6 @@ export const VideoView: FC<VideoViewProps> = () => {
     //// remote video stream
 
     if (remoteVideoElement?.current) {
-      console.log(
-        '## attached! remoteVideoElement.current',
-        remoteVideoElement.current,
-        'remoteVideoStream',
-        remoteVideoStream,
-      ) ////
-
       if (janus.current.attachMediaStream) {
         janus.current.attachMediaStream(
           remoteVideoElement.current,
@@ -149,15 +143,45 @@ export const VideoView: FC<VideoViewProps> = () => {
     eventDispatch('phone-island-toggle-video', { enableVideo: !isVideoEnabled })
   }
 
+  const handleMouseMove = () => {
+    setVideoUiShown(true)
+
+    if (videoUiTimeoutRef.current) {
+      clearTimeout(videoUiTimeoutRef.current)
+      videoUiTimeoutRef.current = null
+    }
+  }
+
+  const startHideTimer = () => {
+    // start a timer when mouse stops moving
+    videoUiTimeoutRef.current = setTimeout(() => {
+      setVideoUiShown(false)
+    }, 3000)
+  }
+
+  const handleMouseMoveWithDebounce = () => {
+    handleMouseMove()
+
+    // clear the previous debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    // set a new debounce timer - when this isn't cleared, it means the mouse has stopped
+    debounceTimerRef.current = setTimeout(() => {
+      startHideTimer()
+    }, 100) // small delay to detect "stopped moving"
+  }
+
   return (
     <>
       {isOpen ? (
-        <div ref={videoViewRef}>
-          <div
-            className={`pi-flex pi-relative pi-justify-center ${
-              isFullscreen ? 'pi-h-screen' : `pi-h-[${variants.video.expanded.height}px]`
-            } `}
-          >
+        <div
+          ref={videoViewRef}
+          onMouseMove={() => handleMouseMoveWithDebounce()}
+          className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px]'}
+        >
+          <div className={`pi-flex pi-h-full pi-relative pi-justify-center`}>
             {/* remote video */}
             <video autoPlay muted={true} ref={remoteVideo} className='pi-rounded-2xl'></video>
             {/* local video */}
@@ -169,7 +193,11 @@ export const VideoView: FC<VideoViewProps> = () => {
             ></video>
           </div>
 
-          <div className='pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl'>
+          <div
+            className={`${
+              !isVideoUiShown && 'pi-opacity-0 pi-pointer-events-none'
+            } pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl pi-transition-all`}
+          >
             <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-5'>
               {/* mute button */}
               {!intrudeListenStatus?.isListen && (
@@ -188,7 +216,6 @@ export const VideoView: FC<VideoViewProps> = () => {
                 </Button>
               )}
 
-              {/* //// remove button? */}
               {/* video button */}
               <Button
                 variant='default'
@@ -198,7 +225,11 @@ export const VideoView: FC<VideoViewProps> = () => {
                   isVideoEnabled ? t('Tooltip.Disable camera') : t('Tooltip.Enable camera')
                 }
               >
-                <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideo} />
+                {isVideoEnabled ? (
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideo} />
+                ) : (
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideoSlash} />
+                )}
               </Button>
 
               {/* fullscreen */}
@@ -259,6 +290,10 @@ export const VideoView: FC<VideoViewProps> = () => {
 
               {/* transfer */}
               <TransferButton />
+
+              {/* ////  */}
+              {/* <DropdownContent data-stop-propagation={true}></DropdownContent> */}
+              <ActionsDropdown />
             </div>
             <Hangup buttonsVariant='default' />
           </div>
