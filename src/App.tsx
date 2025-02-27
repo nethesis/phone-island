@@ -274,7 +274,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       right: sideViewIsVisible ? '42px' : '0px',
       top: isBackCallActive() ? '40px' : '0px',
     }
-    console.log('Updated size information: ', updatedSizeInformation)
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
   })
 
