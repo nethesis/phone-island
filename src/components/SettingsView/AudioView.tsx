@@ -69,9 +69,9 @@ const AudioView = () => {
       {/* Title */}
       <SettingsHeader title={t('Settings.Speakers')} tooltipPrefix='audio' />
       {/* Audio List */}
-      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
+      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1 pi-max-h-48 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
         {actualDevice
-          .filter((device) => device?.kind === 'audioinput')
+          .filter((device) => device?.kind === 'audiooutput')
           .map((audioDevice, index) => (
             <div
               key={index}

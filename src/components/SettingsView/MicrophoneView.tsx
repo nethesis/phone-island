@@ -17,6 +17,7 @@ const MicrophoneView = () => {
   const [selectedAudioInput, setSelectedAudioInput] = useState<string | null>(
     getJSONItem('phone-island-audio-input-device').deviceId || null,
   )
+
   const [actualDevices, setActualDevices]: any = useState([])
 
   const handleClickAudioInput = (audioInputDevice: string) => {
@@ -79,7 +80,7 @@ const MicrophoneView = () => {
       <SettingsHeader title={t('Settings.Microphones')} tooltipPrefix='microphone' />
 
       {/* Microphone List */}
-      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1'>
+      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1 pi-max-h-48 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
         {actualDevices
           .filter((device) => device?.kind === 'audioinput')
           .map((audioDevice, index) => (
