@@ -48,19 +48,19 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               transformOrigin: 'right',
             }}
             initial={{ x: -76 }}
-            animate={{ 
+            animate={{
               x: 4,
               transition: {
                 duration: 0.2,
-                ease: "easeOut"
-              }
+                ease: 'easeOut',
+              },
             }}
             exit={{
               x: -76,
               transition: {
                 duration: 0.2,
-                ease: "easeIn"
-              }
+                ease: 'easeIn',
+              },
             }}
           >
             <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-9'>
@@ -76,7 +76,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                 }
               >
                 {isRecording ? (
-                  <FontAwesomeIcon icon={faStop} className='pi-h-5 pi-w-5' />
+                  <FontAwesomeIcon icon={faStop} className='pi-h-5 pi-w-5 pi-text-white' />
                 ) : (
                   <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
                 )}
