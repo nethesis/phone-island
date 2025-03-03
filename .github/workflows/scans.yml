@@ -9,7 +9,8 @@ on:
       - published
 
 permissions:
-  contents: read  
+  actions: read
+  contents: write  
   security-events: write
 
 jobs:
