@@ -38,5 +38,4 @@ export const initI18n = () => {
     .init(i18nConfig)
 }
 
-// Esportiamo una nuova istanza di i18next per phone-island
 export default i18next.createInstance()
