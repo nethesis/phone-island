@@ -8,6 +8,10 @@ on:
     types:
       - published
 
+permissions:
+  contents: read  
+  security-events: write
+
 jobs:
   sbom:
     name: SBOM
