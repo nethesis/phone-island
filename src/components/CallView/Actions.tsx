@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -238,7 +238,8 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            <Button
+            {/* Hidden at the moment waiting for the conference feature to be implemented */}
+            {/* <Button
               data-stop-propagation={true}
               disabled={true}
               variant='default'
@@ -247,7 +248,7 @@ const Actions: FC = () => {
               data-tooltip-content={t('Tooltip.Conference') || ''}
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button>
+            </Button> */}
             <Button
               variant='default'
               onClick={() =>
