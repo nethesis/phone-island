@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC, useEffect, useRef, useState } from 'react'
@@ -39,7 +39,7 @@ import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
-import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export interface VideoViewProps {}
 
@@ -273,7 +273,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   variant='default'
                   active={muted ? true : false}
                   onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
-                  data-tooltip-id='tooltip-mute'
+                  data-tooltip-id='tooltip-mute-video-view'
                   data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
                 >
                   {muted ? (
@@ -318,7 +318,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 data-stop-propagation={true}
                 variant='default'
                 onClick={() => recordCurrentCall(isRecording)}
-                data-tooltip-id='tooltip-record'
+                data-tooltip-id='tooltip-record-video-view'
                 data-tooltip-content={
                   isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
                 }
@@ -345,7 +345,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   variant='default'
                   active={paused ? true : false}
                   onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
-                  data-tooltip-id='tooltip-pause'
+                  data-tooltip-id='tooltip-pause-video-view'
                   data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
                 >
                   {paused ? (
@@ -359,11 +359,11 @@ export const VideoView: FC<VideoViewProps> = () => {
             <Hangup buttonsVariant='default' />
           </div>
           {/* Buttons tooltips */}
-          <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
+          <CustomThemedTooltip id='tooltip-mute-video-view' place='bottom' />
+          <CustomThemedTooltip id='tooltip-toggle-video' place='bottom' />
+          <CustomThemedTooltip id='tooltip-toggle-fullscreen' place='bottom' />
+          <CustomThemedTooltip id='tooltip-record-video-view' place='bottom' />
+          <CustomThemedTooltip id='tooltip-pause-video-view' place='bottom' />
         </div>
       ) : (
         // collapsed view
