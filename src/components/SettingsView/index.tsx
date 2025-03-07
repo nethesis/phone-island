@@ -10,6 +10,7 @@ import {
   faChevronRight,
   faMicrophone,
   faPalette,
+  faVideo,
   faVolumeHigh,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
@@ -19,6 +20,7 @@ import AudioView from './AudioView'
 import ThemeView from './ThemeView'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { useTranslation } from 'react-i18next'
+import VideoInputView from './VideoInputView'
 
 export const SettingsView: FC<SettingsViewProps> = () => {
   const { settingsView, previousView } = useSelector((state: RootState) => state.island)
@@ -70,6 +72,11 @@ export const SettingsView: FC<SettingsViewProps> = () => {
           onClick={() => dispatch.island.setSettingsView('audioInput')}
         />
         <SettingsMenuItem
+          icon={faVideo}
+          label={t('Settings.Cameras')}
+          onClick={() => dispatch.island.setSettingsView('videoInput')}
+        />
+        <SettingsMenuItem
           icon={faPalette}
           label={t('Settings.Theme')}
           onClick={() => dispatch.island.setSettingsView('theme')}
@@ -88,6 +95,8 @@ export const SettingsView: FC<SettingsViewProps> = () => {
             return <MichrophoneView />
           case 'audioInput':
             return <AudioView />
+          case 'videoInput':
+            return <VideoInputView />
           case 'theme':
             return <ThemeView />
           default:

@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
@@ -23,6 +23,7 @@ const Hangup: FC<HangupProps> = ({
   isDestination,
   description,
   isPhysicalRecording,
+  buttonsVariant = 'transparent',
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
@@ -86,7 +87,7 @@ const Hangup: FC<HangupProps> = ({
           {isOpen && accepted && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
-                variant='transparent'
+                variant={buttonsVariant}
                 onClick={() => dispatch.island.handleToggleIsOpen()}
                 data-tooltip-id='tooltip-open-close-phone-island'
                 data-tooltip-content={
@@ -94,10 +95,7 @@ const Hangup: FC<HangupProps> = ({
                 }
                 className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
-                <FontAwesomeIcon
-                  icon={faDownLeftAndUpRightToCenter}
-                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6'
-                />
+                <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
               </Button>
             </div>
           )}
@@ -132,24 +130,15 @@ const Hangup: FC<HangupProps> = ({
           </Button>
           {isOpen && accepted && (
             <Button
-              variant='transparent'
+              variant={buttonsVariant}
               onClick={() => closeSideViewOpenSettings()}
               data-tooltip-id='tooltip-settings-view'
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
               className={`${
-                transferring && description
-                  ? 'pi-ml-5'
-                  : 'pi-justify-end pi-ml-16'
+                transferring && description ? 'pi-ml-5' : 'pi-justify-end pi-ml-16'
               } pi-flex pi-items-center`}
             >
-              <FontAwesomeIcon
-                icon={faGear}
-                className={`${
-                  transferring && description
-                    ? 'pi-mr-2'
-                    : 'pi-ml-16'
-                }pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6`}
-              />
+              <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
             </Button>
           )}
         </motion.div>
@@ -169,4 +158,12 @@ interface HangupProps {
   isDestination?: boolean
   description?: any
   isPhysicalRecording?: boolean
+  buttonsVariant?:
+    | 'transparent'
+    | 'default'
+    | 'red'
+    | 'green'
+    | 'neutral'
+    | 'transparentSideView'
+    | 'transparentSettings'
 }

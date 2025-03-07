@@ -6,7 +6,7 @@ import { Button } from '../Button'
 import { RootState } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { backToCallView } from '../../lib/island/island'
+import { backToPreviousView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
 import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
@@ -120,8 +120,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   function handleBackClick() {
     // Unpause the current call
     unpauseCurrentCall()
-    // Open the call view
-    backToCallView()
+    // Go back to the previous view
+    backToPreviousView()
   }
 
   const { t } = useTranslation()
@@ -267,8 +267,16 @@ export const TransferListView: FC<TransferListViewProps> = () => {
         <div className='pi-font-medium pi-text-base '>Transfer</div>
       )}
       <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-left' place='left' />
-      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-back-to-call' place='right' />
-      <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-call-to-transfer' place='left' />
+      <CustomThemedTooltip
+        className='pi-z-1000'
+        id='transfer-list-tooltip-back-to-call'
+        place='right'
+      />
+      <CustomThemedTooltip
+        className='pi-z-1000'
+        id='transfer-list-tooltip-call-to-transfer'
+        place='left'
+      />
       <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-top' place='top' />
       <CustomThemedTooltip className='pi-z-1000' id='transfer-list-tooltip-right' place='right' />
     </>

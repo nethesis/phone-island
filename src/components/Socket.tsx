@@ -230,6 +230,7 @@ export const Socket: FC<SocketProps> = ({
                   })
                 }
               }
+              break
 
             case 'onhold':
               // The new conversation during transferring
@@ -340,7 +341,7 @@ export const Socket: FC<SocketProps> = ({
               // Set socket_down alert
               dispatch.alerts.setAlert('socket_down')
               eventDispatch('phone-island-socket-disconnected-popup-open', {})
-              console.debug('Socket is unreachable!')
+              console.error('Socket is unreachable!')
             },
             7 * 1000, // Waits for the response 7 seconds
           ),

@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import Actions from './Actions'
 import { sendDTMF } from '../../lib/webrtc/messages'
-import { backToCallView } from '../../lib/island/island'
+import { backToPreviousView } from '../../lib/island/island'
 import { playDtmfAudio } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import { isWebRTC } from '../../lib/user/default_device'
@@ -60,7 +60,7 @@ const KeypadView: FC<KeypadViewTypes> = () => {
           <div className='pi-flex pi-gap-4'>
             <Button
               variant='transparent'
-              onClick={backToCallView}
+              onClick={backToPreviousView}
               data-tooltip-id='keyboard-tooltip'
               data-tooltip-content={t('Tooltip.Back to call') || ''}
             >

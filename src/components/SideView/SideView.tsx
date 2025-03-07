@@ -1,20 +1,16 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState } from '../../store'
+import { Dispatch, RootState, store } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faArrowUpRightFromSquare,
-  faDisplay,
-  faStop,
-  faVideo,
-} from '@fortawesome/free-solid-svg-icons'
+import { faStop, faVideo } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { getAvailableDevices } from '../../utils/deviceUtils'
+import { eventDispatch } from '../../utils'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -23,8 +19,12 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const userInformation = useSelector((state: RootState) => state.currentUser)
   const allUsersInformation = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
+  const [availableDevices, setAvailableDevices] = useState([])
+  const [mediaDevices, setMediaDevices]: any = useState([])
 
-  const availableDevices = getAvailableDevices(userInformation, allUsersInformation)
+  const videoDevices = useMemo(() => {
+    return mediaDevices.filter((device: any) => device.kind === 'videoinput')
+  }, [mediaDevices])
 
   const closeSideViewAndLaunchEvent = (viewType: any) => {
     dispatch.island.toggleSideViewVisible(false)
@@ -32,6 +32,40 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
       dispatch.island.setIslandView(viewType)
     }
   }
+
+  const goToVideoView = () => {
+    closeSideViewAndLaunchEvent('video')
+
+    setTimeout(() => {
+      store.dispatch.currentCall.setVideoEnabled(true)
+      eventDispatch('phone-island-video-enable', { addVideoTrack: true })
+    }, 250)
+  }
+
+  useEffect(() => {
+    // check available devices
+
+    setAvailableDevices(getAvailableDevices(userInformation, allUsersInformation))
+
+    // check media devices (audio/video)
+
+    const getMediaDevices = () => {
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((deviceInfos) => {
+          setMediaDevices(deviceInfos)
+        })
+        .catch((error) => {
+          console.error('Error fetching devices:', error)
+        })
+    }
+    getMediaDevices()
+    navigator.mediaDevices.addEventListener('devicechange', getMediaDevices)
+
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', getMediaDevices)
+    }
+  }, [])
 
   return (
     <>
@@ -81,16 +115,17 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
                 )}
               </Button>
-              {/* Hidden at the moment waiting for implementation */}
-              {/* Video button */}
-              {/* <Button
-                variant='transparentSideView'
-                onClick={() => closeSideViewAndLaunchEvent('video')}
-                data-tooltip-id='tooltip-video'
-                data-tooltip-content={t('Tooltip.Enable camera') || ''}
-              >
-                <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
-              </Button> */}
+              {/* Videocall button - show only if there are video devices */}
+              {videoDevices?.length > 0 && (
+                <Button
+                  variant='transparentSideView'
+                  onClick={() => goToVideoView()}
+                  data-tooltip-id='tooltip-video'
+                  data-tooltip-content={t('Tooltip.Enable camera') || ''}
+                >
+                  <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
+                </Button>
+              )}
               {/* Switch device button - show only if there are available devices */}
               {availableDevices?.length > 0 && (
                 <Button

@@ -142,15 +142,15 @@ export const player = createModel<RootModel>()({
 })
 
 interface PlayerTypes {
-  audioPlayer: RefObject<HTMLAudioElement> | null
+  audioPlayer?: RefObject<HTMLAudioElement> | null
   audioPlayerPlaying?: boolean
   audioPlayerPaused?: boolean
   audioPlayerLoop?: boolean
   audioPlayerTrackType?: TypeTypes | null
   audioPlayerTrackName?: string | null
   audioPlayerTrackDuration?: number | null
-  localAudio: RefObject<HTMLAudioElement> | null
-  remoteAudio: RefObject<HTMLAudioElement> | null
-  localVideo: RefObject<HTMLVideoElement> | null
-  remoteVideo: RefObject<HTMLVideoElement> | null
+  localAudio?: RefObject<HTMLAudioElement> | null
+  remoteAudio?: RefObject<HTMLAudioElement> | null
+  localVideo?: RefObject<HTMLVideoElement> | null
+  remoteVideo?: RefObject<HTMLVideoElement> | null
 }

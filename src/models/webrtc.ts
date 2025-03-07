@@ -11,6 +11,8 @@ const defaultState = {
   jsepGlobal: null,
   remoteAudioStream: null,
   localAudioStream: null,
+  localVideoStream: null as MediaStream | null,
+  remoteVideoStream: null as MediaStream | null,
   lastActivity: null,
   registered: false,
   destroyed: false,
@@ -40,6 +42,14 @@ export const webrtc = createModel<RootModel>()({
         ...state,
         lastActivity: payload,
       }
+    },
+    updateLocalVideoStream: (state, payload: MediaStream) => {
+      state.localVideoStream = payload
+      return state
+    },
+    updateRemoteVideoStream: (state, payload: MediaStream) => {
+      state.remoteVideoStream = payload
+      return state
     },
   },
 })

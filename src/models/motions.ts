@@ -67,7 +67,10 @@ const defaultState = {
       collapsed: commonCollapsed,
     },
     video: {
-      expanded: commonExpanded,
+      expanded: {
+        width: 600,
+        height: 480,
+      },
       collapsed: commonCollapsed,
     },
     conference: {

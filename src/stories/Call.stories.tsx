@@ -18,6 +18,7 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
+import { Base64 } from 'js-base64'
 
 const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
@@ -44,8 +45,12 @@ const CallTemplate = (args: any) => {
 
   const [isSmallView, setIsSmallView] = useState(true)
 
+  const [tokenConfig, setTokenConfig] = useState<string[]>([])
+
   useEffect(() => {
     localStorage.setItem('phoneIslandToken', token)
+    const config = Base64.atob(token || '').split(':')
+    setTokenConfig(config)
   }, [token])
 
   const openKeypad = () => {
@@ -155,10 +160,18 @@ const CallTemplate = (args: any) => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [number])
 
+  const enableVideo = () => {
+    eventDispatch('phone-island-video-enable', { addVideoTrack: false })
+  }
+
+  const disableVideo = () => {
+    eventDispatch('phone-island-video-disable', {})
+  }
+
   return (
-    <div className='pi-flex pi-flex-col pi-gap-4 pi-w-full pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
+    <div className='pi-flex pi-flex-col pi-gap-4 pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
-      <div className='pi-space-y-2 pi-w-[98rem]'>
+      <div className='pi-space-y-2'>
         <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700'>
           Authentication Token
         </label>
@@ -167,12 +180,18 @@ const CallTemplate = (args: any) => {
           value={token}
           onChange={(e) => setToken(e.target.value)}
           placeholder='Insert token'
-          className='pi-w-full pi-px-4 pi-py-3 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 focus:pi-border-emerald-500 pi-transition-colors'
+          className='pi-w-full pi-pl-4 pi-py-3 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 focus:pi-border-emerald-500 pi-transition-colors'
         />
       </div>
 
       {showUI && (
         <>
+          {/* user info */}
+          <div className='pi-flex pi-text-sm pi-gap-4'>
+            <div>Username: {tokenConfig[1]}</div>
+            <div>Extension: {tokenConfig[3]}</div>
+            <div>Host: {tokenConfig[0]}</div>
+          </div>
           {/* Debug Controls */}
           <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
             <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>Debug Tools</h3>
@@ -219,6 +238,14 @@ const CallTemplate = (args: any) => {
                 className='pi-text-sm pi-w-full'
               >
                 Player status
+              </Button>
+
+              <Button variant='red' onClick={() => enableVideo()} className='pi-text-sm pi-w-full'>
+                Enable camera
+              </Button>
+
+              <Button variant='red' onClick={() => disableVideo()} className='pi-text-sm pi-w-full'>
+                Disable camera
               </Button>
             </div>
           </div>

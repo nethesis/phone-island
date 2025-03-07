@@ -45,7 +45,10 @@
     "Enable camera": "Enable camera",
     "Switch device": "Switch device",
     "Reload": "Reload",
-    "Close alert": "Close alert"
+    "Close alert": "Close alert",
+    "Disable camera": "Disable camera",
+    "Enter fullscreen": "Enter fullscreen",
+    "Exit fullscreen": "Exit fullscreen"
   },
   "Call": {
     "In progress...": "In progress...",
@@ -81,6 +84,7 @@
     "Light": "Light",
     "Speakers": "Speakers",
     "Microphones": "Microphones",
+    "Cameras": "Cameras",
     "Settings": "Settings"
   },
   "Switch device": {

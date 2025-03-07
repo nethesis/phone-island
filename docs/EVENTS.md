@@ -102,6 +102,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-video-input-change` The event to change default video input device for phone island
+
+  ```json
+  {
+    "deviceId": "116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee" // string - The input deviceId obtained by getUserMediaDevices
+  }
+  ```
+
 - `phone-island-theme-change` The event to change phone-island theme
 
   ```json
@@ -146,6 +154,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-fullscreen-enter` The event to manually enter fullscreen mode
+
+  ```json
+  {}
+  ```
+
+- `phone-island-fullscreen-exit` The event to manually exit fullscreen mode
+
+  ```json
+  {}
+  ```
+
+- `phone-island-video-enable` The event to manually enable the video stream during a call. `addVideoTrack` must be set to `true` if the video is enabled for the first time during the current call
+
+- `phone-island-video-disable` The event to manually disable the video stream during a call
+
 ## Dispatch Phone-Island Events - phone-island-*
 
 - `phone-island-expanded` The dispatch of phone-island expand
@@ -183,6 +207,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```json
   {}
   ```
+
+- `phone-island-video-input-changed` The dispatch of change default video input device for phone island
+
+  ```json
+  {}
+  ```
+
 - `phone-island-theme-changed` The dispatch of change phone-island theme
 
   ```json
@@ -343,6 +374,14 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+  - `phone-island-call-video-input-switch` The event to change video input device during a call
+
+  ```json
+  {
+    "deviceId": "116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee" // string - The input deviceId obtained by getUserMediaDevices
+  }
+  ```
+
 - `phone-island-call-actions-open` The event to open actions view
 
   ```json
@@ -490,17 +529,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-call-audio-input-switched` The dispatch of call input switch
+- `phone-island-call-audio-input-switched` The dispatch of call audio input switch
 
   ```json
   {}
   ```
 
-- `phone-island-call-audio-output-switched` The dispatch of call output switch
+- `phone-island-call-audio-output-switched` The dispatch of call audio output switch
 
   ```json
   {}
   ```
+
+- `phone-island-call-video-input-switched` The dispatch of call video input switch
+
+  ```json
+  {}
 
 - `phone-island-call-actions-opened` The dispatch of call actions open
 
@@ -773,7 +817,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-queue-update` Indicates that the informations of a queue are changed.
+- `phone-island-queue-update` Indicates that the information of a queue are changed.
 
   ```json
   {
@@ -819,7 +863,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
-- `phone-island-queue-member-update` Indicates that the informations of a member of a queue are changed.
+- `phone-island-queue-member-update` Indicates that the information of a member of a queue are changed.
 
   ```json
   {
@@ -865,13 +909,35 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-sideview-closed` Indicates that phone island right menu is close
+- `phone-island-sideview-closed` Indicates that phone island right menu is closed
 
   ```json
   {}
   ```
 
+- `phone-island-fullscreen-entered` Indicates that phone island entered fullscreen mode
 
+  ```json
+  {}
+  ```
+
+- `phone-island-fullscreen-exited` Indicates that phone island exited fullscreen mode
+
+  ```json
+  {}
+  ```
+
+- `phone-island-video-enabled` Indicates that the video has been enabled during the current call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-video-disabled` Indicates that the video has been disabled during the current call
+
+  ```json
+  {}
+  ```
 
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
@@ -888,13 +954,13 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-socket-connected` Indicates that webscket connection it's been connected
+- `phone-island-socket-connected` Indicates that websocket connection it's been connected
 
   ```json
   {}
   ```
 
-- `phone-island-socket-disconnected` Indicates that webscket connection it's been disconnected
+- `phone-island-socket-disconnected` Indicates that websocket connection it's been disconnected
 
   ```json
   {}
@@ -946,19 +1012,19 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {"viewType": "call"}
   ```
 
-- `phone-island-call-status` Retrieve all informations about call
+- `phone-island-call-status` Retrieve all information about call
 
   ```json
   {}
   ```
 
-- `phone-island-user-status` Retrieve all informations about main user
+- `phone-island-user-status` Retrieve all information about main user
 
   ```json
   {}
   ```
 
-- `phone-island-all-users-status` Retrieve all informations about all users
+- `phone-island-all-users-status` Retrieve all information about all users
 
   ```json
   {}
@@ -988,9 +1054,9 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-## Resize informations events
+## Resize information events
 
-- `phone-island-size-change` Get phone-island resize informations
+- `phone-island-size-change` Get phone-island resize information
 
 ```json
 {

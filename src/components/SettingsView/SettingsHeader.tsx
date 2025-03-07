@@ -1,9 +1,9 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleLeft, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
-import { Dispatch } from '../../store'
+import { Dispatch, RootState } from '../../store'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { useTranslation } from 'react-i18next'
 
@@ -14,7 +14,15 @@ interface SettingsHeaderProps {
 
 export const SettingsHeader: React.FC<SettingsHeaderProps> = ({ title, tooltipPrefix }) => {
   const dispatch = useDispatch<Dispatch>()
-    const { t } = useTranslation()
+  const { t } = useTranslation()
+  const { previousView } = useSelector((state: RootState) => state.island)
+
+  const closeSettings = () => {
+    // Reset settings view to main
+    dispatch.island.setSettingsView('main')
+    // Go to previous view (e.g. 'call' or 'video')
+    dispatch.island.setIslandView(`${previousView || 'call'}`)
+  }
 
   return (
     <>
@@ -31,7 +39,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({ title, tooltipPr
           <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{title}</h1>
         </div>
         <Button
-          onClick={() => dispatch.island.setIslandView('call')}
+          onClick={() => closeSettings()}
           variant='transparentSettings'
           data-tooltip-id={`tooltip-close-${tooltipPrefix}-settings`}
           data-tooltip-content={t('Common.Close') || ''}

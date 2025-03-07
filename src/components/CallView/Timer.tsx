@@ -41,5 +41,6 @@ export interface TimerProps {
   size?: 'small' | 'large'
   startTime: string
   // when the timer is used in the home view or in the pill view
+  // TODO rename prop: it is used also in video view
   isHome?: boolean
 }
