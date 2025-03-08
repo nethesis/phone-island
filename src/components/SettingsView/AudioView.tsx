@@ -1,22 +1,23 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState, store } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
-import { eventDispatch, getJSONItem, setJSONItem, useEventListener } from '../../utils'
+import { eventDispatch, setJSONItem, useEventListener } from '../../utils'
 import { SettingsHeader } from './SettingsHeader'
 import { useTranslation } from 'react-i18next'
+import { getCurrentAudioOutputDeviceId } from '../../lib/devices/devices'
 
 const AudioView = () => {
   const remoteAudioElement: any = useSelector((state: RootState) => state.player.remoteAudio)
 
   const { t } = useTranslation()
-
+  const audioOutputDevices = store.select.mediaDevices.audioOutputDevices(store.getState())
   const [selectedAudioOutput, setSelectedAudioOutput] = useState<string | null>(
-    getJSONItem('phone-island-audio-output-device').deviceId || null,
+    getCurrentAudioOutputDeviceId() || null,
   )
   const handleClickAudioOutput = (audioOutputDevice: string) => {
     setSelectedAudioOutput(audioOutputDevice)
@@ -39,29 +40,6 @@ const AudioView = () => {
     handleClickAudioOutput(data.deviceId)
   })
 
-  const [actualDevice, setActualDevice]: any = useState([])
-
-  useEffect(() => {
-    const checkInputOutputDevices = () => {
-      navigator.mediaDevices
-        .enumerateDevices()
-        .then((deviceInfos) => {
-          setActualDevice(deviceInfos)
-        })
-        .catch((error) => {
-          console.error('error', error)
-        })
-    }
-
-    checkInputOutputDevices()
-
-    navigator.mediaDevices.addEventListener('devicechange', checkInputOutputDevices)
-
-    return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', checkInputOutputDevices)
-    }
-  }, [selectedAudioOutput])
-
   const [hoveredDevice, setHoveredDevice] = useState<string | null>(null)
 
   return (
@@ -70,34 +48,32 @@ const AudioView = () => {
       <SettingsHeader title={t('Settings.Speakers')} tooltipPrefix='audio' />
       {/* Audio List */}
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1 pi-max-h-48 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
-        {actualDevice
-          .filter((device) => device?.kind === 'audiooutput')
-          .map((audioDevice, index) => (
-            <div
-              key={index}
-              className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md pi-cursor-pointer'
-              onClick={() => handleClickAudioOutput(audioDevice?.deviceId)}
-              onMouseEnter={() => setHoveredDevice(audioDevice?.deviceId)}
-              onMouseLeave={() => setHoveredDevice(null)}
-            >
-              <div className='pi-flex pi-items-center'>
-                <FontAwesomeIcon icon={faVolumeHigh} className='pi-mr-2 pi-w-5 pi-h-5' />
-                <span>{audioDevice?.label || `Input device ${index + 1}`}</span>
-              </div>
-              <div className='pi-flex pi-items-center'>
-                {selectedAudioOutput === audioDevice?.deviceId && (
-                  <FontAwesomeIcon
-                    icon={faCheck}
-                    className={`${
-                      hoveredDevice === audioDevice?.deviceId
-                        ? 'pi-text-gray-700 dark:pi-text-gray-200'
-                        : 'pi-text-emerald-700 dark:pi-text-emerald-500'
-                    } pi-w-5 pi-h-5`}
-                  />
-                )}
-              </div>
+        {audioOutputDevices.map((audioDevice, index) => (
+          <div
+            key={index}
+            className='pi-flex pi-items-center pi-justify-between pi-px-4 pi-py-3 pi-text-base pi-font-normal pi-leading-6 dark:pi-text-gray-200 pi-text-gray-700 hover:pi-bg-gray-200 dark:hover:pi-bg-gray-700 dark:pi-bg-gray-950 pi-bg-gray-50 pi-rounded-md pi-cursor-pointer'
+            onClick={() => handleClickAudioOutput(audioDevice?.deviceId)}
+            onMouseEnter={() => setHoveredDevice(audioDevice?.deviceId)}
+            onMouseLeave={() => setHoveredDevice(null)}
+          >
+            <div className='pi-flex pi-items-center'>
+              <FontAwesomeIcon icon={faVolumeHigh} className='pi-mr-2 pi-w-5 pi-h-5' />
+              <span>{audioDevice?.label || `Input device ${index + 1}`}</span>
             </div>
-          ))}
+            <div className='pi-flex pi-items-center'>
+              {selectedAudioOutput === audioDevice?.deviceId && (
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className={`${
+                    hoveredDevice === audioDevice?.deviceId
+                      ? 'pi-text-gray-700 dark:pi-text-gray-200'
+                      : 'pi-text-emerald-700 dark:pi-text-emerald-500'
+                  } pi-w-5 pi-h-5`}
+                />
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

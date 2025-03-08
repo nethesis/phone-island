@@ -17,6 +17,8 @@ import {
   dispatchExtensions,
   dispatchUrlCall,
   dispatchDefaultDeviceUpdate,
+  dispatchJoinScreenShare,
+  dispatchLeaveScreenShare,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -31,6 +33,7 @@ import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
+import { ScreenSharingMessage } from './VideoView'
 
 interface SocketProps {
   children: ReactNode
@@ -289,6 +292,9 @@ export const Socket: FC<SocketProps> = ({
         reconnectionDelay: 2000,
       })
 
+      // save websocket to store
+      dispatch.websocket.update({ socket: socket.current })
+
       // Handle socket errors
       socket.current.on('connect', () => {
         console.debug(`Socket connected sid: ${socket.current.id}`)
@@ -332,10 +338,6 @@ export const Socket: FC<SocketProps> = ({
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
-              // Calculate and log latency
-              const latency = Date.now() - start
-              console.debug(`Socket latency: ${latency}ms`)
-              console.debug('Socket is reachable!')
             },
             () => {
               // Set socket_down alert
@@ -517,6 +519,20 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
+      })
+
+      // `screenSharingStart` is the socket event when a user starts screen sharing
+      socket.current.on('message', (data: any) => {
+        switch (data.message) {
+          case 'screenSharingStart':
+            dispatchJoinScreenShare(data as ScreenSharingMessage)
+            break
+          case 'screenSharingStop':
+            dispatchLeaveScreenShare(data as ScreenSharingMessage)
+            break
+          default:
+            console.warn('Socket: unknown message type ', data.message)
+        }
       })
 
       // `updateDefaultDevice` is the socket event when user change the default device

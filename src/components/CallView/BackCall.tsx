@@ -1,12 +1,15 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import Timer from './Timer'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TransferCallsTypes } from '../../models/currentCall'
+import { faDisplay } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useTranslation } from 'react-i18next'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const {
@@ -20,7 +23,11 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
 
-  const { isOpen } = useSelector((state: RootState) => state.island)
+  const { t } = useTranslation()
+  const { isOpen, previousView } = useSelector((state: RootState) => state.island)
+  const { active: screenShareActive, role: screenShareRole } = useSelector(
+    (state: RootState) => state.screenShare,
+  )
 
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
@@ -37,7 +44,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className={`pi-absolute pi-w-full pi-bg-gray-700 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-top ${
+          className={`pi-absolute pi-w-full pi-bg-gray-700 pi-flex pi-justify-between pi-text-gray-50 dark:pi-text-gray-50 -pi-mt-10 -pi-z-10 pi-items-start ${
             isOpen ? 'pi-px-6' : 'pi-px-4'
           } pi-pt-3`}
           style={{ borderTopLeftRadius: '20px', borderTopRightRadius: '20px', height: '60px' }}
@@ -51,18 +58,27 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
           }}
           transition={{ duration: 0.3 }}
         >
-          <div className='pi-font-bold pi-text-sm pi-relative'>
+          <div className='pi-font-medium pi-text-sm pi-relative'>
             <div
               className={`pi-whitespace-nowrap pi-overflow-hidden ${
-                isOpen ? 'pi-w-44' : 'pi-w-16'
+                isOpen && previousView !== 'video' ? 'pi-w-44' : 'pi-w-16'
               }`}
             >
               {transferring ? transferringName : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
-          <div className=''>
-            <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+          <div className='pi-flex pi-gap-2'>
+            {/* Screen sharing badge */}
+            {screenShareActive && screenShareRole === 'publisher' && (
+              <div className='pi-flex pi-gap-2 pi-font-medium pi-items-center pi-rounded-full pi-px-2 pi-py-1 pi-text-xs pi-relative -pi-top-0.5 pi-bg-emerald-700 pi-text-emerald-50'>
+                <FontAwesomeIcon icon={faDisplay} className='pi-w-4 pi-h-4' />
+                {t('Screen sharing.Sharing')}
+              </div>
+            )}
+            <div className='pi-w-16 pi-flex pi-justify-end'>
+              <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+            </div>
           </div>
         </motion.div>
       )}

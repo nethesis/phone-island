@@ -166,9 +166,22 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-video-enable` The event to manually enable the video stream during a call. `addVideoTrack` must be set to `true` if the video is enabled for the first time during the current call
+- `phone-island-video-enable` The event to manually enable the video stream during a call.
 
 - `phone-island-video-disable` The event to manually disable the video stream during a call
+
+- `phone-island-screen-share-join` The event triggered when starting to join a screen share initiated by another user
+
+- `phone-island-screen-share-joining` The event triggered just after `phone-island-screen-share-join`, after the phone island view has changed to `video`
+
+- `phone-island-screen-share-leave` The event triggered when starting to leave a screen share initiated by another user
+
+- `phone-island-screen-share-leaving` The event triggered just after `phone-island-screen-share-leave`, after the phone island view has changed to `video` (if needed)
+
+- `phone-island-screen-share-start` The event triggered when starting screen sharing
+
+- `phone-island-screen-share-stop` The event triggered when stopping the screen sharing
+
 
 ## Dispatch Phone-Island Events - phone-island-*
 
@@ -939,6 +952,30 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-screen-share-started` Indicates that the screen sharing has started during the current call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-screen-share-stopped` Indicates that the screen sharing has stopped during the current call
+
+  ```json
+  {}
+  ```
+
+- `phone-island-screen-share-joined` Indicates that the user successfully joined a screen sharing initiated by the other party
+
+  ```json
+  {}
+  ```
+
+- `phone-island-screen-share-leaved` Indicates that the user successfully leaved a screen sharing initiated by the other party
+
+  ```json
+  {}
+  ```
+
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
 
@@ -1037,6 +1074,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   ```
 
 - `phone-island-webrtc-status` Retrieve all information about webrtc
+
+  ```json
+  {}
+  ```
+
+- `phone-island-screen-share-status` Retrieve sll information about screen share
 
   ```json
   {}

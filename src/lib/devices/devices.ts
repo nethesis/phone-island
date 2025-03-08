@@ -10,6 +10,7 @@ import JanusLib from '../webrtc/janus'
 import { JanusTypes } from '../../types'
 import { store } from '../../store'
 import { isPhysical } from '../user/default_device'
+import { getJSONItem } from '../../utils'
 
 const Janus: JanusTypes = JanusLib
 
@@ -121,4 +122,46 @@ export const checkMediaPermissions = function () {
         Janus.error(error.message)
       }
     })
+}
+
+export const getCurrentVideoInputDeviceId = function () {
+  const currentDeviceId = getJSONItem('phone-island-video-input-device').deviceId || null
+  const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
+
+  // Check if the current device is still available
+  const deviceFound = videoInputDevices.find((device) => device.deviceId === currentDeviceId)
+
+  if (deviceFound) {
+    return currentDeviceId
+  } else {
+    return null
+  }
+}
+
+export const getCurrentAudioInputDeviceId = function () {
+  const currentDeviceId = getJSONItem('phone-island-audio-input-device').deviceId || null
+  const audioInputDevices = store.select.mediaDevices.audioInputDevices(store.getState())
+
+  // Check if the current device is still available
+  const deviceFound = audioInputDevices.find((device) => device.deviceId === currentDeviceId)
+
+  if (deviceFound) {
+    return currentDeviceId
+  } else {
+    return null
+  }
+}
+
+export const getCurrentAudioOutputDeviceId = function () {
+  const currentDeviceId = getJSONItem('phone-island-audio-output-device').deviceId || null
+  const audioOutputDevices = store.select.mediaDevices.audioOutputDevices(store.getState())
+
+  // Check if the current device is still available
+  const deviceFound = audioOutputDevices.find((device) => device.deviceId === currentDeviceId)
+
+  if (deviceFound) {
+    return currentDeviceId
+  } else {
+    return null
+  }
 }

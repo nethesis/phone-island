@@ -97,7 +97,6 @@ type IslandViewType =
   | 'physicalPhoneRecorder'
   | 'settings'
   | 'video'
-  | 'screenShare'
   | 'conference'
   | 'switchDevice'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'

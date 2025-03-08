@@ -4,7 +4,7 @@
 import Janus from './janus'
 import { store } from '../../store'
 import adapter from 'webrtc-adapter'
-import { getSupportedDevices } from '../devices/devices'
+import { getCurrentAudioInputDeviceId, getSupportedDevices } from '../devices/devices'
 import { getJSONItem } from '../../utils'
 import { JanusTrack } from '../../types'
 
@@ -40,15 +40,13 @@ export function register({
 export function answerWebRTC() {
   const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
   if (sipcall && jsepGlobal) {
-    // get current input device id from localstorage
-    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
-
+    let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
     const tracks: any[] = []
 
-    if (currentDeviceInputId) {
+    if (currentAudioInputDeviceId) {
       tracks.push({
         type: 'audio',
-        capture: { deviceId: { exact: currentDeviceInputId } },
+        capture: { deviceId: { exact: currentAudioInputDeviceId } },
         recv: true,
       })
     } else {
@@ -145,15 +143,14 @@ export function callSipURI(sipURI: string) {
     // @ts-ignore
     Janus.log('This is a SIP call')
 
-    // get current input device id from localstorage
-    let currentDeviceInputId = getJSONItem('phone-island-audio-input-device').deviceId || null
+    let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
 
     const tracks: JanusTrack[] = []
 
-    if (currentDeviceInputId) {
+    if (currentAudioInputDeviceId) {
       tracks.push({
         type: 'audio',
-        capture: { deviceId: { exact: currentDeviceInputId } },
+        capture: { deviceId: { exact: currentAudioInputDeviceId } },
         recv: true,
       })
     } else {
