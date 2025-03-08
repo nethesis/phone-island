@@ -519,6 +519,13 @@ export const Socket: FC<SocketProps> = ({
         dispatchUrlCall(link, urlType)
       })
 
+      // `screenSharingStart` is the socket event when a user starts screen sharing
+      //// use type instead of any
+      socket.current.on('screenSharingStart', (res: any) => {
+        console.log('aa socket on screenSharingStart') ////
+        //// joinScreen()
+      })
+
       // `updateDefaultDevice` is the socket event when user change the default device
       socket.current.on('updateDefaultDevice', (extension: string) => {
         // Dispatch phone island physical call event with the link and the urlType
