@@ -22,6 +22,7 @@ import { SettingsView } from './SettingsView'
 import { VideoView } from './VideoView'
 import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
+import ScreenShareView from './ScreenShareView'
 
 /**
  * Provides the Island logic
@@ -117,6 +118,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                       physicalPhoneRecorder: <PhysicalRecorderView />,
                       settings: <SettingsView />,
                       video: <VideoView />,
+                      screenShare: <ScreenShareView />,
                       switchDevice: <SwitchDeviceView />,
                     }
 

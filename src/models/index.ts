@@ -17,6 +17,7 @@ import { recorder } from './recorder'
 import { listen } from './listen'
 import { darkTheme } from './darkTheme'
 import { physicalRecorder } from './physicalRecorder'
+import { screenShare } from './screenShare'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -33,6 +34,7 @@ export interface RootModel extends Models<RootModel> {
   recorder: typeof recorder
   listen: typeof listen
   darkTheme: typeof darkTheme
+  screenShare: typeof screenShare
   physicalRecorder: typeof physicalRecorder
 }
 
@@ -51,5 +53,6 @@ export const models: RootModel = {
   recorder,
   listen,
   darkTheme,
+  screenShare,
   physicalRecorder,
 }

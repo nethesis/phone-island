@@ -14,7 +14,6 @@ const defaultState = {
   localVideoStream: null as MediaStream | null,
   remoteVideoStream: null as MediaStream | null,
   lastActivity: null,
-  screenShare: null,
   registered: false,
   destroyed: false,
 }
@@ -63,7 +62,6 @@ export interface WebRTCTypes {
   remoteAudioStream?: any
   localAudioStream?: null
   lastActivity?: any
-  screenShare?: any
   registered?: boolean
   destroyed?: boolean
 }

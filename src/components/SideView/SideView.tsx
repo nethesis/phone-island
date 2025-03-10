@@ -4,7 +4,7 @@ import { Dispatch, RootState, store } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStop, faVideo } from '@fortawesome/free-solid-svg-icons'
+import { faDisplay, faStop, faVideo } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
@@ -40,6 +40,19 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
       store.dispatch.currentCall.setVideoEnabled(true)
       eventDispatch('phone-island-video-enable', { addVideoTrack: true })
     }, 250)
+  }
+
+  const goToScreenShareView = () => {
+    closeSideViewAndLaunchEvent('screenShare')
+
+    // store.dispatch.currentCall.setVideoEnabled(true) //// needed?
+    eventDispatch('phone-island-screen-share-enable', {})
+
+    //// needed?
+    // setTimeout(() => {
+    //   store.dispatch.currentCall.setVideoEnabled(true)
+    //   eventDispatch('phone-island-video-enable', { addVideoTrack: true })
+    // }, 250)
   }
 
   useEffect(() => {
@@ -126,6 +139,15 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
                 </Button>
               )}
+              {/* Share screen button */}
+              <Button
+                variant='transparentSideView'
+                onClick={() => goToScreenShareView()}
+                data-tooltip-id='tooltip-screen-share'
+                data-tooltip-content={t('Tooltip.Share screen') || ''}
+              >
+                <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
+              </Button>
               {/* Switch device button - show only if there are available devices */}
               {availableDevices?.length > 0 && (
                 <Button

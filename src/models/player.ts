@@ -153,4 +153,5 @@ interface PlayerTypes {
   remoteAudio?: RefObject<HTMLAudioElement> | null
   localVideo?: RefObject<HTMLVideoElement> | null
   remoteVideo?: RefObject<HTMLVideoElement> | null
+  localScreen?: RefObject<HTMLVideoElement> | null
 }

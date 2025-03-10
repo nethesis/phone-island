@@ -9,22 +9,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCircle,
   faCircleDot,
+  faDisplay,
   faExpand,
   faMicrophone,
   faMicrophoneSlash,
   faPause,
   faPlay,
   faStop,
-  faVideo,
-  faVideoSlash,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
-import {
-  eventDispatch,
-  getJSONItem,
-  useEventListener,
-  useIsomorphicLayoutEffect,
-} from '../../utils'
+import { eventDispatch, useEventListener } from '../../utils'
 import Hangup from '../Hangup'
 import {
   muteCurrentCall,
@@ -50,6 +44,9 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const { muted, startTime, isRecording, paused, isVideoEnabled } = useSelector(
     (state: RootState) => state.currentCall,
   )
+  const { plugin, role, source, localTracks, localVideos } = useSelector(
+    (state: RootState) => state.screenShare,
+  )
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
@@ -58,7 +55,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const screenShareViewRef = useRef(null)
-  const janus = useRef<JanusTypes>(JanusLib)
+  const janus = useRef<JanusTypes>(JanusLib) //// fix error
 
   ////
   // useIsomorphicLayoutEffect(() => {
@@ -70,7 +67,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
   // component did mount
   useEffect(() => {
-    // updateVideoStreams() ////
+    updateScreenStreams()
 
     // register for full screen change
     addEventListener('fullscreenchange', handleFullscreenChange)
@@ -114,98 +111,374 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     toggleFullScreen()
   })
 
+  const newRemoteFeed = (id, display) => {
+    console.log('aa newRemoteFeed', id, display) //// needed?
+  }
+
+  const preShareScreen = () => {
+    if (!janus.current.isExtensionEnabled()) {
+      janus.current.error?.(
+        "This browser doesn't support screensharing (getDisplayMedia unavailable)",
+      )
+      return
+    }
+    // capture = "screen"; //// needed?
+    shareScreen()
+  }
+
+  const shareScreen = () => {
+    console.log('aa shareScreen') ////
+
+    // const { plugin }: { plugin: any } = store.getState().screenShare ////
+
+    // Create a new room
+
+    // Set role to the store
+
+    const roomName = janus.current.randomString(32)
+
+    let create = {
+      request: 'create',
+      description: roomName,
+      bitrate: 500000,
+      publishers: 1,
+    }
+    plugin.send({
+      message: create,
+      success: function (result) {
+        if (result['error']) {
+          janus.current.error?.("Couldn't create room: " + result['error'])
+          return
+        }
+        let event = result['videoroom']
+        janus.current.debug?.('Event: ' + event)
+        if (event) {
+          // Our own screen sharing session has been created, join it
+
+          const room = result['room']
+          // Set room to the store
+          dispatch.screenShare.update({
+            room: room,
+          })
+
+          janus.current.log?.('Screen sharing session created: ' + room)
+          const username = janus.current.randomString(12)
+          let register = {
+            request: 'join',
+            room: room,
+            ptype: 'publisher',
+            display: username,
+          }
+          plugin.send({ message: register })
+        }
+      },
+    })
+  }
+
   const initScreenShare = () => {
+    console.log('aa initScreenShare') ////
+
     janus.current.attach({
       plugin: 'janus.plugin.videoroom',
       opaqueId: janus.current.randomString(32),
       success: function (pluginHandle) {
         // Set plugin to the store
-        dispatch.webrtc.updateWebRTC({
-          screenShare: pluginHandle,
+        dispatch.screenShare.update({
+          plugin: pluginHandle,
         })
         console.log('aa videoroom plugin attached') ////
 
-        //// preShareScreen()
+        //// call this only if we are the publisher
+        preShareScreen()
       },
       error: function (error) {
-        if (janus.current.error) {
-          janus.current.error('Error attaching videoroom plugin', error)
-        }
+        janus.current.error?.('Error attaching videoroom plugin', error)
       },
       consentDialog: function (on) {
         console.log('aa consentDialog, on?', on) ////
         //// ?
       },
       iceState: function (state) {
-        if (janus.current.log) {
-          janus.current.log('ICE state changed to ' + state)
-        }
+        janus.current.log?.('ICE state changed to ' + state)
       },
       mediaState: function (medium, on) {
-        if (janus.current.log) {
-          janus.current.log('Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
-        }
+        janus.current.log?.('Janus ' + (on ? 'started' : 'stopped') + ' receiving our ' + medium)
       },
       webrtcState: function (on) {
-        if (janus.current.log) {
-          janus.current.log(
-            'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now',
-          )
-        }
-        //// TODO see screensharingtest.js:106
+        janus.current.log?.(
+          'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now',
+        )
+        //// TODO see screensharingtest.js:97
+      },
+      slowLink: function (uplink, lost, mid) {
+        janus.current.warn?.(
+          'Janus reports problems ' +
+            (uplink ? 'sending' : 'receiving') +
+            ' packets on mid ' +
+            mid +
+            ' (' +
+            lost +
+            ' lost packets)',
+        )
       },
       onmessage: function (msg, jsep) {
-        if (janus.current.debug) {
-          janus.current.debug(' ::: Got a message (publisher) :::', msg)
-        }
-        const { screenShare }: { screenShare: any } = store.getState().webrtc
+        janus.current.debug?.(' ::: Got a message (publisher) :::', msg)
+        // const { plugin, role, source, localTracks } = store.getState().screenShare ////
         const event = msg['videoroom']
-        if (janus.current.debug) {
-          janus.current.debug('Event: ' + event)
-        }
+        janus.current.debug?.('Event: ' + event)
+
         if (event) {
           if (event === 'joined') {
-            ////
+            if (role === 'publisher') {
+              // This is our session, publish our stream
+              janus.current.debug?.('Negotiating WebRTC stream for our screen')
+              // Safari expects a user gesture to share the screen: see issue #2455 //// needed?
+              plugin.createOffer({
+                // We want sendonly audio and screensharing
+                tracks: [
+                  { type: 'audio', capture: true, recv: false },
+                  { type: 'screen', capture: true, recv: false },
+                ],
+                success: function (jsep) {
+                  janus.current.debug?.('Got publisher SDP!', jsep)
+                  let publish = { request: 'configure', audio: true, video: true }
+                  plugin.send({ message: publish, jsep: jsep })
+                },
+                error: function (error) {
+                  janus.current.error?.('WebRTC error:', error)
+                },
+              })
+            } else {
+              // We're just watching a session, any feed to attach to?
+              if (msg['publishers']) {
+                let list = msg['publishers']
+                janus.current.debug?.('Got a list of available publishers/feeds:', list)
+                for (let f in list) {
+                  if (list[f]['dummy']) continue
+                  let id = list[f]['id']
+                  let display = list[f]['display']
+                  janus.current.debug?.('  >> [' + id + '] ' + display)
+                  newRemoteFeed(id, display)
+                }
+              }
+            }
           } else if (event === 'event') {
-            ////
+            // Any feed to attach to?
+            if (role === 'listener' && msg['publishers']) {
+              let list = msg['publishers']
+              janus.current.debug?.('Got a list of available publishers/feeds:', list)
+              for (let f in list) {
+                if (list[f]['dummy']) continue
+                let id = list[f]['id']
+                let display = list[f]['display']
+                janus.current.debug?.('  >> [' + id + '] ' + display)
+                newRemoteFeed(id, display)
+              }
+            } else if (msg['leaving']) {
+              // One of the publishers has gone away?
+              let leaving = msg['leaving']
+              janus.current.log?.('Publisher left: ' + leaving)
+              if (role === 'listener' && msg['leaving'] === source) {
+                // bootbox.alert( ////
+                //   'The screen sharing session is over, the publisher left',
+                //   function () {
+                //     window.location.reload()
+                //   },
+                // )
+              }
+            } else if (msg['error']) {
+              janus.current.error?.('Error event: ' + msg['error'])
+            }
           }
         }
         if (jsep) {
-          if (janus.current.debug) {
-            janus.current.debug('Handling SDP as well...', jsep)
-          }
-          screenShare.handleRemoteJsep({ jsep: jsep })
+          janus.current.debug?.('Handling SDP as well...', jsep)
+          plugin.handleRemoteJsep({ jsep: jsep })
         }
-        //// onlocalstream: function(stream) {
+      },
+      onlocaltrack: function (track, on) {
+        janus.current.debug?.('Local track ' + (on ? 'added' : 'removed') + ':', track)
+        // We use the track ID as name of the element, but it may contain invalid characters
+        let trackId = track.id.replace(/[{}]/g, '')
+        if (!on) {
+          // Track removed, get rid of the stream and the rendering
+          let stream = localTracks?.[trackId]
+          if (stream) {
+            try {
+              let tracks = stream.getTracks()
+              for (let i in tracks) {
+                let mst = tracks[i]
+                if (mst) mst.stop()
+              }
+              // eslint-disable-next-line no-unused-vars
+            } catch (e) {}
+          }
+          if (track.kind === 'video') {
+            dispatch.screenShare.update({
+              localVideos: localVideos - 1,
+            })
+            ////
+            // $('#screenvideo' + trackId).remove()
+            // localVideos--
+            // if (localVideos === 0) {
+            //   // No video, at least for now: show a placeholder
+            //   if ($('#screencapture .no-video-container').length === 0) {
+            //     $('#screencapture').append(
+            //       '<div class="no-video-container">' +
+            //         '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+            //         '<span class="no-video-text">No webcam available</span>' +
+            //         '</div>',
+            //     )
+            //   }
+            // }
+          }
+
+          ////
+          // delete localTracks[trackId]
+
+          // remove track
+          const filteredTracks = localTracks?.filter((track) => track !== localTracks[trackId])
+          dispatch.screenShare.update({
+            localTracks: filteredTracks,
+          })
+          return
+        }
+        // If we're here, a new track was added
+        let stream = localTracks?.[trackId]
+        if (stream) {
+          // We've been here already
+          return
+        }
+        ////
+        // $('#screenmenu').addClass('hide')
+        // $('#room').removeClass('hide')
+
+        if (track.kind === 'audio') {
+          // We ignore local audio tracks, they'd generate echo anyway
+          if (localVideos === 0) {
+            // No video, at least for now: show a placeholder
+            ////
+            // if ($('#screencapture .no-video-container').length === 0) {
+            //   $('#screencapture').append(
+            //     '<div class="no-video-container">' +
+            //       '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+            //       '<span class="no-video-text">No webcam available</span>' +
+            //       '</div>',
+            //   )
+            // }
+          }
+        } else {
+          // New video track: create a stream out of it
+          dispatch.screenShare.update({
+            localVideos: localVideos + 1,
+          })
+          // $('#screencapture .no-video-container').remove() ////
+          let stream = new MediaStream([track])
+
+          // Save the new video stream to the store
+          store.dispatch.screenShare.update({
+            localScreenStream: stream,
+          })
+
+          ////
+          // localTracks[trackId] = stream
+          // dispatch.screenShare.update({ ////
+          //   localTracks: { ...localTracks, [trackId]: stream },
+          // })
+
+          janus.current.log?.('Created local stream: ' + stream)
+          ////
+          // $('#screencapture').append(
+          //   '<video class="rounded centered" id="screenvideo' +
+          //     trackId +
+          //     '" width=100% autoplay playsinline muted="muted"/>',
+          // )
+
+          const localScreenElement = store.getState().player.localScreen
+
+          if (localScreenElement?.current) {
+            janus.current.attachMediaStream?.(localScreenElement.current, stream)
+          }
+        }
+        if (
+          plugin.webrtcStuff.pc.iceConnectionState !== 'completed' &&
+          plugin.webrtcStuff.pc.iceConnectionState !== 'connected'
+        ) {
+          ////
+          // $('#screencapture')
+          //   .parent()
+          //   .parent()
+          //   .block({
+          //     message: '<b>Publishing...</b>',
+          //     css: {
+          //       border: 'none',
+          //       backgroundColor: 'transparent',
+          //       color: 'white',
+          //     },
+          //   })
+        }
+      },
+      // eslint-disable-next-line no-unused-vars
+      onremotetrack: function (track, mid, on) {
+        // The publisher stream is sendonly, we don't expect anything here
+
+        console.log('aa onremotetrack', track, mid, on) ////
+      },
+      oncleanup: function () {
+        janus.current.log?.(' ::: Got a cleanup notification :::')
+        ////
+        // $('#screencapture').empty()
+        // $('#screencapture').parent().unblock()
+        // $('#room').addClass('hide')
+        // localTracks = {}
+        // localVideos = 0
+
+        dispatch.screenShare.update({
+          localTracks: {},
+          localVideos: 0,
+        })
       },
     })
   }
 
   ////
-  // const updateVideoStreams = () => {
-  //   const localVideoElement = store.getState().player.localVideo
-  //   const remoteVideoElement = store.getState().player.remoteVideo
-  //   const { localVideoStream, remoteVideoStream } = store.getState().webrtc
+  const updateScreenStreams = () => {
+    const localScreenElement = store.getState().player.localScreen
+    // const remoteVideoElement = store.getState().player.remoteVideo //// uncomment?
+    const { localScreenStream } = store.getState().screenShare
 
-  //   // local video stream
+    // local video stream
 
-  //   if (localVideoElement?.current) {
-  //     if (janus.current.attachMediaStream) {
-  //       janus.current.attachMediaStream(localVideoElement.current, localVideoStream as MediaStream)
-  //     }
-  //   }
+    if (localScreenElement?.current) {
+      if (janus.current.attachMediaStream) {
+        janus.current.attachMediaStream(
+          localScreenElement.current,
+          localScreenStream as MediaStream,
+        )
+      }
+    }
 
-  //   // remote video stream
+    // remote video stream
 
-  //   if (remoteVideoElement?.current) {
-  //     if (janus.current.attachMediaStream) {
-  //       janus.current.attachMediaStream(
-  //         remoteVideoElement.current,
-  //         remoteVideoStream as MediaStream,
-  //       )
-  //     }
-  //   }
-  // }
+    //// remove?
+    // if (remoteVideoElement?.current) {
+    //   if (janus.current.attachMediaStream) {
+    //     janus.current.attachMediaStream(
+    //       remoteVideoElement.current,
+    //       remoteVideoStream as MediaStream,
+    //     )
+    //   }
+    // }
+  }
+
+  const enableScreenShare = () => {
+    console.log('aa enableScreenShare') ////
+
+    initScreenShare()
+  }
+  useEventListener('phone-island-screen-share-enable', () => {
+    enableScreenShare()
+  })
 
   ////
   // const enableVideo = (data) => {
@@ -322,6 +595,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px]'}
         >
           <div className={`pi-flex pi-h-full pi-relative pi-justify-center`}>
+            screen share ////
             {/* remote video */}
             {/* <video autoPlay muted={true} ref={remoteVideo} className='pi-rounded-2xl'></video> ////  */}
             {/* local video */}
@@ -356,8 +630,19 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 </Button>
               )}
 
+              {/* //// todo tooltip */}
+              {/* screen share button */}
+              {/* <Button
+                variant='default'
+                onClick={() => initScreenShare()}
+                data-tooltip-id='tooltip-toggle-video'
+                data-tooltip-content={'Screen share //// '}
+              >
+                <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faDisplay} />
+              </Button> */}
+
               {/* video button */}
-              <Button
+              {/* <Button //// 
                 variant='default'
                 onClick={() => toggleVideo()}
                 data-tooltip-id='tooltip-toggle-video'
@@ -370,7 +655,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 ) : (
                   <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideoSlash} />
                 )}
-              </Button>
+              </Button> */}
 
               {/* fullscreen */}
               <Button
