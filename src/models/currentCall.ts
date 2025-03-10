@@ -35,6 +35,8 @@ const defaultState = {
   ownerExtension: '',
   isRecording: false,
   isVideoEnabled: false,
+  chDest: new Array(),
+  chSource: new Array(),
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -169,6 +171,32 @@ export type TransferCallsTypes = {
   startTime: string
 }
 
+export type chDestTypes = {
+  type: 'dest'
+  channel: string
+  callerNum: string
+  startTime: number
+  callerName: string
+  bridgedNum: string
+  bridgedName: string
+  inConference: boolean
+  channelStatus: string
+  bridgedChannel: string
+}
+
+export type chSourceTypes = {
+  type: 'source'
+  channel: string
+  callerNum: string
+  startTime: number
+  callerName: string
+  bridgedNum: string
+  bridgedName: string
+  inConference: boolean
+  channelStatus: string
+  bridgedChannel: string
+}
+
 export interface CurrentCallTypes {
   displayName?: string
   username?: string
@@ -196,4 +224,6 @@ export interface CurrentCallTypes {
   ownerExtension?: string
   isRecording?: boolean
   isVideoEnabled?: boolean
+  chDest?: any
+  chSource?: any
 }

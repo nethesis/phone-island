@@ -109,18 +109,18 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 <AlertGuard>
                   {(() => {
                     const views = {
-                      call: <CallView />,
-                      keypad: <KeyboardView />,
-                      transfer: <TransferListView />,
-                      player: <AudioPlayerView />,
-                      recorder: <RecorderView />,
-                      physicalPhoneRecorder: <PhysicalRecorderView />,
-                      settings: <SettingsView />,
-                      video: <VideoView />,
-                      switchDevice: <SwitchDeviceView />,
+                      call: CallView ? <CallView /> : null,
+                      keypad: KeyboardView ? <KeyboardView /> : null,
+                      transfer: TransferListView ? <TransferListView /> : null,
+                      player: AudioPlayerView ? <AudioPlayerView /> : null,
+                      recorder: RecorderView ? <RecorderView /> : null,
+                      physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,
+                      settings: SettingsView ? <SettingsView /> : null,
+                      video: VideoView ? <VideoView /> : null,
+                      switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
                     }
 
-                    return currentView in views ? (
+                    return currentView in views && views[currentView as keyof typeof views] ? (
                       <ViewsTransition forView={currentView}>
                         {views[currentView as keyof typeof views]}
                       </ViewsTransition>

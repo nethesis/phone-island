@@ -22,10 +22,12 @@ import {
   callPhysical,
   toggleRecord,
   hangupPhysicalRecordingCall,
+  startConf,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
+import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 
 /**
  * Starts a call to a number
@@ -313,6 +315,44 @@ export async function recordCurrentCall(recordingValue: boolean) {
     if (listenInformations) {
       try {
         await toggleRecord(recordingValues, listenInformations)
+      } catch (e) {
+        console.error(e)
+        return []
+      }
+    }
+  }
+}
+
+export async function startConference() {
+  const {
+    accepted,
+    chSource,
+    chDest,
+    incoming,
+    outgoing,
+    incomingSocket,
+    outgoingSocket,
+    conversationId,
+  }: any = store?.getState()?.currentCall
+  const { default_device } = store.getState().currentUser
+  const defaultDeviceId = default_device?.id || default_device?.exten
+  let addedUserExtension = ''
+  if (accepted && (incoming || incomingSocket) && !isEmpty(chSource)) {
+    addedUserExtension = chSource?.callerNum
+  } else if (accepted && (outgoing || outgoingSocket) && !isEmpty(chDest)) {
+    addedUserExtension = chDest?.callerNum
+  }
+
+  if (defaultDeviceId !== '' && conversationId !== '' && addedUserExtension !== '') {
+    const startConferenceInformations = {
+      convid: conversationId,
+      addEndpointId: addedUserExtension?.toString(),
+      ownerEndpointId: defaultDeviceId?.toString(),
+    }
+
+    if (startConferenceInformations) {
+      try {
+        await startConf(startConferenceInformations)
       } catch (e) {
         console.error(e)
         return []

@@ -164,6 +164,8 @@ export const Socket: FC<SocketProps> = ({
                         extensions[conv.counterpartNum] &&
                         extensions[conv.counterpartNum].username
                       }` || '',
+                    chDest: conv?.chDest || {},
+                    chSource: conv?.chSource || {},
                   })
                   // Update the current call informations for physical devices
                   dispatch.currentCall.checkAcceptedUpdate({
@@ -542,6 +544,9 @@ export const Socket: FC<SocketProps> = ({
         }
 
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
+      })
+
+      socket.current.on('meetmeConfUpdate', (res: any) => {
       })
     }
 

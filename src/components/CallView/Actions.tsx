@@ -239,16 +239,15 @@ const Actions: FC = () => {
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
             {/* Hidden at the moment waiting for the conference feature to be implemented */}
-            {/* <Button
+            <Button
               data-stop-propagation={true}
-              disabled={true}
               variant='default'
               onClick={() => addUserConference()}
               data-tooltip-id='tooltip-conference'
               data-tooltip-content={t('Tooltip.Conference') || ''}
             >
               <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button> */}
+            </Button>
             <Button
               variant='default'
               onClick={() =>
