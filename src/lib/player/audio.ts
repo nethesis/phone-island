@@ -62,3 +62,15 @@ export async function getAnnouncementName(id: string) {
     }
   }
 }
+
+/**
+ * Given an id retrieves the name of the call recording
+ */
+export async function getVoicemailName(id: string) {
+  if (id) {
+    const fileName: string = await getAnnouncementFileName(id)
+    if (fileName) {
+      store.dispatch.player.setAudioPlayerTrackName(fileName)
+    }
+  }
+}
