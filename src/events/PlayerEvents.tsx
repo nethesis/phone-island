@@ -36,6 +36,8 @@ export const PlayerEvents: FC = () => {
       } else if (data.type === 'call_recording') {
         getRecordingName(data.id)
         playCallRecording(data.id)
+      } else if (data?.type === 'voicemail'){
+        
       }
     } else {
       if (data.base64_audio_file) {

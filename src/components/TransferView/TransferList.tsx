@@ -131,9 +131,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     backToPreviousView()
   }
 
-  const clickTransferOrConference = (number: string) => {
+  const clickTransferOrConference = async (number: string) => {
     if (isConferenceList) {
-      startConference()
+      const conferenceStarted = await startConference()
+      if (conferenceStarted) {
+        // Back to call view after successful conference start
+        backToPreviousView()
+      }
     } else {
       handleAttendedTransfer(number)
     }

@@ -546,8 +546,7 @@ export const Socket: FC<SocketProps> = ({
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
       })
 
-      socket.current.on('meetmeConfUpdate', (res: any) => {
-      })
+      socket.current.on('meetmeConfUpdate', (res: any) => {})
     }
 
     initSocketConnection()

@@ -27,6 +27,7 @@ const defaultState = {
   keypadValue: '',
   conversationId: '',
   transferring: false,
+  conferencing: false,
   transferringName: '',
   transferringNumber: '',
   transferringStartTime: '',
@@ -110,6 +111,12 @@ export const currentCall = createModel<RootModel>()({
     setVideoEnabled: (state, payload: boolean) => {
       state.isVideoEnabled = payload
       return state
+    },
+    updateConferencing: (state, payload: boolean) => {
+      return {
+        ...state,
+        conferencing: payload,
+      }
     },
   },
   effects: (dispatch) => ({
@@ -216,6 +223,7 @@ export interface CurrentCallTypes {
   paused?: boolean
   conversationId?: string
   transferring?: boolean
+  conferencing?: boolean
   transferringName?: string
   transferringNumber?: string
   transferringStartTime?: string
