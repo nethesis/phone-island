@@ -20,6 +20,8 @@ const defaultState: PlayerTypes = {
   remoteAudio: null,
   localVideo: null,
   remoteVideo: null,
+  localScreen: null,
+  remoteScreen: null,
 }
 
 export const player = createModel<RootModel>()({
@@ -154,4 +156,5 @@ interface PlayerTypes {
   localVideo?: RefObject<HTMLVideoElement> | null
   remoteVideo?: RefObject<HTMLVideoElement> | null
   localScreen?: RefObject<HTMLVideoElement> | null
+  remoteScreen?: RefObject<HTMLVideoElement> | null
 }

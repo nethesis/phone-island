@@ -15,6 +15,7 @@ import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 import { JanusTrack } from './types/webrtc'
+import { StartScreenSharingMessage } from './components/ScreenShareView'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -281,6 +282,21 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       top: isBackCallActive() ? '40px' : '0px',
     }
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
+  })
+
+  // join a screen share initiated by the other party
+  useEventListener('phone-island-screen-share-join', (data: StartScreenSharingMessage) => {
+    console.log('aa received event phone-island-screen-share-join', data) ////
+
+    ////
+    // store.dispatch.screenShare.update({ role: 'viewer' })
+
+    store.dispatch.island.setIslandView('screenShare')
+
+    // wait for island transition to finish
+    setTimeout(() => {
+      eventDispatch('phone-island-screen-share-joining', data)
+    }, 500)
   })
 
   // Listen for the call end event and set the island size to 0

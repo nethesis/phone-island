@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCircle,
   faCircleDot,
-  faDisplay,
   faExpand,
   faMicrophone,
   faMicrophoneSlash,
@@ -27,7 +26,7 @@ import {
   unmuteCurrentCall,
   unpauseCurrentCall,
 } from '../../lib/phone/call'
-import { JanusTrack, JanusTypes } from '../../types/webrtc'
+import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
 import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
@@ -39,17 +38,23 @@ import { Tooltip } from 'react-tooltip'
 
 export interface ScreenShareViewProps {}
 
+export type StartScreenSharingMessage = {
+  message: 'screenSharingStart'
+  roomId: string
+  destUser: string
+  callUser: string
+}
+
 export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
-  const { muted, startTime, isRecording, paused, isVideoEnabled } = useSelector(
+  const { muted, startTime, isRecording, paused } = useSelector(
     (state: RootState) => state.currentCall,
   )
-  const { plugin, role, source, localTracks, localVideos } = useSelector(
-    (state: RootState) => state.screenShare,
-  )
+  const { source, localTracks, localVideos } = useSelector((state: RootState) => state.screenShare)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
-  const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
+  const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
+  const { username } = store.getState().currentUser
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUiShown, setUiShown] = useState(false)
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -113,9 +118,246 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
   const newRemoteFeed = (id, display) => {
     console.log('aa newRemoteFeed', id, display) //// needed?
+
+    //// review function
+
+    // A new feed has been published, create a new plugin handle and attach to it as a listener
+
+    dispatch.screenShare.update({
+      source: id,
+    })
+
+    let remoteFeed: any = null
+    janusInstance?.attach({
+      plugin: 'janus.plugin.videoroom',
+      opaqueId: janus.current.randomString(32),
+      success: function (pluginHandle) {
+        remoteFeed = pluginHandle
+
+        dispatch.screenShare.update({
+          remoteFeed: pluginHandle,
+        })
+        remoteFeed.remoteTracks = {}
+        remoteFeed.remoteVideos = 0
+        janus.current.log?.(
+          'Plugin attached! (' + remoteFeed.getPlugin() + ', id=' + remoteFeed.getId() + ')',
+        )
+        janus.current.log?.('  -- This is a subscriber')
+        // We wait for the plugin to send us an offer
+        const { room } = store.getState().screenShare
+
+        let listen = {
+          request: 'join',
+          room: room,
+          ptype: 'subscriber',
+          feed: id,
+        }
+        remoteFeed.send({ message: listen })
+      },
+      error: function (error) {
+        janus.current.error?.('Error attaching videoroom plugin', error)
+        // bootbox.alert('Error attaching plugin... ' + error) ////
+      },
+      iceState: function (state) {
+        janus.current.log?.('ICE state (feed #' + remoteFeed.rfindex + ') changed to ' + state)
+      },
+      webrtcState: function (on) {
+        janus.current.log?.(
+          'Janus says this WebRTC PeerConnection (feed #' +
+            remoteFeed.rfindex +
+            ') is ' +
+            (on ? 'up' : 'down') +
+            ' now',
+        )
+      },
+      slowLink: function (uplink, lost, mid) {
+        janus.current.warn?.(
+          'Janus reports problems ' +
+            (uplink ? 'sending' : 'receiving') +
+            ' packets on mid ' +
+            mid +
+            ' (' +
+            lost +
+            ' lost packets)',
+        )
+      },
+      onmessage: function (msg, jsep) {
+        janus.current.debug?.(' ::: Got a message (listener) :::', msg)
+        let event = msg['videoroom']
+        janus.current.debug?.('Event: ' + event)
+        if (event) {
+          if (event === 'attached') {
+            // Subscriber created and attached
+            janus.current.log?.(
+              'Successfully attached to feed ' + id + ' (' + display + ') in room ' + msg['room'],
+            )
+            ////
+            // $('#screenmenu').addClass('hide')
+            // $('#room').removeClass('hide')
+          } else {
+            // What has just happened? ////
+          }
+        }
+        if (jsep) {
+          janus.current.debug?.('Handling SDP as well...', jsep)
+          // Answer and attach
+          remoteFeed.createAnswer({
+            jsep: jsep,
+            // We only specify data channels here, as this way in
+            // case they were offered we'll enable them. Since we
+            // don't mention audio or video tracks, we autoaccept them
+            // as recvonly (since we won't capture anything ourselves)
+            tracks: [{ type: 'data' }],
+            success: function (jsep) {
+              janus.current.debug?.('Got SDP!', jsep)
+
+              const { room } = store.getState().screenShare
+
+              let body = { request: 'start', room: room }
+              remoteFeed.send({ message: body, jsep: jsep })
+            },
+            error: function (error) {
+              janus.current.error?.('WebRTC error:', error)
+              // bootbox.alert('WebRTC error... ' + error.message) ////
+            },
+          })
+        }
+      },
+      // eslint-disable-next-line no-unused-vars
+      onlocaltrack: function (track, on) {
+        // The subscriber stream is recvonly, we don't expect anything here
+      },
+      onremotetrack: function (track, mid, on, metadata) {
+        janus.current.debug?.(
+          'Remote track (mid=' +
+            mid +
+            ') ' +
+            (on ? 'added' : 'removed') +
+            (metadata ? ' (' + metadata.reason + ') ' : '') +
+            ':',
+          track,
+        )
+        // Screen sharing tracks are sometimes muted/unmuted by browser
+        // when data is not flowing fast enough; this can make streams blink.
+        // We can ignore these.
+        if (
+          track.kind === 'video' &&
+          metadata &&
+          (metadata.reason === 'mute' || metadata.reason === 'unmute')
+        ) {
+          janus.current.log?.('Ignoring mute/unmute on screen-sharing track.')
+          return
+        }
+        if (!on) {
+          // Track removed, get rid of the stream and the rendering
+          ////
+          // $('#screenvideo' + mid).remove()
+          // if (track.kind === 'video') {
+          //   remoteVideos--
+          //   if (remoteVideos === 0) {
+          //     // No video, at least for now: show a placeholder
+          //     if ($('#screencapture .no-video-container').length === 0) {
+          //       $('#screencapture').append(
+          //         '<div class="no-video-container">' +
+          //           '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+          //           '<span class="no-video-text">No remote video available</span>' +
+          //           '</div>',
+          //       )
+          //     }
+          //   }
+          // }
+          // delete remoteTracks[mid]
+          return
+        }
+        // If we're here, a new track was added
+        if (track.kind === 'audio') {
+          //// audio is already handled by sip, shouldn't be needed here
+          // New audio track: create a stream out of it, and use a hidden <audio> element
+          ////
+          // let stream = new MediaStream([track])
+          // remoteTracks[mid] = stream
+          // janus.current.log?.('Created remote audio stream:', stream)
+          // $('#screencapture').append(
+          //   '<audio class="hide" id="screenvideo' + mid + '" playsinline/>',
+          // )
+          // $('#screenvideo' + mid).get(0).volume = 0
+          // Janus.attachMediaStream($('#screenvideo' + mid).get(0), stream)
+          // $('#screenvideo' + mid)
+          //   .get(0)
+          //   .play()
+          // $('#screenvideo' + mid).get(0).volume = 1
+          // if (remoteVideos === 0) {
+          //   // No video, at least for now: show a placeholder
+          //   if ($('#screencapture .no-video-container').length === 0) {
+          //     $('#screencapture').append(
+          //       '<div class="no-video-container">' +
+          //         '<i class="fa-solid fa-video fa-xl no-video-icon"></i>' +
+          //         '<span class="no-video-text">No remote video available</span>' +
+          //         '</div>',
+          //     )
+          //   }
+          // }
+        } else {
+          // New video track: create a stream out of it
+
+          // remoteVideos++ //// needed?
+
+          ////
+          // $('#screencapture .no-video-container').remove()
+          let stream = new MediaStream([track])
+          remoteFeed.remoteTracks[mid] = stream
+          janus.current.log?.('Created remote video stream: ' + stream)
+
+          ////
+          // $('#screencapture').append(
+          //   '<video class="rounded centered" id="screenvideo' + mid + '" width=100% playsinline/>',
+          // )
+          // $('#screenvideo' + mid).get(0).volume = 0
+
+          console.log('aaaa attach remote stream') ////
+
+          const remoteScreenElement = store.getState().player.remoteScreen
+
+          if (remoteScreenElement?.current) {
+            janus.current.attachMediaStream?.(remoteScreenElement.current, stream)
+          }
+
+          ////
+          // Janus.attachMediaStream($('#screenvideo' + mid).get(0), stream)
+          // $('#screenvideo' + mid)
+          //   .get(0)
+          //   .play()
+          // $('#screenvideo' + mid).get(0).volume = 1
+        }
+      },
+      oncleanup: function () {
+        janus.current.log?.(' ::: Got a cleanup notification (remote feed ' + id + ') :::')
+
+        // $('#waitingvideo').remove() ////
+
+        remoteFeed.remoteTracks = {}
+        remoteFeed.remoteVideos = 0
+      },
+    })
   }
 
-  const preShareScreen = () => {
+  ////
+  // const preShareScreen = () => {
+  //   console.log('aa preShareScreen') ////
+
+  //   if (!janus.current.isExtensionEnabled()) {
+  //     janus.current.error?.(
+  //       "This browser doesn't support screensharing (getDisplayMedia unavailable)",
+  //     )
+  //     return
+  //   }
+  //   // capture = "screen"; //// needed?
+  //   shareScreen()
+  // }
+
+  const shareScreen = () => {
+    console.log('aa shareScreen') ////
+
     if (!janus.current.isExtensionEnabled()) {
       janus.current.error?.(
         "This browser doesn't support screensharing (getDisplayMedia unavailable)",
@@ -123,17 +365,13 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
       return
     }
     // capture = "screen"; //// needed?
-    shareScreen()
-  }
-
-  const shareScreen = () => {
-    console.log('aa shareScreen') ////
-
-    // const { plugin }: { plugin: any } = store.getState().screenShare ////
 
     // Create a new room
 
     // Set role to the store
+    // dispatch.screenShare.update({
+    //   role: 'publisher',
+    // })
 
     const roomName = janus.current.randomString(32)
 
@@ -143,6 +381,11 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
       bitrate: 500000,
       publishers: 1,
     }
+
+    // console.log('plugin', plugin) ////
+
+    const { plugin } = store.getState().screenShare
+
     plugin.send({
       message: create,
       success: function (result) {
@@ -162,7 +405,10 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           })
 
           janus.current.log?.('Screen sharing session created: ' + room)
-          const username = janus.current.randomString(12)
+
+          const { username } = store.getState().currentUser
+
+          // const roomUser = janus.current.randomString(12) ////
           let register = {
             request: 'join',
             room: room,
@@ -170,26 +416,52 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
             display: username,
           }
           plugin.send({ message: register })
+
+          // send message to websocket to invite the other user
+          const { socket } = store.getState().websocket
+
+          console.log('aa socket', socket) ////
+
+          const { username: destUsername } = store.getState().currentCall
+
+          socket.emit('message', {
+            message: 'screenSharingStart',
+            roomId: room,
+            destUser: destUsername,
+            callUser: username,
+          } as StartScreenSharingMessage)
+
+          console.log('aa screenSharingStart emitted') ////
         }
       },
     })
   }
 
   const initScreenShare = () => {
-    console.log('aa initScreenShare') ////
+    console.log('aa initScreenShare, janusInstance', janusInstance) ////
 
-    janus.current.attach({
+    janusInstance?.attach({
       plugin: 'janus.plugin.videoroom',
       opaqueId: janus.current.randomString(32),
       success: function (pluginHandle) {
+        console.log('aa videoroom plugin attached:', pluginHandle) ////
+
         // Set plugin to the store
         dispatch.screenShare.update({
           plugin: pluginHandle,
         })
-        console.log('aa videoroom plugin attached') ////
 
-        //// call this only if we are the publisher
-        preShareScreen()
+        //// call shareScreen() or joinScreenShare() based on role
+
+        const { role } = store.getState().screenShare
+
+        console.log('aaaa role', role) ////
+
+        if (role === 'publisher') {
+          shareScreen()
+        } else if (role === 'listener') {
+          joinScreenShare()
+        }
       },
       error: function (error) {
         janus.current.error?.('Error attaching videoroom plugin', error)
@@ -208,7 +480,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
         janus.current.log?.(
           'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now',
         )
-        //// TODO see screensharingtest.js:97
+        //// TODO see janus screensharing.js:97
       },
       slowLink: function (uplink, lost, mid) {
         janus.current.warn?.(
@@ -223,16 +495,24 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
       },
       onmessage: function (msg, jsep) {
         janus.current.debug?.(' ::: Got a message (publisher) :::', msg)
+
+        console.log('aa onmessage', msg) ////
+
         // const { plugin, role, source, localTracks } = store.getState().screenShare ////
+        const { plugin, role } = store.getState().screenShare
         const event = msg['videoroom']
         janus.current.debug?.('Event: ' + event)
 
         if (event) {
           if (event === 'joined') {
+            console.log('aa event joined, role', role) ////
+
             if (role === 'publisher') {
               // This is our session, publish our stream
               janus.current.debug?.('Negotiating WebRTC stream for our screen')
-              // Safari expects a user gesture to share the screen: see issue #2455 //// needed?
+
+              // Safari expects a user gesture to share the screen: see issue #2455 //// TODO needed?
+
               plugin.createOffer({
                 // We want sendonly audio and screensharing
                 tracks: [
@@ -263,6 +543,8 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
               }
             }
           } else if (event === 'event') {
+            console.log('aa event "event"') ////
+
             // Any feed to attach to?
             if (role === 'listener' && msg['publishers']) {
               let list = msg['publishers']
@@ -396,10 +678,14 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
           const localScreenElement = store.getState().player.localScreen
 
+          console.log('aaaa attach local stream') ////
+
           if (localScreenElement?.current) {
             janus.current.attachMediaStream?.(localScreenElement.current, stream)
           }
         }
+        const { plugin } = store.getState().screenShare
+
         if (
           plugin.webrtcStuff.pc.iceConnectionState !== 'completed' &&
           plugin.webrtcStuff.pc.iceConnectionState !== 'connected'
@@ -471,14 +757,47 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     // }
   }
 
-  const enableScreenShare = () => {
+  const initAndStartScreenShare = () => {
     console.log('aa enableScreenShare') ////
 
+    dispatch.screenShare.update({ role: 'publisher' })
     initScreenShare()
   }
-  useEventListener('phone-island-screen-share-enable', () => {
-    enableScreenShare()
+  useEventListener('phone-island-screen-share-start', () => {
+    initAndStartScreenShare()
   })
+
+  const initAndJoinScreenShare = (joinData: StartScreenSharingMessage) => {
+    console.log('aa joining Screen Share', joinData) ////
+
+    dispatch.screenShare.update({ role: 'listener' })
+    dispatch.screenShare.update({ room: joinData.roomId })
+    initScreenShare()
+
+    //// needed?
+    // eventDispatch('phone-island-screen-share-joined', {})
+  }
+  useEventListener('phone-island-screen-share-joining', (data: StartScreenSharingMessage) => {
+    initAndJoinScreenShare(data)
+  })
+
+  const joinScreenShare = () => {
+    console.log('aa joinScreenShare') ////
+
+    const { room } = store.getState().screenShare
+
+    console.log('aaaa join room', room) ////
+
+    const joinMessage = {
+      request: 'join',
+      room: room,
+      ptype: 'publisher', //// 'publisher' or 'listener'?
+      display: username,
+    }
+
+    const { plugin } = store.getState().screenShare
+    plugin.send({ message: joinMessage })
+  }
 
   ////
   // const enableVideo = (data) => {

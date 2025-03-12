@@ -557,6 +557,10 @@ export const WebRTC: FC<WebRTCProps> = ({
             dispatch.alerts.setAlert('webrtc_down')
           },
         })
+        // Set janus instance to the store
+        dispatch.webrtc.updateWebRTC({
+          janusInstance,
+        })
       },
     })
   }, [janus.current])

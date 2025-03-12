@@ -43,16 +43,14 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   }
 
   const goToScreenShareView = () => {
+    console.log('aa goToScreenShareView') ////
+
     closeSideViewAndLaunchEvent('screenShare')
 
-    // store.dispatch.currentCall.setVideoEnabled(true) //// needed?
-    eventDispatch('phone-island-screen-share-enable', {})
-
-    //// needed?
-    // setTimeout(() => {
-    //   store.dispatch.currentCall.setVideoEnabled(true)
-    //   eventDispatch('phone-island-video-enable', { addVideoTrack: true })
-    // }, 250)
+    // wait for island transition to finish
+    setTimeout(() => {
+      eventDispatch('phone-island-screen-share-start', {})
+    }, 500)
   }
 
   useEffect(() => {
@@ -140,6 +138,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                 </Button>
               )}
               {/* Share screen button */}
+              {/* //// todo show only if the user has screen sharing permission */}
               <Button
                 variant='transparentSideView'
                 onClick={() => goToScreenShareView()}

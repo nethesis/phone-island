@@ -3,10 +3,12 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import { JanusTypes } from '../types'
 
 const defaultState = {
   INACTIVE_DEADLINE_TIME: 1000 * 60 * 45,
   CHECK_INTERVAL_TIME: 1000 * 60 * 50,
+  janusInstance: null as any,
   sipcall: null,
   jsepGlobal: null,
   remoteAudioStream: null,
@@ -57,6 +59,7 @@ export const webrtc = createModel<RootModel>()({
 export interface WebRTCTypes {
   INACTIVE_DEADLINE_TIME?: number
   CHECK_INTERVAL_TIME?: number
+  janusInstance?: any
   sipcall?: any
   jsepGlobal?: any
   remoteAudioStream?: any

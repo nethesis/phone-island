@@ -9,8 +9,11 @@ export interface ScreenShareTypes {
   role?: string
   room?: string
   source?: string
-  localTracks?: any //// remove?
+  remoteFeed?: any
+  localTracks?: any
+  remoteTracks?: any
   localVideos?: number
+  remoteVideos?: number
   localScreenStream?: MediaStream
 }
 
@@ -19,8 +22,11 @@ const defaultState = {
   role: '',
   room: '',
   source: '',
+  remoteFeed: null as any,
   localTracks: null as any,
+  remoteTracks: null as any,
   localVideos: 0,
+  remoteVideos: 0,
   localScreenStream: null as MediaStream | null,
 }
 

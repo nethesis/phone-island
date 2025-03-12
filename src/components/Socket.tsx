@@ -17,6 +17,7 @@ import {
   dispatchExtensions,
   dispatchUrlCall,
   dispatchDefaultDeviceUpdate,
+  dispatchJoinScreenShare,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -31,6 +32,8 @@ import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
+import { parseSync } from '@babel/core'
+import { StartScreenSharingMessage } from './ScreenShareView'
 
 interface SocketProps {
   children: ReactNode
@@ -289,6 +292,11 @@ export const Socket: FC<SocketProps> = ({
         reconnectionDelay: 2000,
       })
 
+      console.log('aa save socket to store', socket.current) ////
+
+      // save websocket to store
+      dispatch.websocket.update({ socket: socket.current })
+
       // Handle socket errors
       socket.current.on('connect', () => {
         console.debug(`Socket connected sid: ${socket.current.id}`)
@@ -521,9 +529,16 @@ export const Socket: FC<SocketProps> = ({
 
       // `screenSharingStart` is the socket event when a user starts screen sharing
       //// use type instead of any
-      socket.current.on('screenSharingStart', (res: any) => {
-        console.log('aa socket on screenSharingStart') ////
-        //// joinScreen()
+      socket.current.on('message', (data: any) => {
+        console.log('aaaa socket on message:', data) ////
+
+        switch (data.message) {
+          case 'screenSharingStart':
+            dispatchJoinScreenShare(data as StartScreenSharingMessage)
+            break
+          default:
+            console.warn('Socket: unknown message type ', data.message)
+        }
       })
 
       // `updateDefaultDevice` is the socket event when user change the default device

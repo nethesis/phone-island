@@ -96,6 +96,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         break
 
       case 'video':
+      case 'screenShare':
         if (isOpen) {
           size = {
             width: variants.video.expanded.width,
