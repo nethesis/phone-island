@@ -168,6 +168,12 @@ const CallTemplate = (args: any) => {
     eventDispatch('phone-island-video-disable', {})
   }
 
+  //example of object to play audio file
+  let objectPlayAudioFile = {
+    type: 'announcement',
+    id: '76',
+  }
+
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
@@ -250,7 +256,9 @@ const CallTemplate = (args: any) => {
 
               <Button
                 variant='red'
-                onClick={() => eventDispatch('phone-island-recording-open', {})}
+                onClick={() =>
+                  eventDispatch('phone-island-audio-player-start', { ...objectPlayAudioFile })
+                }
                 className='pi-text-sm pi-w-full'
               >
                 Recording announcement

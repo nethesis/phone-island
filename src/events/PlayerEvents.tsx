@@ -9,6 +9,8 @@ import {
   playCallRecording,
   getRecordingName,
   getAnnouncementName,
+  getVoicemailName,
+  playVoicemail,
 } from '../lib/player/audio'
 import { type PlayerStartTypes } from '../types'
 import { useDispatch } from 'react-redux'
@@ -31,11 +33,14 @@ export const PlayerEvents: FC = () => {
       }
       // Manage types
       if (data.type === 'announcement') {
-        getAnnouncementName(data.id)
-        playAnnouncement(data.id)
-      } else if (data.type === 'call_recording') {
-        getRecordingName(data.id)
-        playCallRecording(data.id)
+        getAnnouncementName(data?.id)
+        playAnnouncement(data?.id)
+      } else if (data?.type === 'call_recording') {
+        getRecordingName(data?.id)
+        playCallRecording(data?.id)
+      } else if (data?.type === 'voicemail') {
+        getVoicemailName(data?.id)
+        playVoicemail(data?.id)
       }
     } else {
       if (data.base64_audio_file) {
