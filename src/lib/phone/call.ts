@@ -345,18 +345,33 @@ export async function startConference() {
 
   if (defaultDeviceId !== '' && conversationId !== '' && addedUserExtension !== '') {
     const startConferenceInformations = {
-      convid: conversationId,
+      convid: conversationId?.toString(),
       addEndpointId: addedUserExtension?.toString(),
       ownerEndpointId: defaultDeviceId?.toString(),
     }
 
     if (startConferenceInformations) {
       try {
-        await startConf(startConferenceInformations)
+        const result = await startConf(startConferenceInformations)
+        if (result) {
+          // Set conferencing and disable pause
+          store.dispatch.currentCall.updateCurrentCall({
+            conferencing: true,
+            paused: false,
+          })
+
+          // Play the remote audio element
+          store.dispatch.player.playRemoteAudio()
+
+          eventDispatch('phone-island-call-conferenced', {})
+          return true
+        }
+        return false
       } catch (e) {
         console.error(e)
-        return []
+        return false
       }
     }
   }
+  return false
 }
