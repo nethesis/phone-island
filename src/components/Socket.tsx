@@ -18,6 +18,7 @@ import {
   dispatchUrlCall,
   dispatchDefaultDeviceUpdate,
   dispatchJoinScreenShare,
+  dispatchLeaveScreenShare,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -33,7 +34,7 @@ import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
 import { parseSync } from '@babel/core'
-import { StartScreenSharingMessage } from './ScreenShareView'
+import { ScreenSharingMessage } from './ScreenShareView'
 
 interface SocketProps {
   children: ReactNode
@@ -528,13 +529,15 @@ export const Socket: FC<SocketProps> = ({
       })
 
       // `screenSharingStart` is the socket event when a user starts screen sharing
-      //// use type instead of any
       socket.current.on('message', (data: any) => {
         console.log('aaaa socket on message:', data) ////
 
         switch (data.message) {
           case 'screenSharingStart':
-            dispatchJoinScreenShare(data as StartScreenSharingMessage)
+            dispatchJoinScreenShare(data as ScreenSharingMessage)
+            break
+          case 'screenSharingStop':
+            dispatchLeaveScreenShare(data as ScreenSharingMessage)
             break
           default:
             console.warn('Socket: unknown message type ', data.message)

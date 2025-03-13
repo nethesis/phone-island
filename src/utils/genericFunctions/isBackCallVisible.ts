@@ -13,6 +13,7 @@ export function isBackCallActive() {
   return (
     ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) ||
     (view === 'video' && isOpen) ||
+    (view === 'screenShare' && isOpen) ||
     transferring
   )
 }

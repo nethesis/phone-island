@@ -15,7 +15,7 @@ import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 import { JanusTrack } from './types/webrtc'
-import { StartScreenSharingMessage } from './components/ScreenShareView'
+import { ScreenSharingMessage } from './components/ScreenShareView'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -285,17 +285,27 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   // join a screen share initiated by the other party
-  useEventListener('phone-island-screen-share-join', (data: StartScreenSharingMessage) => {
+  useEventListener('phone-island-screen-share-join', (data: ScreenSharingMessage) => {
     console.log('aa received event phone-island-screen-share-join', data) ////
-
-    ////
-    // store.dispatch.screenShare.update({ role: 'viewer' })
 
     store.dispatch.island.setIslandView('screenShare')
 
     // wait for island transition to finish
     setTimeout(() => {
       eventDispatch('phone-island-screen-share-joining', data)
+    }, 500)
+  })
+
+  // leave a screen share initiated by the other party
+  useEventListener('phone-island-screen-share-leave', (data: ScreenSharingMessage) => {
+    console.log('aa received event phone-island-screen-share-leave', data) ////
+
+    // ensure we are in the screen share view to properly handle the event
+    store.dispatch.island.setIslandView('screenShare')
+
+    // wait for island transition to finish
+    setTimeout(() => {
+      eventDispatch('phone-island-screen-share-leaving', data)
     }, 500)
   })
 

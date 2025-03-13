@@ -12,7 +12,7 @@ import type {
   QueueUpdateMemberTypes,
   QueuesMemberEventType,
 } from '../types'
-import { StartScreenSharingMessage } from '../components/ScreenShareView'
+import { ScreenSharingMessage } from '../components/ScreenShareView'
 
 /**
  * The dispatch function for the userMainPresenceUpdate event
@@ -146,9 +146,14 @@ export function dispatchUrlCall(url: string, urlType: string) {
   eventDispatch('phone-island-action-physical', { urlCallObject })
 }
 
-export function dispatchJoinScreenShare(data: StartScreenSharingMessage) {
+export function dispatchJoinScreenShare(data: ScreenSharingMessage) {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-screen-share-join', data)
+}
+
+export function dispatchLeaveScreenShare(data: ScreenSharingMessage) {
+  // Dispatch the event on window for external handlers
+  eventDispatch('phone-island-screen-share-leave', data)
 }
 
 /**

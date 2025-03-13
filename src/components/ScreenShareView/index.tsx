@@ -32,7 +32,6 @@ import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
-import { Tooltip } from 'react-tooltip'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { faDisplaySlash } from '@nethesis/nethesis-solid-svg-icons'
 
@@ -40,8 +39,8 @@ import { faDisplaySlash } from '@nethesis/nethesis-solid-svg-icons'
 
 export interface ScreenShareViewProps {}
 
-export type StartScreenSharingMessage = {
-  message: 'screenSharingStart'
+export type ScreenSharingMessage = {
+  message: 'screenSharingStart' | 'screenSharingStop'
   roomId: string
   destUser: string
   callUser: string
@@ -452,7 +451,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
             roomId: room,
             destUser: destUsername,
             callUser: username,
-          } as StartScreenSharingMessage)
+          } as ScreenSharingMessage)
 
           console.log('aa screenSharingStart emitted') ////
         }
@@ -795,7 +794,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     initAndStartScreenShare()
   })
 
-  const initAndJoinScreenShare = (joinData: StartScreenSharingMessage) => {
+  const initAndJoinScreenShare = (joinData: ScreenSharingMessage) => {
     console.log('aa joining Screen Share', joinData) ////
 
     dispatch.screenShare.update({ role: 'listener' })
@@ -805,7 +804,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     //// needed?
     // eventDispatch('phone-island-screen-share-joined', {})
   }
-  useEventListener('phone-island-screen-share-joining', (data: StartScreenSharingMessage) => {
+  useEventListener('phone-island-screen-share-joining', (data: ScreenSharingMessage) => {
     initAndJoinScreenShare(data)
   })
 
@@ -827,81 +826,19 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     plugin.send({ message: joinMessage })
   }
 
-  ////
-  // const enableVideo = (data) => {
-  //   const { sipcall }: { sipcall: any } = store.getState().webrtc
-  //   store.dispatch.currentCall.setVideoEnabled(true)
-  //   const tracks: JanusTrack[] = []
+  const leaveScreenShare = (leaveData: ScreenSharingMessage) => {
+    console.log('aa leaving Screen Share', leaveData) ////
 
-  //   // use current video input device from localstorage
-  //   let currentVideoDeviceInputId = getJSONItem('phone-island-video-input-device').deviceId || null
+    const { remoteScreenStream } = store.getState().screenShare
+    janus.current.stopAllTracks(remoteScreenStream)
+    dispatch.island.setIslandView('call')
 
-  //   const track: Partial<JanusTrack> = {
-  //     type: 'video',
-  //     recv: true,
-  //   }
-
-  //   if (currentVideoDeviceInputId) {
-  //     track.capture = { deviceId: { exact: currentVideoDeviceInputId } }
-  //   } else {
-  //     track.capture = true
-  //   }
-
-  //   if (data.addVideoTrack) {
-  //     // add video track
-  //     track.add = true
-  //   } else {
-  //     // replace video track (video track has been previously added and removed)
-  //     track.replace = true
-  //     track.mid = '1'
-  //   }
-  //   tracks.push(track as JanusTrack)
-
-  //   sipcall.createOffer({
-  //     tracks: tracks,
-  //     success: function (jsep) {
-  //       sipcall.send({ message: { request: 'update' }, jsep: jsep })
-  //       eventDispatch('phone-island-video-enabled', {})
-  //     },
-  //     error: function (error) {
-  //       console.error('WebRTC error... ' + JSON.stringify(error))
-  //     },
-  //   })
-  // }
-  // useEventListener('phone-island-video-enable', (data) => {
-  //   enableVideo(data)
-  // })
-
-  ////
-  // const disableVideo = () => {
-  //   const { sipcall }: { sipcall: any } = store.getState().webrtc
-  //   store.dispatch.currentCall.setVideoEnabled(false)
-  //   const tracks: JanusTrack[] = []
-  //   tracks.push({ type: 'video', mid: '1', remove: true })
-
-  //   sipcall.createOffer({
-  //     tracks: tracks,
-  //     success: function (jsep) {
-  //       sipcall.send({ message: { request: 'update' }, jsep: jsep })
-  //       eventDispatch('phone-island-video-disabled', {})
-  //     },
-  //     error: function (error) {
-  //       console.error('WebRTC error... ' + JSON.stringify(error))
-  //     },
-  //   })
-  // }
-  // useEventListener('phone-island-video-disable', () => {
-  //   disableVideo()
-  // })
-
-  ////
-  // const toggleVideo = () => {
-  //   if (isVideoEnabled) {
-  //     disableVideo()
-  //   } else {
-  //     enableVideo({ addVideoTrack: false })
-  //   }
-  // }
+    //// needed?
+    // eventDispatch('phone-island-screen-share-leaved', {})
+  }
+  useEventListener('phone-island-screen-share-leaving', (data: ScreenSharingMessage) => {
+    leaveScreenShare(data)
+  })
 
   const handleMouseMove = () => {
     setUiShown(true)
@@ -936,15 +873,32 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const stopScreenShare = () => {
     console.log('aa stopScreenShare') ////
 
-    const { localScreenStream, remoteScreenStream } = store.getState().screenShare
+    const { localScreenStream } = store.getState().screenShare
 
     janus.current.stopAllTracks(localScreenStream)
 
     console.log('aa stopped all local tracks') ////
 
-    dispatch.island.setIslandView('call')
+    // send message to websocket to tell the other user the screen share has stopped
+    const { socket } = store.getState().websocket
+    const { username: destUsername } = store.getState().currentCall
+    const { room } = store.getState().screenShare
 
-    //// TODO send websocket message to make the other user stop their remote tracks
+    console.log('aa stopping share for room: ', room) ////
+
+    socket.emit('message', {
+      message: 'screenSharingStop',
+      roomId: room,
+      destUser: destUsername,
+      callUser: username,
+    } as ScreenSharingMessage)
+
+    dispatch.island.setIslandView('call')
+  }
+
+  const pauseCall = () => {
+    pauseCurrentCall()
+    stopScreenShare()
   }
 
   return (
@@ -1082,7 +1036,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 <Button
                   variant='default'
                   active={paused ? true : false}
-                  onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
+                  onClick={() => (paused ? unpauseCurrentCall() : pauseCall())}
                   data-tooltip-id='tooltip-pause'
                   data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
                 >
