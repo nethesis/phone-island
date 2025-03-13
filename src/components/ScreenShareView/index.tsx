@@ -33,6 +33,8 @@ import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
 import { Tooltip } from 'react-tooltip'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { faDisplaySlash } from '@nethesis/nethesis-solid-svg-icons'
 
 //// review
 
@@ -50,7 +52,9 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const { muted, startTime, isRecording, paused } = useSelector(
     (state: RootState) => state.currentCall,
   )
-  const { source, localTracks, localVideos } = useSelector((state: RootState) => state.screenShare)
+  const { source, localTracks, localVideos, role } = useSelector(
+    (state: RootState) => state.screenShare,
+  )
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
@@ -247,6 +251,9 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           (metadata.reason === 'mute' || metadata.reason === 'unmute')
         ) {
           janus.current.log?.('Ignoring mute/unmute on screen-sharing track.')
+
+          console.log('aaaa ignoring mute, return') ////
+
           return
         }
         if (!on) {
@@ -268,6 +275,13 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           //   }
           // }
           // delete remoteTracks[mid]
+
+          //// added by us
+          const { remoteScreenStream } = store.getState().screenShare
+          janus.current.stopAllTracks(remoteScreenStream)
+
+          console.log('aaaa stopped remote stream') ////
+
           return
         }
         // If we're here, a new track was added
@@ -919,6 +933,20 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     }, 100) // small delay to detect "stopped moving"
   }
 
+  const stopScreenShare = () => {
+    console.log('aa stopScreenShare') ////
+
+    const { localScreenStream, remoteScreenStream } = store.getState().screenShare
+
+    janus.current.stopAllTracks(localScreenStream)
+
+    console.log('aa stopped all local tracks') ////
+
+    dispatch.island.setIslandView('call')
+
+    //// TODO send websocket message to make the other user stop their remote tracks
+  }
+
   return (
     <>
       {isOpen ? (
@@ -942,6 +970,8 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
               ref={localVideo}
               className='pi-w-1/2 pi-h-1/2 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg'
             ></video>
+            {/* //// remove */}
+            <div className='pi-absolute pi-top-5 pi-left-5 pi-text-gray-500'>Role: {role}</div>
           </div>
 
           <div
@@ -1006,6 +1036,20 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 <FontAwesomeIcon icon={faExpand} className='pi-h-6 pi-w-6' />
               </Button>
 
+              {/* stop screen share */}
+              {/* //// todo show only while presenting */}
+              {/* //// todo tooltip content */}
+              {role === 'publisher' && (
+                <Button
+                  variant='default'
+                  onClick={() => stopScreenShare()}
+                  data-tooltip-id='tooltip-stop-screen-share'
+                  data-tooltip-content={'Stop screen share ////'}
+                >
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faDisplaySlash} />
+                </Button>
+              )}
+
               {/* record */}
               <Button
                 active={isRecording}
@@ -1053,11 +1097,12 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
             <Hangup buttonsVariant='default' />
           </div>
           {/* Buttons tooltips */}
-          <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
+          {/* //// todo stop screen share tooltip */}
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
         </div>
       ) : (
         // collapsed view
