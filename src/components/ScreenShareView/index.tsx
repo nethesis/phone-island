@@ -17,7 +17,7 @@ import {
   faStop,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
-import { eventDispatch, useEventListener } from '../../utils'
+import { eventDispatch, useEventListener, useIsomorphicLayoutEffect } from '../../utils'
 import Hangup from '../Hangup'
 import {
   muteCurrentCall,
@@ -60,15 +60,16 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const screenShareViewRef = useRef(null)
+  const localVideo = useRef<HTMLVideoElement>(null)
+  const remoteVideo = useRef<HTMLVideoElement>(null)
   const janus = useRef<JanusTypes>(JanusLib) //// fix error
 
-  ////
-  // useIsomorphicLayoutEffect(() => {
-  //   dispatch.player.updatePlayer({
-  //     localVideo: localVideo,
-  //     remoteVideo: remoteVideo,
-  //   })
-  // }, [])
+  useIsomorphicLayoutEffect(() => {
+    dispatch.player.updatePlayer({
+      localVideo: localVideo,
+      remoteVideo: remoteVideo,
+    })
+  }, [])
 
   // component did mount
   useEffect(() => {
@@ -88,9 +89,9 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   }, [])
 
   // isOpen changed
-  // useEffect(() => {
-  //   updateVideoStreams() //// needed?
-  // }, [isOpen])
+  useEffect(() => {
+    updateScreenStreams() //// needed?
+  }, [isOpen])
 
   const handleFullscreenChange = () => {
     setIsFullscreen(!!document.fullscreenElement)
@@ -305,6 +306,10 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           ////
           // $('#screencapture .no-video-container').remove()
           let stream = new MediaStream([track])
+
+          // Save the new video stream to the store
+          store.dispatch.screenShare.update({ remoteScreenStream: stream })
+
           remoteFeed.remoteTracks[mid] = stream
           janus.current.log?.('Created remote video stream: ' + stream)
 
@@ -316,10 +321,14 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
           console.log('aaaa attach remote stream') ////
 
-          const remoteScreenElement = store.getState().player.remoteScreen
+          const remoteScreenElement = store.getState().player.remoteVideo
+
+          console.log('aaaa remoteScreenElement', remoteScreenElement?.current) ////
 
           if (remoteScreenElement?.current) {
             janus.current.attachMediaStream?.(remoteScreenElement.current, stream)
+
+            console.log('aaaa remote screen attached') ////
           }
 
           ////
@@ -676,12 +685,14 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           //     '" width=100% autoplay playsinline muted="muted"/>',
           // )
 
-          const localScreenElement = store.getState().player.localScreen
+          const localScreenElement = store.getState().player.localVideo
 
           console.log('aaaa attach local stream') ////
 
           if (localScreenElement?.current) {
             janus.current.attachMediaStream?.(localScreenElement.current, stream)
+
+            console.log('aaaa attached local 1') ////
           }
         }
         const { plugin } = store.getState().screenShare
@@ -729,11 +740,11 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
   ////
   const updateScreenStreams = () => {
-    const localScreenElement = store.getState().player.localScreen
-    // const remoteVideoElement = store.getState().player.remoteVideo //// uncomment?
-    const { localScreenStream } = store.getState().screenShare
+    const localScreenElement = store.getState().player.localVideo
+    const remoteScreenElement = store.getState().player.remoteVideo
+    const { localScreenStream, remoteScreenStream } = store.getState().screenShare
 
-    // local video stream
+    // local screen stream
 
     if (localScreenElement?.current) {
       if (janus.current.attachMediaStream) {
@@ -741,20 +752,23 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           localScreenElement.current,
           localScreenStream as MediaStream,
         )
+
+        console.log('aaaa attached local 1') ////
       }
     }
 
-    // remote video stream
+    // remote screen stream
 
-    //// remove?
-    // if (remoteVideoElement?.current) {
-    //   if (janus.current.attachMediaStream) {
-    //     janus.current.attachMediaStream(
-    //       remoteVideoElement.current,
-    //       remoteVideoStream as MediaStream,
-    //     )
-    //   }
-    // }
+    if (remoteScreenElement?.current) {
+      if (janus.current.attachMediaStream) {
+        janus.current.attachMediaStream(
+          remoteScreenElement.current,
+          remoteScreenStream as MediaStream,
+        )
+
+        console.log('aaaa attached remote 1') ////
+      }
+    }
   }
 
   const initAndStartScreenShare = () => {
@@ -911,19 +925,23 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
         <div
           ref={screenShareViewRef}
           onMouseMove={() => handleMouseMoveWithDebounce()}
-          className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px]'}
+          className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px] pi-w-[600px]'}
         >
-          <div className={`pi-flex pi-h-full pi-relative pi-justify-center`}>
-            screen share ////
+          <div className={`pi-flex pi-relative pi-justify-center pi-w-full pi-h-full`}>
             {/* remote video */}
-            {/* <video autoPlay muted={true} ref={remoteVideo} className='pi-rounded-2xl'></video> ////  */}
+            <video
+              autoPlay
+              muted={true}
+              ref={remoteVideo}
+              className='pi-rounded-2xl pi-w-full pi-h-full'
+            ></video>
             {/* local video */}
-            {/* <video //// 
+            <video
               muted={true}
               autoPlay
               ref={localVideo}
-              className='pi-max-w-32 pi-max-h-32 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg'
-            ></video> */}
+              className='pi-w-1/2 pi-h-1/2 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg'
+            ></video>
           </div>
 
           <div

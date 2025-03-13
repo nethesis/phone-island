@@ -32,7 +32,7 @@ export default meta
 
 const CallTemplate = (args: any) => {
   //take the number from input field
-  const [number, setNumber] = useState('*43')
+  const [number, setNumber] = useState('200') //// *43
   const [token, setToken] = useState(() => {
     return localStorage.getItem('phoneIslandToken') || ''
   })
