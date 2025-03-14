@@ -50,20 +50,29 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
     // check media devices (audio/video)
 
     const getMediaDevices = () => {
-      navigator.mediaDevices
-        .enumerateDevices()
-        .then((deviceInfos) => {
-          setMediaDevices(deviceInfos)
-        })
-        .catch((error) => {
-          console.error('Error fetching devices:', error)
-        })
+      if (navigator && navigator?.mediaDevices && navigator?.mediaDevices?.enumerateDevices) {
+        navigator?.mediaDevices
+          .enumerateDevices()
+          .then((deviceInfos) => {
+            setMediaDevices(deviceInfos)
+          })
+          .catch((error) => {
+            console.error('Error fetching devices:', error)
+          })
+      } else {
+        console.warn('MediaDevices API not supported in this browser or context')
+        setMediaDevices([])
+      }
     }
-    getMediaDevices()
-    navigator.mediaDevices.addEventListener('devicechange', getMediaDevices)
 
-    return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', getMediaDevices)
+    getMediaDevices()
+
+    if (navigator && navigator?.mediaDevices) {
+      navigator?.mediaDevices?.addEventListener('devicechange', getMediaDevices)
+
+      return () => {
+        navigator?.mediaDevices?.removeEventListener('devicechange', getMediaDevices)
+      }
     }
   }, [])
 
