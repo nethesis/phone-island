@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
+import { eventDispatch } from '../utils'
 
 export const Close: FC = () => {
   const { view } = useSelector((state: RootState) => state.island)
@@ -14,6 +15,7 @@ export const Close: FC = () => {
   function playerClose() {
     if (audioPlayerPlaying) {
       dispatch.player.stopAudioPlayer()
+      eventDispatch('phone-island-audio-player-close', {})
     }
     dispatch.island.setIslandView(null)
     dispatch.island.handleToggleIsOpen()
