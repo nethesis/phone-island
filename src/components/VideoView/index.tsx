@@ -318,7 +318,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 data-stop-propagation={true}
                 variant='default'
                 onClick={() => recordCurrentCall(isRecording)}
-                data-tooltip-id='tooltip-record'
+                data-tooltip-id='tooltip-videocall-record'
                 data-tooltip-content={
                   isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
                 }
@@ -362,7 +362,7 @@ export const VideoView: FC<VideoViewProps> = () => {
           <Tooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
           <Tooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
           <Tooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
-          <Tooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+          <Tooltip className='pi-z-20' id='tooltip-videocall-record' place='bottom' />
           <Tooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
         </div>
       ) : (

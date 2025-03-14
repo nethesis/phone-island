@@ -275,7 +275,6 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           // }
           // delete remoteTracks[mid]
 
-          //// added by us
           const { remoteScreenStream } = store.getState().screenShare
           janus.current.stopAllTracks(remoteScreenStream)
           dispatch.screenShare.update({ active: false })
@@ -426,7 +425,6 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
           const { username } = store.getState().currentUser
 
-          // const roomUser = janus.current.randomString(12) ////
           let register = {
             request: 'join',
             room: room,
@@ -434,22 +432,6 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
             display: username,
           }
           plugin.send({ message: register })
-
-          // send message to websocket to invite the other user
-          const { socket } = store.getState().websocket
-
-          console.log('aa socket', socket) ////
-
-          const { username: destUsername } = store.getState().currentCall
-
-          socket.emit('message', {
-            message: 'screenSharingStart',
-            roomId: room,
-            destUser: destUsername,
-            callUser: username,
-          } as ScreenSharingMessage)
-
-          console.log('aa screenSharingStart emitted') ////
         }
       },
     })
@@ -544,6 +526,11 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 },
                 error: function (error) {
                   janus.current.error?.('WebRTC error:', error)
+
+                  if (error.toString() === 'NotAllowedError: Permission denied') {
+                    // Screen sharing canceled by user or something went wrong, go back to call view
+                    dispatch.island.setIslandView('call')
+                  }
                 },
               })
             } else {
@@ -701,7 +688,9 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           if (localScreenElement?.current) {
             janus.current.attachMediaStream?.(localScreenElement.current, stream)
 
-            console.log('aaaa attached local 1') ////
+            console.log('ccc attached local 1') ////
+
+            inviteOtherUser()
           }
         }
         const { plugin } = store.getState().screenShare
@@ -775,9 +764,28 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           remoteScreenStream as MediaStream,
         )
 
-        console.log('aaaa attached remote 1') ////
+        console.log('ccc attached remote 1') ////
       }
     }
+  }
+
+  const inviteOtherUser = () => {
+    // send message to websocket to invite the other user
+    const { socket } = store.getState().websocket
+
+    console.log('aa socket', socket) ////
+
+    const { username: destUsername } = store.getState().currentCall
+    const { room } = store.getState().screenShare
+
+    socket.emit('message', {
+      message: 'screenSharingStart',
+      roomId: room,
+      destUser: destUsername,
+      callUser: username,
+    } as ScreenSharingMessage)
+
+    console.log('ccc screenSharingStart emitted') ////
   }
 
   const initAndStartScreenShare = () => {
@@ -1018,7 +1026,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                 data-stop-propagation={true}
                 variant='default'
                 onClick={() => recordCurrentCall(isRecording)}
-                data-tooltip-id='tooltip-record'
+                data-tooltip-id='tooltip-screen-share-record'
                 data-tooltip-content={
                   isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
                 }
@@ -1063,7 +1071,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-stop-screen-share' place='bottom' />
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-record' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-screen-share-record' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
         </div>
       ) : (
