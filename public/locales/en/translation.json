@@ -47,6 +47,7 @@
     "Reload": "Reload",
     "Close alert": "Close alert",
     "Share screen": "Share screen",
+    "Stop sharing": "Stop sharing",
     "Disable camera": "Disable camera",
     "Enter fullscreen": "Enter fullscreen",
     "Exit fullscreen": "Exit fullscreen"
@@ -91,6 +92,9 @@
   "Switch device": {
     "Switch device": "Switch device",
     "Switch information": "The call will continue in the selected device."
+  },
+  "Screen sharing": {
+    "Sharing": "Sharing"
   },
   "Phone Island": {
     "Mobile app": "Mobile app",

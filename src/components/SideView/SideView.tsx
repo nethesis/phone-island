@@ -175,6 +175,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
       </AnimatePresence>
       <CustomThemedTooltip id='tooltip-record' place='left' />
       <CustomThemedTooltip id='tooltip-video' place='left' />
+      <CustomThemedTooltip id='tooltip-screen-share' place='left' />
       <CustomThemedTooltip id='tooltip-switch-device' place='left' />
     </>
   )

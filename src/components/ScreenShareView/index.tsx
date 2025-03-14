@@ -911,19 +911,29 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
         >
           <div className={`pi-flex pi-relative pi-justify-center pi-w-full pi-h-full`}>
             {/* remote video */}
-            <video
-              autoPlay
-              muted={true}
-              ref={remoteVideo}
-              className='pi-rounded-2xl pi-w-full pi-h-full'
-            ></video>
+            {role === 'listener' && (
+              <video
+                autoPlay
+                muted={true}
+                ref={remoteVideo}
+                className='pi-rounded-2xl pi-w-full pi-h-full'
+              ></video>
+            )}
             {/* local video */}
-            <video
+            {role === 'publisher' && (
+              <video
+                autoPlay
+                muted={true}
+                ref={localVideo}
+                className='pi-rounded-2xl pi-w-full pi-h-full'
+              ></video>
+            )}
+            {/* <video //// 
               muted={true}
               autoPlay
               ref={localVideo}
               className='pi-w-1/2 pi-h-1/2 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg'
-            ></video>
+            ></video> */}
             {/* //// remove */}
             <div className='pi-absolute pi-top-5 pi-left-5 pi-text-gray-500'>Role: {role}</div>
           </div>
@@ -998,7 +1008,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
                   variant='default'
                   onClick={() => stopScreenShare()}
                   data-tooltip-id='tooltip-stop-screen-share'
-                  data-tooltip-content={'Stop screen share ////'}
+                  data-tooltip-content={t('Tooltip.Stop sharing')}
                 >
                   <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faDisplaySlash} />
                 </Button>
@@ -1054,7 +1064,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           <CustomThemedTooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
-          {/* //// todo stop screen share tooltip */}
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-stop-screen-share' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-record' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
         </div>

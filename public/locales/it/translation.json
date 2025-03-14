@@ -46,7 +46,8 @@
     "Switch device": "Cambia dispositivo",
     "Reload": "Ricarica",
     "Close alert": "Chiudi avviso",
-    "Share screen": "Trasmetti schermo",
+    "Share screen": "Condividi schermo",
+    "Stop sharing": "Interrompi condivisione",
     "Disable camera": "Disabilita video",
     "Enter fullscreen": "Vai a schermo intero",
     "Exit fullscreen": "Esci da schermo intero"
@@ -91,6 +92,9 @@
   "Switch device": {
     "Switch device": "Cambia dispositivo",
     "Switch information": "La chiamata continuerà sul dispositivo selezionato."
+  },
+  "Screen sharing": {
+    "Sharing": "Condivisione"
   },
   "Phone island": {
     "Mobile app": "App mobile",
