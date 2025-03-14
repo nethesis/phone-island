@@ -24,13 +24,15 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
    */
   // Clean up phone number from unwanted characters
   const sanitizePhoneNumber = (number: string): string => {
-    return (
-      number
-        // Remove whitespace from both ends of the string
-        .trim()
-        // Remove all whitespace characters from the string
-        .replace(/\s+/g, '')
-    )
+    // Check if the number starts with *, #, or +
+    const prefixMatch = number.match(/^[*#+]+/)
+    const prefix = prefixMatch ? prefixMatch[0] : ''
+
+    // Remove all non-numeric characters (excluding + only if it's at the beginning)
+    let sanitized = number.replace(/[^\d]/g, '')
+
+    // Ensure + is kept only at the start if it was originally there
+    return prefix + sanitized
   }
 
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
