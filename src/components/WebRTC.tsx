@@ -312,7 +312,6 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                           // Update the webrtc last activity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
-                          store.dispatch.island.setIslandView('call')
                         }
 
                         break

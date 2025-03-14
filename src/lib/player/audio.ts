@@ -5,6 +5,7 @@ import { getAnnouncement, getAllAnnouncementsInfo } from '../../services/offhour
 import { getCallRecording, getRecordingFileName } from '../../services/history_call'
 import { store } from '../../store'
 import { AnnouncementInfoTypes } from '../../types'
+import { getVoicemailBase64, getVoicemailFileName } from '../../services/voicemail'
 
 /**
  * Given an id plays an announcement
@@ -39,6 +40,22 @@ export async function playCallRecording(id: string) {
 }
 
 /**
+ * Given an id plays a call recording
+ */
+export async function playVoicemail(id: string) {
+  if (id) {
+    const audioFile: string = await getVoicemailBase64(id)
+    if (audioFile) {
+      store.dispatch.island.setIslandView('player')
+      store.dispatch.player.setAudioPlayerType('voicemail')
+      store.dispatch.player.updateStartAudioPlayer({
+        src: audioFile,
+      })
+    }
+  }
+}
+
+/**
  * Given an id retrieves the name of the call recording
  */
 export async function getRecordingName(id: string) {
@@ -59,6 +76,16 @@ export async function getAnnouncementName(id: string) {
     const announcement = allAnnouncements.find((announcement) => announcement.id.toString() === id)
     if (announcement?.description) {
       store.dispatch.player.setAudioPlayerTrackName(announcement.description)
+    }
+  }
+}
+
+export async function getVoicemailName(id: string) {
+  if (id) {
+    const fileName: string = await getVoicemailFileName(id)
+
+    if (fileName) {
+      store.dispatch.player.setAudioPlayerTrackName(fileName)
     }
   }
 }

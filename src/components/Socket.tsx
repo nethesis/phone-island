@@ -218,14 +218,14 @@ export const Socket: FC<SocketProps> = ({
                   // Update the current outgoing conversation
                   dispatch.currentCall.checkOutgoingUpdate({
                     outgoingSocket: true,
-                    outgoing: true,
+                    outgoing: conv?.counterpartName === 'REC' ? false : true,
                     displayName: getDisplayName(conv),
-                    number: `${conv.counterpartNum}`,
+                    number: `${conv?.counterpartNum}`,
                     username:
                       `${
                         extensions &&
-                        extensions[conv.counterpartNum] &&
-                        extensions[conv.counterpartNum].username
+                        extensions[conv?.counterpartNum] &&
+                        extensions[conv?.counterpartNum].username
                       }` || '',
                   })
                 }
