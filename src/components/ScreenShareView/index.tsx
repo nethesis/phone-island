@@ -278,6 +278,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
           //// added by us
           const { remoteScreenStream } = store.getState().screenShare
           janus.current.stopAllTracks(remoteScreenStream)
+          dispatch.screenShare.update({ active: false })
 
           console.log('aaaa stopped remote stream') ////
 
@@ -389,11 +390,6 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     // capture = "screen"; //// needed?
 
     // Create a new room
-
-    // Set role to the store
-    // dispatch.screenShare.update({
-    //   role: 'publisher',
-    // })
 
     const roomName = janus.current.randomString(32)
 
@@ -787,7 +783,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const initAndStartScreenShare = () => {
     console.log('aa enableScreenShare') ////
 
-    dispatch.screenShare.update({ role: 'publisher' })
+    dispatch.screenShare.update({ active: true, role: 'publisher' })
     initScreenShare()
   }
   useEventListener('phone-island-screen-share-start', () => {
@@ -797,7 +793,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
   const initAndJoinScreenShare = (joinData: ScreenSharingMessage) => {
     console.log('aa joining Screen Share', joinData) ////
 
-    dispatch.screenShare.update({ role: 'listener' })
+    dispatch.screenShare.update({ active: true, role: 'listener' })
     dispatch.screenShare.update({ room: joinData.roomId })
     initScreenShare()
 
@@ -831,6 +827,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
 
     const { remoteScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
+    dispatch.screenShare.update({ active: false })
     dispatch.island.setIslandView('call')
 
     //// needed?
@@ -876,6 +873,7 @@ export const ScreenShareView: FC<ScreenShareViewProps> = () => {
     const { localScreenStream } = store.getState().screenShare
 
     janus.current.stopAllTracks(localScreenStream)
+    dispatch.screenShare.update({ active: false })
 
     console.log('aa stopped all local tracks') ////
 

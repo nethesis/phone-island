@@ -254,6 +254,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Player status debug informations: ', playerInformation)
   })
 
+  useEventListener('phone-island-screen-share-status', () => {
+    const screenShareInformation = store.getState().screenShare
+    console.log('Screen share status debug information: ', screenShareInformation)
+  })
+
   useEventListener('phone-island-player-force-stop', () => {
     store.dispatch.player.reset()
     console.log('Audio player is interrupted')

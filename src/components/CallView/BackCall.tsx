@@ -25,6 +25,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
 
   const { t } = useTranslation()
   const { isOpen, previousView } = useSelector((state: RootState) => state.island)
+  const { active: screenShareActive, role: screenShareRole } = useSelector(
+    (state: RootState) => state.screenShare,
+  )
 
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
@@ -66,11 +69,13 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
           <div className='pi-flex pi-gap-2'>
-            {/* screen sharing badge */}
-            <div className='pi-flex pi-gap-2 pi-font-medium pi-items-center pi-rounded-full pi-px-2 pi-py-1 pi-text-xs pi-relative -pi-top-0.5 pi-bg-emerald-700 pi-text-emerald-50'>
-              <FontAwesomeIcon icon={faDisplay} className='pi-w-4 pi-h-4' />
-              {t('Screen Sharing.Sharing')}
-            </div>
+            {/* Screen sharing badge */}
+            {screenShareActive && screenShareRole === 'publisher' && (
+              <div className='pi-flex pi-gap-2 pi-font-medium pi-items-center pi-rounded-full pi-px-2 pi-py-1 pi-text-xs pi-relative -pi-top-0.5 pi-bg-emerald-700 pi-text-emerald-50'>
+                <FontAwesomeIcon icon={faDisplay} className='pi-w-4 pi-h-4' />
+                {t('Screen sharing.Sharing')}
+              </div>
+            )}
             <div className='pi-w-16 pi-flex pi-justify-end'>
               <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
             </div>

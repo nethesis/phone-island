@@ -5,6 +5,7 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
 export interface ScreenShareTypes {
+  active?: boolean
   plugin?: any
   role?: string
   room?: string
@@ -19,6 +20,7 @@ export interface ScreenShareTypes {
 }
 
 const defaultState = {
+  active: false,
   plugin: null as any,
   role: '',
   room: '',

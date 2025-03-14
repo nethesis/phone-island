@@ -129,6 +129,8 @@ export const WebRTC: FC<WebRTCProps> = ({
                   }
                 },
                 onmessage: function (msg, jsep) {
+                  console.log('bb onmessage', msg) ////
+
                   // Get webrtc state
                   const { sipcall }: { sipcall: any } = store.getState().webrtc
 
@@ -381,6 +383,15 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
+
+                        // Stop screen sharing
+                        const { localScreenStream, remoteScreenStream } =
+                          store.getState().screenShare
+                        janus.current.stopAllTracks(localScreenStream)
+                        janus.current.stopAllTracks(remoteScreenStream)
+                        dispatch.screenShare.update({ active: false })
+
+                        console.log('bb stopped all screen share streams') ////
 
                         break
 
