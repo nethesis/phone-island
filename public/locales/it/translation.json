@@ -92,7 +92,10 @@
     "Switch information": "La chiamata continuerà sul dispositivo selezionato."
   },
   "Phone island": {
-    "Mobile app": "App mobile",
-    "Swtich device": "Cambia dispositivo"
+    "Mobile app": "App mobile"
+  },
+  "Conference": {
+    "Conference": "Conferenza",
+    "Add participant": "Aggiungi partecipante"
   }
 }

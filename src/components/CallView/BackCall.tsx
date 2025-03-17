@@ -7,6 +7,7 @@ import { Dispatch, RootState } from '../../store'
 import Timer from './Timer'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TransferCallsTypes } from '../../models/currentCall'
+import AvatarGroup from '../AvatarGroup'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const {
@@ -21,7 +22,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
 
   const { isOpen } = useSelector((state: RootState) => state.island)
-  const { isActive, usersList, conferenceStartTime} = useSelector((state: RootState) => state.conference)
+  const { isActive, usersList, conferenceStartTime }: any = useSelector(
+    (state: RootState) => state.conference,
+  )
 
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
@@ -62,8 +65,12 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
-          <div className=''>
-            <Timer size='small' startTime={transferring ? transferringStartTime : isActive ? conferenceStartTime :  startTime} />
+          <div>
+            {!isActive ? (
+              <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+            ) : (
+              <AvatarGroup usersList={usersList || {}} maxAvatars={5} />
+            )}
           </div>
         </motion.div>
       )}
