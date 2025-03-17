@@ -41,6 +41,7 @@
     "Interrupt recording": "Interrompi registrazione",
     "Other actions": "Altre azioni",
     "Conference": "Aggiungi partecipante per chiamata in conferenza",
+    "Add user to conference": "Aggiungi alla chiamata in conferenza",
     "Go to settings": "Vai alle impostazioni",
     "Enable camera": "Abilita video",
     "Switch device": "Cambia dispositivo",
@@ -96,6 +97,8 @@
   },
   "Conference": {
     "Conference": "Conferenza",
-    "Add participant": "Aggiungi partecipante"
+    "Add participant": "Aggiungi partecipante",
+    "Waiting for the conference": "In attesa della conferenza",
+    "Start conference": "Inizia conferenza"
   }
 }

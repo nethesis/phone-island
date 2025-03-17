@@ -81,6 +81,10 @@ const defaultState = {
       expanded: commonExpanded,
       collapsed: commonCollapsed,
     },
+    waitingConference: {
+      expanded: { width: 348, height: 360 },
+      collapsed: commonCollapsed,
+    },
   },
 }
 

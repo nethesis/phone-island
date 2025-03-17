@@ -144,6 +144,18 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               height: variants.video.collapsed.height,
             }
         break
+
+      case 'waitingConference':
+        size = isOpen
+          ? {
+              width: variants.waitingConference.expanded.width,
+              height: variants.waitingConference.expanded.height,
+            }
+          : {
+              width: variants.waitingConference.collapsed.width,
+              height: variants.waitingConference.collapsed.height,
+            }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0

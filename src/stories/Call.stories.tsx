@@ -16,6 +16,7 @@ import {
   faPhone,
   faSun,
   faTimes,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { Base64 } from 'js-base64'
@@ -356,6 +357,14 @@ const CallTemplate = (args: any) => {
                 onClick={() => eventDispatch('phone-island-view-changed', { viewType: 'settings' })}
               >
                 <FontAwesomeIcon icon={faOpen} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button
+                variant='default'
+                onClick={() =>
+                  eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+                }
+              >
+                <FontAwesomeIcon icon={faUsers} className='pi-w-5 pi-h-5' />
               </Button>
             </div>
           </div>

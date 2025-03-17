@@ -41,6 +41,7 @@
     "Interrupt recording": "Interrupt recording",
     "Other actions": "Other actions",
     "Conference": "Add participant for conference call",
+    "Add user to conference": "Add to conference call",
     "Go to settings": "Go to settings",
     "Enable camera": "Enable camera",
     "Switch device": "Switch device",
@@ -96,6 +97,8 @@
   },
   "Conference": {
     "Conference": "Conference",
-    "Add participant": "Add participant"
+    "Add participant": "Add participant",
+    "Waiting for the conference": "Waiting for the conference",
+    "Start conference": "Start conference"
   }
 }

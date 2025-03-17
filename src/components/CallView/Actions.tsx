@@ -8,6 +8,7 @@ import {
   pauseCurrentCall,
   unpauseCurrentCall,
   parkCurrentCall,
+  startConference,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,6 +23,7 @@ import {
   faChevronUp,
   faArrowRightArrowLeft,
   faUserPlus,
+  faPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -47,6 +49,7 @@ const Actions: FC = () => {
   )
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   const dispatch = useDispatch<Dispatch>()
 
@@ -133,7 +136,7 @@ const Actions: FC = () => {
     }
   }
 
-  const addUserConference = () => {
+  const beginConference = () => {
     // Update island store and set conference list view to true
     dispatch.island.toggleConferenceList(isConferenceList ? false : true)
     // Set the island view to transfer list
@@ -143,6 +146,13 @@ const Actions: FC = () => {
       eventDispatch('phone-island-sideview-close', {})
     }
     eventDispatch('phone-island-call-conference-list-opened', {})
+  }
+
+  const addUserToConference = async () => {
+    const conferenceStarted = await startConference()
+    if (conferenceStarted) {
+      dispatch.island.setIslandView('waitingConference')
+    }
   }
 
   const { t } = useTranslation()
@@ -238,15 +248,16 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            {/* Hidden at the moment waiting for the conference feature to be implemented */}
             <Button
               data-stop-propagation={true}
               variant='default'
-              onClick={() => addUserConference()}
+              onClick={() => (isActive ? addUserToConference() : beginConference())}
               data-tooltip-id='tooltip-conference'
-              data-tooltip-content={t('Tooltip.Conference') || ''}
+              data-tooltip-content={
+                isActive ? t('Tooltip.Conference') || '' : t('Tooltip.Add user to conference') || ''
+              }
             >
-              <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
+              <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
             </Button>
             <Button
               variant='default'

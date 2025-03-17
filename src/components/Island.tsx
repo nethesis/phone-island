@@ -22,6 +22,7 @@ import { SettingsView } from './SettingsView'
 import { VideoView } from './VideoView'
 import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
+import { WaitingConferenceView } from './ConferenceView'
 
 /**
  * Provides the Island logic
@@ -97,7 +98,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         activeAlertsCount > 0 ||
         view === 'player' ||
         view === 'recorder' ||
-        view === 'physicalPhoneRecorder') &&
+        view === 'physicalPhoneRecorder' ||
+        'waitingConference') &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>
@@ -118,6 +120,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                       settings: SettingsView ? <SettingsView /> : null,
                       video: VideoView ? <VideoView /> : null,
                       switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
+                      waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
                     }
 
                     return currentView in views && views[currentView as keyof typeof views] ? (
