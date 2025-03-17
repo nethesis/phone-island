@@ -21,6 +21,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
 
   const { isOpen } = useSelector((state: RootState) => state.island)
+  const { isActive, usersList, conferenceStartTime} = useSelector((state: RootState) => state.conference)
 
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
@@ -57,12 +58,12 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
                 isOpen ? 'pi-w-44' : 'pi-w-16'
               }`}
             >
-              {transferring ? transferringName : displayName}
+              {transferring ? transferringName : isActive ? 'Waiting' : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
           <div className=''>
-            <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+            <Timer size='small' startTime={transferring ? transferringStartTime : isActive ? conferenceStartTime :  startTime} />
           </div>
         </motion.div>
       )}

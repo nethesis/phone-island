@@ -9,10 +9,13 @@ import { store } from '../../store'
 export function isBackCallActive() {
   const { view, isOpen }: any = store.getState().island
   const { transferring } = store.getState().currentCall
+  const { isActive } = store.getState().conference
 
   return (
     ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) ||
     (view === 'video' && isOpen) ||
-    transferring
+    transferring ||
+    //check if conference is active
+    isActive
   )
 }

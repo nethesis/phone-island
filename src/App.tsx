@@ -253,6 +253,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Player status debug informations: ', playerInformation)
   })
 
+  useEventListener('phone-island-conference-status', () => {
+    const conferenceInformation = store.getState().conference
+    console.log('Webrtc status debug informations: ', conferenceInformation)
+  })
+
   useEventListener('phone-island-player-force-stop', () => {
     store.dispatch.player.reset()
     console.log('Audio player is interrupted')

@@ -17,10 +17,12 @@ import { recorder } from './recorder'
 import { listen } from './listen'
 import { darkTheme } from './darkTheme'
 import { physicalRecorder } from './physicalRecorder'
+import { conference } from './conference'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
   webrtc: typeof webrtc
+  conference: typeof conference
   currentCall: typeof currentCall
   currentUser: typeof currentUser
   fetchDefaults: typeof fetchDefaults
@@ -39,6 +41,7 @@ export interface RootModel extends Models<RootModel> {
 export const models: RootModel = {
   player,
   webrtc,
+  conference,
   currentCall,
   currentUser,
   fetchDefaults,

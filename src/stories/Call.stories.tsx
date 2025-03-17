@@ -246,6 +246,14 @@ const CallTemplate = (args: any) => {
                 Player status
               </Button>
 
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-conference-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Conference status
+              </Button>
+
               <Button variant='red' onClick={() => enableVideo()} className='pi-text-sm pi-w-full'>
                 Enable camera
               </Button>

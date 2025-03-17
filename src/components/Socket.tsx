@@ -546,7 +546,20 @@ export const Socket: FC<SocketProps> = ({
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
       })
 
-      socket.current.on('meetmeConfUpdate', (res: any) => {})
+      socket.current.on('confBridgeUpdate', (res: any) => {
+        if (res && res?.users) {
+          // Get User informations
+          const conferenceId = res?.id
+          const conferenceUsers = res?.users
+
+          store.dispatch.conference.updateConferenceUsersList(conferenceUsers)
+
+          // TO DO - Update the conference id in the store
+          // store.dispatch.conference.updateConferenceId(conferenceId);
+        }
+      })
+
+      socket.current.on('confBridgeEnd', (res: any) => {})
     }
 
     initSocketConnection()

@@ -131,12 +131,20 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     backToPreviousView()
   }
 
+  const waitingConferenceView = (numberToCall) => {
+    // show current waiting user in back view ( only on first)
+    dispatch.conference.setConferenceActive(true)
+    eventDispatch('phone-island-call-start', { number: numberToCall })
+  }
+
   const clickTransferOrConference = async (number: string) => {
     if (isConferenceList) {
+      // Put current user inside conference mode
+      // TO DO: check if is firt user in conference
       const conferenceStarted = await startConference()
       if (conferenceStarted) {
         // Back to call view after successful conference start
-        backToPreviousView()
+        waitingConferenceView(number)
       }
     } else {
       handleAttendedTransfer(number)

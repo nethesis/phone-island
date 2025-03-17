@@ -2998,6 +2998,7 @@ var Janus = (function (factory) {
         }
         if (nt) {
           // FIXME Add the new track locally
+          if (!config.myStream) config.myStream = new MediaStream()
           config.myStream.addTrack(nt)
           // Notify the application about the new local track, if any
           nt.onended = function (ev) {
