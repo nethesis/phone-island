@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownLeftAndUpRightToCenter, faGear, faPhone } from '@fortawesome/free-solid-svg-icons'
-import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
+import { endConference, hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
@@ -27,7 +27,8 @@ const Hangup: FC<HangupProps> = ({
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
-  const { isOpen, sideViewIsVisible } = useSelector((state: RootState) => state.island)
+  const { isOpen, sideViewIsVisible, view } = useSelector((state: RootState) => state.island)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   function handleHangup() {
     if (incoming) {
@@ -84,7 +85,7 @@ const Hangup: FC<HangupProps> = ({
           } `}
         >
           {/* collapse phone island button */}
-          {isOpen && accepted && (
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
                 variant={buttonsVariant}
@@ -102,7 +103,11 @@ const Hangup: FC<HangupProps> = ({
 
           <Button
             onClick={() =>
-              !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
+              !isPhysicalRecording && !isActive
+                ? handleHangup()
+                : isActive
+                ? endConference()
+                : hangupCurrentPhysicalRecording()
             }
             variant='red'
             className={`${
@@ -128,7 +133,7 @@ const Hangup: FC<HangupProps> = ({
               </motion.div>
             )}
           </Button>
-          {isOpen && accepted && (
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
             <Button
               variant={buttonsVariant}
               onClick={() => closeSideViewOpenSettings()}

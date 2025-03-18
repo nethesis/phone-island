@@ -27,7 +27,7 @@ const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
               isHome !== undefined && isHome
                 ? 'pi-text-gray-950 dark:pi-text-gray-50'
                 : 'pi-text-gray-50 dark:pi-text-gray-50'
-            } pi-font-normal`}
+            } pi-font-mono`}
           />
         </StyledTimer>
       )}

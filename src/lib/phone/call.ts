@@ -23,6 +23,8 @@ import {
   toggleRecord,
   hangupPhysicalRecordingCall,
   startConf,
+  joinMyConf,
+  endConf,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -364,6 +366,57 @@ export async function startConference() {
           store.dispatch.player.playRemoteAudio()
 
           eventDispatch('phone-island-call-conferenced', {})
+          return true
+        }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function joinConference() {
+  const { default_device } = store.getState().currentUser
+  const defaultDeviceId = default_device?.id || default_device?.exten
+
+  if (defaultDeviceId !== '') {
+    const joinConferenceInformation = {
+      endpointId: defaultDeviceId?.toString(),
+    }
+
+    if (joinConferenceInformation) {
+      try {
+        const result = await joinMyConf(joinConferenceInformation)
+        if (result) {
+          eventDispatch('phone-island-owner-conference-enter', {})
+          return true
+        }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function endConference() {
+  const { conferenceId } = store.getState().conference
+
+  if (conferenceId !== '') {
+    const endConferenceInformation = {
+      confId: conferenceId?.toString(),
+    }
+
+    if (endConferenceInformation) {
+      try {
+        const result = await endConf(endConferenceInformation)
+        if (result) {
+          eventDispatch('phone-island-owner-conference-finished', {})
           return true
         }
         return false

@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEllipsisVertical, faPause } from '@fortawesome/free-solid-svg-icons'
+import { faMicrophone, faPause, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
 import { useTranslation } from 'react-i18next'
 import { ConferenceUser } from '../../models/conference'
@@ -15,6 +15,7 @@ export interface ConferenceUsersListProps {}
 
 export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
   const { usersList } = useSelector((state: RootState) => state.conference)
+  const { isOwnerInside } = useSelector((state: RootState) => state.conference)
 
   const { avatars } = useSelector((state: RootState) => state.avatars)
   const { extensions } = useSelector((state: RootState) => state.users)
@@ -53,7 +54,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
         {usersList && Object.keys(usersList).length > 0 ? (
           Object.values(usersList).map((user) => (
             <div
-              key={user.id}
+              key={user?.id}
               className='pi-flex pi-items-center pi-justify-between pi-py-2 pi-px-3 pi-bg-gray-50 dark:pi-bg-gray-900 pi-rounded-lg'
             >
               <div className='pi-flex pi-items-center pi-gap-3 pi-truncate'>
@@ -78,13 +79,30 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                   {user?.name}
                 </span>
               </div>
-
-              <div>
-                <FontAwesomeIcon
-                  className='pi-h-5 pi-w-5 pi-text-gray-600 dark:pi-text-gray-300'
-                  icon={faPause}
-                />
-              </div>
+              {isOwnerInside ? (
+                <>
+                  <Button variant='transparent'>
+                    <FontAwesomeIcon
+                      className='pi-h-6 pi-w-6 pi-text-gray-600 dark:pi-text-gray-300'
+                      icon={faMicrophone}
+                    />
+                  </Button>
+                  <Button variant='transparent'>
+                    <FontAwesomeIcon
+                      className='pi-h-6 pi-w-6 pi-text-gray-600 dark:pi-text-gray-300'
+                      icon={faTrash}
+                    />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* TO DO: add timer for each users  */}
+                  <FontAwesomeIcon
+                    className='pi-h-5 pi-w-5 pi-text-gray-600 dark:pi-text-gray-300'
+                    icon={faPause}
+                  />
+                </>
+              )}
             </div>
           ))
         ) : (

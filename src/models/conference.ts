@@ -10,6 +10,7 @@ export interface ConferenceUser {
   owner: boolean
   muted: boolean
   extenId: string
+  joinTime?: number
 }
 
 export interface ConferenceStoreTypes {
@@ -17,6 +18,9 @@ export interface ConferenceStoreTypes {
   ownerInformations: ConferenceUser | null
   isActive: boolean
   conferenceStartTime: any
+  isOwnerInside?: boolean
+  isConferenceMuted: boolean
+  conferenceId: string
 }
 
 const defaultState: ConferenceStoreTypes = {
@@ -24,6 +28,9 @@ const defaultState: ConferenceStoreTypes = {
   ownerInformations: null,
   isActive: false,
   conferenceStartTime: null,
+  isOwnerInside: false,
+  isConferenceMuted: false,
+  conferenceId: '',
 }
 
 export const conference = createModel<RootModel>()({
@@ -33,16 +40,35 @@ export const conference = createModel<RootModel>()({
       // Search for the owner
       let owner: ConferenceUser | null = null
 
+      // Determine if the conference is active
+      const isActive = !!payload && Object.keys(payload).length > 0
+
+      // Prepare updated user list with join timestamps
+      let updatedUsersList: Record<string, ConferenceUser> = {}
+
       if (payload) {
-        Object.values(payload).forEach((user) => {
+        const currentTime = Date.now()
+
+        // Process each user in the payload
+        Object.entries(payload).forEach(([userId, user]) => {
+          // Check if this user already exists in the current usersList
+          const existingUser = state.usersList?.[userId]
+
+          // Keep existing joinTime if user already exists, otherwise set current time
+          updatedUsersList[userId] = {
+            ...user,
+            joinTime: existingUser?.joinTime || currentTime,
+          }
+
+          // Find the owner
           if (user.owner) {
-            owner = user
+            owner = {
+              ...user,
+              joinTime: existingUser?.joinTime || currentTime,
+            }
           }
         })
       }
-
-      // Determine if the conference is active
-      const isActive = !!payload && Object.keys(payload).length > 0
 
       // Update the start time if the conference is becoming active and wasn't before
       const conferenceStartTime =
@@ -108,6 +134,24 @@ export const conference = createModel<RootModel>()({
         ...state,
         usersList: updatedUsersList,
         ownerInformations: updatedOwnerInformations,
+      }
+    },
+    toggleIsOwnerInside: (state, isOwnerInside: boolean) => {
+      return {
+        ...state,
+        isOwnerInside,
+      }
+    },
+    toggleIsConferenceMuted: (state, isConferenceMuted: boolean) => {
+      return {
+        ...state,
+        isConferenceMuted,
+      }
+    },
+    updateConferenceId: (state, conferenceId: string) => {
+      return {
+        ...state,
+        conferenceId,
       }
     },
     resetConference: () => defaultState,

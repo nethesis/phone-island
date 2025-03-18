@@ -554,12 +554,19 @@ export const Socket: FC<SocketProps> = ({
 
           store.dispatch.conference.updateConferenceUsersList(conferenceUsers)
 
-          // TO DO - Update the conference id in the store
-          // store.dispatch.conference.updateConferenceId(conferenceId);
+          store.dispatch.conference.updateConferenceId(conferenceId)
         }
       })
 
-      socket.current.on('confBridgeEnd', (res: any) => {})
+      socket.current.on('confBridgeEnd', (res: any) => {
+        if (res && res?.id) {
+          // Reset the conference store when conference ends
+          store.dispatch.conference.resetConference()
+          eventDispatch('phone-island-conference-finished', {})
+        }
+      })
+
+      socket.current.on('callWebrtc', (res: any) => {})
     }
 
     initSocketConnection()
