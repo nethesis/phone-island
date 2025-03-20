@@ -3,6 +3,7 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import { screenShare } from './screenShare'
 
 // Common dimensions
 const commonCollapsed = {
@@ -67,6 +68,13 @@ const defaultState = {
       collapsed: commonCollapsed,
     },
     video: {
+      expanded: {
+        width: 600,
+        height: 480,
+      },
+      collapsed: commonCollapsed,
+    },
+    screenShare: {
       expanded: {
         width: 600,
         height: 480,

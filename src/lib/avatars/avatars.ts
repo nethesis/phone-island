@@ -34,3 +34,16 @@ export async function retrieveAvatars(username: string) {
     }
   } catch (error) {}
 }
+
+export const getInitials = (displayName: string) => {
+  const initials = displayName
+    .split(' ')
+    .map((name) => name.charAt(0))
+    .join('')
+
+  // Maximum of 3 initials
+  if (initials.length > 3) {
+    return initials.slice(0, 2).concat(initials.charAt(initials.length - 1))
+  }
+  return initials
+}

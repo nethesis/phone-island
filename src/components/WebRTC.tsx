@@ -381,6 +381,14 @@ export const WebRTC: FC<WebRTCProps> = ({
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 
+                        if (view === 'video') {
+                          // Stop screen sharing
+                          const { localScreenStream, remoteScreenStream } =
+                            store.getState().screenShare
+                          janus.current.stopAllTracks(localScreenStream)
+                          janus.current.stopAllTracks(remoteScreenStream)
+                          dispatch.screenShare.update({ active: false })
+                        }
                         break
 
                       case 'gateway_down':
@@ -490,6 +498,12 @@ export const WebRTC: FC<WebRTCProps> = ({
                       remoteVideos--
                     }
                     delete remoteTracks[mid]
+
+                    // Show remote video placeholder
+                    dispatch.currentCall.updateCurrentCall({
+                      showRemoteVideoPlaceHolder: true,
+                    })
+
                     return
                   }
 
@@ -523,14 +537,28 @@ export const WebRTC: FC<WebRTCProps> = ({
                     if (janus.current.debug) {
                       janus.current.debug('Created remote video stream:' + stream)
                     }
-                    const remoteVideoElement = store.getState().player.remoteVideo
+                    const largeRemoteVideoElement = store.getState().player.largeRemoteVideo
+                    const smallRemoteVideoElement = store.getState().player.smallRemoteVideo
 
                     if (
                       janus.current.attachMediaStream &&
-                      remoteVideoElement &&
-                      remoteVideoElement.current
+                      largeRemoteVideoElement &&
+                      largeRemoteVideoElement.current
                     ) {
-                      janus.current.attachMediaStream(remoteVideoElement.current, stream)
+                      janus.current.attachMediaStream(largeRemoteVideoElement.current, stream)
+                    }
+
+                    if (
+                      janus.current.attachMediaStream &&
+                      smallRemoteVideoElement &&
+                      smallRemoteVideoElement.current
+                    ) {
+                      janus.current.attachMediaStream(smallRemoteVideoElement.current, stream)
+
+                      // Hide remote video placeholder
+                      dispatch.currentCall.updateCurrentCall({
+                        showRemoteVideoPlaceHolder: false,
+                      })
                     }
                   }
                 },
@@ -555,6 +583,10 @@ export const WebRTC: FC<WebRTCProps> = ({
             // Activate webrtc connection alert
             dispatch.alerts.setAlert('webrtc_down')
           },
+        })
+        // Set janus instance to the store
+        dispatch.webrtc.updateWebRTC({
+          janusInstance,
         })
       },
     })
@@ -645,6 +677,34 @@ export const WebRTC: FC<WebRTCProps> = ({
       }, 10000)
     }
   }, [reload, connectionReturned])
+
+  // Manage media devices (audio/video)
+  useEffect(() => {
+    const getMediaDevices = () => {
+      if (navigator && navigator?.mediaDevices && navigator?.mediaDevices?.enumerateDevices) {
+        navigator?.mediaDevices
+          .enumerateDevices()
+          .then((deviceInfos) => {
+            dispatch.mediaDevices.updateMediaDevices(deviceInfos)
+          })
+          .catch((error) => {
+            console.error('Error fetching devices:', error)
+          })
+      } else {
+        console.warn('MediaDevices API not supported in this browser or context')
+        dispatch.mediaDevices.updateMediaDevices([])
+      }
+    }
+    getMediaDevices()
+
+    if (navigator && navigator?.mediaDevices) {
+      navigator?.mediaDevices?.addEventListener('devicechange', getMediaDevices)
+
+      return () => {
+        navigator?.mediaDevices?.removeEventListener('devicechange', getMediaDevices)
+      }
+    }
+  }, [])
 
   useEventListener('phone-island-attach', (data) => {
     initWebRTC()
