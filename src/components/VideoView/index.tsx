@@ -739,7 +739,7 @@ export const VideoView: FC<VideoViewProps> = () => {
     const { remoteScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false })
-    eventDispatch('phone-island-screen-share-leaved', {})
+    eventDispatch('phone-island-screen-share-left', {})
   }
   useEventListener('phone-island-screen-share-leaving', (data: ScreenSharingMessage) => {
     leaveScreenShare(data)

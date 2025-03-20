@@ -970,7 +970,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
-- `phone-island-screen-share-leaved` Indicates that the user successfully leaved a screen sharing initiated by the other party
+- `phone-island-screen-share-left` Indicates that the user successfully left a screen sharing initiated by the other party
 
   ```json
   {}
