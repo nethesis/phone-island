@@ -903,7 +903,7 @@ export const VideoView: FC<VideoViewProps> = () => {
           <div
             className={`${
               !isUiShown && 'pi-opacity-0 pi-pointer-events-none'
-            } pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl pi-transition-all`}
+            } pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-transition-all`}
           >
             <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-5'>
               {/* mute button */}
