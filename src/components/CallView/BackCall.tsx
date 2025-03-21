@@ -29,11 +29,10 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const { active: screenShareActive, role: screenShareRole } = useSelector(
     (state: RootState) => state.screenShare,
   )
-  const { isOpen } = useSelector((state: RootState) => state.island)
   const { isActive, usersList, conferenceStartTime }: any = useSelector(
     (state: RootState) => state.conference,
-   )
- 
+  )
+
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
     // Handle call switch during transfer
