@@ -38,7 +38,6 @@ import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
 import Dropdown from '../Dropdown'
-import { getAvailableDevices } from '../../utils/deviceUtils'
 
 export interface VideoViewProps {}
 
@@ -71,7 +70,6 @@ export const VideoView: FC<VideoViewProps> = () => {
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
-  const allUsersInfo = useSelector((state: RootState) => state.users)
   const userInfo = store.getState().currentUser
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUiShown, setUiShown] = useState(false)
