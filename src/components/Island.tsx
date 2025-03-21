@@ -43,6 +43,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   // Get audioPlayerLoop value from player store
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   // The Container reference
   const islandContainerRef = useRef<any>(null)
@@ -99,7 +100,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         view === 'player' ||
         view === 'recorder' ||
         view === 'physicalPhoneRecorder' ||
-        'waitingConference') &&
+        (view === 'waitingConference' && isActive)) &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>

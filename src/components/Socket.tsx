@@ -566,7 +566,14 @@ export const Socket: FC<SocketProps> = ({
         }
       })
 
-      socket.current.on('callWebrtc', (res: any) => {})
+      socket.current.on('callWebrtc', (res: any) => {
+        // On call event from socket dispatch the call start event
+        eventDispatch('phone-island-call-start', { number: res })
+        // TODO - Add the change view logic
+        // setTimeout(() => {
+        //   store.dispatch.island.setIslandView('waitingConference')
+        // }, 1000)
+      })
     }
 
     initSocketConnection()

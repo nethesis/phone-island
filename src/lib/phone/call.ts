@@ -362,9 +362,6 @@ export async function startConference() {
             paused: false,
           })
 
-          // Play the remote audio element
-          store.dispatch.player.playRemoteAudio()
-
           eventDispatch('phone-island-call-conferenced', {})
           return true
         }

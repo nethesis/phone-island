@@ -2747,6 +2747,7 @@ var Janus = (function (factory) {
                 // Standard RID
                 Janus.log('Enabling rid-based simulcasting:', nt)
                 let maxBitrates = getMaxBitrates(track.simulcastMaxBitrates)
+                if (!config.myStream) config.myStream = new MediaStream()
                 transceiver = config.pc.addTransceiver(nt, {
                   direction: 'sendrecv',
                   streams: [config.myStream],
@@ -2776,6 +2777,7 @@ var Janus = (function (factory) {
               } else {
                 // Firefox-based RID, based on https://gist.github.com/voluntas/088bc3cc62094730647b
                 Janus.log('Enabling Simulcasting for Firefox (RID)')
+                if (!config.myStream) config.myStream = new MediaStream()
                 transceiver = config.pc.addTransceiver(nt, {
                   direction: 'sendrecv',
                   streams: [config.myStream],
@@ -2805,6 +2807,7 @@ var Janus = (function (factory) {
               }
             } else {
               Janus.log('Enabling SVC (' + track.svc + '):', nt)
+              if (!config.myStream) config.myStream = new MediaStream()
               transceiver = config.pc.addTransceiver(nt, {
                 direction: 'sendrecv',
                 streams: [config.myStream],

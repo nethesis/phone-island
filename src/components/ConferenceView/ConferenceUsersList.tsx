@@ -54,7 +54,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
         {usersList && Object.keys(usersList).length > 0 ? (
           Object.values(usersList).map((user) => (
             <div
-              key={user?.id}
+              key={`${user?.id}-${user?.extenId}`}
               className='pi-flex pi-items-center pi-justify-between pi-py-2 pi-px-3 pi-bg-gray-50 dark:pi-bg-gray-900 pi-rounded-lg'
             >
               <div className='pi-flex pi-items-center pi-gap-3 pi-truncate'>
@@ -81,13 +81,21 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
               </div>
               {isOwnerInside ? (
                 <>
-                  <Button variant='transparent'>
+                  <Button
+                    variant='transparent'
+                    data-tooltip-id='conference-user-actions'
+                    data-tooltip-content={t('Conference.Mute participant')}
+                  >
                     <FontAwesomeIcon
                       className='pi-h-6 pi-w-6 pi-text-gray-600 dark:pi-text-gray-300'
                       icon={faMicrophone}
                     />
                   </Button>
-                  <Button variant='transparent'>
+                  <Button
+                    variant='transparent'
+                    data-tooltip-id='conference-user-actions'
+                    data-tooltip-content={t('Conference.Remove participant')}
+                  >
                     <FontAwesomeIcon
                       className='pi-h-6 pi-w-6 pi-text-gray-600 dark:pi-text-gray-300'
                       icon={faTrash}

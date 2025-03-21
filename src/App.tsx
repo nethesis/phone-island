@@ -298,6 +298,16 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-sideview-close', {})
   })
 
+  useEventListener('phone-island-conference-list-open', () => {
+    store.dispatch.island.toggleConferenceList(true)
+    eventDispatch('phone-island-conference-list-opened', {})
+  })
+
+  useEventListener('phone-island-conference-list-close', () => {
+    store.dispatch.island.toggleConferenceList(false)
+    eventDispatch('phone-island-conference-list-closed', {})
+  })
+
   return (
     <>
       <Provider store={store}>

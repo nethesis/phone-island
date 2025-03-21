@@ -138,14 +138,13 @@ const Actions: FC = () => {
 
   const beginConference = () => {
     // Update island store and set conference list view to true
-    dispatch.island.toggleConferenceList(isConferenceList ? false : true)
+    eventDispatch('phone-island-conference-list-open', {})
     // Set the island view to transfer list
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
     }
-    eventDispatch('phone-island-call-conference-list-opened', {})
   }
 
   const addUserToConference = async () => {

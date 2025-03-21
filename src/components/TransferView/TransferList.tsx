@@ -16,12 +16,13 @@ import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { store } from '../../store'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
 
 export const TransferListView: FC<TransferListViewProps> = () => {
-  const { isOpen, isConferenceList } = useSelector((state: RootState) => state.island)
+  const { isOpen } = useSelector((state: RootState) => state.island)
   const { endpoints } = useSelector((state: RootState) => state.users)
   const { username } = useSelector((state: RootState) => state.currentUser)
 
@@ -119,9 +120,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }, [isOpen])
 
   function handleBackClick() {
+    const { isConferenceList } = store.getState().island
     if (isConferenceList) {
       // Close the conference list
-      dispatch.island.toggleConferenceList(false)
+      eventDispatch('phone-island-conference-list-close', {})
     } else {
       // Unpause the current call
       unpauseCurrentCall()
@@ -134,13 +136,14 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const waitingConferenceView = (numberToCall) => {
     // show current waiting user in back view ( only on first)
     dispatch.conference.setConferenceActive(true)
+    // start new call with selected user from conference list
     eventDispatch('phone-island-call-start', { number: numberToCall })
   }
 
   const clickTransferOrConference = async (number: string) => {
+    const { isConferenceList } = store.getState().island
     if (isConferenceList) {
-      // Put current user inside conference mode
-      // TO DO: check if is firt user in conference
+      // Put current call user inside conference mode
       const conferenceStarted = await startConference()
       if (conferenceStarted) {
         // Back to call view after successful conference start
