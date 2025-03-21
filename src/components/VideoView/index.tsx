@@ -780,8 +780,6 @@ export const VideoView: FC<VideoViewProps> = () => {
     dispatch.screenShare.update({ active: false })
     plugin.detach()
 
-    console.log('aaa videoroom plugin detached') ////
-
     // send message to websocket to tell the other user the screen share has stopped
     const { socket } = store.getState().websocket
     const { username: destUsername } = store.getState().currentCall

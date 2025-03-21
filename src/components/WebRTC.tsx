@@ -381,8 +381,6 @@ export const WebRTC: FC<WebRTCProps> = ({
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()
 
-                        console.log('aaa hanging up, view', view) ////
-
                         // Stop screen sharing if active
                         const {
                           active: screenShareActive,
@@ -396,8 +394,6 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.stopAllTracks(remoteScreenStream)
                           dispatch.screenShare.update({ active: false })
                           plugin.detach()
-
-                          console.log('aaa screenshare detached') ////
                         }
                         break
 
