@@ -37,6 +37,7 @@ const defaultState = {
   isLocalVideoEnabled: false,
   showRemoteVideoPlaceHolder: true,
   hasVideoTrackAdded: false,
+  isStartingVideoCall: false,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -204,4 +205,5 @@ export interface CurrentCallTypes {
   isLocalVideoEnabled?: boolean
   hasVideoTrackAdded?: boolean
   showRemoteVideoPlaceHolder?: boolean
+  isStartingVideoCall?: boolean
 }

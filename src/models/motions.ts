@@ -71,6 +71,7 @@ const defaultState = {
       expanded: {
         width: 600,
         height: 480,
+        padding: 0,
       },
       collapsed: commonCollapsed,
     },

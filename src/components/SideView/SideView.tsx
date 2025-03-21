@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { getAvailableDevices } from '../../utils/deviceUtils'
-import { eventDispatch } from '../../utils'
 import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
 
@@ -35,23 +34,18 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const goToVideoCall = () => {
     closeSideViewAndLaunchEvent('video')
 
-    // wait for island transition to finish
-    setTimeout(() => {
-      store.dispatch.currentCall.updateCurrentCall({
-        isLocalVideoEnabled: true,
-      })
-
-      eventDispatch('phone-island-video-enable', {})
-    }, 500)
+    store.dispatch.currentCall.updateCurrentCall({
+      isLocalVideoEnabled: true,
+      isStartingVideoCall: true,
+    })
   }
 
   const goToScreenSharing = () => {
     closeSideViewAndLaunchEvent('video')
 
-    // wait for island transition to finish
-    setTimeout(() => {
-      eventDispatch('phone-island-screen-share-start', {})
-    }, 500)
+    store.dispatch.screenShare.update({
+      isStartingScreenShare: true,
+    })
   }
 
   useEffect(() => {

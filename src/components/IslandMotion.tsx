@@ -100,7 +100,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           size = {
             width: variants.video.expanded.width,
             height: variants.video.expanded.height,
-            padding: 0,
+            padding: variants.video.expanded.padding,
           }
         } else {
           size = {
@@ -153,7 +153,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
       padding: isOpen
         ? size.padding != undefined
-          ? size.padding
+          ? `${size.padding}px`
           : `${padding_expanded}px`
         : `${padding_x_collapsed}px ${padding_y_collapsed}px`,
     }
