@@ -104,7 +104,10 @@
   "Conference": {
     "Conference": "Conference",
     "Add participant": "Add participant",
+    "Remove participant": "Remove participant",
     "Waiting for the conference": "Waiting for the conference",
-    "Start conference": "Start conference"
+    "Start conference": "Start conference",
+    "Unmute participant": "Unmute participant",
+    "Mute participant": "Mute participant"
   }
 }

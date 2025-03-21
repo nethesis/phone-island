@@ -16,6 +16,6 @@ export function isBackCallActive() {
     (view === 'video' && isOpen) ||
     transferring ||
     //check if conference is active
-    isActive
+    (isActive && view !== 'waitingConference')
   )
 }

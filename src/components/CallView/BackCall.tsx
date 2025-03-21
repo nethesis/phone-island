@@ -81,15 +81,12 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
               </div>
             )}
             <div className='pi-w-16 pi-flex pi-justify-end'>
-              <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+              {!isActive ? (
+                <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+              ) : (
+                <AvatarGroup usersList={usersList || {}} maxAvatars={5} />
+              )}
             </div>
-          </div>
-          <div>
-            {!isActive ? (
-              <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
-            ) : (
-              <AvatarGroup usersList={usersList || {}} maxAvatars={5} />
-            )}
           </div>
         </motion.div>
       )}

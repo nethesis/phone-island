@@ -104,7 +104,10 @@
   "Conference": {
     "Conference": "Conferenza",
     "Add participant": "Aggiungi partecipante",
+    "Remove participant": "Rimuovi partecipante",
     "Waiting for the conference": "In attesa della conferenza",
-    "Start conference": "Inizia conferenza"
+    "Start conference": "Inizia conferenza",
+    "Unmute participant": "Attiva audio partecipante",
+    "Mute participant": "Disattiva audio partecipante"
   }
 }

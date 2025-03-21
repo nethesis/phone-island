@@ -25,6 +25,9 @@ import {
   startConf,
   joinMyConf,
   endConf,
+  muteUserConf,
+  unmuteUserConf,
+  hangupUserConf,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -416,6 +419,51 @@ export async function endConference() {
           eventDispatch('phone-island-owner-conference-finished', {})
           return true
         }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function muteUserConference(confId, userId, isAlreadyMuted) {
+  if (confId === '' || userId === '') {
+    return false
+  }
+
+  const muteUnmuteUserInformation = {
+    confId: confId?.toString(),
+    userId: userId?.toString(),
+  }
+
+  try {
+    // Check if the user is already muted
+    const actionFunction = isAlreadyMuted ? unmuteUserConf : muteUserConf
+    const result = await actionFunction(muteUnmuteUserInformation)
+    return !!result
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+}
+
+export async function removeUserConference(conferenceId, extensionId) {
+  if (conferenceId !== '' && extensionId !== '') {
+    const removeUserInformation = {
+      confId: conferenceId?.toString(),
+      extenId: extensionId?.toString(),
+    }
+
+    if (removeUserInformation) {
+      try {
+        const result = await hangupUserConf(removeUserInformation)
+        if (result) {
+          return true
+        }
+
         return false
       } catch (e) {
         console.error(e)

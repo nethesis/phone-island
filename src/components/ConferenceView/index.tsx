@@ -62,7 +62,8 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
             <Timer
               size='small'
               startTime={String(Math?.floor(conferenceStartTime / 1000))}
-              isHome
+              isNotAlwaysWhite
+              isInsideConference
             />
           )}
         </div>

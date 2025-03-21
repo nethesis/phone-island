@@ -76,7 +76,7 @@ export const conference = createModel<RootModel>()({
 
       return {
         ...state,
-        usersList: payload,
+        usersList: updatedUsersList,
         ownerInformations: owner,
         isActive: isActive,
         conferenceStartTime: isActive ? conferenceStartTime : null,
