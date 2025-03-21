@@ -35,7 +35,9 @@ const defaultState = {
   transferCalls: new Array(),
   ownerExtension: '',
   isRecording: false,
-  isVideoEnabled: false,
+  isLocalVideoEnabled: false,
+  showRemoteVideoPlaceHolder: true,
+  hasVideoTrackAdded: false,
   chDest: new Array(),
   chSource: new Array(),
 }
@@ -108,8 +110,12 @@ export const currentCall = createModel<RootModel>()({
     reset: () => {
       return defaultState
     },
-    setVideoEnabled: (state, payload: boolean) => {
-      state.isVideoEnabled = payload
+    setLocalVideoEnabled: (state, payload: boolean) => {
+      state.isLocalVideoEnabled = payload
+      return state
+    },
+    setVideoTrackAdded: (state, payload: boolean) => {
+      state.hasVideoTrackAdded = payload
       return state
     },
     updateConferencing: (state, payload: boolean) => {
@@ -231,7 +237,9 @@ export interface CurrentCallTypes {
   transferCalls?: TransferCallsTypes[]
   ownerExtension?: string
   isRecording?: boolean
-  isVideoEnabled?: boolean
+  isLocalVideoEnabled?: boolean
+  hasVideoTrackAdded?: boolean
+  showRemoteVideoPlaceHolder?: boolean
   chDest?: any
   chSource?: any
 }

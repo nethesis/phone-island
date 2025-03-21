@@ -161,14 +161,6 @@ const CallTemplate = (args: any) => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [number])
 
-  const enableVideo = () => {
-    eventDispatch('phone-island-video-enable', { addVideoTrack: false })
-  }
-
-  const disableVideo = () => {
-    eventDispatch('phone-island-video-disable', {})
-  }
-
   //example of object to play audio file
   let objectPlayAudioFile = {
     type: 'announcement',
@@ -249,18 +241,18 @@ const CallTemplate = (args: any) => {
 
               <Button
                 variant='default'
+                onClick={() => eventDispatch('phone-island-screen-share-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Screen share status
+              </Button>
+              
+              <Button
+                variant='default'
                 onClick={() => eventDispatch('phone-island-conference-status', {})}
                 className='pi-text-sm pi-w-full'
               >
                 Conference status
-              </Button>
-
-              <Button variant='red' onClick={() => enableVideo()} className='pi-text-sm pi-w-full'>
-                Enable camera
-              </Button>
-
-              <Button variant='red' onClick={() => disableVideo()} className='pi-text-sm pi-w-full'>
-                Disable camera
               </Button>
 
               <Button

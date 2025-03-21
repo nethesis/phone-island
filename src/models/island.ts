@@ -97,7 +97,6 @@ type IslandViewType =
   | 'physicalPhoneRecorder'
   | 'settings'
   | 'video'
-  | 'screenShare'
   | 'conference'
   | 'switchDevice'
   | 'waitingConference'

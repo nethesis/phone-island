@@ -19,9 +19,9 @@ import IslandDrag from './IslandDrag'
 import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
-import { VideoView } from './VideoView'
 import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
+import VideoView from './VideoView'
 import { WaitingConferenceView } from './ConferenceView'
 
 /**

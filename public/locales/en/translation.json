@@ -11,12 +11,13 @@
     "Enter a phone number": "Enter a phone number",
     "Physical phone": "Physical phone",
     "Close": "Close",
-    "Back": "Back"
+    "Back": "Back",
+    "More actions": "More actions"
   },
   "Tooltip": {
     "Hangup": "Hangup",
-    "Pause": "Pause",
-    "Play": "Play",
+    "Pause": "Hold",
+    "Play": "Resume",
     "Mute": "Mute",
     "Unmute": "Unmute",
     "Transfer": "Transfer",
@@ -47,6 +48,8 @@
     "Switch device": "Switch device",
     "Reload": "Reload",
     "Close alert": "Close alert",
+    "Share screen": "Share screen",
+    "Stop sharing": "Stop sharing",
     "Disable camera": "Disable camera",
     "Enter fullscreen": "Enter fullscreen",
     "Exit fullscreen": "Exit fullscreen"
@@ -91,6 +94,9 @@
   "Switch device": {
     "Switch device": "Switch device",
     "Switch information": "The call will continue in the selected device."
+  },
+  "Screen sharing": {
+    "Sharing": "Sharing"
   },
   "Phone Island": {
     "Mobile app": "Mobile app"
