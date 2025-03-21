@@ -14,7 +14,6 @@ import { changeOperatorStatus } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
-import { ScreenSharingMessage } from './components/VideoView'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -286,29 +285,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       top: isBackCallActive() ? '40px' : '0px',
     }
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
-  })
-
-  // join a screen share initiated by the other party
-  useEventListener('phone-island-screen-share-join', (data: ScreenSharingMessage) => {
-    store.dispatch.island.setIslandView('video')
-
-    // wait for island transition to finish
-    setTimeout(() => {
-      eventDispatch('phone-island-screen-share-joining', data)
-    }, 500)
-  })
-
-  // leave a screen share initiated by the other party
-  useEventListener('phone-island-screen-share-leave', (data: ScreenSharingMessage) => {
-    // ensure we are in the screen share view to properly handle the event
-    if (store.getState().island.view !== 'video') {
-      store.dispatch.island.setIslandView('video')
-    }
-
-    // wait for island transition to finish
-    setTimeout(() => {
-      eventDispatch('phone-island-screen-share-leaving', data)
-    }, 500)
   })
 
   // Listen for the call end event and set the island size to 0

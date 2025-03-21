@@ -59,13 +59,16 @@ export const VideoView: FC<VideoViewProps> = () => {
     showRemoteVideoPlaceHolder,
     hasVideoTrackAdded,
     displayName,
+    isStartingVideoCall,
   } = useSelector((state: RootState) => state.currentCall)
   const {
-    source,
     localTracks,
     localVideos,
     role: screenShareRole,
     active: screenShareActive,
+    isStartingScreenShare,
+    isJoiningScreenShare,
+    isLeavingScreenShare,
   } = useSelector((state: RootState) => state.screenShare)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
@@ -110,6 +113,46 @@ export const VideoView: FC<VideoViewProps> = () => {
       }
     }
   }, [])
+
+  // starting videocall
+  useEffect(() => {
+    if (isStartingVideoCall) {
+      enableVideo()
+      dispatch.currentCall.updateCurrentCall({
+        isStartingVideoCall: false,
+      })
+    }
+  }, [isStartingVideoCall])
+
+  // starting screen sharing
+  useEffect(() => {
+    if (isStartingScreenShare) {
+      initAndStartScreenShare()
+      store.dispatch.screenShare.update({
+        isStartingScreenShare: false,
+      })
+    }
+  }, [isStartingScreenShare])
+
+  // joining screen sharing
+  useEffect(() => {
+    if (isJoiningScreenShare) {
+      initAndJoinScreenShare()
+      store.dispatch.screenShare.update({
+        isJoiningScreenShare: false,
+      })
+    }
+  }, [isJoiningScreenShare])
+
+  // leaving screen sharing
+  useEffect(() => {
+    if (isLeavingScreenShare) {
+      leaveScreenShare()
+      store.dispatch.screenShare.update({
+        isLeavingScreenShare: false,
+      })
+    }
+  }, [isLeavingScreenShare])
 
   // isOpen changed
   useEffect(() => {
@@ -473,7 +516,12 @@ export const VideoView: FC<VideoViewProps> = () => {
         const { role } = store.getState().screenShare
 
         if (role === 'publisher') {
-          shareScreen()
+          // trigger event to nethlink
+          eventDispatch('phone-island-screen-share-initialized', {})
+
+          setTimeout(function () {
+            shareScreen()
+          }, 500)
         } else if (role === 'listener') {
           joinScreenShare()
         }
@@ -631,7 +679,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
             // Listen for the 'ended' event on the screen-sharing track
             track.addEventListener('ended', () => {
-              eventDispatch('phone-island-screen-share-stop', {})
+              stopScreenShare()
             })
           }
         }
@@ -709,14 +757,11 @@ export const VideoView: FC<VideoViewProps> = () => {
     initAndStartScreenShare()
   })
 
-  const initAndJoinScreenShare = (joinData: ScreenSharingMessage) => {
-    dispatch.screenShare.update({ active: true, role: 'listener', room: joinData.roomId })
+  const initAndJoinScreenShare = () => {
+    dispatch.screenShare.update({ active: true, role: 'listener' })
     initScreenShare()
     eventDispatch('phone-island-screen-share-joined', {})
   }
-  useEventListener('phone-island-screen-share-joining', (data: ScreenSharingMessage) => {
-    initAndJoinScreenShare(data)
-  })
 
   const joinScreenShare = () => {
     const { room } = store.getState().screenShare
@@ -733,15 +778,12 @@ export const VideoView: FC<VideoViewProps> = () => {
     plugin.send({ message: joinMessage })
   }
 
-  const leaveScreenShare = (leaveData: ScreenSharingMessage) => {
+  const leaveScreenShare = () => {
     const { remoteScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false })
     eventDispatch('phone-island-screen-share-left', {})
   }
-  useEventListener('phone-island-screen-share-leaving', (data: ScreenSharingMessage) => {
-    leaveScreenShare(data)
-  })
 
   const handleMouseMove = () => {
     setUiShown(true)
@@ -801,7 +843,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const pauseCall = () => {
     pauseCurrentCall()
-    eventDispatch('phone-island-screen-share-stop', {})
+    stopScreenShare()
   }
 
   return (
@@ -944,7 +986,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 !screenShareActive && (
                   <Button
                     variant='default'
-                    onClick={() => eventDispatch('phone-island-screen-share-start', {})}
+                    onClick={() => initAndStartScreenShare()}
                     data-tooltip-id='tooltip-start-screen-share'
                     data-tooltip-content={t('Tooltip.Share screen') || ''}
                   >
@@ -956,7 +998,7 @@ export const VideoView: FC<VideoViewProps> = () => {
               {screenShareActive && screenShareRole === 'publisher' && (
                 <Button
                   variant='default'
-                  onClick={() => eventDispatch('phone-island-screen-share-stop', {})}
+                  onClick={() => stopScreenShare()}
                   data-tooltip-id='tooltip-stop-screen-share'
                   data-tooltip-content={t('Tooltip.Stop sharing')}
                 >

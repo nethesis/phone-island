@@ -25,11 +25,16 @@ const defaultState: IslandTypes = {
 export const island = createModel<RootModel>()({
   state: defaultState,
   reducers: {
-    setIslandView: (state, payload: IslandViewType | null) => {
-      return {
-        ...state,
-        view: payload,
-        previousView: state?.view,
+    setIslandView: (state, newView: IslandViewType | null) => {
+      if (newView === state?.view) {
+        // Don't change view if it's the same
+        return state
+      } else {
+        return {
+          ...state,
+          view: newView,
+          previousView: state?.view,
+        }
       }
     },
     toggleIsOpen: (state, payload: boolean) => {
