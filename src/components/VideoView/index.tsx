@@ -776,10 +776,13 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const stopScreenShare = () => {
-    const { localScreenStream } = store.getState().screenShare
+    const { plugin, localScreenStream } = store.getState().screenShare
 
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
+    plugin.detach()
+
+    console.log('aaa videoroom plugin detached') ////
 
     // send message to websocket to tell the other user the screen share has stopped
     const { socket } = store.getState().websocket
@@ -793,6 +796,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       destUser: destUsername,
       callUser: username,
     } as ScreenSharingMessage)
+
     eventDispatch('phone-island-screen-share-stopped', {})
   }
   useEventListener('phone-island-screen-share-stop', () => {

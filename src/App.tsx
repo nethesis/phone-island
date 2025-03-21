@@ -319,9 +319,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     }
     eventDispatch('phone-island-size-change', { sizeInformation })
     eventDispatch('phone-island-sideview-close', {})
-
-    // reset phone island view
-    store.dispatch.island.setIslandView('call')
   })
 
   return (
