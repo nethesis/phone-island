@@ -67,6 +67,23 @@ export const island = createModel<RootModel>()({
         isFullScreen: payload,
       }
     },
+    resetIslandStore: (state) => {
+      // Keep beginning position
+      const preservedStartPosition = state.startPosition
+      // Keep view if waitingConference
+      const preservedView = state.view === 'waitingConference' ? state.view : defaultState.view
+      const avoidToShow = state.avoidToShow
+
+      return {
+        ...defaultState,
+        startPosition: preservedStartPosition,
+        view: preservedView,
+        avoidToShow: avoidToShow,
+        // Keep previousView if waitingConference
+        previousView:
+          state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
+      }
+    },
   },
   effects: (dispatch) => ({
     handleToggleIsOpen: (_: void, rootState) => {
@@ -99,6 +116,7 @@ type IslandViewType =
   | 'video'
   | 'conference'
   | 'switchDevice'
+  | 'waitingConference'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
 
 interface IslandTypes {
