@@ -587,7 +587,7 @@ export const Socket: FC<SocketProps> = ({
         eventDispatch('phone-island-call-start', { number: res })
         setTimeout(() => {
           store.dispatch.island.setIslandView('waitingConference')
-        }, 400)
+        }, 600)
       })
     }
 
