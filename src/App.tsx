@@ -253,6 +253,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Player status debug informations: ', playerInformation)
   })
 
+  useEventListener('phone-island-conference-status', () => {
+    const conferenceInformation = store.getState().conference
+    console.log('Webrtc status debug informations: ', conferenceInformation)
+  })
+
   useEventListener('phone-island-screen-share-status', () => {
     const screenShareInformation = store.getState().screenShare
     console.log('Screen share status debug information: ', screenShareInformation)
@@ -322,6 +327,16 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
     // reset phone island view
     store.dispatch.island.setIslandView('call')
+  })
+
+  useEventListener('phone-island-conference-list-open', () => {
+    store.dispatch.island.toggleConferenceList(true)
+    eventDispatch('phone-island-conference-list-opened', {})
+  })
+
+  useEventListener('phone-island-conference-list-close', () => {
+    store.dispatch.island.toggleConferenceList(false)
+    eventDispatch('phone-island-conference-list-closed', {})
   })
 
   return (

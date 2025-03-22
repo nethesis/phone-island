@@ -202,7 +202,7 @@ const CallView: FC<CallViewProps> = () => {
                     </span>
                     {accepted ? (
                       !isPhysical() ? (
-                        <Timer startTime={startTime} isHome />
+                        <Timer startTime={startTime} isNotAlwaysWhite />
                       ) : (
                         landlinePhoneDiv()
                       )
@@ -215,7 +215,6 @@ const CallView: FC<CallViewProps> = () => {
                 ) : intrudeListenStatus?.isListen ? (
                   <StyledDetails>
                     <span className='pi-justify-center pi-w-fit pi-relative pi-inline-block pi-font-bold pi-text-base'>
-                      {' '}
                       {t('Common.Listen')}
                       {intrudeListenStatus?.isListenExtension
                         ? ` - ${intrudeListenStatus?.isListenExtension}`
@@ -223,7 +222,7 @@ const CallView: FC<CallViewProps> = () => {
                     </span>
                     {accepted ? (
                       !isPhysical() ? (
-                        <Timer startTime={startTime} isHome />
+                        <Timer startTime={startTime} isNotAlwaysWhite />
                       ) : (
                         landlinePhoneDiv()
                       )
@@ -238,7 +237,7 @@ const CallView: FC<CallViewProps> = () => {
                     <DisplayName />
                     {accepted ? (
                       !isPhysical() ? (
-                        <Timer startTime={startTime} isHome />
+                        <Timer startTime={startTime} isNotAlwaysWhite />
                       ) : (
                         landlinePhoneDiv()
                       )
@@ -251,7 +250,7 @@ const CallView: FC<CallViewProps> = () => {
               {/* The display name when collepsed */}
               {!isOpen && !accepted && <DisplayName />}
               {/* The timer when collapsed */}
-              {!isOpen && accepted && <Timer startTime={startTime} isHome />}
+              {!isOpen && accepted && <Timer startTime={startTime} isNotAlwaysWhite />}
               {accepted && isRecording ? (
                 pulseIcon('red')
               ) : accepted && remoteAudioStream && !isPhysical() ? (

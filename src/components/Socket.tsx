@@ -167,6 +167,8 @@ export const Socket: FC<SocketProps> = ({
                         extensions[conv.counterpartNum] &&
                         extensions[conv.counterpartNum].username
                       }` || '',
+                    chDest: conv?.chDest || {},
+                    chSource: conv?.chSource || {},
                   })
                   // Update the current call informations for physical devices
                   dispatch.currentCall.checkAcceptedUpdate({
@@ -558,6 +560,34 @@ export const Socket: FC<SocketProps> = ({
         }
 
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
+      })
+
+      socket.current.on('confBridgeUpdate', (res: any) => {
+        if (res && res?.users) {
+          // Get User informations
+          const conferenceId = res?.id
+          const conferenceUsers = res?.users
+
+          store.dispatch.conference.updateConferenceUsersList(conferenceUsers)
+
+          store.dispatch.conference.updateConferenceId(conferenceId)
+        }
+      })
+
+      socket.current.on('confBridgeEnd', (res: any) => {
+        if (res && res?.id) {
+          // Reset the conference store when conference ends
+          store.dispatch.conference.resetConference()
+          eventDispatch('phone-island-conference-finished', {})
+        }
+      })
+
+      socket.current.on('callWebrtc', (res: any) => {
+        // On call event from socket dispatch the call start event
+        eventDispatch('phone-island-call-start', { number: res })
+        setTimeout(() => {
+          store.dispatch.island.setIslandView('waitingConference')
+        }, 600)
       })
     }
 

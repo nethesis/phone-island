@@ -9,8 +9,15 @@ import { eventDispatch } from '../utils'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
-  const { incoming, outgoing, accepted, transferring, incomingWebRTC, incomingSocket } =
-    useSelector((state: RootState) => state.currentCall)
+  const {
+    incoming,
+    outgoing,
+    accepted,
+    transferring,
+    incomingWebRTC,
+    incomingSocket,
+    conferencing,
+  } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
   const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
     (state: RootState) => state.island,
@@ -37,7 +44,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     switch (view) {
       case 'call':
         if (isOpen) {
-          if (accepted && transferring) {
+          if (accepted && transferring && conferencing) {
             if (actionsExpanded) {
               size = {
                 width: variants.call.expanded.transfer.actionsExpanded.width,
@@ -135,6 +142,18 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           : {
               width: variants.video.collapsed.width,
               height: variants.video.collapsed.height,
+            }
+        break
+
+      case 'waitingConference':
+        size = isOpen
+          ? {
+              width: variants.waitingConference.expanded.width,
+              height: variants.waitingConference.expanded.height,
+            }
+          : {
+              width: variants.waitingConference.collapsed.width,
+              height: variants.waitingConference.collapsed.height,
             }
         break
     }

@@ -27,6 +27,7 @@ const defaultState = {
   keypadValue: '',
   conversationId: '',
   transferring: false,
+  conferencing: false,
   transferringName: '',
   transferringNumber: '',
   transferringStartTime: '',
@@ -37,6 +38,8 @@ const defaultState = {
   isLocalVideoEnabled: false,
   showRemoteVideoPlaceHolder: true,
   hasVideoTrackAdded: false,
+  chDest: new Array(),
+  chSource: new Array(),
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -115,6 +118,12 @@ export const currentCall = createModel<RootModel>()({
       state.hasVideoTrackAdded = payload
       return state
     },
+    updateConferencing: (state, payload: boolean) => {
+      return {
+        ...state,
+        conferencing: payload,
+      }
+    },
   },
   effects: (dispatch) => ({
     checkIncomingUpdatePlay: (payload: CurrentCallTypes, rootState) => {
@@ -175,6 +184,32 @@ export type TransferCallsTypes = {
   startTime: string
 }
 
+export type chDestTypes = {
+  type: 'dest'
+  channel: string
+  callerNum: string
+  startTime: number
+  callerName: string
+  bridgedNum: string
+  bridgedName: string
+  inConference: boolean
+  channelStatus: string
+  bridgedChannel: string
+}
+
+export type chSourceTypes = {
+  type: 'source'
+  channel: string
+  callerNum: string
+  startTime: number
+  callerName: string
+  bridgedNum: string
+  bridgedName: string
+  inConference: boolean
+  channelStatus: string
+  bridgedChannel: string
+}
+
 export interface CurrentCallTypes {
   displayName?: string
   username?: string
@@ -194,6 +229,7 @@ export interface CurrentCallTypes {
   paused?: boolean
   conversationId?: string
   transferring?: boolean
+  conferencing?: boolean
   transferringName?: string
   transferringNumber?: string
   transferringStartTime?: string
@@ -204,4 +240,6 @@ export interface CurrentCallTypes {
   isLocalVideoEnabled?: boolean
   hasVideoTrackAdded?: boolean
   showRemoteVideoPlaceHolder?: boolean
+  chDest?: any
+  chSource?: any
 }

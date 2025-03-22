@@ -10,6 +10,7 @@ import { TransferCallsTypes } from '../../models/currentCall'
 import { faDisplay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation } from 'react-i18next'
+import AvatarGroup from '../AvatarGroup'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const {
@@ -27,6 +28,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const { isOpen, previousView } = useSelector((state: RootState) => state.island)
   const { active: screenShareActive, role: screenShareRole } = useSelector(
     (state: RootState) => state.screenShare,
+  )
+  const { isActive, usersList, conferenceStartTime }: any = useSelector(
+    (state: RootState) => state.conference,
   )
 
   useEffect(() => {
@@ -64,7 +68,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
                 isOpen && previousView !== 'video' ? 'pi-w-44' : 'pi-w-16'
               }`}
             >
-              {transferring ? transferringName : displayName}
+              {transferring ? transferringName : isActive ? 'Waiting' : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
@@ -77,7 +81,11 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
               </div>
             )}
             <div className='pi-w-16 pi-flex pi-justify-end'>
-              <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+              {!isActive ? (
+                <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
+              ) : (
+                <AvatarGroup usersList={usersList || {}} maxAvatars={5} />
+              )}
             </div>
           </div>
         </motion.div>
