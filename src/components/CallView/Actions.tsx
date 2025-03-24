@@ -17,7 +17,6 @@ import {
   faPlay,
   faMicrophone,
   faMicrophoneSlash,
-  faArrowDownUpAcrossLine,
   faSquareParking,
   faChevronDown,
   faChevronUp,

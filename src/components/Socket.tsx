@@ -17,8 +17,6 @@ import {
   dispatchExtensions,
   dispatchUrlCall,
   dispatchDefaultDeviceUpdate,
-  dispatchJoinScreenShare,
-  dispatchLeaveScreenShare,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, withTimeout } from '../utils'
@@ -523,14 +521,24 @@ export const Socket: FC<SocketProps> = ({
         dispatchUrlCall(link, urlType)
       })
 
-      // `screenSharingStart` is the socket event when a user starts screen sharing
       socket.current.on('message', (data: any) => {
         switch (data.message) {
           case 'screenSharingStart':
-            dispatchJoinScreenShare(data as ScreenSharingMessage)
+            dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.setIslandView('video')
+
+            dispatch.screenShare.update({
+              isJoiningScreenShare: true,
+              room: (data as ScreenSharingMessage).roomId,
+            })
             break
           case 'screenSharingStop':
-            dispatchLeaveScreenShare(data as ScreenSharingMessage)
+            dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.setIslandView('video')
+
+            dispatch.screenShare.update({
+              isLeavingScreenShare: true,
+            })
             break
           default:
             console.warn('Socket: unknown message type ', data.message)

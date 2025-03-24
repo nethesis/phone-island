@@ -38,6 +38,7 @@ const defaultState = {
   isLocalVideoEnabled: false,
   showRemoteVideoPlaceHolder: true,
   hasVideoTrackAdded: false,
+  isStartingVideoCall: false,
   chDest: new Array(),
   chSource: new Array(),
 }
@@ -240,6 +241,7 @@ export interface CurrentCallTypes {
   isLocalVideoEnabled?: boolean
   hasVideoTrackAdded?: boolean
   showRemoteVideoPlaceHolder?: boolean
+  isStartingVideoCall?: boolean
   chDest?: any
   chSource?: any
 }
