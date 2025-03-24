@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faCompress,
   faDisplay,
   faExpand,
   faMicrophone,
@@ -37,8 +38,6 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
-import Dropdown from '../Dropdown'
-import { getAvailableDevices } from '../../utils/deviceUtils'
 
 export interface VideoViewProps {}
 
@@ -60,18 +59,20 @@ export const VideoView: FC<VideoViewProps> = () => {
     showRemoteVideoPlaceHolder,
     hasVideoTrackAdded,
     displayName,
+    isStartingVideoCall,
   } = useSelector((state: RootState) => state.currentCall)
   const {
-    source,
     localTracks,
     localVideos,
     role: screenShareRole,
     active: screenShareActive,
+    isStartingScreenShare,
+    isJoiningScreenShare,
+    isLeavingScreenShare,
   } = useSelector((state: RootState) => state.screenShare)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
-  const allUsersInfo = useSelector((state: RootState) => state.users)
   const userInfo = store.getState().currentUser
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUiShown, setUiShown] = useState(false)
@@ -112,6 +113,46 @@ export const VideoView: FC<VideoViewProps> = () => {
       }
     }
   }, [])
+
+  // starting videocall
+  useEffect(() => {
+    if (isStartingVideoCall) {
+      enableVideo()
+      dispatch.currentCall.updateCurrentCall({
+        isStartingVideoCall: false,
+      })
+    }
+  }, [isStartingVideoCall])
+
+  // starting screen sharing
+  useEffect(() => {
+    if (isStartingScreenShare) {
+      initAndStartScreenShare()
+      store.dispatch.screenShare.update({
+        isStartingScreenShare: false,
+      })
+    }
+  }, [isStartingScreenShare])
+
+  // joining screen sharing
+  useEffect(() => {
+    if (isJoiningScreenShare) {
+      initAndJoinScreenShare()
+      store.dispatch.screenShare.update({
+        isJoiningScreenShare: false,
+      })
+    }
+  }, [isJoiningScreenShare])
+
+  // leaving screen sharing
+  useEffect(() => {
+    if (isLeavingScreenShare) {
+      leaveScreenShare()
+      store.dispatch.screenShare.update({
+        isLeavingScreenShare: false,
+      })
+    }
+  }, [isLeavingScreenShare])
 
   // isOpen changed
   useEffect(() => {
@@ -475,7 +516,12 @@ export const VideoView: FC<VideoViewProps> = () => {
         const { role } = store.getState().screenShare
 
         if (role === 'publisher') {
-          shareScreen()
+          // trigger event to nethlink
+          eventDispatch('phone-island-screen-share-initialized', {})
+
+          setTimeout(function () {
+            shareScreen()
+          }, 500)
         } else if (role === 'listener') {
           joinScreenShare()
         }
@@ -633,7 +679,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
             // Listen for the 'ended' event on the screen-sharing track
             track.addEventListener('ended', () => {
-              eventDispatch('phone-island-screen-share-stop', {})
+              stopScreenShare()
             })
           }
         }
@@ -711,14 +757,11 @@ export const VideoView: FC<VideoViewProps> = () => {
     initAndStartScreenShare()
   })
 
-  const initAndJoinScreenShare = (joinData: ScreenSharingMessage) => {
-    dispatch.screenShare.update({ active: true, role: 'listener', room: joinData.roomId })
+  const initAndJoinScreenShare = () => {
+    dispatch.screenShare.update({ active: true, role: 'listener' })
     initScreenShare()
     eventDispatch('phone-island-screen-share-joined', {})
   }
-  useEventListener('phone-island-screen-share-joining', (data: ScreenSharingMessage) => {
-    initAndJoinScreenShare(data)
-  })
 
   const joinScreenShare = () => {
     const { room } = store.getState().screenShare
@@ -735,15 +778,12 @@ export const VideoView: FC<VideoViewProps> = () => {
     plugin.send({ message: joinMessage })
   }
 
-  const leaveScreenShare = (leaveData: ScreenSharingMessage) => {
+  const leaveScreenShare = () => {
     const { remoteScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false })
     eventDispatch('phone-island-screen-share-left', {})
   }
-  useEventListener('phone-island-screen-share-leaving', (data: ScreenSharingMessage) => {
-    leaveScreenShare(data)
-  })
 
   const handleMouseMove = () => {
     setUiShown(true)
@@ -776,10 +816,11 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const stopScreenShare = () => {
-    const { localScreenStream } = store.getState().screenShare
+    const { plugin, localScreenStream } = store.getState().screenShare
 
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
+    plugin.detach()
 
     // send message to websocket to tell the other user the screen share has stopped
     const { socket } = store.getState().websocket
@@ -793,6 +834,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       destUser: destUsername,
       callUser: username,
     } as ScreenSharingMessage)
+
     eventDispatch('phone-island-screen-share-stopped', {})
   }
   useEventListener('phone-island-screen-share-stop', () => {
@@ -801,7 +843,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const pauseCall = () => {
     pauseCurrentCall()
-    eventDispatch('phone-island-screen-share-stop', {})
+    stopScreenShare()
   }
 
   return (
@@ -901,7 +943,7 @@ export const VideoView: FC<VideoViewProps> = () => {
           <div
             className={`${
               !isUiShown && 'pi-opacity-0 pi-pointer-events-none'
-            } pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-3xl pi-rounded-br-3xl pi-transition-all`}
+            } pi-absolute pi-bottom-0 pi-bg-gray-950/65 pi-w-full pi-p-6 pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-transition-all`}
           >
             <div className='pi-flex pi-items-center pi-justify-center pi-gap-6 pi-mb-5'>
               {/* mute button */}
@@ -944,7 +986,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 !screenShareActive && (
                   <Button
                     variant='default'
-                    onClick={() => eventDispatch('phone-island-screen-share-start', {})}
+                    onClick={() => initAndStartScreenShare()}
                     data-tooltip-id='tooltip-start-screen-share'
                     data-tooltip-content={t('Tooltip.Share screen') || ''}
                   >
@@ -956,7 +998,7 @@ export const VideoView: FC<VideoViewProps> = () => {
               {screenShareActive && screenShareRole === 'publisher' && (
                 <Button
                   variant='default'
-                  onClick={() => eventDispatch('phone-island-screen-share-stop', {})}
+                  onClick={() => stopScreenShare()}
                   data-tooltip-id='tooltip-stop-screen-share'
                   data-tooltip-content={t('Tooltip.Stop sharing')}
                 >
@@ -964,47 +1006,60 @@ export const VideoView: FC<VideoViewProps> = () => {
                 </Button>
               )}
 
-              <Dropdown
-                buttonTooltip={t('Common.More actions')}
-                items={[
-                  {
-                    id: 'fullScreen',
-                    label: isFullscreen
-                      ? t('Tooltip.Exit fullscreen')
-                      : t('Tooltip.Enter fullscreen'),
-                    icon: faExpand,
-                    onClick: () => toggleFullScreen(),
-                  },
-                  {
-                    id: 'record',
-                    label: isRecording ? t('Tooltip.Stop recording') : t('Tooltip.Record'),
-                    icon: isRecording ? faStop : faRecord,
-                    onClick: () => recordCurrentCall(isRecording),
-                  },
-                  {
-                    id: 'hold',
-                    label: paused ? t('Tooltip.Play') : t('Tooltip.Pause'),
-                    icon: paused ? faPlay : faPause,
-                    onClick: () => (paused ? unpauseCurrentCall() : pauseCall()),
-                    disabled: intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen,
-                  },
-                ]}
-              />
+              {/* fullscreen */}
+              <Button
+                variant='default'
+                onClick={() => toggleFullScreen()}
+                data-tooltip-id='tooltip-toggle-fullscreen'
+                data-tooltip-content={
+                  isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
+                }
+              >
+                <FontAwesomeIcon
+                  className='pi-h-6 pi-w-6'
+                  icon={isFullscreen ? faCompress : faExpand}
+                />
+              </Button>
+
+              {/* record */}
+              {userInfo?.profile?.macro_permissions?.settings?.permissions?.recording?.value && (
+                <Button
+                  variant='default'
+                  onClick={() => recordCurrentCall(isRecording)}
+                  data-tooltip-id='tooltip-record-video-view'
+                  data-tooltip-content={
+                    isRecording ? t('Tooltip.Stop recording') : t('Tooltip.Record')
+                  }
+                >
+                  <FontAwesomeIcon
+                    className='pi-h-6 pi-w-6'
+                    icon={isRecording ? faStop : faRecord}
+                  />
+                </Button>
+              )}
+
+              {/* hold */}
+              {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
+                <Button
+                  variant='default'
+                  onClick={() => (paused ? unpauseCurrentCall() : pauseCall())}
+                  data-tooltip-id='tooltip-pause-video-view'
+                  data-tooltip-content={paused ? t('Tooltip.Play') : t('Tooltip.Pause')}
+                >
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={paused ? faPlay : faPause} />
+                </Button>
+              )}
             </div>
             <Hangup buttonsVariant='default' />
           </div>
           {/* Buttons tooltips */}
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-mute-video-view' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-start-screen-share' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-stop-screen-share' place='bottom' />
-          <CustomThemedTooltip
-            className='pi-z-20'
-            id='tooltip-screen-share-record'
-            place='bottom'
-          />
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-record-video-view' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-pause-video-view' place='bottom' />
         </div>
       ) : (
         // collapsed view

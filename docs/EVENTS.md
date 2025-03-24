@@ -172,11 +172,7 @@ eventDispatch(`<event-name>`, `<data-object>`)
 
 - `phone-island-screen-share-join` The event triggered when starting to join a screen share initiated by another user
 
-- `phone-island-screen-share-joining` The event triggered just after `phone-island-screen-share-join`, after the phone island view has changed to `video`
-
 - `phone-island-screen-share-leave` The event triggered when starting to leave a screen share initiated by another user
-
-- `phone-island-screen-share-leaving` The event triggered just after `phone-island-screen-share-leave`, after the phone island view has changed to `video` (if needed)
 
 - `phone-island-screen-share-start` The event triggered when starting screen sharing
 

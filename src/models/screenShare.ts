@@ -17,6 +17,9 @@ export interface ScreenShareTypes {
   remoteVideos?: number
   localScreenStream?: MediaStream
   remoteScreenStream?: MediaStream
+  isStartingScreenShare?: boolean
+  isJoiningScreenShare?: boolean
+  isLeavingScreenShare?: boolean
 }
 
 const defaultState = {
@@ -32,6 +35,9 @@ const defaultState = {
   remoteVideos: 0,
   localScreenStream: null as MediaStream | null,
   remoteScreenStream: null as MediaStream | null,
+  isStartingScreenShare: false,
+  isJoiningScreenShare: false,
+  isLeavingScreenShare: false,
 }
 
 export const screenShare = createModel<RootModel>()({

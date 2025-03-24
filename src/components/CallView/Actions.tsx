@@ -16,12 +16,9 @@ import {
   faPlay,
   faMicrophone,
   faMicrophoneSlash,
-  faArrowDownUpAcrossLine,
   faSquareParking,
   faChevronDown,
   faChevronUp,
-  faArrowRightArrowLeft,
-  faUserPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
