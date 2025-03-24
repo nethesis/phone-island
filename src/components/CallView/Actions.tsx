@@ -1,7 +1,7 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { type FC, useMemo, useEffect, useRef } from 'react'
 import {
   muteCurrentCall,
   unmuteCurrentCall,
@@ -51,6 +51,23 @@ const Actions: FC = () => {
   const { isActive } = useSelector((state: RootState) => state.conference)
 
   const dispatch = useDispatch<Dispatch>()
+
+  // Check if the actions should be expanded automatically
+  const autoExpandedRef = useRef(false)
+
+  // Check if user has enabled conference and view is different from waitingConference
+  const shouldExpandActions = useMemo(() => {
+    return isActive && view === 'call' && !actionsExpanded && !autoExpandedRef.current
+  }, [isActive, view, actionsExpanded])
+
+  // Automatically expand actions if the user has enabled conference
+  useEffect(() => {
+    if (shouldExpandActions) {
+      dispatch.island.toggleActionsExpanded(true)
+      eventDispatch('phone-island-call-actions-opened', {})
+      autoExpandedRef.current = true
+    }
+  }, [shouldExpandActions, dispatch.island])
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')

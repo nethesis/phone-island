@@ -68,7 +68,11 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
                 isOpen && previousView !== 'video' ? 'pi-w-44' : 'pi-w-16'
               }`}
             >
-              {transferring ? transferringName : isActive ? 'Waiting' : displayName}
+              {transferring
+                ? transferringName
+                : isActive
+                ? t('Conference.Conference')
+                : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>

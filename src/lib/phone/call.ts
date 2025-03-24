@@ -464,7 +464,7 @@ export async function muteAllUsersConference(confId, isAlreadyMuted) {
 
   try {
     // Iterate through all users (except the owner) and mute/unmute them
-    const nonOwnerUsers = Object.values(usersList).filter((user) => !user.owner)
+    const nonOwnerUsers = Object.values(usersList)
 
     // Determine which function to use based on isAlreadyMuted
     const actionFunction = isAlreadyMuted ? unmuteUserConf : muteUserConf
