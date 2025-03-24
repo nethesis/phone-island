@@ -17,18 +17,20 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch } from '../../utils'
 import Timer from '../CallView/Timer'
-import { joinConference } from '../../lib/phone/call'
+import { joinConference, muteAllUsersConference } from '../../lib/phone/call'
 
 export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
-  const { isOwnerInside, isConferenceMuted, conferenceStartTime } = useSelector(
-    (state: RootState) => state.conference,
-  )
+  const { isOwnerInside, isConferenceMuted, conferenceStartTime, conferenceId, ownerInformations } =
+    useSelector((state: RootState) => state.conference)
   const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
   const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
 
-  const muteUnmuteConference = () => {
-    dispatch.conference.toggleIsConferenceMuted(!isConferenceMuted)
+  const handleMuteParticipant = () => {
+    if (conferenceId) {
+      muteAllUsersConference(conferenceId, isConferenceMuted)
+      dispatch.conference.toggleIsConferenceMuted(!isConferenceMuted)
+    }
   }
 
   const openAddUserListToAddConference = () => {
@@ -86,7 +88,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
               <Button
                 variant='default'
                 active={isConferenceMuted ? true : false}
-                onClick={() => muteUnmuteConference()}
+                onClick={() => handleMuteParticipant()}
                 data-tooltip-id='tooltip-mute'
                 data-tooltip-content={
                   isConferenceMuted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`

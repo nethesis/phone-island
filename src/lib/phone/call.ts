@@ -450,6 +450,49 @@ export async function muteUserConference(confId, userId, isAlreadyMuted) {
   }
 }
 
+export async function muteAllUsersConference(confId, isAlreadyMuted) {
+  if (confId === '') {
+    return false
+  }
+
+  // Get the conference users from the store
+  const { usersList } = store.getState().conference
+
+  if (!usersList || Object.keys(usersList).length === 0) {
+    return false
+  }
+
+  try {
+    // Iterate through all users (except the owner) and mute/unmute them
+    const nonOwnerUsers = Object.values(usersList).filter((user) => !user.owner)
+
+    // Determine which function to use based on isAlreadyMuted
+    const actionFunction = isAlreadyMuted ? unmuteUserConf : muteUserConf
+
+    // For each user, call the appropriate function directly
+    for (const user of nonOwnerUsers) {
+      const muteUnmuteUserInformation = {
+        confId: confId?.toString(),
+        userId: user.id?.toString(),
+      }
+
+      const result = await actionFunction(muteUnmuteUserInformation)
+
+      if (result) {
+        store.dispatch.conference.toggleUserMuted({
+          extenId: user.extenId,
+          muted: !isAlreadyMuted,
+        })
+      }
+    }
+
+    return true
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+}
+
 export async function removeUserConference(conferenceId, extensionId) {
   if (conferenceId !== '' && extensionId !== '') {
     const removeUserInformation = {

@@ -17,7 +17,7 @@ export const Close: FC = () => {
       dispatch.player.stopAudioPlayer()
       eventDispatch('phone-island-audio-player-close', {})
     }
-    dispatch.island.setIslandView(null)
+    dispatch.island.resetIslandStore()
     dispatch.island.handleToggleIsOpen()
   }
 

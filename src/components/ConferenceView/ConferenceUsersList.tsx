@@ -87,7 +87,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
   return (
     <>
       <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1 pi-max-h-28 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
-        {usersList && Object?.keys(usersList)?.length > 0 ? (
+        {usersList && Object.values(usersList).filter((user) => !user?.owner).length > 0 ? (
           Object?.values(usersList)
             ?.filter((user) => !user?.owner)
             ?.map((user) => (
@@ -105,7 +105,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                   <>
                     <Button
                       variant='transparent'
-                      data-tooltip-id='conference-user-actions'
+                      data-tooltip-id='conference-user-mute'
                       data-tooltip-content={
                         user?.muted
                           ? t('Conference.Unmute participant')
@@ -122,7 +122,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                     </Button>
                     <Button
                       variant='transparent'
-                      data-tooltip-id='conference-user-actions'
+                      data-tooltip-id='conference-user-remove'
                       data-tooltip-content={t('Conference.Remove participant')}
                       onClick={() => handleRemoveParticipant(user?.extenId)}
                     >
@@ -161,7 +161,8 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
           </div>
         )}
       </div>
-      <CustomThemedTooltip className='pi-z-1000' id='conference-user-actions' place='left' />
+      <CustomThemedTooltip className='pi-z-1000' id='conference-user-remove' place='left' />
+      <CustomThemedTooltip className='pi-z-1000' id='conference-user-mute' place='left' />
     </>
   )
 }
