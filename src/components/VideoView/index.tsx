@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faCompress,
   faDisplay,
   faExpand,
   faMicrophone,
@@ -37,7 +38,6 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
-import Dropdown from '../Dropdown'
 
 export interface VideoViewProps {}
 
@@ -1006,47 +1006,60 @@ export const VideoView: FC<VideoViewProps> = () => {
                 </Button>
               )}
 
-              <Dropdown
-                buttonTooltip={t('Common.More actions')}
-                items={[
-                  {
-                    id: 'fullScreen',
-                    label: isFullscreen
-                      ? t('Tooltip.Exit fullscreen')
-                      : t('Tooltip.Enter fullscreen'),
-                    icon: faExpand,
-                    onClick: () => toggleFullScreen(),
-                  },
-                  {
-                    id: 'record',
-                    label: isRecording ? t('Tooltip.Stop recording') : t('Tooltip.Record'),
-                    icon: isRecording ? faStop : faRecord,
-                    onClick: () => recordCurrentCall(isRecording),
-                  },
-                  {
-                    id: 'hold',
-                    label: paused ? t('Tooltip.Play') : t('Tooltip.Pause'),
-                    icon: paused ? faPlay : faPause,
-                    onClick: () => (paused ? unpauseCurrentCall() : pauseCall()),
-                    disabled: intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen,
-                  },
-                ]}
-              />
+              {/* fullscreen */}
+              <Button
+                variant='default'
+                onClick={() => toggleFullScreen()}
+                data-tooltip-id='tooltip-toggle-fullscreen'
+                data-tooltip-content={
+                  isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
+                }
+              >
+                <FontAwesomeIcon
+                  className='pi-h-6 pi-w-6'
+                  icon={isFullscreen ? faCompress : faExpand}
+                />
+              </Button>
+
+              {/* record */}
+              {userInfo?.profile?.macro_permissions?.settings?.permissions?.recording?.value && (
+                <Button
+                  variant='default'
+                  onClick={() => recordCurrentCall(isRecording)}
+                  data-tooltip-id='tooltip-record-video-view'
+                  data-tooltip-content={
+                    isRecording ? t('Tooltip.Stop recording') : t('Tooltip.Record')
+                  }
+                >
+                  <FontAwesomeIcon
+                    className='pi-h-6 pi-w-6'
+                    icon={isRecording ? faStop : faRecord}
+                  />
+                </Button>
+              )}
+
+              {/* hold */}
+              {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
+                <Button
+                  variant='default'
+                  onClick={() => (paused ? unpauseCurrentCall() : pauseCall())}
+                  data-tooltip-id='tooltip-pause-video-view'
+                  data-tooltip-content={paused ? t('Tooltip.Play') : t('Tooltip.Pause')}
+                >
+                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={paused ? faPlay : faPause} />
+                </Button>
+              )}
             </div>
             <Hangup buttonsVariant='default' />
           </div>
           {/* Buttons tooltips */}
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-mute' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-mute-video-view' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-video' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-start-screen-share' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-stop-screen-share' place='bottom' />
-          <CustomThemedTooltip
-            className='pi-z-20'
-            id='tooltip-screen-share-record'
-            place='bottom'
-          />
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-pause' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-record-video-view' place='bottom' />
+          <CustomThemedTooltip className='pi-z-20' id='tooltip-pause-video-view' place='bottom' />
         </div>
       ) : (
         // collapsed view
