@@ -10,7 +10,7 @@ import { backToPreviousView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
 import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
-import { attendedTransfer, startConference } from '../../lib/phone/call'
+import { attendedTransfer, hangupCurrentCall, startConference } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
@@ -134,14 +134,22 @@ export const TransferListView: FC<TransferListViewProps> = () => {
 
   const waitingConferenceView = (numberToCall) => {
     const { username }: any = store.getState().currentUser
-    const { isActive } = store.getState().conference
+    const { isActive, isOwnerInside } = store.getState().conference
     // show current waiting user in back view ( only on first)
     if (!isActive) {
       dispatch.conference.setConferenceActive(true)
       dispatch.conference.setConferenceStartedFrom(username)
     }
     // start new call with selected user from conference list
-    eventDispatch('phone-island-call-start', { number: numberToCall })
+    if (isOwnerInside) {
+      // if owner has already started the conference hangup before make a new call
+      hangupCurrentCall()
+      setTimeout(() => {
+        eventDispatch('phone-island-call-start', { number: numberToCall })
+      }, 500)
+    } else {
+      eventDispatch('phone-island-call-start', { number: numberToCall })
+    }
   }
 
   const clickTransferOrConference = async (number: string) => {
