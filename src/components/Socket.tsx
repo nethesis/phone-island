@@ -373,7 +373,9 @@ export const Socket: FC<SocketProps> = ({
       })
 
       socket.current.on('extenHangup', (res: any) => {
-        const { endpoints } = store.getState().currentUser
+        const { endpoints, name, username } = store.getState().currentUser
+        const { isActive, usersList, conferenceStartedFrom, ownerInformations } =
+          store.getState().conference
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
@@ -395,6 +397,12 @@ export const Socket: FC<SocketProps> = ({
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
           }, 500)
+        } else if (
+          res?.cause === 'normal_circuit_congestion' &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
       })
 

@@ -18,14 +18,10 @@ export interface AvatarGroupProps {
 const AvatarGroup: FC<AvatarGroupProps> = ({ usersList, maxAvatars = 5 }) => {
   const { avatars } = useSelector((state: RootState) => state.avatars)
   const { extensions } = useSelector((state: RootState) => state.users)
-  const { username } = useSelector((state: RootState) => state.currentUser)
+  const { name } = useSelector((state: RootState) => state.currentUser)
 
   // Filter out current user and convert to array
-  const users = usersList
-    ? Object.values(usersList).filter(
-        (user: any) => user?.extenId !== username && user?.id !== username,
-      )
-    : []
+  const users = usersList ? Object.values(usersList).filter((user: any) => user?.name !== name) : []
   const totalUsers = users.length
   const displayUsers = users.slice(0, maxAvatars)
 
