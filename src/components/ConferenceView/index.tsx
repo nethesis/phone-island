@@ -128,7 +128,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
       <CustomThemedTooltip
         className='pi-z-1000'
         id='tooltip-add-user-to-conference-before-started'
-        place='top'
+        place='left'
       />
       <CustomThemedTooltip className='pi-z-1000' id='tooltip-all-user-muted' place='top' />
     </>

@@ -144,6 +144,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     if (isOwnerInside) {
       // if owner has already started the conference hangup before make a new call
       hangupCurrentCall()
+      dispatch.conference.toggleIsOwnerInside(false)
       setTimeout(() => {
         eventDispatch('phone-island-call-start', { number: numberToCall })
       }, 500)

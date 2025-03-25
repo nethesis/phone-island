@@ -22,7 +22,7 @@ export const Close: FC = () => {
   }
 
   function close() {
-    dispatch.island.setIslandView(null)
+    dispatch.island.resetIslandStore()
     dispatch.island.handleToggleIsOpen()
   }
 
