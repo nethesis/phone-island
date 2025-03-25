@@ -155,7 +155,6 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const clickTransferOrConference = async (number: string) => {
     if (isInsideConferenceList()) {
       const { isActive } = store.getState().conference
-      console.log('isActive', isActive)
       // Put current call user inside conference mode (only for first user to add not for the second one)
       if (!isActive) {
         const conferenceStarted = await startConference()

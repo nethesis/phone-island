@@ -173,10 +173,12 @@ const Actions: FC = () => {
   }
 
   const addUserToConference = async () => {
+    dispatch.island.setIslandView('waitingConference')
     const conferenceStarted = await startConference()
-    if (conferenceStarted) {
-      dispatch.island.setIslandView('waitingConference')
-    }
+    // TO DO - check if the conference is started
+    // if (conferenceStarted) {
+    //   dispatch.island.setIslandView('waitingConference')
+    // }
   }
 
   const { t } = useTranslation()

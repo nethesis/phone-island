@@ -9,8 +9,8 @@ import { store } from '../../store'
 export function isBackCallActive() {
   const { view, isOpen }: any = store.getState().island
   const { transferring } = store.getState().currentCall
-  const { isActive, usersList } = store.getState().conference
-  const { name } = store.getState().currentUser
+  const { isActive, usersList, conferenceStartedFrom } = store.getState().conference
+  const { name, username } = store.getState().currentUser
 
   const isUserInConference =
     usersList && Object.values(usersList).some((user: any) => user.name === name)
@@ -20,6 +20,9 @@ export function isBackCallActive() {
     (view === 'video' && isOpen) ||
     transferring ||
     //check if conference is active
-    (isActive && view !== 'waitingConference' && isUserInConference)
+    (isActive &&
+      view !== 'waitingConference' &&
+      (isUserInConference || conferenceStartedFrom === username) &&
+      isOpen)
   )
 }

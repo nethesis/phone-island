@@ -23,6 +23,7 @@ import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
 import VideoView from './VideoView'
 import { WaitingConferenceView } from './ConferenceView'
+import { store } from '../store'
 
 /**
  * Provides the Island logic
@@ -66,8 +67,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Handle and apply view switch logic
   // ...set callview as the current view
   useEffect(() => {
+    const { isActive, conferenceStartedFrom, isOwnerInside } = store.getState().conference
+    const { username } = store.getState().currentUser
     // Check and switch the view
-    if (incoming || outgoing) {
+    if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
+      dispatch.island.setIslandView('waitingConference')
+    } else if (incoming || outgoing) {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
