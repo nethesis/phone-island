@@ -23,7 +23,7 @@ const Timer: FC<TimerProps> = ({
           <Moment
             date={Number(startTime)}
             interval={1000}
-            format='h:mm:ss'
+            format='hh:mm:ss'
             trim={false}
             unix
             durationFromNow

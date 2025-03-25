@@ -28,7 +28,8 @@ const Hangup: FC<HangupProps> = ({
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
   const { isOpen, sideViewIsVisible, view } = useSelector((state: RootState) => state.island)
-  const { isActive } = useSelector((state: RootState) => state.conference)
+  const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
+  const { username } = useSelector((state: RootState) => state.currentUser)
 
   function handleHangup() {
     if (incoming) {
@@ -105,8 +106,10 @@ const Hangup: FC<HangupProps> = ({
             onClick={() =>
               !isPhysicalRecording && !isActive
                 ? handleHangup()
-                : isActive
+                : isActive && conferenceStartedFrom === username
                 ? endConference()
+                : isActive && conferenceStartedFrom !== username
+                ? handleHangup()
                 : hangupCurrentPhysicalRecording()
             }
             variant='red'
