@@ -373,9 +373,8 @@ export const Socket: FC<SocketProps> = ({
       })
 
       socket.current.on('extenHangup', (res: any) => {
-        const { endpoints, name, username } = store.getState().currentUser
-        const { isActive, usersList, conferenceStartedFrom, ownerInformations } =
-          store.getState().conference
+        const { endpoints, username } = store.getState().currentUser
+        const { isActive, conferenceStartedFrom } = store.getState().conference
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
@@ -397,12 +396,25 @@ export const Socket: FC<SocketProps> = ({
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
           }, 500)
+          if (isActive && conferenceStartedFrom !== username) {
+            store.dispatch.conference.resetConference()
+          }
         } else if (
           res?.cause === 'normal_circuit_congestion' &&
           isActive &&
           conferenceStartedFrom === username
         ) {
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+        } else if (
+          (res.cause === 'normal_clearing' ||
+            res?.cause === 'user_busy' ||
+            res?.cause === 'not_defined' ||
+            res?.cause === 'call_rejected') &&
+          (extensionType === 'webrtc' || extensionType === 'nethlink') &&
+          isActive &&
+          conferenceStartedFrom !== username
+        ) {
+          store.dispatch.conference.resetConference()
         }
       })
 
