@@ -11,6 +11,7 @@ import { faDisplay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useTranslation } from 'react-i18next'
 import AvatarGroup from '../AvatarGroup'
+import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 
 const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const {
@@ -29,7 +30,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
   const { active: screenShareActive, role: screenShareRole } = useSelector(
     (state: RootState) => state.screenShare,
   )
-  const { isActive, usersList }: any = useSelector((state: RootState) => state.conference)
+  const { isActive, usersList, ownerInformations }: any = useSelector(
+    (state: RootState) => state.conference,
+  )
 
   useEffect(() => {
     const callData: TransferCallsTypes = transferCalls.find((item) => item.number !== number)
@@ -68,8 +71,10 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
             >
               {transferring
                 ? transferringName
-                : isActive
-                ? t('Conference.Conference')
+                : isActive && !isEmpty(ownerInformations)
+                ? t('Conference.In conference')
+                : isActive && isEmpty(ownerInformations)
+                ? t('Conference.Waiting for the conference')
                 : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
