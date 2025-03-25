@@ -86,14 +86,20 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
 
   return (
     <>
-      <div className='pi-flex pi-flex-col pi-mt-2 pi-space-y-1 pi-max-h-28 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'>
+      <div
+        className={`${
+          isOwnerInside ? '' : 'pi-space-y-1'
+        } pi-flex pi-flex-col pi-mt-2 pi-max-h-28 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
+      >
         {usersList && Object.values(usersList).filter((user) => !user?.owner).length > 0 ? (
           Object?.values(usersList)
             ?.filter((user) => !user?.owner)
             ?.map((user) => (
               <div
                 key={`${user?.id}-${user?.extenId}`}
-                className='pi-flex pi-items-center pi-justify-between pi-py-2 pi-px-3 pi-bg-gray-50 dark:pi-bg-gray-900 pi-rounded-lg'
+                className={`${
+                  isOwnerInside ? '' : 'pi-py-1'
+                } pi-flex pi-items-center pi-justify-between pi-px-3 pi-rounded-lg`}
               >
                 <div className='pi-flex pi-items-center pi-gap-3 pi-truncate'>
                   <UserAvatar user={user} />
@@ -114,7 +120,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                       onClick={() => handleMuteParticipant(user?.id, user?.extenId, user?.muted)}
                     >
                       <FontAwesomeIcon
-                        className={`pi-h-6 pi-w-6 ${
+                        className={`pi-h-4 pi-w-4 ${
                           user?.muted ? 'pi-text-red-500' : 'pi-text-gray-600 dark:pi-text-gray-300'
                         }`}
                         icon={user?.muted ? faMicrophoneSlash : faMicrophone}
@@ -127,7 +133,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                       onClick={() => handleRemoveParticipant(user?.extenId)}
                     >
                       <FontAwesomeIcon
-                        className='pi-h-6 pi-w-6 pi-text-gray-600 dark:pi-text-gray-300'
+                        className='pi-h-4 pi-w-4 pi-text-gray-600 dark:pi-text-gray-300'
                         icon={faTrash}
                       />
                     </Button>

@@ -109,6 +109,9 @@
     "Start conference": "Inizia conferenza",
     "Unmute participant": "Attiva audio partecipante",
     "Mute participant": "Disattiva audio partecipante",
-    "In conference": "In conferenza"
+    "Mute all participants": "Disattiva audio a tutti",
+    "Unmute all participants": "Attiva audio a tutti",
+    "In conference": "In conferenza",
+    "End conference": "Termina conferenza"
   }
 }

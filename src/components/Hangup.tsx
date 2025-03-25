@@ -106,9 +106,9 @@ const Hangup: FC<HangupProps> = ({
             onClick={() =>
               !isPhysicalRecording && !isActive
                 ? handleHangup()
-                : isActive && conferenceStartedFrom === username
+                : isActive && conferenceStartedFrom === username && view === 'waitingConference'
                 ? endConference()
-                : isActive && conferenceStartedFrom !== username
+                : isActive && conferenceStartedFrom !== username && view !== 'waitingConference'
                 ? handleHangup()
                 : hangupCurrentPhysicalRecording()
             }
@@ -119,10 +119,16 @@ const Hangup: FC<HangupProps> = ({
                 : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
             }`}
             data-tooltip-id={
-              description && transferring ? 'tooltip-top-transfer' : 'tooltip-left-transfer'
+              (description && transferring) || (view === 'waitingConference' && isActive)
+                ? 'tooltip-top-transfer'
+                : 'tooltip-left-transfer'
             }
             data-tooltip-content={
-              description && transferring ? description : `${t('Tooltip.Hangup')}`
+              description && transferring
+                ? description
+                : view === 'waitingConference' && isActive
+                ? t('Conference.End conference')
+                : `${t('Tooltip.Hangup')}`
             }
             // data-tooltip-placement="top"
           >

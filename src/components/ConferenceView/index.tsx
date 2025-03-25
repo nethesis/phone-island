@@ -18,6 +18,7 @@ import {
 import { eventDispatch } from '../../utils'
 import Timer from '../CallView/Timer'
 import { joinConference, muteAllUsersConference } from '../../lib/phone/call'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
   const { isOwnerInside, isConferenceMuted, conferenceStartTime, conferenceId, ownerInformations } =
@@ -79,7 +80,12 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                 <FontAwesomeIcon icon={faArrowRightToBracket} className='pi-mr-3' />
                 {t('Conference.Start conference')}
               </Button>
-              <Button variant='default' onClick={() => openAddUserListToAddConference()}>
+              <Button
+                variant='default'
+                onClick={() => openAddUserListToAddConference()}
+                data-tooltip-id='tooltip-add-user-to-conference-before-started'
+                data-tooltip-content={t('Conference.Add participant') || ''}
+              >
                 <FontAwesomeIcon icon={faUserPlus} />
               </Button>
             </>
@@ -89,9 +95,11 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                 variant='default'
                 active={isConferenceMuted ? true : false}
                 onClick={() => handleMuteParticipant()}
-                data-tooltip-id='tooltip-mute'
+                data-tooltip-id='tooltip-all-user-muted'
                 data-tooltip-content={
-                  isConferenceMuted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`
+                  isConferenceMuted
+                    ? `${t('Conference.Unmute all participants')}`
+                    : `${t('Conference.Mute all participants')}`
                 }
               >
                 {isConferenceMuted ? (
@@ -104,8 +112,8 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                 data-stop-propagation={true}
                 variant='default'
                 onClick={() => openAddUserListToAddConference()}
-                data-tooltip-id='tooltip-conference'
-                data-tooltip-content={t('Tooltip.Conference') || ''}
+                data-tooltip-id='tooltip-add-user-to-conference'
+                data-tooltip-content={t('Conference.Add participant') || ''}
               >
                 <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
               </Button>
@@ -116,6 +124,13 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
       <div className={`pi-absolute pi-bottom-0 pi-right-0 pi-w-full pi-pb-2`}>
         <Hangup buttonsVariant='default' />
       </div>
+      <CustomThemedTooltip className='pi-z-1000' id='tooltip-add-user-to-conference' place='top' />
+      <CustomThemedTooltip
+        className='pi-z-1000'
+        id='tooltip-add-user-to-conference-before-started'
+        place='top'
+      />
+      <CustomThemedTooltip className='pi-z-1000' id='tooltip-all-user-muted' place='top' />
     </>
   )
 }

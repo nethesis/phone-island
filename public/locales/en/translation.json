@@ -109,6 +109,9 @@
     "Start conference": "Start conference",
     "Unmute participant": "Unmute participant",
     "Mute participant": "Mute participant",
-    "In conference": "In conference"
+    "Mute all participants": "Mute all participants",
+    "Unmute all participants": "Unmute all participants",
+    "In conference": "In conference",
+    "End conference": "End conference"
   }
 }
