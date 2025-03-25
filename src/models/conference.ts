@@ -17,6 +17,7 @@ export interface ConferenceStoreTypes {
   usersList: Record<string, ConferenceUser> | null
   ownerInformations: ConferenceUser | null
   isActive: boolean
+  conferenceStartedFrom: string
   conferenceStartTime: any
   isOwnerInside?: boolean
   isConferenceMuted: boolean
@@ -27,6 +28,7 @@ const defaultState: ConferenceStoreTypes = {
   usersList: null,
   ownerInformations: null,
   isActive: false,
+  conferenceStartedFrom: '',
   conferenceStartTime: null,
   isOwnerInside: false,
   isConferenceMuted: false,
@@ -94,6 +96,12 @@ export const conference = createModel<RootModel>()({
         isActive,
         conferenceStartTime:
           isActive && !state.conferenceStartTime ? Date.now() : state.conferenceStartTime,
+      }
+    },
+    setConferenceStartedFrom: (state, conferenceStartedFrom: string) => {
+      return {
+        ...state,
+        conferenceStartedFrom,
       }
     },
     resetTimer: (state) => {

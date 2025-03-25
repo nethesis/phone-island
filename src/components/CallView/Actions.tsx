@@ -48,17 +48,26 @@ const Actions: FC = () => {
   )
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
-  const { isActive } = useSelector((state: RootState) => state.conference)
+  const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
+  const { username } = useSelector((state: RootState) => state?.currentUser)
 
   const dispatch = useDispatch<Dispatch>()
 
   // Check if the actions should be expanded automatically
   const autoExpandedRef = useRef(false)
 
-  // Check if user has enabled conference and view is different from waitingConference
+  // Check if user has enabled conference and view is different from waitingConference && the owner is the user
   const shouldExpandActions = useMemo(() => {
-    return isActive && view === 'call' && !actionsExpanded && !autoExpandedRef.current
-  }, [isActive, view, actionsExpanded])
+    return (
+      isActive &&
+      view === 'call' &&
+      !actionsExpanded &&
+      !autoExpandedRef.current &&
+      username !== '' &&
+      conferenceStartedFrom !== '' &&
+      conferenceStartedFrom === username
+    )
+  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
 
   // Automatically expand actions if the user has enabled conference
   useEffect(() => {
@@ -213,32 +222,32 @@ const Actions: FC = () => {
             )}
           </Button>
         )}
-
-        <TransferButton />
-
-        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
-          <Button
-            active={actionsExpanded}
-            variant='transparent'
-            onClick={() => toggleActionsExpanded()}
-            data-tooltip-id='tooltip-expand'
-            data-tooltip-content={
-              actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
-            }
-          >
-            {actionsExpanded ? (
-              <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                icon={faChevronUp}
-              />
-            ) : (
-              <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                icon={faChevronDown}
-              />
-            )}
-          </Button>
-        )}
+        {/* If user is in conference and is not the owner of the conference, hide the transfer button */}
+        {!(isActive && conferenceStartedFrom !== username) && <TransferButton />}
+        {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) &&
+          !(isActive && conferenceStartedFrom !== username) && (
+            <Button
+              active={actionsExpanded}
+              variant='transparent'
+              onClick={() => toggleActionsExpanded()}
+              data-tooltip-id='tooltip-expand'
+              data-tooltip-content={
+                actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
+              }
+            >
+              {actionsExpanded ? (
+                <FontAwesomeIcon
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+                  icon={faChevronUp}
+                />
+              ) : (
+                <FontAwesomeIcon
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+                  icon={faChevronDown}
+                />
+              )}
+            </Button>
+          )}
       </div>
       {/* Actions expanded section */}
       {actionsExpanded ? (

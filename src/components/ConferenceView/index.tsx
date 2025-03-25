@@ -79,8 +79,8 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                 <FontAwesomeIcon icon={faArrowRightToBracket} className='pi-mr-3' />
                 {t('Conference.Start conference')}
               </Button>
-              <Button variant='default' className=''>
-                <FontAwesomeIcon icon={faUserPlus} className='' />
+              <Button variant='default' onClick={() => openAddUserListToAddConference()}>
+                <FontAwesomeIcon icon={faUserPlus} />
               </Button>
             </>
           ) : (

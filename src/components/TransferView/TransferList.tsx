@@ -133,18 +133,28 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }
 
   const waitingConferenceView = (numberToCall) => {
+    const { username }: any = store.getState().currentUser
+    const { isActive } = store.getState().conference
     // show current waiting user in back view ( only on first)
-    dispatch.conference.setConferenceActive(true)
+    if (!isActive) {
+      dispatch.conference.setConferenceActive(true)
+      dispatch.conference.setConferenceStartedFrom(username)
+    }
     // start new call with selected user from conference list
     eventDispatch('phone-island-call-start', { number: numberToCall })
   }
 
   const clickTransferOrConference = async (number: string) => {
     if (isInsideConferenceList()) {
-      // Put current call user inside conference mode
-      const conferenceStarted = await startConference()
-      if (conferenceStarted) {
-        // Back to call view after successful conference start
+      const { isActive } = store.getState().conference
+      console.log('isActive', isActive)
+      // Put current call user inside conference mode (only for first user to add not for the second one)
+      if (!isActive) {
+        const conferenceStarted = await startConference()
+        if (conferenceStarted) {
+          waitingConferenceView(number)
+        }
+      } else {
         waitingConferenceView(number)
       }
     } else {

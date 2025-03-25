@@ -100,7 +100,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         view === 'player' ||
         view === 'recorder' ||
         view === 'physicalPhoneRecorder' ||
-        (view === 'waitingConference' && isActive)) &&
+        (view === 'waitingConference' && isActive) ||
+        (view === 'transfer' && isActive)) &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>
