@@ -80,7 +80,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
 
             {/* User waiting list */}
             <ConferenceUsersList />
-            <div className='pi-flex pi-justify-center pi-space-x-6 pi-mt-6'>
+            <div className='pi-flex pi-justify-center pi-space-x-6 pi-mt-4'>
               {!isOwnerInside ? (
                 <>
                   <Button

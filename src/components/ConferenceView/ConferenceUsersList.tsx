@@ -89,7 +89,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
       <div
         className={`${
           isOwnerInside ? '' : 'pi-space-y-1'
-        } pi-flex pi-flex-col pi-mt-2 pi-max-h-28 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
+        } pi-flex pi-flex-col pi-mt-2 pi-h-32 pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-dark:scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-dark:scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25`}
       >
         {usersList && Object.values(usersList).filter((user) => !user?.owner).length > 0 ? (
           Object?.values(usersList)
