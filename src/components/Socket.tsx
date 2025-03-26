@@ -165,6 +165,8 @@ export const Socket: FC<SocketProps> = ({
                         extensions[conv.counterpartNum] &&
                         extensions[conv.counterpartNum].username
                       }` || '',
+                    chDest: conv?.chDest || {},
+                    chSource: conv?.chSource || {},
                   })
                   // Update the current call informations for physical devices
                   dispatch.currentCall.checkAcceptedUpdate({
@@ -371,7 +373,9 @@ export const Socket: FC<SocketProps> = ({
       })
 
       socket.current.on('extenHangup', (res: any) => {
-        const { endpoints } = store.getState().currentUser
+        const { endpoints, username } = store.getState().currentUser
+        const { isActive, conferenceStartedFrom } = store.getState().conference
+        const { view } = store.getState().island
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
@@ -393,6 +397,34 @@ export const Socket: FC<SocketProps> = ({
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
           }, 500)
+          if (isActive && conferenceStartedFrom !== username) {
+            store.dispatch.conference.resetConference()
+          }
+        } else if (
+          res?.cause === 'normal_circuit_congestion' &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+        } else if (
+          (res.cause === 'normal_clearing' ||
+            res?.cause === 'user_busy' ||
+            res?.cause === 'not_defined' ||
+            res?.cause === 'call_rejected') &&
+          (extensionType === 'webrtc' || extensionType === 'nethlink') &&
+          isActive &&
+          conferenceStartedFrom !== username
+        ) {
+          store.dispatch.conference.resetConference()
+        }
+        // if conference owner call the call with the added user inside conference
+        if (
+          res?.cause === 'interworking' &&
+          isActive &&
+          conferenceStartedFrom === username &&
+          view !== 'waitingConference'
+        ) {
+          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
       })
 
@@ -566,6 +598,49 @@ export const Socket: FC<SocketProps> = ({
         }
 
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
+      })
+
+      socket.current.on('confBridgeUpdate', (res: any) => {
+        if (res && res?.users) {
+          // Get User informations
+          const conferenceId = res?.id
+          const conferenceUsers = res?.users
+
+          // Get current users list to preserve mute status
+          const { usersList } = store.getState().conference
+
+          // Create a copy of the new conference users while preserving mute status
+          const updatedConferenceUsers = { ...conferenceUsers }
+
+          // Preserve mute status for existing users
+          if (usersList) {
+            Object.keys(updatedConferenceUsers).forEach((userId) => {
+              if (usersList[userId]) {
+                // Keep the existing mute status instead of using the server's value
+                updatedConferenceUsers[userId] = {
+                  ...updatedConferenceUsers[userId],
+                  muted: usersList[userId].muted,
+                }
+              }
+            })
+          }
+
+          store.dispatch.conference.updateConferenceUsersList(updatedConferenceUsers)
+          store.dispatch.conference.updateConferenceId(conferenceId)
+        }
+      })
+
+      socket.current.on('confBridgeEnd', (res: any) => {
+        if (res && res?.id) {
+          // Reset the conference store when conference ends
+          store.dispatch.conference.resetConference()
+          eventDispatch('phone-island-conference-finished', {})
+        }
+      })
+
+      socket.current.on('callWebrtc', (res: any) => {
+        // On call event from socket dispatch the call start event
+        eventDispatch('phone-island-call-start', { number: res })
       })
     }
 

@@ -1,13 +1,14 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { type FC, useMemo, useEffect, useRef } from 'react'
 import {
   muteCurrentCall,
   unmuteCurrentCall,
   pauseCurrentCall,
   unpauseCurrentCall,
   parkCurrentCall,
+  startConference,
 } from '../../lib/phone/call'
 import { Button } from '../'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -19,6 +20,8 @@ import {
   faSquareParking,
   faChevronDown,
   faChevronUp,
+  faUserPlus,
+  faPlus,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -44,8 +47,58 @@ const Actions: FC = () => {
   )
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+  const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
+  const { username, profile } = useSelector((state: RootState) => state?.currentUser)
 
   const dispatch = useDispatch<Dispatch>()
+
+  // Check if the actions should be expanded automatically
+  const autoExpandedRef = useRef(false)
+  // Check if the actions should be collapsed automatically
+  const autoCollapsedRef = useRef(false)
+
+  // Check if user has enabled conference and view is different from waitingConference && the owner is the user
+  const shouldExpandActions = useMemo(() => {
+    return (
+      isActive &&
+      view === 'call' &&
+      !actionsExpanded &&
+      !autoExpandedRef.current &&
+      username !== '' &&
+      conferenceStartedFrom !== '' &&
+      conferenceStartedFrom === username
+    )
+  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+
+  // Check if user is not the owner of the conference
+  const shouldCollapseActions = useMemo(() => {
+    return (
+      isActive &&
+      view === 'call' &&
+      actionsExpanded &&
+      !autoCollapsedRef.current &&
+      username !== '' &&
+      conferenceStartedFrom !== username
+    )
+  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+
+  // Automatically expand actions if the user has enabled conference
+  useEffect(() => {
+    if (shouldExpandActions) {
+      dispatch.island.toggleActionsExpanded(true)
+      eventDispatch('phone-island-call-actions-opened', {})
+      autoExpandedRef.current = true
+    }
+  }, [shouldExpandActions, dispatch.island])
+
+  // Automatically collapse actions if the user is not the owner of the conference
+  useEffect(() => {
+    if (shouldCollapseActions) {
+      dispatch.island.toggleActionsExpanded(false)
+      eventDispatch('phone-island-call-actions-closed', {})
+      autoCollapsedRef.current = true
+    }
+  }, [shouldCollapseActions, dispatch.island])
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
@@ -130,16 +183,20 @@ const Actions: FC = () => {
     }
   }
 
-  const addUserConference = () => {
+  const beginConference = () => {
     // Update island store and set conference list view to true
-    dispatch.island.toggleConferenceList(isConferenceList ? false : true)
+    eventDispatch('phone-island-conference-list-open', {})
     // Set the island view to transfer list
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
     }
-    eventDispatch('phone-island-call-conference-list-opened', {})
+  }
+
+  const addUserToConference = async () => {
+    dispatch.island.setIslandView('waitingConference')
+    const conferenceStarted = await startConference()
   }
 
   const { t } = useTranslation()
@@ -148,10 +205,14 @@ const Actions: FC = () => {
     <>
       <div
         className={`${
-          !intrudeListenStatus?.isListen && !intrudeListenStatus?.isIntrude
+          !intrudeListenStatus?.isListen &&
+          !intrudeListenStatus?.isIntrude &&
+          (!isActive || (isActive && conferenceStartedFrom === username))
             ? 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
             : intrudeListenStatus.isIntrude
             ? 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+            : isActive && conferenceStartedFrom !== username
+            ? 'pi-flex pi-items-center pi-justify-center pi-gap-4'
             : 'pi-hidden'
         } `}
       >
@@ -185,32 +246,32 @@ const Actions: FC = () => {
             )}
           </Button>
         )}
-
-        <TransferButton />
-
-        {!(intrudeListenStatus.isIntrude || intrudeListenStatus.isListen) && (
-          <Button
-            active={actionsExpanded}
-            variant='transparent'
-            onClick={() => toggleActionsExpanded()}
-            data-tooltip-id='tooltip-expand'
-            data-tooltip-content={
-              actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
-            }
-          >
-            {actionsExpanded ? (
-              <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                icon={faChevronUp}
-              />
-            ) : (
-              <FontAwesomeIcon
-                className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                icon={faChevronDown}
-              />
-            )}
-          </Button>
-        )}
+        {/* If user is in conference and is not the owner of the conference, hide the transfer button */}
+        {!(isActive && conferenceStartedFrom !== username) && <TransferButton />}
+        {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) &&
+          !(isActive && conferenceStartedFrom !== username) && (
+            <Button
+              active={actionsExpanded}
+              variant='transparent'
+              onClick={() => toggleActionsExpanded()}
+              data-tooltip-id='tooltip-expand'
+              data-tooltip-content={
+                actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
+              }
+            >
+              {actionsExpanded ? (
+                <FontAwesomeIcon
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+                  icon={faChevronUp}
+                />
+              ) : (
+                <FontAwesomeIcon
+                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
+                  icon={faChevronDown}
+                />
+              )}
+            </Button>
+          )}
       </div>
       {/* Actions expanded section */}
       {actionsExpanded ? (
@@ -235,17 +296,22 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            {/* Hidden at the moment waiting for the conference feature to be implemented */}
-            {/* <Button
-              data-stop-propagation={true}
-              disabled={true}
-              variant='default'
-              onClick={() => addUserConference()}
-              data-tooltip-id='tooltip-conference'
-              data-tooltip-content={t('Tooltip.Conference') || ''}
-            >
-              <FontAwesomeIcon icon={faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button> */}
+            {profile?.macro_permissions?.settings?.permissions?.conference?.value && (
+              <Button
+                data-stop-propagation={true}
+                variant='default'
+                onClick={() => (isActive ? addUserToConference() : beginConference())}
+                data-tooltip-id='tooltip-conference'
+                data-tooltip-content={
+                  isActive
+                    ? t('Tooltip.Conference') || ''
+                    : t('Tooltip.Add user to conference') || ''
+                }
+              >
+                <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
+              </Button>
+            )}
+
             <Button
               variant='default'
               onClick={() =>

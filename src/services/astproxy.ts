@@ -324,3 +324,105 @@ export async function toggleRecord(recordingType: any, obj: any) {
     throw error
   }
 }
+
+export async function startConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/start_conf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function endConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/end_conf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function joinMyConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/join_myconf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function muteUserConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/mute_userconf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function unmuteUserConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/unmute_userconf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function hangupUserConf(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/hangup_userconf`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}

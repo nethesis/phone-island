@@ -20,10 +20,12 @@ import { physicalRecorder } from './physicalRecorder'
 import { screenShare } from './screenShare'
 import { websocket } from './websocket'
 import { mediaDevices } from './mediaDevices'
+import { conference } from './conference'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
   webrtc: typeof webrtc
+  conference: typeof conference
   currentCall: typeof currentCall
   currentUser: typeof currentUser
   fetchDefaults: typeof fetchDefaults
@@ -45,6 +47,7 @@ export interface RootModel extends Models<RootModel> {
 export const models: RootModel = {
   player,
   webrtc,
+  conference,
   currentCall,
   currentUser,
   fetchDefaults,

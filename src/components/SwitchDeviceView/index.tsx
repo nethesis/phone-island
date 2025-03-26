@@ -57,9 +57,7 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
     }
   }
 
-  const blindTransferOnSelectedDevice = (
-    endpointIdInConversation: string,
-  ) => {
+  const blindTransferOnSelectedDevice = (endpointIdInConversation: string) => {
     if (selectedSwitchDevices?.id && endpointIdInConversation) {
       if (
         selectedSwitchDevices?.type == 'physical' &&
@@ -174,12 +172,10 @@ export const SwitchDeviceView: FC<SwitchDeviceViewProps> = () => {
             disabled={selectedSwitchDevices?.id === ''}
             variant='gray'
             className='pi-font-medium pi-text-sm pi-leading-5'
-            onClick={() =>
-              blindTransferOnSelectedDevice(extensionInCall)
-            }
+            onClick={() => blindTransferOnSelectedDevice(extensionInCall)}
           >
             <FontAwesomeIcon className='pi-w-6 pi-h-6 pi-mr-2' icon={faArrowsRepeat} />
-            <span>{t('Phone Island.Switch device')}</span>
+            <span>{t('Switch device.Switch device')}</span>
           </Button>
         </div>
       </div>

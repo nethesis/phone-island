@@ -22,6 +22,8 @@ import { SettingsView } from './SettingsView'
 import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
 import VideoView from './VideoView'
+import { WaitingConferenceView } from './ConferenceView'
+import { store } from '../store'
 
 /**
  * Provides the Island logic
@@ -42,6 +44,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
 
   // Get audioPlayerLoop value from player store
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   // The Container reference
   const islandContainerRef = useRef<any>(null)
@@ -64,8 +67,12 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Handle and apply view switch logic
   // ...set callview as the current view
   useEffect(() => {
+    const { isActive, conferenceStartedFrom, isOwnerInside } = store.getState().conference
+    const { username } = store.getState().currentUser
     // Check and switch the view
-    if (incoming || outgoing) {
+    if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
+      dispatch.island.setIslandView('waitingConference')
+    } else if (incoming || outgoing) {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
@@ -97,7 +104,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         activeAlertsCount > 0 ||
         view === 'player' ||
         view === 'recorder' ||
-        view === 'physicalPhoneRecorder') &&
+        view === 'physicalPhoneRecorder' ||
+        (view === 'waitingConference' && isActive) ||
+        (view === 'transfer' && isActive) || (view === 'settings' && isActive)) &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>
@@ -109,18 +118,19 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                 <AlertGuard>
                   {(() => {
                     const views = {
-                      call: <CallView />,
-                      keypad: <KeyboardView />,
-                      transfer: <TransferListView />,
-                      player: <AudioPlayerView />,
-                      recorder: <RecorderView />,
-                      physicalPhoneRecorder: <PhysicalRecorderView />,
-                      settings: <SettingsView />,
-                      video: <VideoView />,
-                      switchDevice: <SwitchDeviceView />,
+                      call: CallView ? <CallView /> : null,
+                      keypad: KeyboardView ? <KeyboardView /> : null,
+                      transfer: TransferListView ? <TransferListView /> : null,
+                      player: AudioPlayerView ? <AudioPlayerView /> : null,
+                      recorder: RecorderView ? <RecorderView /> : null,
+                      physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,
+                      settings: SettingsView ? <SettingsView /> : null,
+                      video: VideoView ? <VideoView /> : null,
+                      switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
+                      waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
                     }
 
-                    return currentView in views ? (
+                    return currentView in views && views[currentView as keyof typeof views] ? (
                       <ViewsTransition forView={currentView}>
                         {views[currentView as keyof typeof views]}
                       </ViewsTransition>

@@ -1105,3 +1105,19 @@ eventDispatch(`<event-name>`, `<data-object>`)
   "padding": "24px"
 }
 ```
+
+## Listen Conference Events - phone-island-conference-*
+
+- `phone-island-owner-conference-enter` The event to advert that owner has entered inside conference
+
+```json
+{}
+```
+
+## Dispatch Conference Events - phone-island-conference-*
+
+- `phone-island-conference-finished` The dispatch of finished conference
+
+```json
+{}
+```

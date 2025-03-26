@@ -8,10 +8,14 @@ import { StyledTimer } from '../../styles/Island.styles'
 import Moment from 'react-moment'
 import { isPhysical } from '../../lib/user/default_device'
 
-const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
+const Timer: FC<TimerProps> = ({
+  size = 'large',
+  startTime,
+  isNotAlwaysWhite,
+  isInsideConference,
+}) => {
   // Get isOpen from the island store
   const { isOpen } = useSelector((state: RootState) => state.island)
-
   return (
     <>
       {startTime != null && !isPhysical() && (
@@ -19,15 +23,15 @@ const Timer: FC<TimerProps> = ({ size = 'large', startTime, isHome }) => {
           <Moment
             date={Number(startTime)}
             interval={1000}
-            format='h:mm:ss'
+            format='hh:mm:ss'
             trim={false}
             unix
             durationFromNow
             className={`${
-              isHome !== undefined && isHome
+              isNotAlwaysWhite !== undefined && isNotAlwaysWhite
                 ? 'pi-text-gray-950 dark:pi-text-gray-50'
                 : 'pi-text-gray-50 dark:pi-text-gray-50'
-            } pi-font-normal`}
+            } ${isInsideConference ? 'pi-font-mono' : ''}`}
           />
         </StyledTimer>
       )}
@@ -42,5 +46,6 @@ export interface TimerProps {
   startTime: string
   // when the timer is used in the home view or in the pill view
   // TODO rename prop: it is used also in video view
-  isHome?: boolean
+  isNotAlwaysWhite?: boolean
+  isInsideConference?: boolean
 }

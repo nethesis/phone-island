@@ -22,10 +22,17 @@ import {
   callPhysical,
   toggleRecord,
   hangupPhysicalRecordingCall,
+  startConf,
+  joinMyConf,
+  endConf,
+  muteUserConf,
+  unmuteUserConf,
+  hangupUserConf,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
+import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 
 /**
  * Starts a call to a number
@@ -319,4 +326,206 @@ export async function recordCurrentCall(recordingValue: boolean) {
       }
     }
   }
+}
+
+export async function startConference() {
+  const {
+    accepted,
+    chSource,
+    chDest,
+    incoming,
+    outgoing,
+    incomingSocket,
+    outgoingSocket,
+    conversationId,
+  }: any = store?.getState()?.currentCall
+  const { default_device } = store.getState().currentUser
+  const defaultDeviceId = default_device?.id || default_device?.exten
+  let addedUserExtension = ''
+  if (accepted && (incoming || incomingSocket) && !isEmpty(chSource)) {
+    addedUserExtension = chSource?.callerNum
+  } else if (accepted && (outgoing || outgoingSocket) && !isEmpty(chDest)) {
+    addedUserExtension = chDest?.callerNum
+  }
+
+  if (defaultDeviceId !== '' && conversationId !== '' && addedUserExtension !== '') {
+    const startConferenceInformations = {
+      convid: conversationId?.toString(),
+      addEndpointId: addedUserExtension?.toString(),
+      ownerEndpointId: defaultDeviceId?.toString(),
+    }
+
+    if (startConferenceInformations) {
+      try {
+        const result = await startConf(startConferenceInformations)
+        if (result) {
+          // Set conferencing and disable pause
+          store.dispatch.currentCall.updateCurrentCall({
+            conferencing: true,
+            paused: false,
+          })
+
+          eventDispatch('phone-island-call-conferenced', {})
+          return true
+        }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function joinConference() {
+  const { default_device } = store.getState().currentUser
+  const defaultDeviceId = default_device?.id || default_device?.exten
+
+  if (defaultDeviceId !== '') {
+    const joinConferenceInformation = {
+      endpointId: defaultDeviceId?.toString(),
+    }
+
+    if (joinConferenceInformation) {
+      try {
+        const result = await joinMyConf(joinConferenceInformation)
+        if (result) {
+          eventDispatch('phone-island-owner-conference-enter', {})
+          return true
+        }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function endConference() {
+  const { conferenceId } = store.getState().conference
+
+  if (conferenceId !== '') {
+    const endConferenceInformation = {
+      confId: conferenceId?.toString(),
+    }
+
+    if (endConferenceInformation) {
+      try {
+        const result = await endConf(endConferenceInformation)
+        if (result) {
+          eventDispatch('phone-island-owner-conference-finished', {})
+          return true
+        }
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
+}
+
+export async function muteUserConference(confId, userId, isAlreadyMuted) {
+  if (confId === '' || userId === '') {
+    return false
+  }
+
+  const muteUnmuteUserInformation = {
+    confId: confId?.toString(),
+    userId: userId?.toString(),
+  }
+
+  try {
+    // Check if the user is already muted
+    const actionFunction = isAlreadyMuted ? unmuteUserConf : muteUserConf
+    const result = await actionFunction(muteUnmuteUserInformation)
+    return !!result
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+}
+
+export async function muteAllUsersConference(confId, isAlreadyMuted) {
+  if (confId === '') {
+    return false
+  }
+
+  // Get the conference users from the store
+  const { usersList } = store.getState().conference
+
+  if (!usersList || Object.keys(usersList).length === 0) {
+    return false
+  }
+
+  try {
+    // Iterate through all users (except the owner) and mute/unmute them
+    const nonOwnerUsers = Object.values(usersList)
+
+    // Determine which function to use based on isAlreadyMuted
+    const actionFunction = isAlreadyMuted ? unmuteUserConf : muteUserConf
+
+    // For each user, call the appropriate function directly
+    for (const user of nonOwnerUsers) {
+      const muteUnmuteUserInformation = {
+        confId: confId?.toString(),
+        userId: user.id?.toString(),
+      }
+
+      const result = await actionFunction(muteUnmuteUserInformation)
+
+      if (result) {
+        store.dispatch.conference.toggleUserMuted({
+          extenId: user.extenId,
+          muted: !isAlreadyMuted,
+        })
+      }
+    }
+
+    return true
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+}
+
+export async function removeUserConference(conferenceId, extensionId) {
+  if (conferenceId !== '' && extensionId !== '') {
+    const removeUserInformation = {
+      confId: conferenceId?.toString(),
+      extenId: extensionId?.toString(),
+    }
+
+    if (removeUserInformation) {
+      try {
+        const result = await hangupUserConf(removeUserInformation)
+        if (result) {
+          // Check if this was the last participant (excluding owner)
+          setTimeout(async () => {
+            const { usersList } = store.getState().conference
+            const remainingParticipants = Object.values(usersList || {}).filter(
+              (user) => !user.owner && user.extenId !== extensionId,
+            ).length
+
+            // If no more participants left, end the conference
+            if (remainingParticipants === 0) {
+              await endConference()
+            }
+          }, 500)
+
+          return true
+        }
+
+        return false
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+  }
+  return false
 }

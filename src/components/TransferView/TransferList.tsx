@@ -10,12 +10,13 @@ import { backToPreviousView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
 import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
-import { attendedTransfer } from '../../lib/phone/call'
+import { attendedTransfer, hangupCurrentCall, startConference } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
 import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { store } from '../../store'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -24,6 +25,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { endpoints } = useSelector((state: RootState) => state.users)
   const { username } = useSelector((state: RootState) => state.currentUser)
+
   const [loaded, setLoaded] = useState<boolean>(false)
   const [listUsers, setListUsers] = useState<UserEndpointsTypes[]>([])
   const searchValue = useRef<string>('')
@@ -118,12 +120,63 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }, [isOpen])
 
   function handleBackClick() {
-    // Unpause the current call
-    unpauseCurrentCall()
-    // Go back to the previous view
+    if (isInsideConferenceList()) {
+      // Close the conference list
+      eventDispatch('phone-island-conference-list-close', {})
+    } else {
+      // Unpause the current call
+      unpauseCurrentCall()
+    }
+
+    // Open the call view
     backToPreviousView()
   }
 
+  const waitingConferenceView = (numberToCall) => {
+    const { username }: any = store.getState().currentUser
+    const { isActive, isOwnerInside } = store.getState().conference
+    // show current waiting user in back view ( only on first)
+    if (!isActive) {
+      dispatch.conference.setConferenceActive(true)
+      dispatch.conference.setConferenceStartedFrom(username)
+    }
+    // start new call with selected user from conference list
+    if (isOwnerInside) {
+      // if owner has already started the conference hangup before make a new call
+      hangupCurrentCall()
+      dispatch.conference.toggleIsOwnerInside(false)
+      setTimeout(() => {
+        eventDispatch('phone-island-call-start', { number: numberToCall })
+      }, 500)
+    } else {
+      eventDispatch('phone-island-call-start', { number: numberToCall })
+    }
+  }
+
+  const clickTransferOrConference = async (number: string) => {
+    if (isInsideConferenceList()) {
+      const { isActive } = store.getState().conference
+      // Put current call user inside conference mode (only for first user to add not for the second one)
+      if (!isActive) {
+        const conferenceStarted = await startConference()
+        if (conferenceStarted) {
+          waitingConferenceView(number)
+        }
+      } else {
+        waitingConferenceView(number)
+      }
+    } else {
+      handleAttendedTransfer(number)
+    }
+  }
+
+  const isInsideConferenceList = () => {
+    const { isConferenceList } = store.getState().island
+    if (isConferenceList) {
+      return true
+    }
+    return false
+  }
   const { t } = useTranslation()
 
   return (
@@ -180,7 +233,7 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
                     <Button
-                      onClick={() => handleAttendedTransfer(searchValue.current)}
+                      onClick={() => clickTransferOrConference(searchValue?.current)}
                       variant='default'
                       data-tooltip-id='transfer-list-tooltip-call-to-transfer'
                       data-tooltip-content={t('Tooltip.Call to transfer') || ''}
@@ -198,51 +251,52 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                     className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
                   >
                     <div className='pi-flex pi-items-center pi-gap-4'>
-                      <ListAvatar
-                        onClick={() =>
-                          userEndpoints.mainPresence === 'online' &&
-                          handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
+                      {(() => {
+                        const isOnline = userEndpoints?.mainPresence === 'online'
+                        const tooltipContent = isOnline
+                          ? isInsideConferenceList()
+                            ? t('Conference.Call to add')
+                            : t('Tooltip.Call to transfer')
+                          : ''
+
+                        const handleClick = () => {
+                          isOnline &&
+                            clickTransferOrConference(
+                              userEndpoints?.endpoints?.mainextension[0]?.id,
+                            )
                         }
-                        username={userEndpoints.username}
-                        status={userEndpoints.mainPresence}
-                        data-tooltip-id={
-                          userEndpoints.mainPresence === 'online'
-                            ? 'transfer-list-tooltip-right'
-                            : ''
-                        }
-                        data-tooltip-content={
-                          userEndpoints?.mainPresence === 'online'
-                            ? `${t('Tooltip.Call to transfer')}`
-                            : ''
-                        }
-                      />
-                      <div
-                        onClick={() =>
-                          userEndpoints.mainPresence === 'online' &&
-                          handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
-                        }
-                        style={{ maxWidth: '196px' }}
-                        data-stop-propagation={true}
-                        data-tooltip-id={
-                          userEndpoints.mainPresence === 'online' ? 'transfer-list-tooltip-top' : ''
-                        }
-                        data-tooltip-content={
-                          userEndpoints.mainPresence === 'online'
-                            ? `${t('Tooltip.Call to transfer')}`
-                            : ''
-                        }
-                        className={`pi-h-fit  pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition`}
-                      >
-                        {/* The user name */}
-                        {userEndpoints.name}
-                      </div>
+
+                        return (
+                          <>
+                            <ListAvatar
+                              onClick={handleClick}
+                              username={userEndpoints?.username}
+                              status={userEndpoints?.mainPresence}
+                              data-tooltip-id={isOnline ? 'transfer-list-tooltip-right' : ''}
+                              data-tooltip-content={tooltipContent}
+                            />
+                            <div
+                              onClick={handleClick}
+                              style={{ maxWidth: '196px' }}
+                              data-stop-propagation={true}
+                              data-tooltip-id={isOnline ? 'transfer-list-tooltip-top' : ''}
+                              data-tooltip-content={isOnline ? t('Tooltip.Call to transfer') : ''}
+                              className='pi-h-fit pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition'
+                            >
+                              {userEndpoints.name}
+                            </div>
+                          </>
+                        )
+                      })()}
                     </div>
                     <div className='pi-flex pi-gap-3.5'>
                       {userEndpoints.mainPresence === 'online' && (
                         <Button
                           onClick={() =>
                             userEndpoints.mainPresence === 'online' &&
-                            handleAttendedTransfer(userEndpoints.endpoints.mainextension[0].id)
+                            clickTransferOrConference(
+                              userEndpoints?.endpoints?.mainextension[0]?.id,
+                            )
                           }
                           variant='green'
                           disabled={userEndpoints.mainPresence !== 'online'}

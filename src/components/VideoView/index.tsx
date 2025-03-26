@@ -1066,7 +1066,7 @@ export const VideoView: FC<VideoViewProps> = () => {
         <>
           <div className='pi-flex pi-justify-between pi-items-center'>
             <Avatar />
-            <Timer startTime={startTime} isHome />
+            <Timer startTime={startTime} isNotAlwaysWhite />
             {!isOpen && remoteAudioStream && !isPhysical() && (
               <AudioBars
                 audioStream={remoteAudioStream}

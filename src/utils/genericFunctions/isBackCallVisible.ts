@@ -9,10 +9,20 @@ import { store } from '../../store'
 export function isBackCallActive() {
   const { view, isOpen }: any = store.getState().island
   const { transferring } = store.getState().currentCall
+  const { isActive, usersList, conferenceStartedFrom } = store.getState().conference
+  const { name, username } = store.getState().currentUser
+
+  const isUserInConference =
+    usersList && Object.values(usersList).some((user: any) => user.name === name)
 
   return (
     ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) ||
     (view === 'video' && isOpen) ||
-    transferring
+    transferring ||
+    //check if conference is active
+    (isActive &&
+      view !== 'waitingConference' &&
+      (isUserInConference || conferenceStartedFrom === username) &&
+      isOpen)
   )
 }

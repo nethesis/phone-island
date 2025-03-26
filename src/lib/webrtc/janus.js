@@ -2739,6 +2739,14 @@ var Janus = (function (factory) {
           } else {
             // FIXME Add as a new track
             if (!config.myStream) config.myStream = new MediaStream()
+            if (!config.pc) {
+              try {
+                createPeerconnectionIfNeeded(handleId, callbacks)
+              } catch (e) {
+                Janus.warn('Could not create PeerConnection')
+                throw 'Could not create PeerConnection: ' + e
+              }
+            }
             if (kind === 'audio' || (!track.simulcast && !track.svc)) {
               sender = config.pc.addTrack(nt, config.myStream)
               transceiver = config.pc.getTransceivers().find((t) => t.sender === sender)
@@ -2747,6 +2755,7 @@ var Janus = (function (factory) {
                 // Standard RID
                 Janus.log('Enabling rid-based simulcasting:', nt)
                 let maxBitrates = getMaxBitrates(track.simulcastMaxBitrates)
+                if (!config.myStream) config.myStream = new MediaStream()
                 transceiver = config.pc.addTransceiver(nt, {
                   direction: 'sendrecv',
                   streams: [config.myStream],
@@ -2776,6 +2785,7 @@ var Janus = (function (factory) {
               } else {
                 // Firefox-based RID, based on https://gist.github.com/voluntas/088bc3cc62094730647b
                 Janus.log('Enabling Simulcasting for Firefox (RID)')
+                if (!config.myStream) config.myStream = new MediaStream()
                 transceiver = config.pc.addTransceiver(nt, {
                   direction: 'sendrecv',
                   streams: [config.myStream],
@@ -2805,6 +2815,7 @@ var Janus = (function (factory) {
               }
             } else {
               Janus.log('Enabling SVC (' + track.svc + '):', nt)
+              if (!config.myStream) config.myStream = new MediaStream()
               transceiver = config.pc.addTransceiver(nt, {
                 direction: 'sendrecv',
                 streams: [config.myStream],
@@ -2998,6 +3009,7 @@ var Janus = (function (factory) {
         }
         if (nt) {
           // FIXME Add the new track locally
+          if (!config.myStream) config.myStream = new MediaStream()
           config.myStream.addTrack(nt)
           // Notify the application about the new local track, if any
           nt.onended = function (ev) {

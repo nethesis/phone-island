@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownLeftAndUpRightToCenter, faGear, faPhone } from '@fortawesome/free-solid-svg-icons'
-import { hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
+import { endConference, hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
 import { Dispatch } from '../store'
@@ -27,7 +27,9 @@ const Hangup: FC<HangupProps> = ({
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
-  const { isOpen, sideViewIsVisible } = useSelector((state: RootState) => state.island)
+  const { isOpen, sideViewIsVisible, view } = useSelector((state: RootState) => state.island)
+  const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
+  const { username } = useSelector((state: RootState) => state.currentUser)
 
   function handleHangup() {
     if (incoming) {
@@ -84,7 +86,7 @@ const Hangup: FC<HangupProps> = ({
           } `}
         >
           {/* collapse phone island button */}
-          {isOpen && accepted && (
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
                 variant={buttonsVariant}
@@ -101,9 +103,19 @@ const Hangup: FC<HangupProps> = ({
           )}
 
           <Button
-            onClick={() =>
-              !isPhysicalRecording ? handleHangup() : hangupCurrentPhysicalRecording()
-            }
+            onClick={() => {
+              if (isPhysicalRecording) {
+                hangupCurrentPhysicalRecording()
+              } else if (isActive) {
+                if (conferenceStartedFrom === username && view === 'waitingConference') {
+                  endConference()
+                } else {
+                  handleHangup()
+                }
+              } else {
+                handleHangup()
+              }
+            }}
             variant='red'
             className={`${
               transferring && description
@@ -111,10 +123,16 @@ const Hangup: FC<HangupProps> = ({
                 : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
             }`}
             data-tooltip-id={
-              description && transferring ? 'tooltip-top-transfer' : 'tooltip-left-transfer'
+              (description && transferring) || (view === 'waitingConference' && isActive)
+                ? 'tooltip-top-transfer'
+                : 'tooltip-left-transfer'
             }
             data-tooltip-content={
-              description && transferring ? description : `${t('Tooltip.Hangup')}`
+              description && transferring
+                ? description
+                : view === 'waitingConference' && isActive
+                ? t('Conference.End conference')
+                : `${t('Tooltip.Hangup')}`
             }
             // data-tooltip-placement="top"
           >
@@ -128,7 +146,7 @@ const Hangup: FC<HangupProps> = ({
               </motion.div>
             )}
           </Button>
-          {isOpen && accepted && (
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
             <Button
               variant={buttonsVariant}
               onClick={() => closeSideViewOpenSettings()}

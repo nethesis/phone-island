@@ -42,6 +42,7 @@
     "Interrupt recording": "Interrompi registrazione",
     "Other actions": "Altre azioni",
     "Conference": "Aggiungi partecipante per chiamata in conferenza",
+    "Add user to conference": "Aggiungi alla chiamata in conferenza",
     "Go to settings": "Vai alle impostazioni",
     "Enable camera": "Abilita video",
     "Switch device": "Cambia dispositivo",
@@ -98,7 +99,21 @@
     "Sharing": "Condivisione"
   },
   "Phone island": {
-    "Mobile app": "App mobile",
-    "Swtich device": "Cambia dispositivo"
+    "Mobile app": "App mobile"
+  },
+  "Conference": {
+    "Conference": "Conferenza",
+    "Add participant": "Aggiungi partecipante",
+    "Remove participant": "Rimuovi partecipante",
+    "Waiting for the conference": "In attesa della conferenza",
+    "Start conference": "Inizia conferenza",
+    "Unmute participant": "Attiva audio partecipante",
+    "Mute participant": "Disattiva audio partecipante",
+    "Mute all participants": "Disattiva audio a tutti",
+    "Unmute all participants": "Attiva audio a tutti",
+    "In conference": "In conferenza",
+    "End conference": "Termina conferenza",
+    "No participants": "Nessun partecipante",
+    "Add participants to conference": "Aggiungi partecipanti alla conferenza"
   }
 }

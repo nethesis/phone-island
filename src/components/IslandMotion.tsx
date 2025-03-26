@@ -9,8 +9,15 @@ import { eventDispatch } from '../utils'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
-  const { incoming, outgoing, accepted, transferring, incomingWebRTC, incomingSocket } =
-    useSelector((state: RootState) => state.currentCall)
+  const {
+    incoming,
+    outgoing,
+    accepted,
+    transferring,
+    incomingWebRTC,
+    incomingSocket,
+    conferencing,
+  } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
   const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
     (state: RootState) => state.island,
@@ -20,11 +27,13 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     variants,
     border_radius_collapsed,
     border_radius_expanded,
+    border_radius_collapsed_conference,
     padding_x_collapsed,
     padding_y_collapsed,
     padding_expanded,
     alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   const motionVariants = useMemo(() => {
     // Initial size
@@ -37,7 +46,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     switch (view) {
       case 'call':
         if (isOpen) {
-          if (accepted && transferring) {
+          if (accepted && transferring && conferencing) {
             if (actionsExpanded) {
               size = {
                 width: variants.call.expanded.transfer.actionsExpanded.width,
@@ -137,6 +146,18 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               height: variants.video.collapsed.height,
             }
         break
+
+      case 'waitingConference':
+        size = isOpen
+          ? {
+              width: variants.waitingConference.expanded.width,
+              height: variants.waitingConference.expanded.height,
+            }
+          : {
+              width: variants.waitingConference.collapsed.width,
+              height: variants.waitingConference.collapsed.height,
+            }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0
@@ -150,7 +171,11 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
       }px`,
-      borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
+      borderRadius: isOpen
+        ? `${border_radius_expanded}px`
+        : isActive && view === 'waitingConference'
+        ? `${border_radius_collapsed_conference}px`
+        : `${border_radius_collapsed}px`,
       padding: isOpen
         ? size.padding != undefined
           ? `${size.padding}px`
@@ -176,6 +201,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
     incomingWebRTC,
     incomingSocket,
+    isActive
   ])
 
   useEffect(() => {
@@ -206,6 +232,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     sideViewIsVisible,
     incomingSocket,
     incomingWebRTC,
+    isActive
   ])
 
   return (
