@@ -48,7 +48,7 @@ const Actions: FC = () => {
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
-  const { username } = useSelector((state: RootState) => state?.currentUser)
+  const { username, profile } = useSelector((state: RootState) => state?.currentUser)
 
   const dispatch = useDispatch<Dispatch>()
 
@@ -197,10 +197,6 @@ const Actions: FC = () => {
   const addUserToConference = async () => {
     dispatch.island.setIslandView('waitingConference')
     const conferenceStarted = await startConference()
-    // TO DO - check if the conference is started
-    // if (conferenceStarted) {
-    //   dispatch.island.setIslandView('waitingConference')
-    // }
   }
 
   const { t } = useTranslation()
@@ -300,17 +296,22 @@ const Actions: FC = () => {
             >
               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
             </Button>
-            <Button
-              data-stop-propagation={true}
-              variant='default'
-              onClick={() => (isActive ? addUserToConference() : beginConference())}
-              data-tooltip-id='tooltip-conference'
-              data-tooltip-content={
-                isActive ? t('Tooltip.Conference') || '' : t('Tooltip.Add user to conference') || ''
-              }
-            >
-              <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
-            </Button>
+            {profile?.macro_permissions?.settings?.permissions?.conference?.value && (
+              <Button
+                data-stop-propagation={true}
+                variant='default'
+                onClick={() => (isActive ? addUserToConference() : beginConference())}
+                data-tooltip-id='tooltip-conference'
+                data-tooltip-content={
+                  isActive
+                    ? t('Tooltip.Conference') || ''
+                    : t('Tooltip.Add user to conference') || ''
+                }
+              >
+                <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
+              </Button>
+            )}
+
             <Button
               variant='default'
               onClick={() =>
