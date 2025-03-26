@@ -209,10 +209,14 @@ const Actions: FC = () => {
     <>
       <div
         className={`${
-          !intrudeListenStatus?.isListen && !intrudeListenStatus?.isIntrude
+          !intrudeListenStatus?.isListen &&
+          !intrudeListenStatus?.isIntrude &&
+          (!isActive || (isActive && conferenceStartedFrom === username))
             ? 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
             : intrudeListenStatus.isIntrude
             ? 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+            : isActive && conferenceStartedFrom !== username
+            ? 'pi-flex pi-items-center pi-justify-center pi-gap-4'
             : 'pi-hidden'
         } `}
       >
