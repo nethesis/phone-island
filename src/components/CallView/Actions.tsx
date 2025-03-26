@@ -20,7 +20,6 @@ import {
   faSquareParking,
   faChevronDown,
   faChevronUp,
-  faArrowRightArrowLeft,
   faUserPlus,
   faPlus,
 } from '@fortawesome/free-solid-svg-icons'
@@ -55,6 +54,8 @@ const Actions: FC = () => {
 
   // Check if the actions should be expanded automatically
   const autoExpandedRef = useRef(false)
+  // Check if the actions should be collapsed automatically
+  const autoCollapsedRef = useRef(false)
 
   // Check if user has enabled conference and view is different from waitingConference && the owner is the user
   const shouldExpandActions = useMemo(() => {
@@ -69,6 +70,18 @@ const Actions: FC = () => {
     )
   }, [isActive, view, actionsExpanded, conferenceStartedFrom])
 
+  // Check if user is not the owner of the conference
+  const shouldCollapseActions = useMemo(() => {
+    return (
+      isActive &&
+      view === 'call' &&
+      actionsExpanded &&
+      !autoCollapsedRef.current &&
+      username !== '' &&
+      conferenceStartedFrom !== username
+    )
+  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+
   // Automatically expand actions if the user has enabled conference
   useEffect(() => {
     if (shouldExpandActions) {
@@ -77,6 +90,15 @@ const Actions: FC = () => {
       autoExpandedRef.current = true
     }
   }, [shouldExpandActions, dispatch.island])
+
+  // Automatically collapse actions if the user is not the owner of the conference
+  useEffect(() => {
+    if (shouldCollapseActions) {
+      dispatch.island.toggleActionsExpanded(false)
+      eventDispatch('phone-island-call-actions-closed', {})
+      autoCollapsedRef.current = true
+    }
+  }, [shouldCollapseActions, dispatch.island])
 
   function openKeypad() {
     dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
