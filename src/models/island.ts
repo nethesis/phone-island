@@ -76,7 +76,10 @@ export const island = createModel<RootModel>()({
       // Keep beginning position
       const preservedStartPosition = state.startPosition
       // Keep view if waitingConference
-      const preservedView = state.view === 'waitingConference' ? state.view : defaultState.view
+      const preservedView =
+        state.view === 'waitingConference' || state.view === 'recorder'
+          ? state.view
+          : defaultState.view
       const avoidToShow = state.avoidToShow
 
       return {
