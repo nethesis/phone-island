@@ -504,6 +504,19 @@ export async function removeUserConference(conferenceId, extensionId) {
       try {
         const result = await hangupUserConf(removeUserInformation)
         if (result) {
+          // Check if this was the last participant (excluding owner)
+          setTimeout(async () => {
+            const { usersList } = store.getState().conference
+            const remainingParticipants = Object.values(usersList || {}).filter(
+              (user) => !user.owner && user.extenId !== extensionId,
+            ).length
+
+            // If no more participants left, end the conference
+            if (remainingParticipants === 0) {
+              await endConference()
+            }
+          }, 500)
+
           return true
         }
 

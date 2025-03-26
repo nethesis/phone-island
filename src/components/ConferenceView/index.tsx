@@ -86,6 +86,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                   <Button
                     variant='default'
                     className='pi-w-52 pi-font-medium pi-leading-5'
+                    conference
                     onClick={() => joinOwnerToConference()}
                   >
                     <FontAwesomeIcon icon={faArrowRightToBracket} className='pi-mr-3' />
@@ -93,6 +94,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                   </Button>
                   <Button
                     variant='default'
+                    conference
                     onClick={() => openAddUserListToAddConference()}
                     data-tooltip-id='tooltip-add-user-to-conference-before-started'
                     data-tooltip-content={t('Conference.Add participant') || ''}
@@ -134,7 +136,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
             </div>
           </div>
           <div className={`pi-absolute pi-bottom-4 pi-right-0 pi-w-full pi-pb-2`}>
-            <Hangup/>
+            <Hangup />
           </div>
           <CustomThemedTooltip
             className='pi-z-1000'
