@@ -2739,6 +2739,14 @@ var Janus = (function (factory) {
           } else {
             // FIXME Add as a new track
             if (!config.myStream) config.myStream = new MediaStream()
+            if (!config.pc) {
+              try {
+                createPeerconnectionIfNeeded(handleId, callbacks)
+              } catch (e) {
+                Janus.warn('Could not create PeerConnection')
+                throw 'Could not create PeerConnection: ' + e
+              }
+            }
             if (kind === 'audio' || (!track.simulcast && !track.svc)) {
               sender = config.pc.addTrack(nt, config.myStream)
               transceiver = config.pc.getTransceivers().find((t) => t.sender === sender)
