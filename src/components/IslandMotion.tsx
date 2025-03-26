@@ -27,11 +27,13 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     variants,
     border_radius_collapsed,
     border_radius_expanded,
+    border_radius_collapsed_conference,
     padding_x_collapsed,
     padding_y_collapsed,
     padding_expanded,
     alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
+  const { isActive } = useSelector((state: RootState) => state.conference)
 
   const motionVariants = useMemo(() => {
     // Initial size
@@ -169,7 +171,11 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
       }px`,
-      borderRadius: isOpen ? `${border_radius_expanded}px` : `${border_radius_collapsed}px`,
+      borderRadius: isOpen
+        ? `${border_radius_expanded}px`
+        : isActive && view === 'waitingConference'
+        ? `${border_radius_collapsed_conference}px`
+        : `${border_radius_collapsed}px`,
       padding: isOpen
         ? size.padding != undefined
           ? `${size.padding}px`

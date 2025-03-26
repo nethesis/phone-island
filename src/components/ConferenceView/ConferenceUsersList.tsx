@@ -160,9 +160,9 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
             ))
         ) : (
           <div className='pi-flex pi-flex-col pi-justify-center pi-items-center pi-h-20 pi-text-gray-500 dark:pi-text-gray-400'>
-            <span>{t('Conference.No participants yet')}</span>
+            <span>{t('Conference.No participants')}</span>
             <span className='pi-text-xs pi-mt-1'>
-              {t('Conference.Waiting for participants to join')}
+              {t('Conference.Add participants to conference')}
             </span>
           </div>
         )}

@@ -112,6 +112,8 @@
     "Mute all participants": "Mute all participants",
     "Unmute all participants": "Unmute all participants",
     "In conference": "In conference",
-    "End conference": "End conference"
+    "End conference": "End conference",
+    "No participants": "No participants",
+    "Add participants to conference": "Add participants to conference"
   }
 }

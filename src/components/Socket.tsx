@@ -375,6 +375,7 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('extenHangup', (res: any) => {
         const { endpoints, username } = store.getState().currentUser
         const { isActive, conferenceStartedFrom } = store.getState().conference
+        const { view } = store.getState().island
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
@@ -415,6 +416,15 @@ export const Socket: FC<SocketProps> = ({
           conferenceStartedFrom !== username
         ) {
           store.dispatch.conference.resetConference()
+        }
+        // if conference owner call the call with the added user inside conference
+        if (
+          res?.cause === 'interworking' &&
+          isActive &&
+          conferenceStartedFrom === username &&
+          view !== 'waitingConference'
+        ) {
+          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
       })
 
@@ -596,8 +606,26 @@ export const Socket: FC<SocketProps> = ({
           const conferenceId = res?.id
           const conferenceUsers = res?.users
 
-          store.dispatch.conference.updateConferenceUsersList(conferenceUsers)
+          // Get current users list to preserve mute status
+          const { usersList } = store.getState().conference
 
+          // Create a copy of the new conference users while preserving mute status
+          const updatedConferenceUsers = { ...conferenceUsers }
+
+          // Preserve mute status for existing users
+          if (usersList) {
+            Object.keys(updatedConferenceUsers).forEach((userId) => {
+              if (usersList[userId]) {
+                // Keep the existing mute status instead of using the server's value
+                updatedConferenceUsers[userId] = {
+                  ...updatedConferenceUsers[userId],
+                  muted: usersList[userId].muted,
+                }
+              }
+            })
+          }
+
+          store.dispatch.conference.updateConferenceUsersList(updatedConferenceUsers)
           store.dispatch.conference.updateConferenceId(conferenceId)
         }
       })

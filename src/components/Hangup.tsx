@@ -103,15 +103,19 @@ const Hangup: FC<HangupProps> = ({
           )}
 
           <Button
-            onClick={() =>
-              !isPhysicalRecording && !isActive
-                ? handleHangup()
-                : isActive && conferenceStartedFrom === username && view === 'waitingConference'
-                ? endConference()
-                : isActive && conferenceStartedFrom !== username && view !== 'waitingConference'
-                ? handleHangup()
-                : hangupCurrentPhysicalRecording()
-            }
+            onClick={() => {
+              if (isPhysicalRecording) {
+                hangupCurrentPhysicalRecording()
+              } else if (isActive) {
+                if (conferenceStartedFrom === username && view === 'waitingConference') {
+                  endConference()
+                } else {
+                  handleHangup()
+                }
+              } else {
+                handleHangup()
+              }
+            }}
             variant='red'
             className={`${
               transferring && description

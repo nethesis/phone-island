@@ -112,6 +112,8 @@
     "Mute all participants": "Disattiva audio a tutti",
     "Unmute all participants": "Attiva audio a tutti",
     "In conference": "In conferenza",
-    "End conference": "Termina conferenza"
+    "End conference": "Termina conferenza",
+    "No participants": "Nessun partecipante",
+    "Add participants to conference": "Aggiungi partecipanti alla conferenza"
   }
 }

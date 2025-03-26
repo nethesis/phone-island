@@ -23,6 +23,7 @@ const defaultState = {
   padding_y_collapsed: 16,
   border_radius_expanded: 20,
   border_radius_collapsed: 99,
+  border_radius_collapsed_conference: 8,
   variants: {
     call: {
       expanded: {
@@ -92,7 +93,7 @@ const defaultState = {
     },
     waitingConference: {
       expanded: { width: 348, height: 360 },
-      collapsed: commonCollapsed,
+      collapsed: { width: 180, height: 74 },
     },
   },
 }

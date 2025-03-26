@@ -56,10 +56,12 @@ export const conference = createModel<RootModel>()({
           // Check if this user already exists in the current usersList
           const existingUser = state.usersList?.[userId]
 
-          // Keep existing joinTime if user already exists, otherwise set current time
+          // Preserve existing user data: joinTime and muted status
           updatedUsersList[userId] = {
             ...user,
             joinTime: existingUser?.joinTime || currentTime,
+            // Keep existing muted status if user already exists
+            muted: existingUser ? existingUser.muted : user.muted,
           }
 
           // Find the owner
@@ -67,6 +69,8 @@ export const conference = createModel<RootModel>()({
             owner = {
               ...user,
               joinTime: existingUser?.joinTime || currentTime,
+              // Keep existing muted status for owner if it exists
+              muted: existingUser ? existingUser.muted : user.muted,
             }
           }
         })
