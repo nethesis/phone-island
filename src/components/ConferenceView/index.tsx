@@ -132,7 +132,7 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
               )}
             </div>
           </div>
-          <div className={`pi-absolute pi-bottom-0 pi-right-0 pi-w-full pi-pb-2`}>
+          <div className={`pi-absolute pi-bottom-4 pi-right-0 pi-w-full pi-pb-2`}>
             <Hangup buttonsVariant='default' />
           </div>
           <CustomThemedTooltip
