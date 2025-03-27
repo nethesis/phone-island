@@ -14,6 +14,7 @@ import {
   faRecordVinyl,
   faStop,
   faCircleNotch,
+  faGear,
 } from '@fortawesome/free-solid-svg-icons'
 import { startAnnouncementRecording } from '../../services/offhour'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
@@ -210,16 +211,25 @@ export const Actions: FC<{}> = () => {
       )}
       {!recording && !recorded && (
         <div className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'>
-          <DropdownContent data-stop-propagation={true}></DropdownContent>
+          <Button
+            variant={'default'}
+            onClick={() => dispatch.island.setIslandView('settings')}
+            data-tooltip-id='tooltip-settings-view-recorder'
+            data-tooltip-content={t('Tooltip.Go to settings') || ''}
+            className='pi-justify-end pi-flex pi-items-center'
+          >
+            <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
+          </Button>
         </div>
       )}
       {/* Buttons tooltips */}
-      <CustomThemedTooltip id='tooltip-start-recording-recorder-view' place='bottom' />
-      <CustomThemedTooltip id='tooltip-stop-recorder-view' place='bottom' />
-      <CustomThemedTooltip id='tooltip-play-recorder-view' place='bottom' />
-      <CustomThemedTooltip id='tooltip-pause-recorder-view' place='bottom' />
-      <CustomThemedTooltip id='tooltip-delete-recorder-view' place='bottom' />
-      <CustomThemedTooltip id='tooltip-confirm-record-view' place='bottom' />
+      <CustomThemedTooltip id='tooltip-start-recording-recorder-view' place='top' />
+      <CustomThemedTooltip id='tooltip-stop-recorder-view' place='top' />
+      <CustomThemedTooltip id='tooltip-play-recorder-view' place='top' />
+      <CustomThemedTooltip id='tooltip-pause-recorder-view' place='top' />
+      <CustomThemedTooltip id='tooltip-delete-recorder-view' place='top' />
+      <CustomThemedTooltip id='tooltip-confirm-record-view' place='top' />
+      <CustomThemedTooltip id='tooltip-settings-view-recorder' place='top' />
     </div>
   )
 }

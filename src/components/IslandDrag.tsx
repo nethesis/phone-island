@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useState, useRef, MutableRefObject } from 'react'
@@ -33,14 +33,32 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   )
 
   // Handles the drag started event
-  function handleStartDrag(event) {
+  function handleStartDrag(event: React.PointerEvent<Element>) {
+    const target = event.target as HTMLElement
+    if (
+      target.closest('[data-stop-propagation="true"]') ||
+      target.hasAttribute('data-stop-propagation')
+    ) {
+      return
+    }
+
     controls.start(event)
   }
+
   // Handles log press event
   const handleLongPress = () => {}
 
-  // Handle Island click
-  const handleIslandClick = () => {
+  const handleIslandClick = (event?: React.MouseEvent<Element> | any) => {
+    if (event && event.target) {
+      const target = event.target as HTMLElement
+      if (
+        target.closest('[data-stop-propagation="true"]') ||
+        target.hasAttribute('data-stop-propagation')
+      ) {
+        return
+      }
+    }
+
     // Only if phone island is close is possible to open it trough the click
     const isPhoneIslandAlreadyOpen = store?.getState()?.island?.isOpen
     !isPhoneIslandAlreadyOpen && dispatch.island.handleToggleIsOpen()
@@ -87,7 +105,7 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   return (
     <motion.div
       drag
-      onPointerDown={(e) => controls.start(e)}
+      onPointerDown={handleStartDrag}
       onDragStart={handleDragStarted}
       dragTransition={{ power: 0 }}
       initial={{

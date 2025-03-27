@@ -56,8 +56,17 @@ export const Progress: FC<ProgressTypes> = () => {
     dispatch.player.setAudioPlayerCurrentTime(progressBarRef.current.value)
   }
 
+  function stopPropagation(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
+    e.stopPropagation()
+  }
+
   return (
-    <div className='pi-w-full pi-h-fit'>
+    <div
+      className='pi-w-full pi-h-fit'
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onTouchStart={stopPropagation}
+    >
       <StyledCustomRange
         data-stop-propagation={true}
         ref={progressBarRef}
