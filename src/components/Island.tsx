@@ -34,7 +34,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  const { view, sideViewIsVisible, avoidToShow } = useSelector((state: RootState) => state.island)
+  const { view, sideViewIsVisible, avoidToShow, previousView } = useSelector(
+    (state: RootState) => state.island,
+  )
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -106,7 +108,9 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         view === 'recorder' ||
         view === 'physicalPhoneRecorder' ||
         (view === 'waitingConference' && isActive) ||
-        (view === 'transfer' && isActive) || (view === 'settings' && isActive)) &&
+        (view === 'transfer' && isActive) ||
+        (view === 'settings' && isActive) ||
+        (view === 'settings' && previousView === 'recorder')) &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>

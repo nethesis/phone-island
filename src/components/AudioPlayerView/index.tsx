@@ -36,6 +36,10 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
     pausePlaying()
   })
 
+  function stopPropagation(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
+    e.stopPropagation()
+  }
+
   const { t } = useTranslation()
 
   return (
@@ -58,7 +62,7 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
         />
       </div>
       {isOpen && (
-        <div>
+        <div onClick={stopPropagation} onMouseDown={stopPropagation} onTouchStart={stopPropagation}>
           <Progress />
           <div className='pi-w-full pi-flex pi-justify-center pi-items-center pi-pt-7'>
             <Button

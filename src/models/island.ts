@@ -72,22 +72,11 @@ export const island = createModel<RootModel>()({
         isFullScreen: payload,
       }
     },
+    resetPlayerClose: (state) => {
+      return getResetState(state, false)
+    },
     resetIslandStore: (state) => {
-      // Keep beginning position
-      const preservedStartPosition = state.startPosition
-      // Keep view if waitingConference
-      const preservedView = state.view === 'waitingConference' ? state.view : defaultState.view
-      const avoidToShow = state.avoidToShow
-
-      return {
-        ...defaultState,
-        startPosition: preservedStartPosition,
-        view: preservedView,
-        avoidToShow: avoidToShow,
-        // Keep previousView if waitingConference
-        previousView:
-          state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
-      }
+      return getResetState(state, true)
     },
   },
   effects: (dispatch) => ({
@@ -109,6 +98,31 @@ export const island = createModel<RootModel>()({
     },
   }),
 })
+
+function getResetState(state: IslandTypes, includeRecorder: boolean): IslandTypes {
+  // Keep beginning position
+  const preservedStartPosition = state.startPosition
+  // Determine which view to preserve
+  const viewsToPreserve = ['waitingConference']
+  if (includeRecorder) {
+    viewsToPreserve.push('recorder')
+  }
+
+  const preservedView = viewsToPreserve.includes(state.view as string)
+    ? state.view
+    : defaultState.view
+  const avoidToShow = state.avoidToShow
+
+  return {
+    ...defaultState,
+    startPosition: preservedStartPosition,
+    view: preservedView,
+    avoidToShow: avoidToShow,
+    // Keep previousView if waitingConference
+    previousView:
+      state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
+  }
+}
 
 type IslandViewType =
   | 'call'

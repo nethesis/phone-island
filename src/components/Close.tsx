@@ -17,13 +17,11 @@ export const Close: FC = () => {
       dispatch.player.stopAudioPlayer()
       eventDispatch('phone-island-audio-player-close', {})
     }
-    dispatch.island.resetIslandStore()
-    dispatch.island.handleToggleIsOpen()
+    dispatch.island.resetPlayerClose()
   }
 
   function close() {
-    dispatch.island.resetIslandStore()
-    dispatch.island.handleToggleIsOpen()
+    dispatch.island.resetPlayerClose()
   }
 
   return (
