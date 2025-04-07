@@ -117,3 +117,20 @@ export async function changeDefaultDevice(obj: any) {
     throw error
   }
 }
+
+export async function setMainDevice(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/user/default_device`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}

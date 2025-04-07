@@ -81,6 +81,15 @@ export const getSupportedDevices = function (origCallback: () => void) {
 }
 
 export const checkMediaPermissions = function () {
+  //Remove all media alerts if default_device is physical
+  if (isPhysical()) {
+    store.dispatch.alerts.removeAlert('browser_permissions')
+    store.dispatch.alerts.removeAlert('user_permissions')
+    store.dispatch.alerts.removeAlert('busy_camera')
+    store.dispatch.alerts.removeAlert('unknown_media_permissions')
+    return
+  }
+
   requestMediaPermissions({ audio: true, video: true })
     .then(() => {
       // Can successfully access camera and microphone streams
@@ -112,10 +121,8 @@ export const checkMediaPermissions = function () {
         message: "WebRTC: can't access audio or camera on this device. unknown error",
       }
 
-      // Display alert if not a physical device
-      if (!isPhysical()) {
-        store.dispatch.alerts.setAlert(error.alert)
-      }
+      // Display alert only for non-physical devices
+      store.dispatch.alerts.setAlert(error.alert)
 
       // Log error message if Janus logger is available
       if (Janus.error) {

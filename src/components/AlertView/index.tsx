@@ -19,7 +19,7 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 /**
  * Shows user alerts
  */
-const AlertView: FC = () => {
+const AlertView: FC<AlertViewProp> = ({ uaType }) => {
   const { data } = useSelector((state: RootState) => state.alerts)
   const { default_device } = useSelector((state: RootState) => state.currentUser)
   const dispatch = useDispatch<Dispatch>()
@@ -82,14 +82,18 @@ const AlertView: FC = () => {
         <Button
           variant='transparent'
           onClick={() =>
-            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+            default_device?.type === 'nethlink' &&
+            uaType === 'mobile' &&
+            latestAlert?.type !== 'call_transfered'
               ? reloadPhoneIsland()
               : handleClearAllAlerts()
           }
           className='pi-absolute pi--right-6 pi-transform pi--translate-y-1/2'
           data-tooltip-id='tooltip-close-alert'
           data-tooltip-content={
-            default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+            default_device?.type === 'nethlink' &&
+            uaType === 'mobile' &&
+            latestAlert?.type !== 'call_transfered'
               ? `${t('Tooltip.Reload')}`
               : `${t('Tooltip.Close alert')}`
           }
@@ -107,6 +111,10 @@ const AlertView: FC = () => {
       </div>
     )
   )
+}
+
+interface AlertViewProp {
+  uaType?: string
 }
 
 export default AlertView

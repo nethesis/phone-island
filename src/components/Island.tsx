@@ -30,7 +30,7 @@ import { store } from '../store'
  *
  * @param showAlways Sets the Island ever visible
  */
-export const Island: FC<IslandProps> = ({ showAlways }) => {
+export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
@@ -119,7 +119,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
               <SideView isVisible={sideViewIsVisible} />
               <IslandMotions>
                 {/* The views logic */}
-                <AlertGuard>
+                <AlertGuard uaType={uaType}>
                   {(() => {
                     const views = {
                       call: CallView ? <CallView /> : null,
@@ -161,4 +161,5 @@ Island.displayName = 'Island'
 
 interface IslandProps {
   showAlways?: boolean
+  uaType?: string
 }

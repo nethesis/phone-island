@@ -336,7 +336,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
-                <Island showAlways={showAlways} />
+                <Island showAlways={showAlways} uaType={uaType}/>
               </Events>
             </Socket>
           </RestAPI>
