@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'
 import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { isAlertVisible } from '../../utils/genericFunctions/isAlertVisible'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -49,12 +50,10 @@ const CallView: FC<CallViewProps> = () => {
 
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isListen, isIntrude } = useSelector((state: RootState) => state.listen)
-  const { data } = useSelector((state: RootState) => state.alerts)
-
   const { t } = useTranslation()
-  const activeAlerts = Object.values(data).filter((alert: any) => alert.active)
-  const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
   const currentUser = useSelector((state: RootState) => state.currentUser)
+
+  const alertVisible = isAlertVisible()
 
   const landlinePhoneDiv = () => {
     return (
@@ -100,7 +99,7 @@ const CallView: FC<CallViewProps> = () => {
   return (
     <>
       {/* Avoid alert message and incoming call message for slow connections */}
-      {latestAlert !== null ? null : (
+      {alertVisible ? null : (
         <div className='pi-bg-red pi-content-center pi-justify-center'>
           <StyledCallView
             incoming={incoming}
@@ -125,7 +124,6 @@ const CallView: FC<CallViewProps> = () => {
                 />
               ) : intrudeListenStatus?.isIntrude ? (
                 <FontAwesomeIcon
-                  // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
                   className={`${
                     isOpen
                       ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
@@ -141,7 +139,6 @@ const CallView: FC<CallViewProps> = () => {
                 (currentCallDetails?.username === '' ||
                   currentCallDetails?.username === 'undefined') ? (
                 <FontAwesomeIcon
-                  // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
                   className={`${
                     isOpen
                       ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi--rotate-45'
@@ -154,7 +151,6 @@ const CallView: FC<CallViewProps> = () => {
                 (currentCallDetails?.username === '' ||
                   currentCallDetails?.username === 'undefined') ? (
                 <FontAwesomeIcon
-                  // className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover'
                   className={`${
                     isOpen
                       ? 'pi-relative pi-z-30 pi-h-12 pi-w-12 pi-rounded-sm pi-bg-cover pi--rotate-45'
@@ -165,7 +161,6 @@ const CallView: FC<CallViewProps> = () => {
               ) : outgoing &&
                 (currentCallDetails?.username === '' ||
                   currentCallDetails?.username === 'undefined') ? (
-                // set a loading avatar when the call is not attached to a user
                 <FontAwesomeIcon
                   className={`${
                     isOpen
@@ -178,7 +173,6 @@ const CallView: FC<CallViewProps> = () => {
                 accepted &&
                 (currentCallDetails?.username === '' ||
                   currentCallDetails?.username === 'undefined') ? (
-                // set a loading avatar when the call is not attached to a user
                 <FontAwesomeIcon
                   className={`${
                     isOpen
@@ -279,14 +273,7 @@ const CallView: FC<CallViewProps> = () => {
                       : 'pi-grid-cols-1 pi-justify-items-end'
                   } pi-gap-3.5`}
                 >
-                  {/* The button to hangup the currentCall */}
-                  {/* {incoming || outgoing ? (
-            <Button onClick={hangupCurrentCall} variant='red'>
-              <FontAwesomeIcon className='pi-rotate-135 pi-w-6 pi-h-6' icon={faPhone} />
-            </Button>
-          ) : ( */}
                   <Hangup description={t('Tooltip.Hangup and transfer')} />
-                  {/* )} */}
                   {/* The button to answer the incoming call */}
                   {isAnswerVisible(outgoing, accepted) && (
                     <Button

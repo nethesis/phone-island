@@ -15,6 +15,7 @@ import { Button } from '../Button'
 import { t } from 'i18next'
 import { eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { useLocalStorage } from '../../utils/customHooks/useLocalStorage'
 
 /**
  * Shows user alerts
@@ -23,6 +24,10 @@ const AlertView: FC = () => {
   const { data } = useSelector((state: RootState) => state.alerts)
   const { default_device } = useSelector((state: RootState) => state.currentUser)
   const dispatch = useDispatch<Dispatch>()
+  const [alertsToAvoid, setAlertsToAvoid] = useLocalStorage<Record<string, boolean>>(
+    'phoneIslandAlertsToAvoid',
+    {},
+  )
 
   // Extract active alerts
   const activeAlerts = Object.values(data).filter((alert: any) => alert.active)
@@ -31,6 +36,14 @@ const AlertView: FC = () => {
   const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
 
   const handleClearAllAlerts = () => {
+    if (latestAlert) {
+      // Save the alert type in localStorage to avoid showing it again
+      setAlertsToAvoid({
+        ...alertsToAvoid,
+        [latestAlert.type]: true,
+      })
+    }
+
     dispatch.alerts.removeAllAlerts()
     eventDispatch('phone-island-all-alerts-removed', {})
   }

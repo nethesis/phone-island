@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { useState, useRef, useEffect, type FC } from 'react'
@@ -21,6 +21,7 @@ import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
 import { SwitchDeviceView } from './SwitchDeviceView'
 import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
+import { isAlertVisible } from '../utils/genericFunctions/isAlertVisible'
 import VideoView from './VideoView'
 import { WaitingConferenceView } from './ConferenceView'
 import { store } from '../store'
@@ -40,9 +41,6 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
-
-  // Get activeAlertsCount from island store
-  const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
 
   // Get audioPlayerLoop value from player store
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
@@ -94,6 +92,19 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
     }, 200)
   }, [view])
 
+  const views = {
+    call: CallView ? <CallView /> : null,
+    keypad: KeyboardView ? <KeyboardView /> : null,
+    transfer: TransferListView ? <TransferListView /> : null,
+    player: AudioPlayerView ? <AudioPlayerView /> : null,
+    recorder: RecorderView ? <RecorderView /> : null,
+    physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,
+    settings: SettingsView ? <SettingsView /> : null,
+    video: VideoView ? <VideoView /> : null,
+    switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
+    waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
+  }
+
   return (
     <div
       ref={islandContainerRef}
@@ -103,7 +114,7 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
         outgoing ||
         accepted ||
         showAlways ||
-        activeAlertsCount > 0 ||
+        isAlertVisible() ||
         view === 'player' ||
         view === 'recorder' ||
         view === 'physicalPhoneRecorder' ||
@@ -119,21 +130,20 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
               <SideView isVisible={sideViewIsVisible} />
               <IslandMotions>
                 {/* The views logic */}
-                <AlertGuard>
-                  {(() => {
-                    const views = {
-                      call: CallView ? <CallView /> : null,
-                      keypad: KeyboardView ? <KeyboardView /> : null,
-                      transfer: TransferListView ? <TransferListView /> : null,
-                      player: AudioPlayerView ? <AudioPlayerView /> : null,
-                      recorder: RecorderView ? <RecorderView /> : null,
-                      physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,
-                      settings: SettingsView ? <SettingsView /> : null,
-                      video: VideoView ? <VideoView /> : null,
-                      switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
-                      waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
-                    }
-
+                {isAlertVisible() ? (
+                  <AlertGuard>
+                    {(() => {
+                      return currentView in views && views[currentView as keyof typeof views] ? (
+                        <ViewsTransition forView={currentView}>
+                          {views[currentView as keyof typeof views]}
+                        </ViewsTransition>
+                      ) : (
+                        <></>
+                      )
+                    })()}
+                  </AlertGuard>
+                ) : (
+                  (() => {
                     return currentView in views && views[currentView as keyof typeof views] ? (
                       <ViewsTransition forView={currentView}>
                         {views[currentView as keyof typeof views]}
@@ -141,8 +151,8 @@ export const Island: FC<IslandProps> = ({ showAlways }) => {
                     ) : (
                       <></>
                     )
-                  })()}
-                </AlertGuard>
+                  })()
+                )}
               </IslandMotions>
               <Close />
             </IslandDrag>

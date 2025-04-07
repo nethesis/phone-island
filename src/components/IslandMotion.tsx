@@ -6,6 +6,7 @@ import { RootState } from '../store'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { eventDispatch } from '../utils'
+import { isAlertVisible } from '../utils/genericFunctions/isAlertVisible'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
@@ -22,7 +23,6 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
     (state: RootState) => state.island,
   )
-  const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
   const {
     variants,
     border_radius_collapsed,
@@ -34,6 +34,8 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
   const { isActive } = useSelector((state: RootState) => state.conference)
+
+  const alertVisible = isAlertVisible()
 
   const motionVariants = useMemo(() => {
     // Initial size
@@ -160,13 +162,11 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         break
     }
 
-    const isAlert: boolean = activeAlertsCount > 0
-
     return {
-      width: `${size.width === 0 && isAlert ? variants.alerts.width : size.width}px`,
+      width: `${size.width === 0 && alertVisible ? variants.alerts.width : size.width}px`,
       height: `${
         // If there is an alert and the island is open put the correct height
-        isAlert && isOpen
+        alertVisible && isOpen
           ? variants.alerts.height +
             (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
@@ -191,7 +191,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     isListen,
     incoming,
     outgoing,
-    activeAlertsCount,
+    alertVisible,
     variants,
     border_radius_collapsed,
     border_radius_expanded,
@@ -201,7 +201,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
     incomingWebRTC,
     incomingSocket,
-    isActive
+    isActive,
   ])
 
   useEffect(() => {
@@ -221,7 +221,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     isListen,
     incoming,
     outgoing,
-    activeAlertsCount,
+    alertVisible,
     variants,
     border_radius_collapsed,
     border_radius_expanded,
@@ -232,7 +232,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     sideViewIsVisible,
     incomingSocket,
     incomingWebRTC,
-    isActive
+    isActive,
   ])
 
   return (
