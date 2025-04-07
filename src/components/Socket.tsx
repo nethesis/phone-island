@@ -32,6 +32,7 @@ import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
 import { ScreenSharingMessage } from './VideoView'
+import { checkMediaPermissions } from '../lib/devices/devices'
 
 interface SocketProps {
   children: ReactNode
@@ -598,6 +599,8 @@ export const Socket: FC<SocketProps> = ({
         }
 
         store.dispatch.currentUser.updateCurrentDefaultDevice(objectComplete)
+        //make sure to check the media permissions
+        checkMediaPermissions()
       })
 
       socket.current.on('confBridgeUpdate', (res: any) => {

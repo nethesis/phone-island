@@ -7,11 +7,13 @@ import { PhoneIsland } from '../App'
 import { eventDispatch, useEventListener } from '../utils'
 import { Button } from '../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { store } from '../store'
 import {
   faBullhorn,
   faCheck,
   faDownLeftAndUpRightToCenter,
   faGear,
+  faHeadset,
   faMoon,
   faPhone,
   faSun,
@@ -20,6 +22,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { Base64 } from 'js-base64'
+import { isEmpty } from '../utils/genericFunctions/isEmpty'
+import { setMainDevice } from '../services/user'
 
 const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
@@ -167,6 +171,45 @@ const CallTemplate = (args: any) => {
     id: '76',
   }
 
+  const [mainDeviceType, setMainDeviceType] = useState('')
+  const [noMobileListDevice, setNoMobileListDevice]: any = useState([])
+  const { endpoints, default_device } = store.getState().currentUser
+  useEffect(() => {
+    if (endpoints) {
+      let extensionObj: any = endpoints
+      if (default_device?.id && !isEmpty(extensionObj)) {
+        const extensionType = extensionObj.extension.find(
+          (ext: any) => ext.id === default_device?.id,
+        )
+        if (extensionType?.type !== '') {
+          setMainDeviceType(extensionType?.type)
+        }
+      }
+      if (!isEmpty(extensionObj)) {
+        const filteredDevices = extensionObj?.extension?.filter(
+          (device: any) => device?.type !== 'mobile',
+        )
+        setNoMobileListDevice(filteredDevices)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [default_device])
+
+  const setMainDeviceId = async (device: any) => {
+    let deviceExtension: any = {}
+    if (device) {
+      deviceExtension.id = device?.id
+      try {
+        const response = await setMainDevice(deviceExtension)
+        if (response) {
+          window.location.reload()
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
+
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
@@ -246,7 +289,7 @@ const CallTemplate = (args: any) => {
               >
                 Screen share status
               </Button>
-              
+
               <Button
                 variant='default'
                 onClick={() => eventDispatch('phone-island-conference-status', {})}
@@ -324,6 +367,40 @@ const CallTemplate = (args: any) => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Main device choose */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>
+              Device Selection
+            </h3>
+            <div className='pi-relative'>
+              <select
+                value={default_device?.id || ''}
+                onChange={(e) => {
+                  const device = noMobileListDevice.find((d) => d.id === e.target.value)
+                  setMainDeviceId(device)
+                }}
+                className='pi-w-full pi-px-4 pi-py-2 pi-pl-10 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white pi-text-gray-700'
+              >
+                {noMobileListDevice
+                  .filter((device: any) => device.type !== 'nethlink')
+                  .sort((a: any, b: any) => {
+                    const order = ['webrtc', 'physical']
+                    return order.indexOf(a.type) - order.indexOf(b.type)
+                  })
+                  .map((device: any) => (
+                    <option key={device.id} value={device.id}>
+                      {device.id === default_device?.id ? '✓ ' : ''}
+                      {device.type === 'webrtc' ? 'Web Phone' : device.description || 'Ip phone'}
+                    </option>
+                  ))}
+              </select>
+              <FontAwesomeIcon
+                icon={faHeadset}
+                className='pi-absolute pi-left-3 pi-top-1/2 pi-transform -pi-translate-y-1/2 pi-text-gray-500'
+              />
+            </div>
           </div>
 
           {/* View Controls */}

@@ -13,7 +13,7 @@ import AlertView from './AlertView'
  * @returns
  */
 
-export const AlertGuard: FC<AlertGuard> = ({ children }) => {
+export const AlertGuard: FC<AlertGuard> = ({ children, uaType}) => {
   // Get alert status from alerts store
   const { activeAlertsCount, breakActiveAlertsCount } = useSelector(
     (state: RootState) => state.alerts.status,
@@ -24,7 +24,7 @@ export const AlertGuard: FC<AlertGuard> = ({ children }) => {
 
   return (
     <>
-      {activeAlertsCount > 0 && isOpen && <AlertView />}
+      {activeAlertsCount > 0 && isOpen && <AlertView uaType={uaType}/>}
       {breakActiveAlertsCount === 0 && !call_transfered.active && children}
     </>
   )
@@ -32,4 +32,5 @@ export const AlertGuard: FC<AlertGuard> = ({ children }) => {
 
 interface AlertGuard {
   children: ReactNode
+  uaType?: string
 }

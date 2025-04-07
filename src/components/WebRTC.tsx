@@ -598,10 +598,13 @@ export const WebRTC: FC<WebRTCProps> = ({
     })
   }, [janus.current])
 
-  // Check audio and video permissions
+  // Check audio and video permissions when default_device is loaded or changed
   useEffect(() => {
-    checkMediaPermissions()
-  }, [])
+    const { default_device } = store.getState().currentUser
+    if (default_device !== undefined) {
+      checkMediaPermissions()
+    }
+  }, [store?.getState()?.currentUser?.default_device])
 
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [connectionReturned, setConnectionReturned] = useState(false)
