@@ -201,7 +201,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
     incomingWebRTC,
     incomingSocket,
-    isActive
+    isActive,
   ])
 
   useEffect(() => {
@@ -232,7 +232,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     sideViewIsVisible,
     incomingSocket,
     incomingWebRTC,
-    isActive
+    isActive,
   ])
 
   return (
