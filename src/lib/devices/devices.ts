@@ -90,7 +90,7 @@ export const checkMediaPermissions = function () {
     return
   }
 
-  requestMediaPermissions({ audio: true, video: true })
+  requestMediaPermissions({ audio: true })
     .then(() => {
       // Can successfully access camera and microphone streams
       // Save permissions state on rematch to get access globally on the app
@@ -108,11 +108,6 @@ export const checkMediaPermissions = function () {
           alert: 'user_permissions',
           message: "WebRTC: user didn't allow app to access camera or microphone",
         },
-        [MediaPermissionsErrorType.CouldNotStartVideoSource]: {
-          alert: 'busy_camera',
-          message:
-            'WebRTC: camera is in use by another application (Zoom, Skype) or browser tab (Google Meet, Messenger Video)',
-        },
       }
 
       // Get error details from map or use default error
@@ -129,6 +124,19 @@ export const checkMediaPermissions = function () {
         Janus.error(error.message)
       }
     })
+}
+
+export const checkWebCamPermission = function (): Promise<boolean> {
+  return new Promise((resolve) => {
+    requestMediaPermissions({ video: true })
+      .then(() => {
+        resolve(true)
+      })
+      .catch((err: any) => {
+        console.error('Error requesting webcam permission:', err)
+        resolve(false)
+      })
+  })
 }
 
 export const getCurrentVideoInputDeviceId = function () {
