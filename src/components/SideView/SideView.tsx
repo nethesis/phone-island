@@ -4,7 +4,13 @@ import { Dispatch, RootState, store } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDisplay, faStop, faVideo } from '@fortawesome/free-solid-svg-icons'
+import {
+  faDisplay,
+  faStop,
+  faVideo,
+  faVideoSlash,
+  IconDefinition,
+} from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
@@ -12,6 +18,8 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { getAvailableDevices } from '../../utils/deviceUtils'
 import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
+import { checkWebCamPermission } from '../../lib/devices/devices'
+import { check } from 'prettier'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -31,13 +39,34 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
     }
   }
 
-  const goToVideoCall = () => {
-    closeSideViewAndLaunchEvent('video')
+  const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
 
-    store.dispatch.currentCall.updateCurrentCall({
-      isLocalVideoEnabled: true,
-      isStartingVideoCall: true,
-    })
+  const goToVideoCall = async () => {
+    let cameraPermission = await checkCameraPermission()
+    if (cameraPermission) {
+      closeSideViewAndLaunchEvent('video')
+
+      store.dispatch.currentCall.updateCurrentCall({
+        isLocalVideoEnabled: true,
+        isStartingVideoCall: true,
+      })
+    }
+  }
+
+  const checkCameraPermission = async () => {
+    if (videoInputDevices.length > 0) {
+      const isWebCamAccepted = await checkWebCamPermission()
+      if (isWebCamAccepted) {
+        setIsVideoCallButtonVisible(true)
+        return true
+      } else {
+        setIsVideoCallButtonVisible(false)
+        return false
+      }
+    } else {
+      setIsVideoCallButtonVisible(false)
+      return false
+    }
   }
 
   const goToScreenSharing = () => {
@@ -107,13 +136,23 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               )}
               {/* Videocall button - show only if there are video devices */}
               {videoInputDevices?.length > 0 && (
+                // && isVideoCallButtonVisible
                 <Button
                   variant='transparentSideView'
                   onClick={() => goToVideoCall()}
                   data-tooltip-id='tooltip-video'
-                  data-tooltip-content={t('Tooltip.Enable camera') || ''}
+                  data-tooltip-content={`${
+                    isVideoCallButtonVisible
+                      ? t('Tooltip.Enable camera') || ''
+                      : t('Tooltip.Enable permission camera') || ''
+                  }`}
+                  disabled={!isVideoCallButtonVisible}
+                  className={`${!isVideoCallButtonVisible ? 'pi-cursor-auto' : ''}`}
                 >
-                  <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faVideo} />
+                  <FontAwesomeIcon
+                    className='pi-h-5 pi-w-5 pi-text-white'
+                    icon={isVideoCallButtonVisible ? faVideo : faVideoSlash}
+                  />
                 </Button>
               )}
               {/* Share screen button */}
