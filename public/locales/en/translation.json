@@ -7,12 +7,13 @@
     "Recording": "Recording",
     "Answer phone to start recording": "Answer phone to start recording",
     "Close the call to stop recording": "Close the call to stop recording",
-    "Search or type a contact": "Search or type a contact",
+    "Search contact or phone number": "Search contact or phone number",
     "Enter a phone number": "Enter a phone number",
     "Physical phone": "Physical phone",
     "Close": "Close",
     "Back": "Back",
-    "More actions": "More actions"
+    "More actions": "More actions",
+    "plus_x_others": "+{{count}} others"
   },
   "Tooltip": {
     "Hangup": "Hangup",

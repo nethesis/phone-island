@@ -7,12 +7,13 @@
     "Recording": "Registrazione",
     "Answer phone to start recording": "Rispondi al telefono per iniziare la registrazione",
     "Close the call to stop recording": "Chiudi la chiamata per fermare la registrazione",
-    "Search or type a contact": "Cerca o digita un contatto",
+    "Search contact or phone number": "Cerca un contatto o un numero di telefono",
     "Enter a phone number": "Inserisci un numero di telefono",
     "Physical phone": "Telefono fisso",
     "Close": "Chiudi",
     "Back": "Indietro",
-    "More actions": "Altre azioni"
+    "More actions": "Altre azioni",
+    "plus_x_others": "+{{count}} altri"
   },
   "Tooltip": {
     "Hangup": "Chiudi",

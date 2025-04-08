@@ -17,7 +17,7 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
       }}
       data-stop-propagation={true}
       className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition ${
-        status === 'online' ? 'hover:pi-scale-110' : ''
+        status === 'online' ? 'hover:pi-scale-110 pi-cursor-pointer' : ''
       }`}
       {...props}
     >

@@ -1,14 +1,19 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useState, FormEvent, useRef } from 'react'
+import React, { type FC, useEffect, useState, FormEvent, useRef, useMemo } from 'react'
 import { Button } from '../Button'
 import { RootState } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { backToPreviousView } from '../../lib/island/island'
 import ListAvatar from './ListAvatar'
-import { faPhone, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPhone,
+  faArrowLeft,
+  faHandsAmericanSignLanguageInterpreting,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes, UsersEndpointsTypes } from '../../types'
 import { attendedTransfer, hangupCurrentCall, startConference } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
@@ -17,9 +22,18 @@ import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { store } from '../../store'
+import {
+  getMainPhoneNumber,
+  getTotalPhoneNumbers,
+  hasMultiplePhoneNumbers,
+  searchPhonebook,
+} from '../../services/phonebook'
+import { PhonebookContact, PhonebookSearchResult } from '../../types/phonebook'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
+
+type TransferResult = UserEndpointsTypes | PhonebookContact
 
 export const TransferListView: FC<TransferListViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
@@ -27,7 +41,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const { username } = useSelector((state: RootState) => state.currentUser)
 
   const [loaded, setLoaded] = useState<boolean>(false)
-  const [listUsers, setListUsers] = useState<UserEndpointsTypes[]>([])
+  // const [listUsers, setListUsers] = useState<UserEndpointsTypes[]>([]) ////
+  // const [phonebookSearchResult, setPhonebookResult] = useState<PhonebookSearchResult>([]) ////
+  const [transferResults, setTransferResults] = useState<TransferResult[]>([])
   const searchValue = useRef<string>('')
   const [showCustomUser, setShowCustomUser] = useState<boolean>()
   const relativeRef = useRef<HTMLDivElement>(null)
@@ -35,34 +51,88 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
   const dispatch = useDispatch<Dispatch>()
 
+  // const transferResults = useMemo(() => { ////
+  //     return (
+  //       isActive &&
+  //       view === 'call' &&
+  //       !actionsExpanded &&
+  //       !autoExpandedRef.current &&
+  //       username !== '' &&
+  //       conferenceStartedFrom !== '' &&
+  //       conferenceStartedFrom === username
+  //     )
+  //   }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+
   function handleChange(event: FormEvent<HTMLInputElement>) {
     // Update search value
     searchValue.current = event.currentTarget.value
-    // Filter the users list
-    endpoints && setListUsers(filterUsers(endpoints))
-    // Check if custom user to call must be visible
+    retrieveTransferResults()
+
+    // Filter the users list //// remove
+    // endpoints && setListUsers(filterUsers(endpoints)) ////
+  }
+
+  async function retrieveTransferResults() {
+    let transferResults: TransferResult[] = []
+
+    // filter operators
+
+    if (endpoints) {
+      // Remove the currentUser from the list
+      username && delete endpoints[username]
+      const operators = Object.values(endpoints).filter(
+        (userEndpoints: UserEndpointsTypes) =>
+          userEndpoints.endpoints.extension.find((extension) =>
+            extension.id.toLowerCase().startsWith(searchValue.current.toLowerCase()),
+          ) ||
+          userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+          userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+          userEndpoints.name.toLowerCase().includes(searchValue.current.toLowerCase()) ||
+          userEndpoints.username.toLowerCase() === searchValue.current.toLowerCase(),
+      )
+      transferResults = [...transferResults, ...operators]
+    }
+
+    // custom phone number
+
     if (/^[0-9*#+]+$/.test(searchValue.current)) {
       setShowCustomUser(true)
     } else {
       setShowCustomUser(false)
     }
+
+    // search phonebook
+
+    try {
+      const phonebookSearchResult = await searchPhonebook(1, searchValue.current, '')
+      // setPhonebookResult(phonebookSearchResult) //// uncomment?
+      transferResults = [...transferResults, ...phonebookSearchResult.rows]
+    } catch (error) {
+      console.error('Error fetching phonebook:', error)
+    }
+    setTransferResults(transferResults)
+
+    console.log('transferResults', transferResults) ////
+
+    setLoaded(true)
   }
 
-  function filterUsers(endpoints: UsersEndpointsTypes) {
-    // Remove the currentUser from the list
-    username && delete endpoints[username]
-    // Filter the users
-    return Object.values(endpoints).filter(
-      (userEndpoints: UserEndpointsTypes) =>
-        userEndpoints.endpoints.extension.find((extension) =>
-          extension.id.toLowerCase().startsWith(searchValue.current.toLowerCase()),
-        ) ||
-        userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
-        userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
-        userEndpoints.name.toLowerCase().includes(searchValue.current.toLowerCase()) ||
-        userEndpoints.username.toLowerCase() === searchValue.current.toLowerCase(),
-    )
-  }
+  //// remove
+  // function filterUsers(endpoints: UsersEndpointsTypes) {
+  //   // Remove the currentUser from the list
+  //   username && delete endpoints[username]
+  //   // Filter the users
+  //   return Object.values(endpoints).filter(
+  //     (userEndpoints: UserEndpointsTypes) =>
+  //       userEndpoints.endpoints.extension.find((extension) =>
+  //         extension.id.toLowerCase().startsWith(searchValue.current.toLowerCase()),
+  //       ) ||
+  //       userEndpoints.username.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+  //       userEndpoints.name.toLowerCase().startsWith(searchValue.current.toLowerCase()) ||
+  //       userEndpoints.name.toLowerCase().includes(searchValue.current.toLowerCase()) ||
+  //       userEndpoints.username.toLowerCase() === searchValue.current.toLowerCase(),
+  //   )
+  // }
 
   async function handleAttendedTransfer(number: string) {
     // Send attended transfer message
@@ -87,8 +157,12 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   // Initialize users list
   useEffect(() => {
     if (endpoints && username) {
-      setListUsers(filterUsers(endpoints))
-      setLoaded(true)
+      // setListUsers(filterUsers(endpoints)) ////
+
+      retrieveTransferResults()
+
+      // getPhonebookPage() ////
+      // setLoaded(true) //// move after fetching phonebook
     }
   }, [endpoints, username])
 
@@ -118,6 +192,16 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     }
     return () => relativeRef.current?.removeEventListener('scroll', handleScroll)
   }, [isOpen])
+
+  //// remove
+  // async function getPhonebookPage() {
+  //   const phonebookSearchResult = await searchPhonebook(1, '', '')
+  //   setPhonebookResult(phonebookSearchResult)
+
+  //   console.log('getPhonebookPage, phonebookSearchResult', phonebookSearchResult) ////
+
+  //   setLoaded(true)
+  // }
 
   function handleBackClick() {
     if (isInsideConferenceList()) {
@@ -154,6 +238,8 @@ export const TransferListView: FC<TransferListViewProps> = () => {
   }
 
   const clickTransferOrConference = async (number: string) => {
+    console.log('clickTransferOrConference', number) ////
+
     if (isInsideConferenceList()) {
       const { isActive } = store.getState().conference
       // Put current call user inside conference mode (only for first user to add not for the second one)
@@ -177,6 +263,15 @@ export const TransferListView: FC<TransferListViewProps> = () => {
     }
     return false
   }
+
+  function isUserEndpointsType(obj: any): obj is UserEndpointsTypes {
+    return obj && typeof obj === 'object' && 'endpoints' in obj && 'username' in obj
+  }
+
+  function isPhonebookContact(obj: any): obj is PhonebookContact {
+    return obj && typeof obj === 'object' && 'source' in obj && 'name' in obj
+  }
+
   const { t } = useTranslation()
 
   return (
@@ -199,10 +294,10 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                 type='text'
                 onChange={handleChange}
                 value={searchValue?.current}
-                placeholder={t('Common.Search or type a contact') || ''}
+                placeholder={t('Common.Search contact or phone number') || ''}
                 autoFocus
                 spellCheck={false}
-                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-xl pi-text-center pi-px-2 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
+                className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-base pi-px-4 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs'
               />
             </div>
           </div>
@@ -220,13 +315,13 @@ export const TransferListView: FC<TransferListViewProps> = () => {
               className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
             >
               {/* The custom searched number */}
-              {showCustomUser && listUsers.length === 0 && (
+              {showCustomUser && (
                 <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
                   <div className='pi-flex pi-items-center pi-gap-4'>
                     <ListAvatar />
                     <div
                       style={{ maxWidth: '146px' }}
-                      className='pi-h-fit pi-max-w-40  pi-truncate pi-text-sm pi-font-bold'
+                      className='pi-h-fit pi-max-w-40  pi-truncate pi-text-sm pi-font-medium'
                     >
                       {searchValue.current}
                     </div>
@@ -243,74 +338,127 @@ export const TransferListView: FC<TransferListViewProps> = () => {
                   </div>
                 </div>
               )}
-              {/* The users list */}
-              {listUsers &&
-                listUsers.slice(0, showingUsers).map((userEndpoints, i) => (
+              {/* Operators and phonebook contacts list */}
+              {transferResults &&
+                transferResults.slice(0, showingUsers).map((transferResult, i) => (
                   <div
                     key={i}
                     className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
                   >
                     <div className='pi-flex pi-items-center pi-gap-4'>
                       {(() => {
-                        const isOnline = userEndpoints?.mainPresence === 'online'
-                        const tooltipContent = isOnline
-                          ? isInsideConferenceList()
-                            ? t('Conference.Call to add')
-                            : t('Tooltip.Call to transfer')
-                          : ''
+                        if (isUserEndpointsType(transferResult)) {
+                          const isOnline = transferResult?.mainPresence === 'online'
+                          const tooltipContent = isOnline
+                            ? isInsideConferenceList()
+                              ? t('Conference.Call to add')
+                              : t('Tooltip.Call to transfer')
+                            : ''
 
-                        const handleClick = () => {
-                          isOnline &&
-                            clickTransferOrConference(
-                              userEndpoints?.endpoints?.mainextension[0]?.id,
-                            )
+                          const handleClick = () => {
+                            isOnline &&
+                              clickTransferOrConference(
+                                transferResult?.endpoints?.mainextension[0]?.id,
+                              )
+                          }
+
+                          return (
+                            <>
+                              <ListAvatar
+                                onClick={handleClick}
+                                username={transferResult?.username}
+                                status={transferResult?.mainPresence}
+                                data-tooltip-id={isOnline ? 'transfer-list-tooltip-right' : ''}
+                                data-tooltip-content={tooltipContent}
+                              />
+                              <div
+                                onClick={handleClick}
+                                style={{ maxWidth: '196px' }}
+                                data-stop-propagation={true}
+                                data-tooltip-id={isOnline ? 'transfer-list-tooltip-top' : ''}
+                                data-tooltip-content={isOnline ? t('Tooltip.Call to transfer') : ''}
+                                className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition ${
+                                  isOnline ? 'pi-cursor-pointer' : ''
+                                }`}
+                              >
+                                {transferResult.name}
+                              </div>
+                            </>
+                          )
+                        } else if (isPhonebookContact(transferResult)) {
+                          //// handle contacts with multiple numbers
+                          return (
+                            <>
+                              <div
+                                onClick={() => clickTransferOrConference('////')}
+                                className='pi-relative pi-block pi-shrink-0 pi-h-12 pi-w-12 pi-text-base pi-bg-gray-700 dark:pi-bg-gray-200 pi-rounded-full pi-cursor-pointer'
+                              >
+                                <div className='pi-text-white dark:pi-text-gray-950 pi-w-full pi-h-full pi-fill-white pi-flex pi-justify-center pi-items-center'>
+                                  <FontAwesomeIcon
+                                    icon={faUser}
+                                    className='pi-h-6 pi-w-6'
+                                    aria-hidden='true'
+                                  />
+                                  {/* //// company icon */}
+                                </div>
+                              </div>
+                              <div>
+                                <div
+                                  onClick={() => clickTransferOrConference('////')}
+                                  style={{ maxWidth: '196px' }}
+                                  data-stop-propagation={true}
+                                  className='pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition pi-cursor-pointer'
+                                >
+                                  {transferResult.displayName || '-'}
+                                </div>
+                                <div className='pi-text-sm pi-text-gray-700 dark:pi-text-gray-300'>
+                                  <span>{getMainPhoneNumber(transferResult)}</span>
+                                  {getTotalPhoneNumbers(transferResult) > 1 && (
+                                    <span className='pi-ml-2'>
+                                      {t('Common.plus_x_others', {
+                                        count: getTotalPhoneNumbers(transferResult) - 1,
+                                      })}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          )
                         }
-
-                        return (
-                          <>
-                            <ListAvatar
-                              onClick={handleClick}
-                              username={userEndpoints?.username}
-                              status={userEndpoints?.mainPresence}
-                              data-tooltip-id={isOnline ? 'transfer-list-tooltip-right' : ''}
-                              data-tooltip-content={tooltipContent}
-                            />
-                            <div
-                              onClick={handleClick}
-                              style={{ maxWidth: '196px' }}
-                              data-stop-propagation={true}
-                              data-tooltip-id={isOnline ? 'transfer-list-tooltip-top' : ''}
-                              data-tooltip-content={isOnline ? t('Tooltip.Call to transfer') : ''}
-                              className='pi-h-fit pi-truncate pi-text-sm pi-font-bold pi-text-gray-600 dark:pi-text-white pi-transition'
-                            >
-                              {userEndpoints.name}
-                            </div>
-                          </>
-                        )
                       })()}
                     </div>
                     <div className='pi-flex pi-gap-3.5'>
-                      {userEndpoints.mainPresence === 'online' && (
-                        <Button
-                          onClick={() =>
-                            userEndpoints.mainPresence === 'online' &&
-                            clickTransferOrConference(
-                              userEndpoints?.endpoints?.mainextension[0]?.id,
+                      {(() => {
+                        if (isUserEndpointsType(transferResult)) {
+                          if (transferResult.mainPresence === 'online') {
+                            return (
+                              <Button
+                                onClick={() =>
+                                  transferResult.mainPresence === 'online' &&
+                                  clickTransferOrConference(
+                                    transferResult?.endpoints?.mainextension[0]?.id,
+                                  )
+                                }
+                                variant='green'
+                                disabled={transferResult.mainPresence !== 'online'}
+                                data-tooltip-id='transfer-list-tooltip-left'
+                                data-tooltip-content={t('Tooltip.Call to transfer') || ''}
+                              >
+                                <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
+                              </Button>
                             )
+                          } else if (isPhonebookContact(transferResult)) {
+                            //// asdf
+                            return <>asdf ////</>
                           }
-                          variant='green'
-                          disabled={userEndpoints.mainPresence !== 'online'}
-                          data-tooltip-id='transfer-list-tooltip-left'
-                          data-tooltip-content={t('Tooltip.Call to transfer') || ''}
-                        >
-                          <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
-                        </Button>
-                      )}
+                        }
+                      })()}
                     </div>
                   </div>
                 ))}
-              {loaded && listUsers.length === 0 && !showCustomUser && (
-                <p className=' pi-font-bold pi-w-full pi-flex pi-justify-center pi-text-sm'>
+              {loaded && transferResults.length === 0 && !showCustomUser && (
+                <p className=' pi-font-medium pi-w-full pi-flex pi-justify-center pi-text-sm'>
+                  {/* //// -> No results found */}
                   {t('No users found')}
                 </p>
               )}
