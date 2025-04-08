@@ -136,7 +136,6 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
               )}
               {/* Videocall button - show only if there are video devices */}
               {videoInputDevices?.length > 0 && (
-                // && isVideoCallButtonVisible
                 <Button
                   variant='transparentSideView'
                   onClick={() => goToVideoCall()}
@@ -144,7 +143,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   data-tooltip-content={`${
                     isVideoCallButtonVisible
                       ? t('Tooltip.Enable camera') || ''
-                      : t('Tooltip.Enable permission camera') || ''
+                      : t('Tooltip.Enable camera permission') || ''
                   }`}
                   disabled={!isVideoCallButtonVisible}
                   className={`${!isVideoCallButtonVisible ? 'pi-cursor-auto' : ''}`}
