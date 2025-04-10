@@ -67,37 +67,6 @@ export const Actions: FC<{}> = () => {
     handleStop()
   })
 
-  function handlePlay() {
-    dispatch.player.startAudioPlayer(() => {
-      // The callback for the end event of the audio player
-      dispatch.recorder.setPlaying(false)
-      dispatch.recorder.setPaused(true)
-    })
-    dispatch.recorder.setPlaying(true)
-    eventDispatch('phone-island-recording-played', {})
-  }
-  useEventListener('phone-island-recording-play', (data: {}) => {
-    handlePlay()
-  })
-
-  function handlePause() {
-    dispatch.player.pauseAudioPlayer()
-    dispatch.recorder.setPlaying(false)
-    dispatch.recorder.setPaused(true)
-    eventDispatch('phone-island-recording-paused', {})
-  }
-  useEventListener('phone-island-recording-pause', (data: {}) => {
-    handlePause()
-  })
-
-  function handleDelete() {
-    dispatch.recorder.resetRecorded()
-    eventDispatch('phone-island-recording-deleted', {})
-  }
-  useEventListener('phone-island-recording-delete', (data: {}) => {
-    handleDelete()
-  })
-
   function handleSaveRecording() {
     // check if the audio is playing and pause it
     if (playing) {
@@ -155,35 +124,6 @@ export const Actions: FC<{}> = () => {
       {recorded && !recording && (
         <>
           <Button
-            onClick={handleDelete}
-            variant='default'
-            data-tooltip-id='tooltip-delete-recorder-view'
-            data-tooltip-content={t('Tooltip.Delete') || ''}
-          >
-            <FontAwesomeIcon icon={faTrash} className='pi-h-6 pi-w-6' />
-          </Button>
-          {playing ? (
-            <Button
-              onClick={handlePause}
-              variant='default'
-              style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip-pause-recorder-view'
-              data-tooltip-content={t('Tooltip.Pause') || ''}
-            >
-              <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
-            </Button>
-          ) : (
-            <Button
-              onClick={handlePlay}
-              variant='default'
-              style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip-play-recorder-view'
-              data-tooltip-content={t('Tooltip.Play') || ''}
-            >
-              <FontAwesomeIcon icon={faPlay} className='pi-h-6 pi-w-6' />
-            </Button>
-          )}
-          <Button
             onClick={handleSaveRecording}
             variant='green'
             data-tooltip-id='tooltip-confirm-record-view'
@@ -209,25 +149,17 @@ export const Actions: FC<{}> = () => {
           )}
         </Button>
       )}
-      {!recording && !recorded && (
-        <div className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'>
-          <Button
-            variant={'default'}
-            onClick={() => dispatch.island.setIslandView('settings')}
-            data-tooltip-id='tooltip-settings-view-recorder'
-            data-tooltip-content={t('Tooltip.Go to settings') || ''}
-            className='pi-justify-end pi-flex pi-items-center'
-          >
-            <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
-          </Button>
-        </div>
-      )}
+      <div
+        onClick={() => dispatch.island.setIslandView('settings')}
+        data-tooltip-id='tooltip-settings-view-recorder'
+        data-tooltip-content={t('Tooltip.Go to settings') || ''}
+        className='pi-flex-none pi-justify-end pi-ml-11 pi-items-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200'
+      >
+        <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
+      </div>
       {/* Buttons tooltips */}
       <CustomThemedTooltip id='tooltip-start-recording-recorder-view' place='top' />
       <CustomThemedTooltip id='tooltip-stop-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-play-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-pause-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-delete-recorder-view' place='top' />
       <CustomThemedTooltip id='tooltip-confirm-record-view' place='top' />
       <CustomThemedTooltip id='tooltip-settings-view-recorder' place='top' />
     </div>
