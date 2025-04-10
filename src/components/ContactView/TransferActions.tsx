@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
+//// TODO this component and related events seems unused, remove?
+
 export const TransferActions: FC<TransferActionsProps> = () => {
   const dispatch = useDispatch<Dispatch>()
   const { transferCalls, number } = useSelector((state: RootState) => state.currentCall)

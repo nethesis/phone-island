@@ -40,19 +40,12 @@ export async function searchPhonebook(
  * @returns
  */
 export const mapPhonebookResponse = (phonebookResponse: PhonebookSearchResult) => {
-  // if (!phonebookResponse) { ////
-  //   return null
-  // }
-
   phonebookResponse.rows.map((contact: PhonebookContact) => {
     return mapContact(contact)
   })
 
   // total pages
   phonebookResponse.totalPages = Math.ceil(phonebookResponse.count / PAGE_SIZE)
-
-  console.log('phonebookResponse', phonebookResponse) ////
-
   return phonebookResponse
 }
 
@@ -70,9 +63,6 @@ export function mapContact(contact: PhonebookContact) {
   if (contact.contacts) {
     contact.contacts = JSON.parse(contact.contacts)
   }
-
-  // console.log('contact', contact) ////
-
   return contact
 }
 

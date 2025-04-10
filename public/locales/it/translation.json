@@ -33,7 +33,8 @@
     "Confirm": "Conferma",
     "Start recording": "Inizia registrazione",
     "Switch call": "Scambia chiamata",
-    "Call to transfer": "Clicca per trasferire",
+    "Click to transfer": "Clicca per trasferire",
+    "Select phone number": "Seleziona numero di telefono",
     "Hangup and transfer": "Trasferisci",
     "Answer": "Rispondi",
     "Settings": "Impostazioni",
@@ -62,7 +63,7 @@
     "Incoming call": "Chiamata in arrivo"
   },
   "Transfer": {
-    "No users found": "Nessun utente trovato"
+    "No contacts found": "Nessun contatto trovato"
   },
   "Errors": {
     "browser_permissions": "Errore nei permessi del browser",

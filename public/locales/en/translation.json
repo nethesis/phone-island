@@ -33,7 +33,8 @@
     "Confirm": "Confirm",
     "Start recording": "Start recording",
     "Switch call": "Switch call",
-    "Call to transfer": "Click to transfer",
+    "Click to transfer": "Click to transfer",
+    "Select phone number": "Select phone number",
     "Hangup and transfer": "Transfer",
     "Answer": "Answer",
     "Settings": "Settings",
@@ -62,7 +63,7 @@
     "Incoming call": "Incoming call"
   },
   "Transfer": {
-    "No users found": "No users found"
+    "No contacts found": "No contacts found"
   },
   "Errors": {
     "browser_permissions": "Browser permissions error",
@@ -117,5 +118,10 @@
     "End conference": "End conference",
     "No participants": "No participants",
     "Add participants to conference": "Add participants to conference"
+  },
+  "Phone": {
+    "extension": "Extension",
+    "workphone": "Main phone",
+    "cellphone": "Mobile phone"
   }
 }

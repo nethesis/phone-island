@@ -6,6 +6,7 @@ import type { RootModel } from '.'
 import incomingRingtone from '../static/incoming_ringtone'
 import { dispatchOutgoingCallStarted } from '../events/index'
 import { eventDispatch } from '../utils'
+import { PhonebookContact } from '../types/phonebook'
 
 const defaultState = {
   displayName: '',

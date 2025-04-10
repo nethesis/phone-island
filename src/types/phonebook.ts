@@ -7,10 +7,6 @@ export interface PhonebookSearchResult {
   totalPages?: number
 }
 
-// export interface PhonebookSearchResult extends PhonebookSearchResponse { ////
-//   totalPages: number
-// }
-
 export interface PhonebookContact {
   id: number
   owner_id: string
@@ -43,5 +39,5 @@ export interface PhonebookContact {
   source: string
   displayName?: string
   kind?: string
-  contacts?: any ////
+  contacts?: any
 }
