@@ -104,17 +104,11 @@ export const ContactListView: FC<ContactListViewProps> = () => {
 
     try {
       const phonebookSearchResult = await searchPhonebook(1, textQuery, '')
-
-      console.log('phonebookSearchResult', phonebookSearchResult) ////
-
       contactResults = [...contactResults, ...phonebookSearchResult.rows]
     } catch (error) {
       console.error('Error fetching phonebook:', error)
     }
     setContactResults(contactResults)
-
-    console.log('contactResults', contactResults) ////
-
     setLoaded(true)
   }
 
@@ -260,9 +254,13 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                 <div className='pi-flex pi-gap-3.5'>
                   <Button
                     onClick={() => clickTransferOrConference(searchQuery, dispatch)}
-                    variant='default'
+                    variant='green'
                     data-tooltip-id='contact-list-tooltip-call-to-transfer'
-                    data-tooltip-content={t('Tooltip.Click to transfer') || ''}
+                    data-tooltip-content={
+                      isInsideConferenceList()
+                        ? t('Conference.Add participant')
+                        : t('Tooltip.Transfer call')
+                    }
                   >
                     <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                   </Button>
@@ -279,42 +277,17 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                   <div className='pi-flex pi-items-center pi-gap-4'>
                     {(() => {
                       if (isUserEndpointsType(contactResult)) {
-                        const isOnline = contactResult?.mainPresence === 'online'
-                        const tooltipContent = isOnline
-                          ? isInsideConferenceList()
-                            ? t('Conference.Call to add')
-                            : t('Tooltip.Click to transfer')
-                          : ''
-
-                        const handleClick = () => {
-                          isOnline &&
-                            clickTransferOrConference(
-                              contactResult?.endpoints?.mainextension[0]?.id,
-                              dispatch,
-                            )
-                        }
-
                         return (
                           <>
                             <ListAvatar
-                              onClick={handleClick}
                               username={contactResult?.username}
                               status={contactResult?.mainPresence}
-                              data-tooltip-id={isOnline ? 'contact-list-tooltip-right' : ''}
-                              data-tooltip-content={tooltipContent}
                             />
                             <div>
                               <div
-                                onClick={handleClick}
                                 style={{ maxWidth: '196px' }}
                                 data-stop-propagation={true}
-                                data-tooltip-id={isOnline ? 'contact-list-tooltip-top' : ''}
-                                data-tooltip-content={
-                                  isOnline ? t('Tooltip.Click to transfer') : ''
-                                }
-                                className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition ${
-                                  isOnline ? 'pi-cursor-pointer' : ''
-                                }`}
+                                className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition`}
                               >
                                 {contactResult.name}
                               </div>
@@ -379,7 +352,11 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                                 ? 'contact-list-tooltip-left'
                                 : ''
                             }
-                            data-tooltip-content={t('Tooltip.Click to transfer') || ''}
+                            data-tooltip-content={
+                              isInsideConferenceList()
+                                ? t('Conference.Add participant')
+                                : t('Tooltip.Transfer call')
+                            }
                           >
                             <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                           </Button>
@@ -401,7 +378,11 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                                   ? 'contact-list-tooltip-left'
                                   : ''
                               }
-                              data-tooltip-content={t('Tooltip.Click to transfer') || ''}
+                              data-tooltip-content={
+                                isInsideConferenceList()
+                                  ? t('Conference.Add participant')
+                                  : t('Tooltip.Transfer call')
+                              }
                             >
                               <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                             </Button>
@@ -458,8 +439,6 @@ export const ContactListView: FC<ContactListViewProps> = () => {
         id='contact-list-tooltip-call-to-transfer'
         place='left'
       />
-      <CustomThemedTooltip className='pi-z-1000' id='contact-list-tooltip-top' place='top' />
-      <CustomThemedTooltip className='pi-z-1000' id='contact-list-tooltip-right' place='right' />
     </>
   )
 }

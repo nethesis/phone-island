@@ -98,7 +98,7 @@ export const SelectContactNumberView: FC<SelectContactNumberViewProps> = ({ cont
                     onClick={() => clickTransferOrConference(phoneNumber.number, dispatch)}
                     variant='green'
                     data-tooltip-id='transfer-list-tooltip-left'
-                    data-tooltip-content={t('Tooltip.Click to transfer') || ''}
+                    data-tooltip-content={t('Tooltip.Transfer call') || ''}
                   >
                     <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                   </Button>

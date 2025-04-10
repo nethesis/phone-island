@@ -16,9 +16,7 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
         backgroundSize: 'contain',
       }}
       data-stop-propagation={true}
-      className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition ${
-        status === 'online' ? 'pi-cursor-pointer' : ''
-      }`}
+      className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition`}
       {...props}
     >
       {/* The status bullet */}
