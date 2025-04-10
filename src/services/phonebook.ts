@@ -4,7 +4,7 @@
 import { store } from '../store'
 import { PhonebookContact, PhonebookSearchResult } from '../types/phonebook'
 
-export const PAGE_SIZE = 25
+export const PAGE_SIZE = 50
 
 /**
  * phonebook search

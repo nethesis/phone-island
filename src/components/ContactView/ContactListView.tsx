@@ -14,7 +14,6 @@ import {
   faUser,
   faBuilding,
   faAngleRight,
-  faCircleNotch,
 } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes } from '../../types'
 import {
@@ -52,7 +51,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
   const dispatch = useDispatch<Dispatch>()
 
   // debounce phonebook search
-  const debouncedFilterContacts = useRef(
+  const debouncedSearchContacts = useRef(
     debounce((value: string) => {
       retrieveContacts(value)
     }, 300), // debounce delay
@@ -61,13 +60,13 @@ export const ContactListView: FC<ContactListViewProps> = () => {
   // cleanup the debounce function on unmount
   useEffect(() => {
     return () => {
-      debouncedFilterContacts.cancel()
+      debouncedSearchContacts.cancel()
     }
-  }, [debouncedFilterContacts])
+  }, [debouncedSearchContacts])
 
   function searchQueryChanged(event: FormEvent<HTMLInputElement>) {
     setSearchQuery(event.currentTarget.value)
-    debouncedFilterContacts(event.currentTarget.value)
+    debouncedSearchContacts(event.currentTarget.value)
   }
 
   async function retrieveContacts(textQuery: string = '') {
@@ -105,11 +104,9 @@ export const ContactListView: FC<ContactListViewProps> = () => {
 
     try {
       const phonebookSearchResult = await searchPhonebook(1, textQuery, '')
-      // setPhonebookResult(phonebookSearchResult) //// uncomment?
 
       console.log('phonebookSearchResult', phonebookSearchResult) ////
 
-      // filter contacts with at least one phone number
       contactResults = [...contactResults, ...phonebookSearchResult.rows]
     } catch (error) {
       console.error('Error fetching phonebook:', error)
@@ -213,9 +210,27 @@ export const ContactListView: FC<ContactListViewProps> = () => {
           />
         </div>
       </div>
+      {/* skeleton loader */}
       {!loaded && (
-        <FontAwesomeIcon icon={faCircleNotch} className='pi-mt-8 pi-animate-spin' size='4x' />
+        <div className='pi-mt-6'>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div className='pi-animate-pulse pi-flex pi-items-center pi-space-x-4 pi-px-3 pi-py-1'>
+              <div className='pi-flex pi-items-center pi-justify-center'>
+                <div className='pi-rounded-full pi-bg-gray-500 pi-h-12 pi-w-12'></div>
+              </div>
+              <div className='pi-flex pi-flex-col pi-gap-2 pi-w-full'>
+                <div className='pi-h-3 pi-w-4/5 pi-bg-gray-500 pi-rounded'></div>
+                <div className='pi-h-3 pi-w-1/2 pi-bg-gray-500 pi-rounded'></div>
+              </div>
+              <div className='pi-flex pi-items-center pi-justify-center pi-pr-2'>
+                <div className='pi-rounded-full pi-bg-gray-500 pi-h-12 pi-w-12'></div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
+
+      {/* contact list */}
       <div className={!loaded ? 'pi-hidden' : ''}>
         {/* List shadow */}
         <div className='pi-z-30 pi-h-6 pi-pointer-events-none pi-bg-transparent pi-mt-7 pi-pr-4'>
