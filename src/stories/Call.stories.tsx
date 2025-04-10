@@ -300,9 +300,7 @@ const CallTemplate = (args: any) => {
 
               <Button
                 variant='red'
-                onClick={() =>
-                  eventDispatch('phone-island-audio-player-start', { ...objectPlayAudioFile })
-                }
+                onClick={() => eventDispatch('phone-island-recording-open', {})}
                 className='pi-text-sm pi-w-full'
               >
                 Recording announcement
