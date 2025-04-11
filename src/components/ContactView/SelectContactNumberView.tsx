@@ -68,7 +68,7 @@ export const SelectContactNumberView: FC<SelectContactNumberViewProps> = ({ cont
             {phoneNumbers.map((phoneNumber, i) => (
               <div
                 key={i}
-                className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
+                className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1 pi-rounded-md hover:pi-bg-gray-200 hover:dark:pi-bg-gray-800'
               >
                 <div className='pi-flex pi-items-center pi-gap-4'>
                   <div className='pi-relative pi-block pi-shrink-0 pi-h-12 pi-w-12 pi-text-base pi-bg-gray-700 dark:pi-bg-gray-200 pi-rounded-full'>
@@ -84,7 +84,7 @@ export const SelectContactNumberView: FC<SelectContactNumberViewProps> = ({ cont
                     <div
                       style={{ maxWidth: '196px' }}
                       data-stop-propagation={true}
-                      className='pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition'
+                      className='pi-h-fit pi-truncate pi-text-sm pi-font-medium'
                     >
                       {t(`Phone.${phoneNumber.type}`)}
                     </div>

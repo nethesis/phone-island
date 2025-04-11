@@ -259,7 +259,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
           >
             {/* The custom searched number */}
             {showPhoneNumberTyped && (
-              <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
+              <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1 pi-rounded-md hover:pi-bg-gray-200 hover:dark:pi-bg-gray-800'>
                 <div className='pi-flex pi-items-center pi-gap-4'>
                   <ListAvatar placeHolderIcon={faPhone} />
                   <div
@@ -290,7 +290,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
               filteredContacts.slice(0, showingUsers).map((filteredContact, i) => (
                 <div
                   key={i}
-                  className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
+                  className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1 pi-rounded-md hover:pi-bg-gray-200 hover:dark:pi-bg-gray-800'
                 >
                   <div className='pi-flex pi-items-center pi-gap-4'>
                     {(() => {
@@ -306,7 +306,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                               <div
                                 style={{ maxWidth: '196px' }}
                                 data-stop-propagation={true}
-                                className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition`}
+                                className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium`}
                               >
                                 {filteredContact.name}
                               </div>
@@ -328,7 +328,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                               <div
                                 style={{ maxWidth: '196px' }}
                                 data-stop-propagation={true}
-                                className='pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition'
+                                className='pi-h-fit pi-truncate pi-text-sm pi-font-medium'
                               >
                                 {filteredContact.displayName || '-'}
                               </div>
