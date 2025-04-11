@@ -215,7 +215,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
             placeholder={t('Common.Search contact or phone number') || ''}
             autoFocus
             spellCheck={false}
-            className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-900 dark:pi-text-gray-50 pi-font-light pi-text-sm pi-px-5 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-400 dark:pi-placeholder-gray-500 pi-placeholder-text-xs pi-font-[inherit]'
+            className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-900 dark:pi-text-gray-50 pi-font-light pi-text-sm pi-px-5 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-400 dark:pi-placeholder-gray-500 pi-font-[inherit]'
           />
         </div>
       </div>
