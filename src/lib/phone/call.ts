@@ -10,7 +10,7 @@ import {
   pauseWebRTC,
   unpauseWebRTC,
 } from '../webrtc/messages'
-import { store } from '../../store'
+import { Dispatch, store } from '../../store'
 import { isWebRTC } from '../user/default_device'
 import {
   blindTransfer as blindTransferRequest,
@@ -33,6 +33,7 @@ import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
+import { useDispatch } from 'react-redux'
 
 /**
  * Starts a call to a number
@@ -528,4 +529,67 @@ export async function removeUserConference(conferenceId, extensionId) {
     }
   }
   return false
+}
+
+export const clickTransferOrConference = async (number: string, dispatch: Dispatch) => {
+  if (isInsideConferenceList()) {
+    const { isActive } = store.getState().conference
+    // Put current call user inside conference mode (only for first user to add not for the second one)
+    if (!isActive) {
+      const conferenceStarted = await startConference()
+      if (conferenceStarted) {
+        waitingConferenceView(number, dispatch)
+      }
+    } else {
+      waitingConferenceView(number, dispatch)
+    }
+  } else {
+    handleAttendedTransfer(number, dispatch)
+  }
+}
+
+export const isInsideConferenceList = () => {
+  const { isConferenceList } = store.getState().island
+  if (isConferenceList) {
+    return true
+  }
+  return false
+}
+
+export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
+  const { username }: any = store.getState().currentUser
+  const { isActive, isOwnerInside } = store.getState().conference
+
+  // show current waiting user in back view ( only on first)
+  if (!isActive) {
+    dispatch.conference.setConferenceActive(true)
+    dispatch.conference.setConferenceStartedFrom(username)
+  }
+  // start new call with selected user from conference list
+  if (isOwnerInside) {
+    // if owner has already started the conference hangup before make a new call
+    hangupCurrentCall()
+    dispatch.conference.toggleIsOwnerInside(false)
+    setTimeout(() => {
+      eventDispatch('phone-island-call-start', { number: numberToCall })
+    }, 500)
+  } else {
+    eventDispatch('phone-island-call-start', { number: numberToCall })
+  }
+}
+
+export async function handleAttendedTransfer(number: string, dispatch: Dispatch) {
+  // Send attended transfer message
+  const transferringMessageSent = await attendedTransfer(number)
+  if (transferringMessageSent) {
+    // Set transferring and disable pause
+    dispatch.currentCall.updateCurrentCall({
+      transferring: true,
+      paused: false,
+    })
+    // Play the remote audio element
+    dispatch.player.playRemoteAudio()
+
+    eventDispatch('phone-island-call-transfered', {})
+  }
 }

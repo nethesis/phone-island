@@ -12,7 +12,6 @@ import { AlertGuard } from './AlertGuard'
 import BackCall from './CallView/BackCall'
 import SideView from './SideView/SideView'
 import ViewsTransition from './ViewsTransition'
-import { TransferListView } from './TransferView'
 import { RecorderView } from './RecorderView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
@@ -24,6 +23,7 @@ import { isBackCallActive } from '../utils/genericFunctions/isBackCallVisible'
 import VideoView from './VideoView'
 import { WaitingConferenceView } from './ConferenceView'
 import { store } from '../store'
+import { ContactListView } from './ContactView/ContactListView'
 
 /**
  * Provides the Island logic
@@ -124,7 +124,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
                     const views = {
                       call: CallView ? <CallView /> : null,
                       keypad: KeyboardView ? <KeyboardView /> : null,
-                      transfer: TransferListView ? <TransferListView /> : null,
+                      transfer: ContactListView ? <ContactListView /> : null,
                       player: AudioPlayerView ? <AudioPlayerView /> : null,
                       recorder: RecorderView ? <RecorderView /> : null,
                       physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,

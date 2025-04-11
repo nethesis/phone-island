@@ -15,6 +15,7 @@ const defaultState: IslandTypes = {
   },
   inputOutputOpened: false,
   settingsView: 'main',
+  contactListView: 'main',
   sideViewIsVisible: false,
   isConferenceList: false,
   previousView: null,
@@ -53,6 +54,9 @@ export const island = createModel<RootModel>()({
     },
     setSettingsView: (state, payload: SettingsViewType) => {
       state.settingsView = payload
+    },
+    setContactListView: (state, payload: ContactListViewType) => {
+      state.contactListView = payload
     },
     toggleSideViewVisible: (state, payload: boolean) => {
       state.sideViewIsVisible = payload
@@ -137,6 +141,7 @@ type IslandViewType =
   | 'switchDevice'
   | 'waitingConference'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
+type ContactListViewType = 'main' | 'selectContactNumber'
 
 interface IslandTypes {
   view?: IslandViewType | null
@@ -147,7 +152,8 @@ interface IslandTypes {
     y: number
   }
   inputOutputOpened: boolean
-  settingsView: string
+  settingsView: SettingsViewType
+  contactListView: ContactListViewType
   sideViewIsVisible: boolean
   isConferenceList: boolean
   previousView?: IslandViewType | null
