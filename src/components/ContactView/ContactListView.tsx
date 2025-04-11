@@ -228,14 +228,14 @@ export const ContactListView: FC<ContactListViewProps> = () => {
               className='pi-animate-pulse pi-flex pi-items-center pi-space-x-4 pi-px-3 pi-py-1'
             >
               <div className='pi-flex pi-items-center pi-justify-center'>
-                <div className='pi-rounded-full pi-bg-gray-500 pi-h-12 pi-w-12'></div>
+                <div className='pi-rounded-full pi-h-12 pi-w-12 pi-bg-gray-300 dark:pi-bg-gray-700'></div>
               </div>
               <div className='pi-flex pi-flex-col pi-gap-2 pi-w-full'>
-                <div className='pi-h-3 pi-w-4/5 pi-bg-gray-500 pi-rounded'></div>
-                <div className='pi-h-3 pi-w-1/2 pi-bg-gray-500 pi-rounded'></div>
+                <div className='pi-h-3 pi-w-4/5 pi-rounded pi-bg-gray-300 dark:pi-bg-gray-700'></div>
+                <div className='pi-h-3 pi-w-1/2 pi-rounded pi-bg-gray-300 dark:pi-bg-gray-700'></div>
               </div>
               <div className='pi-flex pi-items-center pi-justify-center pi-pr-2'>
-                <div className='pi-rounded-full pi-bg-gray-500 pi-h-12 pi-w-12'></div>
+                <div className='pi-rounded-full pi-h-12 pi-w-12 pi-bg-gray-300 dark:pi-bg-gray-700'></div>
               </div>
             </div>
           ))}
