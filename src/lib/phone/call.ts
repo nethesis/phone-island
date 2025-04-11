@@ -532,8 +532,6 @@ export async function removeUserConference(conferenceId, extensionId) {
 }
 
 export const clickTransferOrConference = async (number: string, dispatch: Dispatch) => {
-  console.log('clickTransferOrConference', number) ////
-
   if (isInsideConferenceList()) {
     const { isActive } = store.getState().conference
     // Put current call user inside conference mode (only for first user to add not for the second one)
