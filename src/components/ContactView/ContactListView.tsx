@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useState, FormEvent, useRef } from 'react'
+import React, { type FC, useEffect, useState, FormEvent, useRef, useMemo } from 'react'
 import { Button } from '../Button'
 import { RootState } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -35,81 +35,95 @@ import ListAvatar from './ListAvatar'
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
 
-type ContactResult = UserEndpointsTypes | PhonebookContact
-
 export const ContactListView: FC<ContactListViewProps> = () => {
   const { isOpen, contactListView } = useSelector((state: RootState) => state.island)
   const { endpoints } = useSelector((state: RootState) => state.users)
   const { username } = useSelector((state: RootState) => state.currentUser)
   const [loaded, setLoaded] = useState<boolean>(false)
-  const [contactResults, setContactResults] = useState<ContactResult[]>([])
+  const [filteredOperators, setFilteredOperators] = useState<UserEndpointsTypes[]>([])
+  const [filteredPhonebookContacts, setFilteredPhonebookContacts] = useState<PhonebookContact[]>([])
   const [currentContact, setCurrentContact] = useState<PhonebookContact>()
+  const [firstPhonebookLoading, setFirstPhonebookLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [showCustomUser, setShowCustomUser] = useState<boolean>()
+  const [showPhoneNumberTyped, setShowPhoneNumberTyped] = useState<boolean>()
   const relativeRef = useRef<HTMLDivElement>(null)
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
   const dispatch = useDispatch<Dispatch>()
 
+  const filteredContacts = useMemo(() => {
+    return [...filteredOperators, ...filteredPhonebookContacts]
+  }, [filteredOperators, filteredPhonebookContacts])
+
   // debounce phonebook search
-  const debouncedSearchContacts = useRef(
+  const debouncedSearchPhonebookContacts = useRef(
     debounce((value: string) => {
-      retrieveContacts(value)
+      retrievePhonebookContacts(value)
     }, 300), // debounce delay
   ).current
 
   // cleanup the debounce function on unmount
   useEffect(() => {
     return () => {
-      debouncedSearchContacts.cancel()
+      debouncedSearchPhonebookContacts.cancel()
     }
-  }, [debouncedSearchContacts])
+  }, [debouncedSearchPhonebookContacts])
 
   function searchQueryChanged(event: FormEvent<HTMLInputElement>) {
     setSearchQuery(event.currentTarget.value)
-    debouncedSearchContacts(event.currentTarget.value)
+    debouncedSearchPhonebookContacts(event.currentTarget.value)
+    filterOperators(event.currentTarget.value)
   }
 
-  async function retrieveContacts(textQuery: string = '') {
-    setLoaded(false)
-    textQuery = textQuery.trim().toLowerCase()
-    let contactResults: ContactResult[] = []
+  function retrieveContacts() {
+    filterOperators(searchQuery)
 
-    // filter operators
+    // load phonebook contacts only once
+
+    if (firstPhonebookLoading) {
+      retrievePhonebookContacts(searchQuery)
+      setFirstPhonebookLoading(false)
+    }
+  }
+
+  function filterOperators(textQuery: string = '') {
+    textQuery = textQuery.trim().toLowerCase()
 
     if (endpoints) {
-      // Remove the currentUser from the list
-      username && delete endpoints[username]
       const operators = Object.values(endpoints).filter(
         (userEndpoints: UserEndpointsTypes) =>
-          userEndpoints.endpoints.extension.find((extension) =>
+          // Remove the currentUser from the list
+          userEndpoints.username !== username &&
+          (userEndpoints.endpoints.extension.find((extension) =>
             extension.id.toLowerCase().startsWith(textQuery),
           ) ||
-          userEndpoints.username.toLowerCase().startsWith(textQuery) ||
-          userEndpoints.name.toLowerCase().startsWith(textQuery) ||
-          userEndpoints.name.toLowerCase().includes(textQuery) ||
-          userEndpoints.username.toLowerCase() === textQuery,
+            userEndpoints.username.toLowerCase().includes(textQuery) ||
+            userEndpoints.name.toLowerCase().includes(textQuery)),
       )
-      contactResults = [...contactResults, ...operators]
+      setFilteredOperators(operators)
     }
+  }
 
-    // custom phone number
+  async function retrievePhonebookContacts(textQuery: string = '') {
+    setLoaded(false)
+    textQuery = textQuery.trim().toLowerCase()
+
+    // phone number typed
 
     if (/^[0-9*#+]+$/.test(textQuery)) {
-      setShowCustomUser(true)
+      setShowPhoneNumberTyped(true)
     } else {
-      setShowCustomUser(false)
+      setShowPhoneNumberTyped(false)
     }
 
     // search phonebook
 
     try {
       const phonebookSearchResult = await searchPhonebook(1, textQuery, '')
-      contactResults = [...contactResults, ...phonebookSearchResult.rows]
+      setFilteredPhonebookContacts(phonebookSearchResult.rows)
     } catch (error) {
       console.error('Error fetching phonebook:', error)
     }
-    setContactResults(contactResults)
     setLoaded(true)
   }
 
@@ -118,7 +132,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
     eventDispatch('phone-island-call-transfer-opened', {})
   })
 
-  // Initialize users list
+  // Retrieve
   useEffect(() => {
     if (endpoints && username) {
       retrieveContacts()
@@ -201,7 +215,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
             placeholder={t('Common.Search contact or phone number') || ''}
             autoFocus
             spellCheck={false}
-            className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-700 dark:pi-text-white pi-font-light pi-text-base pi-px-5 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-800 dark:pi-placeholder-gray-200 pi-placeholder-text-xs pi-font-[inherit]'
+            className='pi-w-full pi-rounded-full dark:pi-bg-gray-950 pi-bg-gray-50 pi-border-2 pi-border-emerald-500 dark:pi-border-emerald-200 active:pi-border-emerald-500 dark:active:pi-border-emerald-200 focus:pi-border-emerald-500 dark:focus:pi-border-emerald-200 pi-text-gray-900 dark:pi-text-gray-50 pi-font-light pi-text-sm pi-px-5 focus:pi-outline-0 focus:pi-ring-0 pi-placeholder-gray-400 dark:pi-placeholder-gray-500 pi-placeholder-text-xs pi-font-[inherit]'
           />
         </div>
       </div>
@@ -244,7 +258,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
             className='pi-relative pi-w-full pi-flex pi-flex-col pi-gap-1 pi-overflow-y-auto pi-overflow-x-hidden pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-gray-200 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
           >
             {/* The custom searched number */}
-            {showCustomUser && (
+            {showPhoneNumberTyped && (
               <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
                 <div className='pi-flex pi-items-center pi-gap-4'>
                   <ListAvatar placeHolderIcon={faPhone} />
@@ -272,20 +286,20 @@ export const ContactListView: FC<ContactListViewProps> = () => {
               </div>
             )}
             {/* Operators and phonebook contacts list */}
-            {contactResults &&
-              contactResults.slice(0, showingUsers).map((contactResult, i) => (
+            {filteredContacts &&
+              filteredContacts.slice(0, showingUsers).map((filteredContact, i) => (
                 <div
                   key={i}
                   className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'
                 >
                   <div className='pi-flex pi-items-center pi-gap-4'>
                     {(() => {
-                      if (isUserEndpointsType(contactResult)) {
+                      if (isUserEndpointsType(filteredContact)) {
                         return (
                           <>
                             <ListAvatar
-                              username={contactResult?.username}
-                              status={contactResult?.mainPresence}
+                              username={filteredContact?.username}
+                              status={filteredContact?.mainPresence}
                               placeHolderIcon={faHeadset}
                             />
                             <div>
@@ -294,20 +308,20 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                                 data-stop-propagation={true}
                                 className={`pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition`}
                               >
-                                {contactResult.name}
+                                {filteredContact.name}
                               </div>
                               <div className='pi-text-sm pi-text-gray-700 dark:pi-text-gray-300'>
-                                {contactResult?.endpoints?.mainextension[0]?.id}
+                                {filteredContact?.endpoints?.mainextension[0]?.id}
                               </div>
                             </div>
                           </>
                         )
-                      } else if (isPhonebookContact(contactResult)) {
+                      } else if (isPhonebookContact(filteredContact)) {
                         return (
                           <>
                             <ListAvatar
                               placeHolderIcon={
-                                contactResult.kind === 'person' ? faUser : faBuilding
+                                filteredContact.kind === 'person' ? faUser : faBuilding
                               }
                             />
                             <div>
@@ -316,14 +330,14 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                                 data-stop-propagation={true}
                                 className='pi-h-fit pi-truncate pi-text-sm pi-font-medium pi-text-gray-600 dark:pi-text-white pi-transition'
                               >
-                                {contactResult.displayName || '-'}
+                                {filteredContact.displayName || '-'}
                               </div>
                               <div className='pi-text-sm pi-text-gray-700 dark:pi-text-gray-300'>
-                                <span>{getMainPhoneNumber(contactResult) || '-'}</span>
-                                {getTotalPhoneNumbers(contactResult) > 1 && (
+                                <span>{getMainPhoneNumber(filteredContact) || '-'}</span>
+                                {getTotalPhoneNumbers(filteredContact) > 1 && (
                                   <span className='pi-ml-2'>
                                     {t('Common.plus_x_others', {
-                                      count: getTotalPhoneNumbers(contactResult) - 1,
+                                      count: getTotalPhoneNumbers(filteredContact) - 1,
                                     })}
                                   </span>
                                 )}
@@ -336,20 +350,20 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                   </div>
                   <div className='pi-flex pi-gap-3.5'>
                     {(() => {
-                      if (isUserEndpointsType(contactResult)) {
+                      if (isUserEndpointsType(filteredContact)) {
                         return (
                           <Button
                             onClick={() =>
-                              contactResult.mainPresence === 'online' &&
+                              filteredContact.mainPresence === 'online' &&
                               clickTransferOrConference(
-                                contactResult?.endpoints?.mainextension[0]?.id,
+                                filteredContact?.endpoints?.mainextension[0]?.id,
                                 dispatch,
                               )
                             }
                             variant='green'
-                            disabled={contactResult.mainPresence !== 'online'}
+                            disabled={filteredContact.mainPresence !== 'online'}
                             data-tooltip-id={
-                              contactResult.mainPresence === 'online'
+                              filteredContact.mainPresence === 'online'
                                 ? 'contact-list-tooltip-left'
                                 : ''
                             }
@@ -362,20 +376,20 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                             <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPhone} />
                           </Button>
                         )
-                      } else if (isPhonebookContact(contactResult)) {
-                        if (getTotalPhoneNumbers(contactResult) < 2) {
+                      } else if (isPhonebookContact(filteredContact)) {
+                        if (getTotalPhoneNumbers(filteredContact) < 2) {
                           return (
                             <Button
                               onClick={() =>
                                 clickTransferOrConference(
-                                  getMainPhoneNumber(contactResult),
+                                  getMainPhoneNumber(filteredContact),
                                   dispatch,
                                 )
                               }
                               variant='green'
-                              disabled={getTotalPhoneNumbers(contactResult) == 0}
+                              disabled={getTotalPhoneNumbers(filteredContact) == 0}
                               data-tooltip-id={
-                                getTotalPhoneNumbers(contactResult) > 0
+                                getTotalPhoneNumbers(filteredContact) > 0
                                   ? 'contact-list-tooltip-left'
                                   : ''
                               }
@@ -392,7 +406,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                           // change view to show contact numbers
                           return (
                             <Button
-                              onClick={() => goToSelectNumberView(contactResult)}
+                              onClick={() => goToSelectNumberView(filteredContact)}
                               variant='transparent'
                               data-tooltip-id={'contact-list-tooltip-left'}
                               data-tooltip-content={t('Tooltip.Select phone number')}
@@ -406,7 +420,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                   </div>
                 </div>
               ))}
-            {contactResults.length === 0 && !showCustomUser && (
+            {filteredContacts.length === 0 && !showPhoneNumberTyped && (
               <p className=' pi-font-medium pi-w-full pi-flex pi-justify-center pi-text-sm'>
                 {t('No contacts found')}
               </p>
