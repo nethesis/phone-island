@@ -4,8 +4,11 @@
 import React, { type FC, ComponentProps } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
+import StatusBullet from './StatusBullet'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 
-const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
+const ListAvatar: FC<ListAvatarProps> = ({ username, status, placeHolderIcon, ...props }) => {
   const { avatars } = useSelector((state: RootState) => state.avatars)
 
   return (
@@ -16,28 +19,34 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
         backgroundSize: 'contain',
       }}
       data-stop-propagation={true}
-      className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition`}
+      className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-500 pi-flex-shrink-0 pi-relative`}
       {...props}
     >
-      {/* The status bullet */}
-      {status && (
-        <span
-          style={{ right: '1px', bottom: '1px' }}
-          className={`pi-absolute pi-rounded-full pi-w-3 pi-h-3 pi-z-20 ${
-            status === 'online' ||
-            status === 'voicemail' ||
-            status === 'cellphone' ||
-            status === 'callforward'
-              ? 'pi-bg-green-500'
-              : status === 'busy' || status === 'incoming' || status === 'ringing'
-              ? 'pi-bg-red-500'
-              : status === 'dnd'
-              ? 'pi-bg-gray-950'
-              : status === 'offline'
-              ? 'pi-bg-gray-500'
-              : ''
-          } pi-border-2 pi-border-white`}
-        ></span>
+      {avatars && username && avatars[username] && avatars[username] ? (
+        <div
+          style={{
+            backgroundImage: `url(${
+              avatars && username && avatars[username] && avatars[username]
+            })`,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
+          }}
+          data-stop-propagation={true}
+          className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-500 pi-flex-shrink-0 pi-relative`}
+          {...props}
+        >
+          <StatusBullet status={status} />
+        </div>
+      ) : (
+        <div
+          className={`pi-w-12 pi-h-12 pi-rounded-full pi-bg-gray-700 dark:pi-bg-gray-200 pi-flex-shrink-0 pi-relative pi-transition`}
+          {...props}
+        >
+          <div className='pi-text-white dark:pi-text-gray-950 pi-w-full pi-h-full pi-fill-white pi-flex pi-justify-center pi-items-center'>
+            <FontAwesomeIcon icon={placeHolderIcon} className='pi-h-6 pi-w-6' aria-hidden='true' />
+            {status && <StatusBullet status={status} />}
+          </div>
+        </div>
       )}
     </div>
   )
@@ -46,6 +55,7 @@ const ListAvatar: FC<ListAvatarProps> = ({ username, status, ...props }) => {
 interface ListAvatarProps extends ComponentProps<'div'> {
   username?: string
   status?: string
+  placeHolderIcon: IconDefinition
 }
 
 export default ListAvatar

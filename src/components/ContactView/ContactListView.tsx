@@ -7,13 +7,13 @@ import { RootState } from '../../store'
 import { useDispatch, useSelector } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { backToPreviousView } from '../../lib/island/island'
-import ListAvatar from './ListAvatar'
 import {
   faPhone,
   faArrowLeft,
   faUser,
   faBuilding,
   faAngleRight,
+  faHeadset,
 } from '@fortawesome/free-solid-svg-icons'
 import { UserEndpointsTypes } from '../../types'
 import {
@@ -30,6 +30,7 @@ import { getMainPhoneNumber, getTotalPhoneNumbers, searchPhonebook } from '../..
 import { PhonebookContact } from '../../types/phonebook'
 import { SelectContactNumberView } from './SelectContactNumberView'
 import debounce from 'lodash/debounce'
+import ListAvatar from './ListAvatar'
 
 const USERS_NUMBER_PER_PAGE = 10
 const SHOW_LIST_GRADIENT_DISTANCE = 3
@@ -207,8 +208,11 @@ export const ContactListView: FC<ContactListViewProps> = () => {
       {/* skeleton loader */}
       {!loaded && (
         <div className='pi-mt-6'>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div className='pi-animate-pulse pi-flex pi-items-center pi-space-x-4 pi-px-3 pi-py-1'>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className='pi-animate-pulse pi-flex pi-items-center pi-space-x-4 pi-px-3 pi-py-1'
+            >
               <div className='pi-flex pi-items-center pi-justify-center'>
                 <div className='pi-rounded-full pi-bg-gray-500 pi-h-12 pi-w-12'></div>
               </div>
@@ -243,7 +247,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
             {showCustomUser && (
               <div className='pi-flex pi-items-center pi-w-full pi-justify-between pi-px-3 pi-py-1'>
                 <div className='pi-flex pi-items-center pi-gap-4'>
-                  <ListAvatar />
+                  <ListAvatar placeHolderIcon={faPhone} />
                   <div
                     style={{ maxWidth: '146px' }}
                     className='pi-h-fit pi-max-w-40  pi-truncate pi-text-sm pi-font-medium'
@@ -282,6 +286,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                             <ListAvatar
                               username={contactResult?.username}
                               status={contactResult?.mainPresence}
+                              placeHolderIcon={faHeadset}
                             />
                             <div>
                               <div
@@ -300,15 +305,11 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                       } else if (isPhonebookContact(contactResult)) {
                         return (
                           <>
-                            <div className='pi-relative pi-block pi-shrink-0 pi-h-12 pi-w-12 pi-text-base pi-bg-gray-700 dark:pi-bg-gray-200 pi-rounded-full'>
-                              <div className='pi-text-white dark:pi-text-gray-950 pi-w-full pi-h-full pi-fill-white pi-flex pi-justify-center pi-items-center'>
-                                <FontAwesomeIcon
-                                  icon={contactResult.kind === 'person' ? faUser : faBuilding}
-                                  className='pi-h-6 pi-w-6'
-                                  aria-hidden='true'
-                                />
-                              </div>
-                            </div>
+                            <ListAvatar
+                              placeHolderIcon={
+                                contactResult.kind === 'person' ? faUser : faBuilding
+                              }
+                            />
                             <div>
                               <div
                                 style={{ maxWidth: '196px' }}
