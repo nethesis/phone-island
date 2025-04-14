@@ -574,7 +574,9 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
       eventDispatch('phone-island-call-start', { number: numberToCall })
     }, 500)
   } else {
-    eventDispatch('phone-island-call-start', { number: numberToCall })
+    setTimeout(() => {
+      eventDispatch('phone-island-call-start', { number: numberToCall })
+    }, 500)
   }
 }
 
