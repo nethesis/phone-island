@@ -1037,6 +1037,15 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-voicemail-received` Indicates that user has a received a new voicemail message
+
+  ```json
+  {
+    "voicemail": "228",
+    "counter": "14"
+  }
+  ```
+
 ## Debug events
 
 - `phone-island-view-changed` Force to change phone-island view

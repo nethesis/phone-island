@@ -645,6 +645,10 @@ export const Socket: FC<SocketProps> = ({
         // On call event from socket dispatch the call start event
         eventDispatch('phone-island-call-start', { number: res })
       })
+
+      socket.current.on('newVoiceMessageCounter', (res: any) => {
+        eventDispatch('phone-island-voicemail-received', { voicemailInfo: res })
+      })
     }
 
     initSocketConnection()
