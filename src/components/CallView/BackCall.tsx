@@ -79,7 +79,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
           </div>
-          <div className='pi-flex pi-gap-2'>
+          <div className='pi-flex pi-gap-5'>
             {/* Screen sharing badge */}
             {screenShareActive && screenShareRole === 'publisher' && (
               <div className='pi-flex pi-gap-2 pi-font-medium pi-items-center pi-rounded-full pi-px-2 pi-py-1 pi-text-xs pi-relative -pi-top-0.5 pi-bg-emerald-700 pi-text-emerald-50'>
