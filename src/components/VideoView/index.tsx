@@ -1007,19 +1007,21 @@ export const VideoView: FC<VideoViewProps> = () => {
               )}
 
               {/* fullscreen */}
-              <Button
-                variant='default'
-                onClick={() => toggleFullScreen()}
-                data-tooltip-id='tooltip-toggle-fullscreen'
-                data-tooltip-content={
-                  isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
-                }
-              >
-                <FontAwesomeIcon
-                  className='pi-h-6 pi-w-6'
-                  icon={isFullscreen ? faCompress : faExpand}
-                />
-              </Button>
+              {screenShareActive && screenShareRole === 'listener' && (
+                <Button
+                  variant='default'
+                  onClick={() => toggleFullScreen()}
+                  data-tooltip-id='tooltip-toggle-fullscreen'
+                  data-tooltip-content={
+                    isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
+                  }
+                >
+                  <FontAwesomeIcon
+                    className='pi-h-6 pi-w-6'
+                    icon={isFullscreen ? faCompress : faExpand}
+                  />
+                </Button>
+              )}
 
               {/* record */}
               {userInfo?.profile?.macro_permissions?.settings?.permissions?.recording?.value && (
