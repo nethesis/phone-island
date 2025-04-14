@@ -149,7 +149,9 @@ export const TransferListView: FC<TransferListViewProps> = () => {
         eventDispatch('phone-island-call-start', { number: numberToCall })
       }, 500)
     } else {
-      eventDispatch('phone-island-call-start', { number: numberToCall })
+      setTimeout(() => {
+        eventDispatch('phone-island-call-start', { number: numberToCall })
+      }, 500)
     }
   }
 
