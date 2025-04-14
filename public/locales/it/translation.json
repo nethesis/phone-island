@@ -7,12 +7,14 @@
     "Recording": "Registrazione",
     "Answer phone to start recording": "Rispondi al telefono per iniziare la registrazione",
     "Close the call to stop recording": "Chiudi la chiamata per fermare la registrazione",
-    "Search or type a contact": "Cerca o digita un contatto",
+    "Search contact or phone number": "Cerca un contatto o un numero di telefono",
     "Enter a phone number": "Inserisci un numero di telefono",
     "Physical phone": "Telefono fisso",
     "Close": "Chiudi",
     "Back": "Indietro",
-    "More actions": "Altre azioni"
+    "More actions": "Altre azioni",
+    "plus_x_others": "+{{count}} altri",
+    "Phone number entered": "Numero di telefono inserito"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
@@ -32,7 +34,8 @@
     "Confirm": "Conferma",
     "Start recording": "Inizia registrazione",
     "Switch call": "Scambia chiamata",
-    "Call to transfer": "Clicca per trasferire",
+    "Transfer call": "Trasferisci chiamata",
+    "Select phone number": "Seleziona numero di telefono",
     "Hangup and transfer": "Trasferisci",
     "Answer": "Rispondi",
     "Settings": "Impostazioni",
@@ -61,7 +64,7 @@
     "Incoming call": "Chiamata in arrivo"
   },
   "Transfer": {
-    "No users found": "Nessun utente trovato"
+    "No contacts found": "Nessun contatto trovato"
   },
   "Errors": {
     "browser_permissions": "Errore nei permessi del browser",
@@ -116,5 +119,10 @@
     "End conference": "Termina conferenza",
     "No participants": "Nessun partecipante",
     "Add participants to conference": "Aggiungi partecipanti alla conferenza"
+  },
+  "Phone": {
+    "extension": "Interno",
+    "workphone": "Principale",
+    "cellphone": "Cellulare"
   }
 }

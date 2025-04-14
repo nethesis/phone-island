@@ -7,12 +7,14 @@
     "Recording": "Recording",
     "Answer phone to start recording": "Answer phone to start recording",
     "Close the call to stop recording": "Close the call to stop recording",
-    "Search or type a contact": "Search or type a contact",
+    "Search contact or phone number": "Search contact or phone number",
     "Enter a phone number": "Enter a phone number",
     "Physical phone": "Physical phone",
     "Close": "Close",
     "Back": "Back",
-    "More actions": "More actions"
+    "More actions": "More actions",
+    "plus_x_others": "+{{count}} others",
+    "Phone number entered": "Phone number entered"
   },
   "Tooltip": {
     "Hangup": "Hangup",
@@ -32,7 +34,8 @@
     "Confirm": "Confirm",
     "Start recording": "Start recording",
     "Switch call": "Switch call",
-    "Call to transfer": "Click to transfer",
+    "Transfer call": "Transfer call",
+    "Select phone number": "Select phone number",
     "Hangup and transfer": "Transfer",
     "Answer": "Answer",
     "Settings": "Settings",
@@ -61,7 +64,7 @@
     "Incoming call": "Incoming call"
   },
   "Transfer": {
-    "No users found": "No users found"
+    "No contacts found": "No contacts found"
   },
   "Errors": {
     "browser_permissions": "Browser permissions error",
@@ -116,5 +119,10 @@
     "End conference": "End conference",
     "No participants": "No participants",
     "Add participants to conference": "Add participants to conference"
+  },
+  "Phone": {
+    "extension": "Extension",
+    "workphone": "Main phone",
+    "cellphone": "Mobile phone"
   }
 }

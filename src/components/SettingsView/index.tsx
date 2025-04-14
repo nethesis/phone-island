@@ -7,7 +7,6 @@ import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faAngleRight,
-  faChevronRight,
   faMicrophone,
   faPalette,
   faVideo,
@@ -15,7 +14,7 @@ import {
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../Button'
-import MichrophoneView from './MicrophoneView'
+import MicrophoneView from './MicrophoneView'
 import AudioView from './AudioView'
 import ThemeView from './ThemeView'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
@@ -92,7 +91,7 @@ export const SettingsView: FC<SettingsViewProps> = () => {
           case 'main':
             return MainSettings
           case 'microphone':
-            return <MichrophoneView />
+            return <MicrophoneView />
           case 'audioInput':
             return <AudioView />
           case 'videoInput':
