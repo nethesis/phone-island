@@ -572,11 +572,11 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
     dispatch.conference.toggleIsOwnerInside(false)
     setTimeout(() => {
       eventDispatch('phone-island-call-start', { number: numberToCall })
-    }, 500)
+    }, 800)
   } else {
     setTimeout(() => {
       eventDispatch('phone-island-call-start', { number: numberToCall })
-    }, 500)
+    }, 800)
   }
 }
 

@@ -53,7 +53,9 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
 
   const joinOwnerToConference = () => {
     dispatch.conference.toggleIsOwnerInside(true)
-    joinConference()
+    setTimeout(() => {
+      joinConference()
+    }, 800)
   }
 
   return (
