@@ -53,28 +53,59 @@ export function answerWebRTC() {
       tracks.push({ type: 'audio', capture: true, recv: true })
     }
 
-    sipcall.createAnswer({
-      jsep: jsepGlobal,
-      tracks: tracks,
-      success: (jsep) => {
-        sipcall.send({
-          message: {
-            request: 'accept',
-          },
-          jsep: jsep,
-        })
-      },
-      error: (error) => {
-        // @ts-ignore
-        Janus.error('WebRTC error:', error)
-        sipcall.send({
-          message: {
-            request: 'decline',
-            code: 480,
-          },
-        })
-      },
-    })
+    // For incoming calls, directly create an answer without first calling handleRemoteJsep
+    // because Janus has already provided us with an offer
+    try {
+      sipcall.createAnswer({
+        jsep: jsepGlobal,
+        tracks: tracks,
+        success: (jsep) => {
+          sipcall.send({
+            message: {
+              request: 'accept',
+            },
+            jsep: jsep,
+          })
+        },
+        error: (error) => {
+          // If there's an error during createAnswer, check if it's error 469 (Unexpected ANSWER)
+          // @ts-ignore
+          Janus.error('WebRTC error:', error)
+
+          // Check if the error contains code 469 or the message "Unexpected ANSWER"
+          if (
+            error &&
+            ((typeof error === 'object' && error.code === 469) ||
+              (typeof error === 'string' && error.includes('Unexpected ANSWER')))
+          ) {
+            console.warn('Got "Unexpected ANSWER" error, forcing the answer anyway')
+            // Force sending the accept message even without JSEP
+            sipcall.send({
+              message: {
+                request: 'accept',
+              },
+            })
+          } else {
+            // For other types of errors, decline the call
+            sipcall.send({
+              message: {
+                request: 'decline',
+                code: 480,
+              },
+            })
+          }
+        },
+      })
+    } catch (error) {
+      console.error('Exception in createAnswer:', error)
+
+      // Even in case of an exception, try to accept the call
+      sipcall.send({
+        message: {
+          request: 'accept',
+        },
+      })
+    }
   }
 }
 
