@@ -19,7 +19,6 @@ import { getAvailableDevices } from '../../utils/deviceUtils'
 import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
 import { checkWebCamPermission } from '../../lib/devices/devices'
-import { check } from 'prettier'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
