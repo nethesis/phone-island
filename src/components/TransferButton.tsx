@@ -13,6 +13,7 @@ import outgoingRingtone from '../static/outgoing_ringtone'
 import { faArrowDownUpAcrossLine, faArrowRightArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
 import { PlacesType, Tooltip } from 'react-tooltip'
+import { forceHangupConversation} from '../lib/phone/call'
 
 interface TransferButtonProps {
   tooltipPlace?: PlacesType
@@ -37,11 +38,7 @@ export const TransferButton: FC<TransferButtonProps> = ({ tooltipPlace = 'bottom
 
   // Cancels the current transfer through dtmfs
   function cancelTransfer() {
-    if (isWebRTC()) {
-      sendDTMF('*')
-    } else {
-      sendPhysicalDTMF('*')
-    }
+    forceHangupConversation()
 
     const { audioPlayerPlaying } = store.getState().player
     // Check if the local audio is already playing and start playing

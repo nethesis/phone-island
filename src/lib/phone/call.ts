@@ -28,6 +28,7 @@ import {
   muteUserConf,
   unmuteUserConf,
   hangupUserConf,
+  forceHangup,
 } from '../../services/astproxy'
 import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
@@ -74,6 +75,22 @@ export function hangupAllExtensions() {
       hangupConversation({
         convid: id,
         endpointId: extension,
+      })
+    })
+  }
+}
+
+export function forceHangupConversation() {
+  // Get current user endpoints
+  const { conversations } = store.getState().currentUser
+  // Hangup all the conversations of all extensions of the current user
+  for (const extension in conversations) {
+    const conversationsIds = Object.keys(conversations[extension])
+    conversationsIds.forEach((id) => {
+      forceHangup({
+        convid: id,
+        endpointId: extension,
+        endpointType: 'extension',
       })
     })
   }

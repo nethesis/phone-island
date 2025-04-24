@@ -994,7 +994,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   data-tooltip-id='tooltip-toggle-video'
                   data-tooltip-content={`${
                     !isVideoCallButtonVisible
-                      ? t('Tooltip.Enable camera permission ') || ''
+                      ? t('Tooltip.Enable camera permission') || ''
                       : isLocalVideoEnabled
                       ? t('Tooltip.Disable camera')
                       : t('Tooltip.Enable camera')

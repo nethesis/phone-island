@@ -84,6 +84,26 @@ export async function hangupConversation(body: { convid: string; endpointId: str
   }
 }
 
+/**
+ * Force hangup a conversation
+ */
+export async function forceHangup(body: { convid: string; endpointId: string, endpointType: string }) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/force_hangup`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
 export async function parkConversation(body: {
   applicantId: string // Current user main extension
   convid: string
