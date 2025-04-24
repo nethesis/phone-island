@@ -1,7 +1,7 @@
 {
   "name": "@nethesis/phone-island",
   "author": "Nethesis",
-  "version": "0.13.6",
+  "version": "0.13.7",
   "description": "NethVoice CTI Phone Island",
   "keywords": [
     "nethserver",
