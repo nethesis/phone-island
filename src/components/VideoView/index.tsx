@@ -38,6 +38,7 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
+import { checkWebCamPermission } from '../../lib/devices/devices'
 
 export interface VideoViewProps {}
 
@@ -85,6 +86,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const largeRemoteVideo = useRef<HTMLVideoElement>(null)
   const smallRemoteVideo = useRef<HTMLVideoElement>(null)
   const janus = useRef<JanusTypes>(JanusLib)
+  const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
@@ -442,11 +444,14 @@ export const VideoView: FC<VideoViewProps> = () => {
     disableVideo()
   })
 
-  const toggleVideo = () => {
-    if (isLocalVideoEnabled) {
-      disableVideo()
-    } else {
-      enableVideo()
+  const toggleVideo = async () => {
+    let cameraPermission = await checkCameraPermission()
+    if (cameraPermission) {
+      if (isLocalVideoEnabled) {
+        disableVideo()
+      } else {
+        enableVideo()
+      }
     }
   }
 
@@ -846,6 +851,24 @@ export const VideoView: FC<VideoViewProps> = () => {
     stopScreenShare()
   }
 
+  const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
+
+  const checkCameraPermission = async () => {
+    if (videoInputDevices?.length > 0) {
+      const isWebCamAccepted = await checkWebCamPermission()
+      if (isWebCamAccepted) {
+        setIsVideoCallButtonVisible(true)
+        return true
+      } else {
+        setIsVideoCallButtonVisible(false)
+        return false
+      }
+    } else {
+      setIsVideoCallButtonVisible(false)
+      return false
+    }
+  }
+
   return (
     <>
       {isOpen ? (
@@ -964,20 +987,27 @@ export const VideoView: FC<VideoViewProps> = () => {
               )}
 
               {/* video button */}
-              <Button
-                variant='default'
-                onClick={() => toggleVideo()}
-                data-tooltip-id='tooltip-toggle-video'
-                data-tooltip-content={
-                  isLocalVideoEnabled ? t('Tooltip.Disable camera') : t('Tooltip.Enable camera')
-                }
-              >
-                {isLocalVideoEnabled ? (
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideo} />
-                ) : (
-                  <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVideoSlash} />
-                )}
-              </Button>
+              {videoInputDevices?.length > 0 && (
+                <Button
+                  variant='default'
+                  onClick={() => toggleVideo()}
+                  data-tooltip-id='tooltip-toggle-video'
+                  data-tooltip-content={`${
+                    !isVideoCallButtonVisible
+                      ? t('Tooltip.Enable camera permission') || ''
+                      : isLocalVideoEnabled
+                      ? t('Tooltip.Disable camera')
+                      : t('Tooltip.Enable camera')
+                  }`}
+                  disabled={!isVideoCallButtonVisible}
+                  className={`${!isVideoCallButtonVisible ? 'pi-cursor-auto' : ''}`}
+                >
+                  <FontAwesomeIcon
+                    className='pi-h-6 pi-w-6'
+                    icon={isVideoCallButtonVisible || isLocalVideoEnabled ? faVideo : faVideoSlash}
+                  />
+                </Button>
+              )}
 
               {/* Share screen button */}
               {janus.current.webRTCAdapter.browserDetails.browser !== 'safari' &&
