@@ -61,7 +61,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
               display: 'none',
             },
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.12, ease: "easeOut" }}
         >
           <div className='pi-font-medium pi-text-sm pi-relative'>
             <div
