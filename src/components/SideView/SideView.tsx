@@ -100,14 +100,14 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
             animate={{
               x: 4,
               transition: {
-                duration: 0.15,
+                duration: 0.1,
                 ease: 'easeOut',
               },
             }}
             exit={{
               x: -76,
               transition: {
-                duration: 0.15,
+                duration: 0.1,
                 ease: 'easeIn',
               },
             }}
