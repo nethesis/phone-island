@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-  release:
-    types: [published]
 
 permissions:
   actions: read
@@ -17,12 +15,10 @@ jobs:
   sbom:
     name: SBOM
     runs-on: ubuntu-22.04
-    if: github.event_name == 'push' || github.event_name == 'release'
     steps:
       - uses: actions/checkout@v4
 
       - name: Generate Trivy GitHub report
-        if: github.event_name == 'push'
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'fs'
@@ -32,7 +28,6 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Trivy SARIF report
-        if: github.event_name == 'push'
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'fs'
@@ -42,23 +37,6 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SARIF
-        if: github.event_name == 'push'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-
-      - name: Generate SBOM (CycloneDX)
-        if: github.event_name == 'release'
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: cyclonedx
-          output: sbom.cdx.json
-
-      - name: Attach SBOM to release
-        if: github.event_name == 'release'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ github.event.release.tag_name }}" sbom.cdx.json --clobber
