@@ -15,7 +15,6 @@ import ViewsTransition from './ViewsTransition'
 import { RecorderView } from './RecorderView'
 import IslandMotions from './IslandMotion'
 import IslandDrag from './IslandDrag'
-import Close from './Close'
 import { PhysicalRecorderView } from './PhysicalRecorderView'
 import { SettingsView } from './SettingsView'
 import { SwitchDeviceView } from './SwitchDeviceView'
@@ -110,7 +109,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
         (view === 'waitingConference' && isActive) ||
         (view === 'transfer' && isActive) ||
         (view === 'settings' && isActive) ||
-        (view === 'settings' && previousView === 'recorder')) &&
+        (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))) &&
         !avoidToShow && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>
@@ -144,7 +143,6 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
                   })()}
                 </AlertGuard>
               </IslandMotions>
-              <Close />
             </IslandDrag>
           </>
         )}

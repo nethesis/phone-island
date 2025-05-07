@@ -1,46 +1,39 @@
-// Copyright (C) 2024 Nethesis S.r.l.
+// Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState } from '../../store'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState, Dispatch } from '../../store'
 import { Avatar } from './Avatar'
-import { AudioBars } from '../AudioBars'
 import Progress from './Progress'
-import { Button } from '../Button'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
-import { useEventListener, eventDispatch } from '../../utils'
-import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import PlayerFooterActions from './PlayerFooterActions'
+import { Button } from '../Button'
+import { eventDispatch } from '../../utils'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
   const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
     useSelector((state: RootState) => state.player)
   const { isOpen } = useSelector((state: RootState) => state.island)
-  const dispatch = useDispatch<Dispatch>()
-
-  function startPlaying() {
-    dispatch.player.startAudioPlayer(() => {})
-    eventDispatch('phone-island-audio-player-played', {})
-  }
-  useEventListener('phone-island-audio-player-play', (data: {}) => {
-    startPlaying()
-  })
-
-  function pausePlaying() {
-    dispatch.player.pauseAudioPlayer()
-    eventDispatch('phone-island-audio-player-paused', {})
-  }
-  useEventListener('phone-island-audio-player-pause', (data: {}) => {
-    pausePlaying()
-  })
 
   function stopPropagation(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
     e.stopPropagation()
   }
 
   const { t } = useTranslation()
+
+  // Initialize state dispatch
+  const dispatch = useDispatch<Dispatch>()
+
+  function playerClose() {
+    if (audioPlayerPlaying) {
+      dispatch.player.stopAudioPlayer()
+      eventDispatch('phone-island-audio-player-close', {})
+    }
+    dispatch.island.resetPlayerClose()
+  }
 
   return (
     <div className='pi-flex pi-gap-7 pi-flex-col'>
@@ -56,35 +49,23 @@ export const KeypadView: FC<KeypadViewTypes> = () => {
             {audioPlayerTrackName}
           </div>
         </div>
-        <AudioBars
-          audioElement={audioPlayer && audioPlayer.current}
-          size={isOpen ? 'large' : 'small'}
-        />
+        <Button
+          onClick={() => playerClose()}
+          variant='transparentSettings'
+          data-tooltip-id='tooltip-close-settings'
+          data-tooltip-content={t('Common.Close') || ''}
+        >
+          <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5' />
+        </Button>
       </div>
       {isOpen && (
         <div onClick={stopPropagation} onMouseDown={stopPropagation} onTouchStart={stopPropagation}>
-          <Progress />
-          <div className='pi-w-full pi-flex pi-justify-center pi-items-center pi-pt-7'>
-            <Button
-              onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
-              variant='default'
-              style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip-pause-audio-player'
-              data-tooltip-content={
-                audioPlayerPlaying ? `${t('Tooltip.Pause')}` : `${t('Tooltip.Play')}`
-              }
-            >
-              {audioPlayerPlaying ? (
-                <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
-              ) : (
-                <FontAwesomeIcon icon={faPlay} className='pi-h-6 pi-w-6' />
-              )}
-            </Button>
-          </div>
+          {/* add prop to indicate that is audioplayer view */}
+          <Progress isPlayer />
+          <PlayerFooterActions />
         </div>
       )}
       {/* Buttons tooltips */}
-      <CustomThemedTooltip id='tooltip-pause-audio-player' place='bottom' />
     </div>
   )
 }

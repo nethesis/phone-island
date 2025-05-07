@@ -13,7 +13,7 @@ import Timer from './Timer'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPause, faTrash, faXmark, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faXmark, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch } from '../../utils'
 
 // The number of groups to be created
@@ -25,7 +25,6 @@ const MIME_TYPE = 'audio/webm'
 
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
-  const { view } = useSelector((state: RootState) => state.island)
   const { audioPlayerPlaying } = useSelector((state: RootState) => state.player)
   const visibleContainerRef = useRef<HTMLDivElement>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
@@ -113,7 +112,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
           <div className='pi-flex pi-items-center pi-justify-between pi-text-gray-900 dark:pi-text-gray-50'>
             <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{t('Common.Record message')}</h1>
             <Button
-              onClick={view === 'player' ? playerClose : close}
+              onClick={() => close()}
               variant='transparentSettings'
               data-tooltip-id='tooltip-close-settings'
               data-tooltip-content={t('Common.Close') || ''}
@@ -122,7 +121,11 @@ export const RecorderView: FC<RecorderViewProps> = () => {
             </Button>
           </div>
           <div className='pi-pt-4'>
-            <div className={`${!recording || waiting || audioPlayerPlaying ? 'pi-mb-3': ''} pi-flex pi-w-full pi-justify-center pi-items-center`}>
+            <div
+              className={`${
+                !recording || waiting || audioPlayerPlaying ? 'pi-mb-3' : ''
+              } pi-flex pi-w-full pi-justify-center pi-items-center`}
+            >
               <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit dark:pi-text-white'>
                 <Timer />
               </div>
@@ -143,7 +146,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
                       className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
                     />
                   </Button>
-                  
+
                   {/* Audio visualization in the middle */}
                   <div className='pi-relative pi-overflow-hidden pi-flex pi-flex-grow pi-justify-center pi-h-4'>
                     {/* Create a custom numbers of bars groups */}
@@ -156,7 +159,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
                       />
                     ))}
                   </div>
-                  
+
                   {/* Trash button (disabled) on right */}
                   <Button variant='transparent' disabled className='pi-flex pi-flex-none'>
                     <FontAwesomeIcon

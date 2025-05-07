@@ -5,10 +5,10 @@ import { formatTime } from '../../utils/genericFunctions/player'
 import { useDispatch } from 'react-redux'
 import { StyledCustomRange } from '../../styles/CustomRange.styles'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay, faPause, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPlay, faPause, faTrash, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch, useEventListener } from '../../utils'
 
-export const Progress: FC<ProgressTypes> = () => {
+export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
   const { audioPlayer, audioPlayerPlaying, audioPlayerTrackDuration } = useSelector(
     (state: RootState) => state.player,
   )
@@ -99,30 +99,41 @@ export const Progress: FC<ProgressTypes> = () => {
     <div className='pi-w-full pi-h-full pi-flex pi-flex-col pi-items-center pi-justify-between pi-px-2'>
       {/* Player controls with progress bar */}
       <div className='pi-w-full pi-flex pi-items-center pi-justify-between pi-gap-2'>
-        {audioPlayerPlaying ? (
-          <div
-            onClick={handlePause}
-            className='pi-cursor-pointer pi-flex-none'
-            data-tooltip-id='tooltip-pause-recorder-view'
-            data-tooltip-content={'Pause'}
-          >
+        {isPlayer ? (
+          <div className='pi-cursor-pointer pi-flex-none'>
             <FontAwesomeIcon
-              icon={faPause}
-              className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
+              icon={faVolumeHigh}
+              className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-300'
             />
           </div>
         ) : (
-          <div
-            onClick={handlePlay}
-            className='pi-cursor-pointer pi-flex-none'
-            data-tooltip-id='tooltip-play-recorder-view'
-            data-tooltip-content={'Play'}
-          >
-            <FontAwesomeIcon
-              icon={faPlay}
-              className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
-            />
-          </div>
+          <>
+            {audioPlayerPlaying ? (
+              <div
+                onClick={handlePause}
+                className='pi-cursor-pointer pi-flex-none'
+                data-tooltip-id='tooltip-pause-recorder-view'
+                data-tooltip-content={'Pause'}
+              >
+                <FontAwesomeIcon
+                  icon={faPause}
+                  className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-300'
+                />
+              </div>
+            ) : (
+              <div
+                onClick={handlePlay}
+                className='pi-cursor-pointer pi-flex-none'
+                data-tooltip-id='tooltip-play-recorder-view'
+                data-tooltip-content={'Play'}
+              >
+                <FontAwesomeIcon
+                  icon={faPlay}
+                  className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-300'
+                />
+              </div>
+            )}
+          </>
         )}
 
         <div
@@ -144,17 +155,19 @@ export const Progress: FC<ProgressTypes> = () => {
           />
         </div>
 
-        <div
-          onClick={handleDelete}
-          className='pi-cursor-pointer pi-flex-none'
-          data-tooltip-id='tooltip-delete-recorder-view'
-          data-tooltip-content={'Delete'}
-        >
-          <FontAwesomeIcon
-            icon={faTrash}
-            className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
-          />
-        </div>
+        {!isPlayer && (
+          <div
+            onClick={handleDelete}
+            className='pi-cursor-pointer pi-flex-none'
+            data-tooltip-id='tooltip-delete-recorder-view'
+            data-tooltip-content={'Delete'}
+          >
+            <FontAwesomeIcon
+              icon={faTrash}
+              className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
+            />
+          </div>
+        )}
       </div>
 
       {/* Time indicators */}
@@ -171,4 +184,6 @@ export const Progress: FC<ProgressTypes> = () => {
 }
 
 export default Progress
-export interface ProgressTypes {}
+export interface ProgressTypes {
+  isPlayer?: boolean
+}
