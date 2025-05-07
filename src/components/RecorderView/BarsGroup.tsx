@@ -101,7 +101,7 @@ export const BarsGroup: FC<BarsGroupProps> = ({ index, startAnimation, audioStre
       style={{
         transform: `translateX(${100 * index}%)`,
       }}
-      className='pi-absolute pi-flex pi-w-fit pi-h-8 pi-gap-1 pi-items-center pi-px-0.5'
+      className='pi-absolute pi-flex pi-w-fit pi-h-6 pi-gap-1 pi-items-center pi-px-0.5'
       ref={barsContainerRef}
     >
       {/* Create a custom number of bars */}

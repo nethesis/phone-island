@@ -14,7 +14,8 @@
     "Back": "Indietro",
     "More actions": "Altre azioni",
     "plus_x_others": "+{{count}} altri",
-    "Phone number entered": "Numero di telefono inserito"
+    "Phone number entered": "Numero di telefono inserito",
+    "Record message": "Registra messaggio"
   },
   "Tooltip": {
     "Hangup": "Chiudi",

@@ -210,6 +210,15 @@ const CallTemplate = (args: any) => {
     }
   }
 
+  function playFileAudio() {
+    let objectPlayAudioFile = {
+      type: 'announcement',
+      id: '4',
+    }
+    console.log('objectPlayAudioFile', objectPlayAudioFile)
+    eventDispatch('phone-island-audio-player-start', { ...objectPlayAudioFile })
+  }
+
   return (
     <div className='pi-flex pi-flex-col pi-gap-4 pi-max-w-[100rem] pi-mx-auto pi-p-6 pi-bg-gray-50 pi-rounded-xl pi-shadow-sm pi-overflow-y-auto'>
       {/* Token Section */}
@@ -304,6 +313,13 @@ const CallTemplate = (args: any) => {
                 className='pi-text-sm pi-w-full'
               >
                 Recording announcement
+              </Button>
+              <Button
+                variant='red'
+                onClick={() => playFileAudio()}
+                className='pi-text-sm pi-w-full'
+              >
+                Play announcement
               </Button>
             </div>
           </div>

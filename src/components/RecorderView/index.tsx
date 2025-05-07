@@ -11,6 +11,10 @@ import { updateAudioPlayerSource } from '../../lib/phone/audio'
 import fixWebmDuration from 'webm-duration-fix'
 import Timer from './Timer'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../Button'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPause, faTrash, faXmark, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { eventDispatch } from '../../utils'
 
 // The number of groups to be created
 // ...the minimun to have this effect is 2
@@ -21,6 +25,8 @@ const MIME_TYPE = 'audio/webm'
 
 export const RecorderView: FC<RecorderViewProps> = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
+  const { view } = useSelector((state: RootState) => state.island)
+  const { audioPlayerPlaying } = useSelector((state: RootState) => state.player)
   const visibleContainerRef = useRef<HTMLDivElement>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunks = useRef<BlobPart[]>([])
@@ -87,44 +93,88 @@ export const RecorderView: FC<RecorderViewProps> = () => {
 
   const { t } = useTranslation()
 
+  function playerClose() {
+    if (audioPlayerPlaying) {
+      dispatch.player.stopAudioPlayer()
+      eventDispatch('phone-island-audio-player-close', {})
+    }
+    dispatch.island.resetPlayerClose()
+  }
+
+  function close() {
+    dispatch.island.resetPlayerClose()
+  }
+
   return (
     <>
       {isOpen ? (
         <>
           {' '}
-          <div className='pi-flex pi-w-full pi-justify-center pi-items-center pi-pt-4 pi-pb-9'>
-            <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit dark:pi-text-white'>
-              <Timer />
-            </div>
+          <div className='pi-flex pi-items-center pi-justify-between pi-text-gray-900 dark:pi-text-gray-50'>
+            <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{t('Common.Record message')}</h1>
+            <Button
+              onClick={view === 'player' ? playerClose : close}
+              variant='transparentSettings'
+              data-tooltip-id='tooltip-close-settings'
+              data-tooltip-content={t('Common.Close') || ''}
+            >
+              <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5' />
+            </Button>
           </div>
-          {/* Bars animation section  */}
-          <div
-            className={`pi-relative pi-w-full pi-justify-center ${
-              !recorded ? 'pi-h-8' : ''
-            } pi-overflow-x-hidden pi-flex`}
-            ref={visibleContainerRef}
-          >
-            {recorded ? (
-              <Progress />
-            ) : recording && !waiting ? (
-              // Create a custom numbers of bars groups
-              Array.from({ length: BAR_GROUPS_COUNT }).map((_, i) => (
-                <BarsGroup
-                  key={i}
-                  index={i}
-                  startAnimation={recording}
-                  audioStream={localAudioStream}
-                />
-              ))
-            ) : recording && waiting ? (
-              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white'>
-                {t('Common.Start recording message after')}
+          <div className='pi-pt-4'>
+            <div className={`${!recording || waiting || audioPlayerPlaying ? 'pi-mb-3': ''} pi-flex pi-w-full pi-justify-center pi-items-center`}>
+              <div className='pi-font-medium pi-text-4xl pi-w-fit pi-h-fit dark:pi-text-white'>
+                <Timer />
               </div>
-            ) : (
-              <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white'>
-                {t('Common.Start recording message before')}
-              </div>
-            )}
+            </div>
+            {/* Bars animation section  */}
+            <div
+              className={`pi-relative pi-w-full pi-justify-center pi-overflow-hidden pi-flex pi-items-center`}
+              ref={visibleContainerRef}
+            >
+              {recorded ? (
+                <Progress />
+              ) : recording && !waiting ? (
+                <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-pb-3 pi-overflow-hidden'>
+                  {/* Play button (disabled) on left */}
+                  <Button variant='transparent' disabled className='pi-flex pi-flex-none'>
+                    <FontAwesomeIcon
+                      icon={faPlay}
+                      className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
+                    />
+                  </Button>
+                  
+                  {/* Audio visualization in the middle */}
+                  <div className='pi-relative pi-overflow-hidden pi-flex pi-flex-grow pi-justify-center pi-h-4'>
+                    {/* Create a custom numbers of bars groups */}
+                    {Array.from({ length: BAR_GROUPS_COUNT }).map((_, i) => (
+                      <BarsGroup
+                        key={i}
+                        index={i}
+                        startAnimation={recording}
+                        audioStream={localAudioStream}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Trash button (disabled) on right */}
+                  <Button variant='transparent' disabled className='pi-flex pi-flex-none'>
+                    <FontAwesomeIcon
+                      icon={faTrash}
+                      className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-200'
+                    />
+                  </Button>
+                </div>
+              ) : recording && waiting ? (
+                <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white pi-pb-7'>
+                  {t('Common.Start recording message after')}
+                </div>
+              ) : (
+                <div className='pi-sans pi-text-sm pi-w-fit pi-h-fit dark:pi-text-white pi-pb-7'>
+                  {t('Common.Start recording message before')}
+                </div>
+              )}
+            </div>
           </div>
           {/* Actions section */}
           <Actions />
