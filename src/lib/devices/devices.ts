@@ -11,6 +11,7 @@ import { JanusTypes } from '../../types'
 import { store } from '../../store'
 import { isPhysical } from '../user/default_device'
 import { getJSONItem } from '../../utils'
+import { eventDispatch} from '../../utils/genericFunctions/eventDispatch'
 
 const Janus: JanusTypes = JanusLib
 

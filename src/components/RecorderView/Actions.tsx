@@ -7,14 +7,11 @@ import React, { type FC, useEffect } from 'react'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faPause,
-  faPlay,
-  faTrash,
-  faCheck,
-  faRecordVinyl,
   faStop,
   faCircleNotch,
   faGear,
+  faDownLeftAndUpRightToCenter,
+  faFloppyDisk,
 } from '@fortawesome/free-solid-svg-icons'
 import { startAnnouncementRecording } from '../../services/offhour'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
@@ -23,8 +20,8 @@ import { hangupCurrentCall, answerIncomingCall } from '../../lib/phone/call'
 import { dispatchRecordingSave } from '../../events'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
-import DropdownContent from '../SwitchInputView/DropdownContent'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { faRecord } from '@nethesis/nethesis-solid-svg-icons'
 
 export const Actions: FC<{}> = () => {
   const dispatch = useDispatch<Dispatch>()
@@ -67,37 +64,6 @@ export const Actions: FC<{}> = () => {
     handleStop()
   })
 
-  function handlePlay() {
-    dispatch.player.startAudioPlayer(() => {
-      // The callback for the end event of the audio player
-      dispatch.recorder.setPlaying(false)
-      dispatch.recorder.setPaused(true)
-    })
-    dispatch.recorder.setPlaying(true)
-    eventDispatch('phone-island-recording-played', {})
-  }
-  useEventListener('phone-island-recording-play', (data: {}) => {
-    handlePlay()
-  })
-
-  function handlePause() {
-    dispatch.player.pauseAudioPlayer()
-    dispatch.recorder.setPlaying(false)
-    dispatch.recorder.setPaused(true)
-    eventDispatch('phone-island-recording-paused', {})
-  }
-  useEventListener('phone-island-recording-pause', (data: {}) => {
-    handlePause()
-  })
-
-  function handleDelete() {
-    dispatch.recorder.resetRecorded()
-    eventDispatch('phone-island-recording-deleted', {})
-  }
-  useEventListener('phone-island-recording-delete', (data: {}) => {
-    handleDelete()
-  })
-
   function handleSaveRecording() {
     // check if the audio is playing and pause it
     if (playing) {
@@ -134,100 +100,72 @@ export const Actions: FC<{}> = () => {
 
   return (
     <div
-      className={`pi-flex pi-items-center pi-justify-center pi-pt-9 pi-gap-6`}
-      style={recorded ? { paddingTop: '2rem' } : {}}
+      className={`pi-flex pi-items-center pi-justify-between pi-px-6 pi-py-2 pi-gap-0 pi-w-full pi-mt-auto`}
     >
-      {recording && (
-        <Button
-          onClick={handleStop}
-          variant='default'
-          style={{ transform: 'scale(1.15)' }}
-          data-tooltip-id='tooltip-stop-recorder-view'
-          data-tooltip-content={t('Tooltip.Stop') || ''}
-        >
-          {waiting ? (
-            <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
-          ) : (
-            <FontAwesomeIcon icon={faStop} size='xl' />
-          )}
-        </Button>
-      )}
-      {recorded && !recording && (
-        <>
+      <Button
+        variant='transparent'
+        disabled
+        className='pi-w-6 pi-h-6 pi-flex pi-items-center pi-justify-center pi-flex-none'
+      >
+        <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
+      </Button>
+
+      <div className='pi-flex pi-items-center pi-justify-center pi-flex-grow'>
+        {recording && (
           <Button
-            onClick={handleDelete}
+            onClick={handleStop}
             variant='default'
-            data-tooltip-id='tooltip-delete-recorder-view'
-            data-tooltip-content={t('Tooltip.Delete') || ''}
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+            data-tooltip-id='tooltip-stop-recorder-view'
+            data-tooltip-content={t('Tooltip.Stop') || ''}
           >
-            <FontAwesomeIcon icon={faTrash} className='pi-h-6 pi-w-6' />
+            {waiting ? (
+              <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
+            ) : (
+              <FontAwesomeIcon icon={faStop} size='xl' />
+            )}
           </Button>
-          {playing ? (
-            <Button
-              onClick={handlePause}
-              variant='default'
-              style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip-pause-recorder-view'
-              data-tooltip-content={t('Tooltip.Pause') || ''}
-            >
-              <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
-            </Button>
-          ) : (
-            <Button
-              onClick={handlePlay}
-              variant='default'
-              style={{ transform: 'scale(1.15)' }}
-              data-tooltip-id='tooltip-play-recorder-view'
-              data-tooltip-content={t('Tooltip.Play') || ''}
-            >
-              <FontAwesomeIcon icon={faPlay} className='pi-h-6 pi-w-6' />
-            </Button>
-          )}
+        )}
+        {recorded && !recording && (
           <Button
             onClick={handleSaveRecording}
-            variant='green'
+            variant='default'
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
             data-tooltip-id='tooltip-confirm-record-view'
             data-tooltip-content={t('Tooltip.Confirm') || ''}
           >
-            <FontAwesomeIcon icon={faCheck} className='pi-h-6 pi-w-6' />
+            <FontAwesomeIcon icon={faFloppyDisk} className='pi-h-6 pi-w-6' />
           </Button>
-        </>
-      )}
-      {!recording && !recorded && (
-        <Button
-          onClick={handleStart}
-          variant='red'
-          style={{ transform: 'scale(1.15)' }}
-          data-tooltip-id='tooltip-start-recording-recorder-view'
-          data-tooltip-content={t('Tooltip.Start recording') || ''}
-          className='pi-flex pi-justify-center pi-ml-20'
-        >
-          {waiting ? (
-            <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
-          ) : (
-            <FontAwesomeIcon icon={faRecordVinyl} className='pi-h-6 pi-w-6' />
-          )}
-        </Button>
-      )}
-      {!recording && !recorded && (
-        <div className='pi-flex-none pi-justify-end pi-ml-11 pi-w-2'>
+        )}
+        {!recording && !recorded && (
           <Button
-            variant={'default'}
-            onClick={() => dispatch.island.setIslandView('settings')}
-            data-tooltip-id='tooltip-settings-view-recorder'
-            data-tooltip-content={t('Tooltip.Go to settings') || ''}
-            className='pi-justify-end pi-flex pi-items-center'
+            onClick={handleStart}
+            variant='default'
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+            data-tooltip-id='tooltip-start-recording-recorder-view'
+            data-tooltip-content={t('Tooltip.Start recording') || ''}
           >
-            <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
+            {waiting ? (
+              <FontAwesomeIcon icon={faCircleNotch} className='fa-spin pi-loader' size='lg' />
+            ) : (
+              <FontAwesomeIcon icon={faRecord} className='pi-h-6 pi-w-6' />
+            )}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div
+        onClick={() => dispatch.island.setIslandView('settings')}
+        data-tooltip-id='tooltip-settings-view-recorder'
+        data-tooltip-content={t('Tooltip.Go to settings') || ''}
+        className='pi-flex pi-items-center pi-justify-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6 pi-flex-none'
+      >
+        <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
+      </div>
+
       {/* Buttons tooltips */}
       <CustomThemedTooltip id='tooltip-start-recording-recorder-view' place='top' />
       <CustomThemedTooltip id='tooltip-stop-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-play-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-pause-recorder-view' place='top' />
-      <CustomThemedTooltip id='tooltip-delete-recorder-view' place='top' />
       <CustomThemedTooltip id='tooltip-confirm-record-view' place='top' />
       <CustomThemedTooltip id='tooltip-settings-view-recorder' place='top' />
     </div>

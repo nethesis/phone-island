@@ -196,6 +196,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                         }
                         // Remove WebRTC connections alert if any
                         dispatch.alerts.removeAlert('webrtc_down')
+                        eventDispatch('phone-island-alert-removed', {
+                          type: 'webrtc_down',
+                        })
                         // Update webrtc lastActivity time
                         dispatch.webrtc.updateLastActivity(new Date().getTime())
                         break

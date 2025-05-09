@@ -107,7 +107,10 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
       drag
       onPointerDown={handleStartDrag}
       onDragStart={handleDragStarted}
-      dragTransition={{ power: 0 }}
+      dragTransition={{ 
+        power: 0,
+        timeConstant: 300
+      }}
       initial={{
         x: position?.x || startPosition.x,
         y: position?.y || startPosition.y,

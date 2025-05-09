@@ -61,7 +61,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
               display: 'none',
             },
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.12, ease: 'easeOut' }}
         >
           <div className='pi-font-medium pi-text-sm pi-relative'>
             <div
@@ -75,6 +75,10 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
                 ? t('Conference.In conference')
                 : isActive && isEmpty(ownerInformations)
                 ? t('Conference.Waiting for the conference')
+                : previousView === 'recorder'
+                ? t('Common.Record message')
+                : previousView === 'player'
+                ? t('Common.Play message')
                 : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>
@@ -88,7 +92,7 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
               </div>
             )}
             <div className='pi-w-16 pi-flex pi-justify-end'>
-              {!isActive ? (
+              {!isActive && previousView !== 'recorder' && previousView !== 'player' ? (
                 <Timer size='small' startTime={transferring ? transferringStartTime : startTime} />
               ) : (
                 <AvatarGroup usersList={usersList || {}} maxAvatars={5} />

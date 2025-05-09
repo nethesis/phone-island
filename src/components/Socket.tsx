@@ -338,6 +338,9 @@ export const Socket: FC<SocketProps> = ({
             () => {
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
+              eventDispatch('phone-island-alert-removed', {
+                type: 'socket_down'
+              })
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
             },
             () => {

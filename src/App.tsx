@@ -294,18 +294,75 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   // Listen for the call end event and set the island size to 0
   useEventListener('phone-island-call-ended', () => {
-    const sizeInformation: any = {
-      width: '0px',
-      height: '0px',
+    const { mainPresence } = store.getState().currentUser
+    if (mainPresence === 'online') {
+      const sizeInformation: any = {
+        width: '0px',
+        height: '0px',
+      }
+      eventDispatch('phone-island-size-change', { sizeInformation })
+      eventDispatch('phone-island-sideview-close', {})
+      store.dispatch.island.resetIslandStore()
     }
-    eventDispatch('phone-island-size-change', { sizeInformation })
-    eventDispatch('phone-island-sideview-close', {})
-    store.dispatch.island.resetIslandStore()
   })
 
   useEventListener('phone-island-conference-list-open', () => {
     store.dispatch.island.toggleConferenceList(true)
     eventDispatch('phone-island-conference-list-opened', {})
+  })
+
+  useEventListener('phone-island-alert-removed', (alertRemovedType) => {
+    // Get current alerts status
+    const { activeAlertsCount } = store.getState().alerts.status
+    const { view, previousView } = store.getState().island
+    const { isActive } = store.getState().conference
+    const alertsData = store.getState().alerts.data
+    const currentCall = store.getState().currentCall
+    const { incoming, outgoing, accepted } = currentCall
+
+    // Check if alert type was provided
+    const alertType = alertRemovedType?.type
+
+    // Check if user is in a call
+    const isInCall =
+      currentCall.incoming ||
+      currentCall.outgoing ||
+      currentCall.accepted ||
+      currentCall.conversationId !== ''
+
+    // Determine if the island should remain visible
+    const shouldKeepVisible =
+      incoming ||
+      outgoing ||
+      accepted ||
+      activeAlertsCount > 0 ||
+      view === 'player' ||
+      view === 'recorder' ||
+      view === 'physicalPhoneRecorder' ||
+      (view === 'waitingConference' && isActive) ||
+      (view === 'transfer' && isActive) ||
+      (view === 'settings' && isActive) ||
+      (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))
+
+    // Reset the island store only if:
+    // 1. The island should not remain visible
+    // 2. No more active alerts
+    // 3. The specific alert is not active anymore
+    // 4. User is not currently in a call
+    if (
+      !shouldKeepVisible &&
+      activeAlertsCount === 0 &&
+      (!alertType || (alertsData[alertType] && !alertsData[alertType].active)) &&
+      !isInCall
+    ) {
+      const sizeInformation: any = {
+        width: '0px',
+        height: '0px',
+      }
+      eventDispatch('phone-island-size-change', { sizeInformation })
+      eventDispatch('phone-island-sideview-close', {})
+      store.dispatch.island.resetIslandStore()
+    }
   })
 
   useEventListener('phone-island-conference-list-close', () => {
@@ -336,7 +393,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
-                <Island showAlways={showAlways} uaType={uaType}/>
+                <Island showAlways={showAlways} uaType={uaType} />
               </Events>
             </Socket>
           </RestAPI>

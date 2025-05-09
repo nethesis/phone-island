@@ -11,7 +11,7 @@ const ViewsTransition: FC<ViewTransitionTypes> = ({ children, forView }) => {
   return (
     <motion.div
       animate={view === forView ? { opacity: 1 } : { opacity: 0 }}
-      transition={{ duration: 0.1 }}
+      transition={{ duration: 0.05 }}
     >
       {children && children}
     </motion.div>
