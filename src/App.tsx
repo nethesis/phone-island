@@ -307,6 +307,16 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     store.dispatch.island.toggleConferenceList(true)
     eventDispatch('phone-island-conference-list-opened', {})
   })
+  
+  useEventListener('phone-island-alert-removed', () => {
+    const sizeInformation: any = {
+      width: '0px',
+      height: '0px',
+    }
+    eventDispatch('phone-island-size-change', { sizeInformation })
+    eventDispatch('phone-island-sideview-close', {})
+    store.dispatch.island.resetIslandStore()
+  })
 
   useEventListener('phone-island-conference-list-close', () => {
     store.dispatch.island.toggleConferenceList(false)

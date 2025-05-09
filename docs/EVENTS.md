@@ -972,6 +972,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-alert-removed` Indicates that alert is closed
+
+  ```json
+  {}
+  ```
+
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
 

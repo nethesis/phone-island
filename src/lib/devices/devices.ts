@@ -11,6 +11,7 @@ import { JanusTypes } from '../../types'
 import { store } from '../../store'
 import { isPhysical } from '../user/default_device'
 import { getJSONItem } from '../../utils'
+import { eventDispatch} from '../../utils/genericFunctions/eventDispatch'
 
 const Janus: JanusTypes = JanusLib
 
@@ -87,6 +88,7 @@ export const checkMediaPermissions = function () {
     store.dispatch.alerts.removeAlert('user_permissions')
     store.dispatch.alerts.removeAlert('busy_camera')
     store.dispatch.alerts.removeAlert('unknown_media_permissions')
+    eventDispatch('phone-island-alert-removed', {})
     return
   }
 
