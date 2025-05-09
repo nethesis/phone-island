@@ -294,28 +294,56 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   // Listen for the call end event and set the island size to 0
   useEventListener('phone-island-call-ended', () => {
-    const sizeInformation: any = {
-      width: '0px',
-      height: '0px',
+    const { mainPresence } = store.getState().currentUser
+    if (mainPresence === 'online') {
+      const sizeInformation: any = {
+        width: '0px',
+        height: '0px',
+      }
+      eventDispatch('phone-island-size-change', { sizeInformation })
+      eventDispatch('phone-island-sideview-close', {})
+      store.dispatch.island.resetIslandStore()
     }
-    eventDispatch('phone-island-size-change', { sizeInformation })
-    eventDispatch('phone-island-sideview-close', {})
-    store.dispatch.island.resetIslandStore()
   })
 
   useEventListener('phone-island-conference-list-open', () => {
     store.dispatch.island.toggleConferenceList(true)
     eventDispatch('phone-island-conference-list-opened', {})
   })
-  
-  useEventListener('phone-island-alert-removed', () => {
-    const sizeInformation: any = {
-      width: '0px',
-      height: '0px',
+
+  useEventListener('phone-island-alert-removed', (alertRemovedType) => {
+    // Get current alerts status
+    const { activeAlertsCount } = store.getState().alerts.status
+    const alertsData = store.getState().alerts.data
+    const currentCall = store.getState().currentCall
+
+    // Check if alert type was provided
+    const alertType = alertRemovedType?.type
+
+    // Check if user is in a call
+    const isInCall =
+      currentCall.incoming ||
+      currentCall.outgoing ||
+      currentCall.accepted ||
+      currentCall.conversationId !== ''
+
+    // Reset the island store only if:
+    // 1. No more active alerts
+    // 2. The specific alert is not active anymore
+    // 3. User is not currently in a call
+    if (
+      activeAlertsCount === 0 &&
+      (!alertType || (alertsData[alertType] && !alertsData[alertType].active)) &&
+      !isInCall
+    ) {
+      const sizeInformation: any = {
+        width: '0px',
+        height: '0px',
+      }
+      eventDispatch('phone-island-size-change', { sizeInformation })
+      eventDispatch('phone-island-sideview-close', {})
+      store.dispatch.island.resetIslandStore()
     }
-    eventDispatch('phone-island-size-change', { sizeInformation })
-    eventDispatch('phone-island-sideview-close', {})
-    store.dispatch.island.resetIslandStore()
   })
 
   useEventListener('phone-island-conference-list-close', () => {
@@ -346,7 +374,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
-                <Island showAlways={showAlways} uaType={uaType}/>
+                <Island showAlways={showAlways} uaType={uaType} />
               </Events>
             </Socket>
           </RestAPI>
