@@ -52,7 +52,7 @@ export const PlayerFooterActions: FC<PlayerFooterActionsTypes> = () => {
         <Button
           onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
           variant='default'
-          className='pi-rounded-full pi-bg-white pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+          className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
           data-tooltip-id='tooltip-confirm-play-pause-player'
           data-tooltip-content={audioPlayerPlaying ? t('Tooltip.Pause') || '' : t('Tooltip.Play') || ''}
         >

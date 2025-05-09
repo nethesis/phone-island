@@ -115,7 +115,7 @@ export const Actions: FC<{}> = () => {
           <Button
             onClick={handleStop}
             variant='default'
-            className='pi-rounded-full pi-bg-white pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
             data-tooltip-id='tooltip-stop-recorder-view'
             data-tooltip-content={t('Tooltip.Stop') || ''}
           >
@@ -130,7 +130,7 @@ export const Actions: FC<{}> = () => {
           <Button
             onClick={handleSaveRecording}
             variant='default'
-            className='pi-rounded-full pi-bg-white pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
             data-tooltip-id='tooltip-confirm-record-view'
             data-tooltip-content={t('Tooltip.Confirm') || ''}
           >
@@ -141,7 +141,7 @@ export const Actions: FC<{}> = () => {
           <Button
             onClick={handleStart}
             variant='default'
-            className='pi-rounded-full pi-bg-white pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
+            className='pi-rounded-full pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
             data-tooltip-id='tooltip-start-recording-recorder-view'
             data-tooltip-content={t('Tooltip.Start recording') || ''}
           >

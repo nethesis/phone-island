@@ -15,7 +15,9 @@
     "More actions": "Altre azioni",
     "plus_x_others": "+{{count}} altri",
     "Phone number entered": "Numero di telefono inserito",
-    "Record message": "Registra messaggio"
+    "Record message": "Registra messaggio",
+    "Recording message": "Registrazione messaggio",
+    "Playing message": "Riproduzione messaggio"
   },
   "Tooltip": {
     "Hangup": "Chiudi",
