@@ -314,8 +314,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-alert-removed', (alertRemovedType) => {
     // Get current alerts status
     const { activeAlertsCount } = store.getState().alerts.status
+    const { view, previousView } = store.getState().island
+    const { isActive } = store.getState().conference
     const alertsData = store.getState().alerts.data
     const currentCall = store.getState().currentCall
+    const { incoming, outgoing, accepted } = currentCall
 
     // Check if alert type was provided
     const alertType = alertRemovedType?.type
@@ -327,11 +330,27 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       currentCall.accepted ||
       currentCall.conversationId !== ''
 
+    // Determine if the island should remain visible
+    const shouldKeepVisible =
+      incoming ||
+      outgoing ||
+      accepted ||
+      activeAlertsCount > 0 ||
+      view === 'player' ||
+      view === 'recorder' ||
+      view === 'physicalPhoneRecorder' ||
+      (view === 'waitingConference' && isActive) ||
+      (view === 'transfer' && isActive) ||
+      (view === 'settings' && isActive) ||
+      (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))
+
     // Reset the island store only if:
-    // 1. No more active alerts
-    // 2. The specific alert is not active anymore
-    // 3. User is not currently in a call
+    // 1. The island should not remain visible
+    // 2. No more active alerts
+    // 3. The specific alert is not active anymore
+    // 4. User is not currently in a call
     if (
+      !shouldKeepVisible &&
       activeAlertsCount === 0 &&
       (!alertType || (alertsData[alertType] && !alertsData[alertType].active)) &&
       !isInCall
