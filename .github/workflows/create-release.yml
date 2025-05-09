@@ -38,9 +38,13 @@ jobs:
           scan-ref: '.'
           format: cyclonedx
           output: sbom.cdx.json
-
+      - name: Get tag name
+        id: extract_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_REF: ${{ github.ref }}
       - name: Attach SBOM to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "${{ github.ref }}" sbom.cdx.json --clobber
+          gh release upload "${{ steps.extract_tag.outputs.TAG_NAME }}" sbom.cdx.json --clobber
