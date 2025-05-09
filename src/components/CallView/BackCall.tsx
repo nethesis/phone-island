@@ -76,9 +76,9 @@ const BackCall: FC<BackCallTypes> = ({ isVisible }) => {
                 : isActive && isEmpty(ownerInformations)
                 ? t('Conference.Waiting for the conference')
                 : previousView === 'recorder'
-                ? t('Common.Recording message')
+                ? t('Common.Record message')
                 : previousView === 'player'
-                ? t('Common.Playing message')
+                ? t('Common.Play message')
                 : displayName}
             </div>
             <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent pi-to-gray-700'></div>

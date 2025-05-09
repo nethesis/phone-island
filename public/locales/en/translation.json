@@ -16,8 +16,7 @@
     "plus_x_others": "+{{count}} others",
     "Phone number entered": "Phone number entered",
     "Record message": "Record message",
-    "Recording message": "Recording message",
-    "Playing message": "Playing message"
+    "Play message": "Play message"
   },
   "Tooltip": {
     "Hangup": "Hangup",
