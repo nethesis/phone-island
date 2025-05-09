@@ -215,7 +215,6 @@ const CallTemplate = (args: any) => {
       type: 'announcement',
       id: '4',
     }
-    console.log('objectPlayAudioFile', objectPlayAudioFile)
     eventDispatch('phone-island-audio-player-start', { ...objectPlayAudioFile })
   }
 
