@@ -56,7 +56,7 @@ const defaultState = {
       collapsed: commonCollapsed,
     },
     recorder: {
-      expanded: { width: 374, height: 256 },
+      expanded: { width: 374, height: 272 },
       collapsed: commonCollapsed,
     },
     physicalPhoneRecorder: {

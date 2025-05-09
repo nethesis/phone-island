@@ -5,7 +5,7 @@ import { formatTime } from '../../utils/genericFunctions/player'
 import { useDispatch } from 'react-redux'
 import { StyledCustomRange } from '../../styles/CustomRange.styles'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay, faPause, faTrash, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
+import { faPlay, faPause, faTrash, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch, useEventListener } from '../../utils'
 
 export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
@@ -21,6 +21,7 @@ export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
     (audioPlayerTrackDuration && Math.round(audioPlayerTrackDuration)) || 0,
   )
   const { recorded, playing } = useSelector((state: RootState) => state.recorder)
+  const [isMuted, setIsMuted] = useState<boolean>(false)
 
   const progressAnimation = useCallback(() => {
     const currentTime = audioPlayer?.current?.currentTime
@@ -95,14 +96,22 @@ export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
     handleDelete()
   })
 
+  function handleToggleMute() {
+    if (audioPlayer?.current) {
+      const newMuteState = !isMuted
+      audioPlayer.current.muted = newMuteState
+      setIsMuted(newMuteState)
+    }
+  }
+
   return (
     <div className='pi-w-full pi-h-full pi-flex pi-flex-col pi-items-center pi-justify-between pi-px-2'>
       {/* Player controls with progress bar */}
       <div className='pi-w-full pi-flex pi-items-center pi-justify-between pi-gap-2'>
         {isPlayer ? (
-          <div className='pi-cursor-pointer pi-flex-none'>
+          <div className='pi-cursor-pointer pi-flex-none' onClick={handleToggleMute}>
             <FontAwesomeIcon
-              icon={faVolumeHigh}
+              icon={isMuted ? faVolumeXmark : faVolumeHigh}
               className='pi-h-4 pi-w-4 pi-text-gray-700 dark:pi-text-gray-300'
             />
           </div>

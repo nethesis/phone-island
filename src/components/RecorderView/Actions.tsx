@@ -7,11 +7,6 @@ import React, { type FC, useEffect } from 'react'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faPause,
-  faPlay,
-  faTrash,
-  faCheck,
-  faRecordVinyl,
   faStop,
   faCircleNotch,
   faGear,
@@ -105,13 +100,17 @@ export const Actions: FC<{}> = () => {
 
   return (
     <div
-      className={`pi-flex pi-items-center pi-justify-between pi-px-6 pi-gap-0 pi-w-full pi-mt-auto`}
+      className={`pi-flex pi-items-center pi-justify-between pi-px-6 pi-py-2 pi-gap-0 pi-w-full pi-mt-auto`}
     >
-      <Button variant='transparent' disabled>
+      <Button
+        variant='transparent'
+        disabled
+        className='pi-w-6 pi-h-6 pi-flex pi-items-center pi-justify-center pi-flex-none'
+      >
         <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
       </Button>
 
-      <div className='pi-flex pi-items-center pi-justify-center'>
+      <div className='pi-flex pi-items-center pi-justify-center pi-flex-grow'>
         {recording && (
           <Button
             onClick={handleStop}
@@ -159,7 +158,7 @@ export const Actions: FC<{}> = () => {
         onClick={() => dispatch.island.setIslandView('settings')}
         data-tooltip-id='tooltip-settings-view-recorder'
         data-tooltip-content={t('Tooltip.Go to settings') || ''}
-        className='pi-flex-none pi-items-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200'
+        className='pi-flex pi-items-center pi-justify-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6 pi-flex-none'
       >
         <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
       </div>

@@ -38,19 +38,23 @@ export const PlayerFooterActions: FC<PlayerFooterActionsTypes> = () => {
 
   return (
     <div
-      className={`pi-flex pi-items-center pi-justify-between pi-px-6 pi-gap-0 pi-w-full pi-mt-auto`}
+      className={`pi-flex pi-items-center pi-justify-between pi-px-6 pi-py-2 pi-gap-0 pi-w-full pi-mt-auto`}
     >
-      <Button variant='transparent' disabled>
+      <Button 
+        variant='transparent' 
+        disabled
+        className='pi-w-6 pi-h-6 pi-flex pi-items-center pi-justify-center pi-flex-none'
+      >
         <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
       </Button>
 
-      <div className='pi-flex pi-items-center pi-justify-center'>
+      <div className='pi-flex pi-items-center pi-justify-center pi-flex-grow'>
         <Button
           onClick={audioPlayerPlaying ? pausePlaying : startPlaying}
           variant='default'
           className='pi-rounded-full pi-bg-white pi-w-14 pi-h-14 pi-flex pi-items-center pi-justify-center'
-          data-tooltip-id='tooltip-confirm-record-view'
-          data-tooltip-content={t('Tooltip.Confirm') || ''}
+          data-tooltip-id='tooltip-confirm-play-pause-player'
+          data-tooltip-content={audioPlayerPlaying ? t('Tooltip.Pause') || '' : t('Tooltip.Play') || ''}
         >
           {audioPlayerPlaying ? (
             <FontAwesomeIcon icon={faPause} className='pi-h-6 pi-w-6' />
@@ -64,7 +68,7 @@ export const PlayerFooterActions: FC<PlayerFooterActionsTypes> = () => {
         onClick={() => dispatch.island.setIslandView('settings')}
         data-tooltip-id='tooltip-settings-view-recorder'
         data-tooltip-content={t('Tooltip.Go to settings') || ''}
-        className='pi-flex-none pi-items-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200'
+        className='pi-flex pi-items-center pi-justify-center pi-cursor-pointer pi-text-gray-700 dark:pi-text-gray-200 pi-w-6 pi-h-6 pi-flex-none'
       >
         <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
       </div>
@@ -72,6 +76,7 @@ export const PlayerFooterActions: FC<PlayerFooterActionsTypes> = () => {
       {/* Buttons tooltips */}
       <CustomThemedTooltip id='tooltip-settings-view-recorder' place='top' />
       <CustomThemedTooltip id='tooltip-pause-audio-player' place='bottom' />
+      <CustomThemedTooltip id='tooltip-confirm-play-pause-player' place='top' />
     </div>
   )
 }
