@@ -5,20 +5,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faArrowUpRightFromSquare,
   faDisplay,
   faStop,
   faVideo,
   faVideoSlash,
-  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { getAvailableDevices } from '../../utils/deviceUtils'
-import { JanusTypes } from '../../types/webrtc'
 import JanusLib from '../../lib/webrtc/janus.js'
 import { checkWebCamPermission } from '../../lib/devices/devices'
+import { eventDispatch } from '../../utils'
 
 const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -29,11 +29,13 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
   const { t } = useTranslation()
   const [availableDevices, setAvailableDevices] = useState([])
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
-  const janus = useRef<JanusTypes>(JanusLib)
+  const janus = useRef<any>(JanusLib)
 
   const closeSideViewAndLaunchEvent = (viewType: any) => {
     dispatch.island.toggleSideViewVisible(false)
-    if (viewType !== null) {
+    if (viewType === 'openUrl') {
+      eventDispatch('phone-island-url-parameter-opened', {})
+    } else if (viewType !== null) {
       dispatch.island.setIslandView(viewType)
     }
   }
@@ -82,12 +84,14 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
     setAvailableDevices(getAvailableDevices(userInformation, allUsersInformation))
   }, [])
 
+  console.log('currentUser', userInformation)
+
   return (
     <>
       <AnimatePresence>
         {isVisible && (
           <motion.div
-            className={`pi-absolute pi-h-full pi-bg-gray-700 pi-flex pi-flex-col pi-items-center pi-text-gray-50 dark:pi-text-gray-50 -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
+            className={`pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
               isOpen ? 'pi-py-6' : 'pi-py-4'
             }`}
             style={{
@@ -127,9 +131,9 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   }
                 >
                   {isRecording ? (
-                    <FontAwesomeIcon icon={faStop} className='pi-h-5 pi-w-5 pi-text-white' />
+                    <FontAwesomeIcon icon={faStop} className='pi-h-5 pi-w-5' />
                   ) : (
-                    <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
+                    <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faRecord} />
                   )}
                 </Button>
               )}
@@ -148,7 +152,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   className={`${!isVideoCallButtonVisible ? 'pi-cursor-auto' : ''}`}
                 >
                   <FontAwesomeIcon
-                    className='pi-h-5 pi-w-5 pi-text-white'
+                    className='pi-h-5 pi-w-5'
                     icon={isVideoCallButtonVisible ? faVideo : faVideoSlash}
                   />
                 </Button>
@@ -163,7 +167,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                     data-tooltip-id='tooltip-screen-share'
                     data-tooltip-content={t('Tooltip.Share screen') || ''}
                   >
-                    <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
+                    <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faDisplay} />
                   </Button>
                 )}
               {/* Switch device button - show only if there are available devices */}
@@ -174,7 +178,18 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   data-tooltip-content={t('Tooltip.Switch device') || ''}
                   onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
                 >
-                  <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
+                  <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowsRepeat} />
+                </Button>
+              )}
+              {/* Url param button - show only if default device is different from NethLink */}
+              {userInformation?.default_device?.type !== 'nethlink' && (
+                <Button
+                  variant='transparentSideView'
+                  data-tooltip-id='tooltip-open-url'
+                  data-tooltip-content={t('Tooltip.Open url') || ''}
+                  onClick={() => closeSideViewAndLaunchEvent('openUrl')}
+                >
+                  <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowUpRightFromSquare} />
                 </Button>
               )}
             </div>
@@ -185,6 +200,7 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
       <CustomThemedTooltip id='tooltip-video' place='left' />
       <CustomThemedTooltip id='tooltip-screen-share' place='left' />
       <CustomThemedTooltip id='tooltip-switch-device' place='left' />
+      <CustomThemedTooltip id='tooltip-open-url' place='left' />
     </>
   )
 }

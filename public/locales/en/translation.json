@@ -58,7 +58,8 @@
     "Stop sharing": "Stop sharing",
     "Disable camera": "Disable camera",
     "Enter fullscreen": "Enter fullscreen",
-    "Exit fullscreen": "Exit fullscreen"
+    "Exit fullscreen": "Exit fullscreen",
+    "Open url": "Open url"
   },
   "Call": {
     "In progress...": "In progress...",
