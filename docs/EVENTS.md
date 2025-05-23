@@ -978,6 +978,12 @@ eventDispatch(`<event-name>`, `<data-object>`)
   {}
   ```
 
+- `phone-island-url-parameter-opened` Indicates that user has clicked on url parameter button
+
+  ```json
+  {}
+  ```
+
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
 
 

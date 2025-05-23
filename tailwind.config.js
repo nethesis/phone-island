@@ -39,6 +39,27 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      colors: {
+        //surface
+
+        //surfaceBackground
+        surfaceBackground: '#F9FAFB', // gray-50
+        surfaceBackgroundDark: '#030712', // gray-950
+
+        //surfaceSidebar
+        surfaceSidebar: '#374151', // gray-700
+        surfaceSidebarDark: '#374151', // gray-700
+
+        //surfaceSidebarHover
+        surfaceSidebarHover: '#4B5563', // gray-600
+        surfaceSidebarHoverDark: '#4B5563', // gray-600
+
+        //icon
+
+        //iconWhite
+        iconWhite: '#FFFFFF', // white
+        iconWhiteDark: '#FFFFFF', // white
+      },
     },
   },
   variants: {
