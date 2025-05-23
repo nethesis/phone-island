@@ -170,17 +170,6 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                     <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faDisplay} />
                   </Button>
                 )}
-              {/* Switch device button - show only if there are available devices */}
-              {availableDevices?.length > 0 && (
-                <Button
-                  variant='transparentSideView'
-                  data-tooltip-id='tooltip-switch-device'
-                  data-tooltip-content={t('Tooltip.Switch device') || ''}
-                  onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
-                >
-                  <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowsRepeat} />
-                </Button>
-              )}
               {/* Url param button - show only if default device is different from NethLink */}
               {userInformation?.default_device?.type !== 'nethlink' && (
                 <Button
@@ -190,6 +179,17 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
                   onClick={() => closeSideViewAndLaunchEvent('openUrl')}
                 >
                   <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowUpRightFromSquare} />
+                </Button>
+              )}
+              {/* Switch device button - show only if there are available devices */}
+              {availableDevices?.length > 0 && (
+                <Button
+                  variant='transparentSideView'
+                  data-tooltip-id='tooltip-switch-device'
+                  data-tooltip-content={t('Tooltip.Switch device') || ''}
+                  onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
+                >
+                  <FontAwesomeIcon className='pi-h-5 pi-w-5' icon={faArrowsRepeat} />
                 </Button>
               )}
             </div>
