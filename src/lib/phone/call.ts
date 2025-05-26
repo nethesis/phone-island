@@ -34,7 +34,6 @@ import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
-import { useDispatch } from 'react-redux'
 
 /**
  * Starts a call to a number

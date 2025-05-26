@@ -1,23 +1,29 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useLayoutEffect, type FC } from 'react'
+import React, { useState, useRef, useLayoutEffect, useCallback, useMemo, memo } from 'react'
 import { StyledName } from '../../styles/Island.styles'
 import { motion } from 'framer-motion'
 import { RootState } from '../../store'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import TextScroll from '../TextScroll'
+import { getDisplayText, getTextClassName } from './DisplayNameUtils'
 
-const DisplayName: FC<DisplayNameProps> = () => {
+const selectDisplayNameAndIncoming = (state: RootState) => ({
+  displayName: state.currentCall.displayName,
+  incoming: state.currentCall.incoming,
+})
+
+const selectIntrudeListenStatus = (state: RootState) => state.listen
+
+const DisplayName: React.FC<DisplayNameProps> = () => {
   const [animateText, setAnimateText] = useState<boolean>(false)
   const nameContainer = useRef<null | HTMLDivElement>(null)
   const nameText = useRef<null | HTMLDivElement>(null)
   const NameMotion = motion(StyledName)
 
-  // Get the displayName of the currentCall store
-  const { displayName, incoming } = useSelector((state: RootState) => state.currentCall)
-  const intrudeListenStatus = useSelector((state: RootState) => state.listen)
+  const { displayName, incoming } = useSelector(selectDisplayNameAndIncoming)
+  const intrudeListenStatus = useSelector(selectIntrudeListenStatus)
 
   const { t } = useTranslation()
 
@@ -29,74 +35,28 @@ const DisplayName: FC<DisplayNameProps> = () => {
     ) {
       setAnimateText(true)
     }
-  })
+  }, [nameContainer, nameText])
+
+  const textClassName = useMemo(
+    () => getTextClassName({ intrudeListenStatus, animateText }),
+    [intrudeListenStatus, animateText],
+  )
+
+  const displayTextContent = useMemo(
+    () => getDisplayText({ intrudeListenStatus, displayName, incoming, t }),
+    [intrudeListenStatus, displayName, incoming, t],
+  )
 
   return (
-    <>
-      {intrudeListenStatus?.isIntrude ? (
-        <NameMotion
-          ref={nameContainer}
-          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
-        >
-          <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
-              animateText && 'animated-text'
-            }`}
-            ref={nameText}
-          >
-            {intrudeListenStatus?.isIntrudeExtension !== '' &&
-            intrudeListenStatus?.isIntrudeExtension !== undefined
-              ? `${t('Common.Intrude')}` + '-' + intrudeListenStatus?.isIntrudeExtension
-              : `${t('Common.Intrude')}`}
-          </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
-        </NameMotion>
-      ) : intrudeListenStatus?.isListen ? (
-        <NameMotion
-          ref={nameContainer}
-          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'
-        >
-          <div
-            className={`pi-w-fit pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
-              animateText && 'animated-text'
-            }`}
-            ref={nameText}
-          >
-            {intrudeListenStatus?.isListenExtension !== '' &&
-            intrudeListenStatus?.isListenExtension !== undefined
-              ? `${t('Common.Listen')}` + '-' + intrudeListenStatus?.isListenExtension
-              : `${t('Common.Listen')}`}
-          </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50'></div>
-        </NameMotion>
-      ) : (
-        <NameMotion
-          ref={nameContainer}
-          className='pi-whitespace-nowrap pi-relative pi-overflow-hidden '
-        >
-          <div
-            className={`pi-relative pi-inline-block pi-text-gray-950 dark:pi-text-gray-50 ${
-              animateText ? 'pi-animate-scroll-text' : ''
-            }`}
-            ref={nameText}
-          >
-            {displayName && displayName === '<unknown>' ? (
-              'PBX'
-            ) : displayName ? (
-              <TextScroll text={displayName}></TextScroll>
-            ) : incoming ? (
-              t('Call.Incoming call') || '-'
-            ) : (
-              t('Call.Outgoing call') || '-'
-            )}
-          </div>
-          <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50' />
-        </NameMotion>
-      )}
-    </>
+    <NameMotion ref={nameContainer} className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'>
+      <div className={textClassName} ref={nameText}>
+        {displayTextContent}
+      </div>
+      <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50' />
+    </NameMotion>
   )
 }
 
-export default DisplayName
+export default memo(DisplayName)
 
 export interface DisplayNameProps {}

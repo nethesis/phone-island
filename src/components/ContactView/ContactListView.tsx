@@ -170,11 +170,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
     if (isInsideConferenceList()) {
       // Close the conference list
       eventDispatch('phone-island-conference-list-close', {})
-    } else {
-      // Unpause the current call
-      unpauseCurrentCall()
     }
-
     // Open the call view
     backToPreviousView()
   }

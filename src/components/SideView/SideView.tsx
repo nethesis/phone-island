@@ -84,8 +84,6 @@ const SideView: FC<SideViewTypes> = ({ isVisible }) => {
     setAvailableDevices(getAvailableDevices(userInformation, allUsersInformation))
   }, [])
 
-  console.log('currentUser', userInformation)
-
   return (
     <>
       <AnimatePresence>

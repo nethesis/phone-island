@@ -40,6 +40,12 @@ module.exports = {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
+
+        //text
+        primaryNeutral: '#111827', // gray-900
+        primaryNeutralDark: '#F9FAFB', // gray-50
+
+
         //surface
 
         //surfaceBackground
