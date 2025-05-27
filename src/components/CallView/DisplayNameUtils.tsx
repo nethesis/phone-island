@@ -14,6 +14,11 @@ interface TextClassNameProps {
   animateText: boolean
 }
 
+export interface DisplayTextResult {
+  type: 'text' | 'scroll'
+  content: string
+}
+
 const MemoizedTextScroll = memo(TextScroll)
 
 export const getDisplayText = ({
@@ -21,28 +26,39 @@ export const getDisplayText = ({
   displayName,
   incoming,
   t,
-}: DisplayTextProps) => {
+}: DisplayTextProps): DisplayTextResult => {
   if (intrudeListenStatus?.isIntrude) {
     const extension = intrudeListenStatus?.isIntrudeExtension
-    return extension && extension !== ''
-      ? `${t('Common.Intrude')}-${extension}`
-      : t('Common.Intrude')
+    return {
+      type: 'text',
+      content:
+        extension && extension !== ''
+          ? `${t('Common.Intrude')}-${extension}`
+          : t('Common.Intrude'),
+    }
   }
 
   if (intrudeListenStatus?.isListen) {
     const extension = intrudeListenStatus?.isListenExtension
-    return extension && extension !== '' ? `${t('Common.Listen')}-${extension}` : t('Common.Listen')
+    return {
+      type: 'text',
+      content:
+        extension && extension !== '' ? `${t('Common.Listen')}-${extension}` : t('Common.Listen'),
+    }
   }
 
   if (displayName && displayName === '<unknown>') {
-    return 'PBX'
+    return { type: 'text', content: 'PBX' }
   }
 
   if (displayName) {
-    return <MemoizedTextScroll text={displayName} />
+    return { type: 'scroll', content: displayName }
   }
 
-  return incoming ? t('Call.Incoming call') || '-' : t('Call.Outgoing call') || '-'
+  return {
+    type: 'text',
+    content: incoming ? t('Call.Incoming call') || '-' : t('Call.Outgoing call') || '-',
+  }
 }
 
 export const getTextClassName = ({ intrudeListenStatus, animateText }: TextClassNameProps) => {
@@ -55,3 +71,5 @@ export const getTextClassName = ({ intrudeListenStatus, animateText }: TextClass
 
   return `${baseClass} ${animateText ? 'pi-animate-scroll-text' : ''}`
 }
+
+export { MemoizedTextScroll }

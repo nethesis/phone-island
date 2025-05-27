@@ -586,13 +586,20 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
     // if owner has already started the conference hangup before make a new call
     hangupCurrentCall()
     dispatch.conference.toggleIsOwnerInside(false)
-    setTimeout(() => {
-      eventDispatch('phone-island-call-start', { number: numberToCall })
-    }, 800)
+
+    // Use requestAnimationFrame to ensure state updates are complete before dispatching event
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        eventDispatch('phone-island-call-start', { number: numberToCall })
+      }, 800)
+    })
   } else {
-    setTimeout(() => {
-      eventDispatch('phone-island-call-start', { number: numberToCall })
-    }, 800)
+    // Use requestAnimationFrame to ensure state updates are complete before dispatching event
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        eventDispatch('phone-island-call-start', { number: numberToCall })
+      }, 800)
+    })
   }
 }
 
@@ -605,9 +612,11 @@ export async function handleAttendedTransfer(number: string, dispatch: Dispatch)
       transferring: true,
       paused: false,
     })
-    // Play the remote audio element
-    dispatch.player.playRemoteAudio()
 
-    eventDispatch('phone-island-call-transfered', {})
+    // Use requestAnimationFrame to ensure state update is complete before audio operations
+    requestAnimationFrame(() => {
+      dispatch.player.playRemoteAudio()
+      eventDispatch('phone-island-call-transfered', {})
+    })
   }
 }
