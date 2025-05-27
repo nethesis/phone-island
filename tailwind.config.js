@@ -73,27 +73,27 @@ module.exports = {
 
         // Active state
         phoneIslandActive: '#374151', // Gray/700
-        phoneIslandActiveLight: '#D1D5DB', // Gray/300
+        phoneIslandActiveDark: '#D1D5DB', // Gray/300
 
         // Hover state
         phoneIslandHover: '#1F2937', // Gray/800
-        phoneIslandHoverLight: '#F9FAFB', // Gray/50
+        phoneIslandHoverDark: '#F9FAFB', // Gray/50
 
         // Call state
         phoneIslandCall: '#15803D', // Green/700
-        phoneIslandCallLight: '#22C55E', // Green/500
+        phoneIslandCallDark: '#22C55E', // Green/500
 
         // Call hover state
         phoneIslandCallHover: '#166534', // Green/800
-        phoneIslandCallHoverLight: '#86EFAC', // Green/300
+        phoneIslandCallHoverDark: '#86EFAC', // Green/300
 
         // Close state
         phoneIslandClose: '#B91C1C', // Red/700
-        phoneIslandCloseLight: '#EF4444', // Red/500
+        phoneIslandCloseDark: '#EF4444', // Red/500
 
         // Close hover state
         phoneIslandCloseHover: '#991B1B', // Red/800
-        phoneIslandCloseHoverLight: '#FCA5A5', // Red/300
+        phoneIslandCloseHoverDark: '#FCA5A5', // Red/300
 
         //icon
 

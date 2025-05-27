@@ -108,21 +108,28 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
-    const remoteAudioElement: any = store.getState().player.remoteAudio
-    // set audio output
-    remoteAudioElement?.current
-      .setSinkId(data.deviceId)
-      .then(function () {
-        console.info('Default audio output device change with success!')
-        // set device to localstorage
-        setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+    store.dispatch.island.toggleAvoidToShow(true)
+    eventDispatch('phone-island-call-start', { number: '*43' })
+    setTimeout(() => {
+      const remoteAudioElement: any = store.getState().player.remoteAudio
+      // set audio output
+      remoteAudioElement?.current
+        .setSinkId(data.deviceId)
+        .then(function () {
+          console.info('Default audio output device change with success!')
+          // set device to localstorage
+          setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
 
-        // dispatch event
-        eventDispatch('phone-island-audio-output-changed', {})
-      })
-      .catch(function (err) {
-        console.error('Default audio output device change error:', err)
-      })
+          // dispatch event
+          eventDispatch('phone-island-audio-output-changed', {})
+          eventDispatch('phone-island-call-end', {})
+          store.dispatch.island.toggleAvoidToShow(false)
+        })
+        .catch(function (err) {
+          console.error('Default audio output device change error:', err)
+          store.dispatch.island.toggleAvoidToShow(false)
+        })
+    }, 500)
   })
 
   // Listen for the operator status change
