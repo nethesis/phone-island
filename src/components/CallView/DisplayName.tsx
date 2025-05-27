@@ -7,7 +7,12 @@ import { motion } from 'framer-motion'
 import { RootState } from '../../store'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { getDisplayText, getTextClassName, MemoizedTextScroll, DisplayTextResult } from './DisplayNameUtils'
+import {
+  getDisplayText,
+  getTextClassName,
+  MemoizedTextScroll,
+  DisplayTextResult,
+} from './DisplayNameUtils'
 
 const selectDisplayNameAndIncoming = (state: RootState) => ({
   displayName: state?.currentCall?.displayName,
@@ -20,7 +25,7 @@ const DisplayName: React.FC<DisplayNameProps> = () => {
   const [animateText, setAnimateText] = useState<boolean>(false)
   const nameContainer = useRef<null | HTMLDivElement>(null)
   const nameText = useRef<null | HTMLDivElement>(null)
-  const NameMotion = motion.create(StyledName)
+  const NameMotion = motion(StyledName)
 
   const { displayName, incoming } = useSelector(selectDisplayNameAndIncoming)
   const intrudeListenStatus = useSelector(selectIntrudeListenStatus)
