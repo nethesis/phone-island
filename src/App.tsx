@@ -107,9 +107,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-video-input-changed', {})
   })
 
+  const [firstRenderI18n, setFirstRenderI18n] = useState(true)
+  const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
+
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
-    store.dispatch.island.toggleAvoidToShow(true)
-    eventDispatch('phone-island-call-start', { number: '*43' })
+    if (!firstAudioOutputInit) {
+      eventDispatch('phone-island-call-start', { number: '*43' })
+      store.dispatch.island.toggleAvoidToShow(true)
+    }
+
     setTimeout(() => {
       const remoteAudioElement: any = store.getState().player.remoteAudio
       // set audio output
@@ -143,9 +149,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     store.dispatch.island.setIslandView(viewType)
   })
 
-  const [firstRenderI18n, setFirstRenderI18n] = useState(true)
-  const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
-
   //initialize i18n
   useEffect(() => {
     if (firstRenderI18n) {
@@ -162,7 +165,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       const defaultAudioOutputDevice: any = getJSONItem(
         `phone-island-audio-output-device`,
       )?.deviceId
-      eventDispatch('phone-island-audio-output-change', { deviceId: defaultAudioOutputDevice })
+      eventDispatch('phone-island-audio-output-change', {
+        deviceId: defaultAudioOutputDevice,
+      })
       setFirstAudioOutputInit(false)
     }
   }, [firstAudioOutputInit, remoteAudioElement])
