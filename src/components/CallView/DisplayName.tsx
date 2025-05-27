@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useRef, useLayoutEffect, useCallback, useMemo, memo } from 'react'
+import React, { useState, useRef, useLayoutEffect, useMemo, memo } from 'react'
 import { StyledName } from '../../styles/Island.styles'
 import { motion } from 'framer-motion'
 import { RootState } from '../../store'
@@ -10,8 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { getDisplayText, getTextClassName } from './DisplayNameUtils'
 
 const selectDisplayNameAndIncoming = (state: RootState) => ({
-  displayName: state.currentCall.displayName,
-  incoming: state.currentCall.incoming,
+  displayName: state?.currentCall?.displayName,
+  incoming: state?.currentCall?.incoming,
 })
 
 const selectIntrudeListenStatus = (state: RootState) => state.listen

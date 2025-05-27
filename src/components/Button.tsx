@@ -34,11 +34,11 @@ export const Button: FC<ButtonProps> = ({
       green:
         'pi-bg-green-700 dark:pi-bg-green-500 hover:pi-bg-green-600 dark:hover:pi-bg-green-300 focus:pi-ring-green-500 focus:dark:pi-ring-200 pi-text-white dark:pi-text-gray-950 pi-h-12 pi-w-12 pi-rounded-full',
       default:
-        'hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300 pi-text-white dark:pi-text-gray-950 pi-h-12 pi-w-12 pi-rounded-full',
+        'pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300 pi-text-primaryInvert dark:pi-text-primaryInvertDark pi-h-12 pi-w-12 pi-rounded-full',
       neutral:
         'pi-bg-transparent enabled:hover:pi-bg-gray-500 enabled:hover:pi-border-gray-500 pi-border pi-border-gray-700 focus:pi-ring-0 pi-h-12 pi-w-12 pi-rounded-full',
       transparent:
-        'pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white pi-h-12 pi-w-12 pi-rounded-full',
+        'pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-12 pi-rounded-full',
       transparentSideView:
         'pi-bg-transparent dark:enabled:hover:pi-bg-gray-600 enabled:hover:pi-bg-gray-600 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 dark:pi-text-white pi-h-8 pi-w-8 pi-rounded',
       transparentSettings:
