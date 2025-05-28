@@ -133,6 +133,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
         })
         .catch(function (err) {
           console.error('Default audio output device change error:', err)
+          eventDispatch('phone-island-call-end', {})
           store.dispatch.island.toggleAvoidToShow(false)
         })
     }, 500)
