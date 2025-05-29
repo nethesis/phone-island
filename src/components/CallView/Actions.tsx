@@ -1,7 +1,7 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useMemo, useEffect, useRef } from 'react'
+import React, { type FC, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
   muteCurrentCall,
   unmuteCurrentCall,
@@ -18,10 +18,10 @@ import {
   faMicrophone,
   faMicrophoneSlash,
   faSquareParking,
-  faChevronDown,
-  faChevronUp,
   faUserPlus,
   faPlus,
+  faAngleDown,
+  faAngleUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { faClose, faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState, Dispatch } from '../../store'
@@ -35,40 +35,129 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import TransferButton from '../TransferButton'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
+import { IconDefinition } from '@fortawesome/fontawesome-common-types'
+
+interface ActionButtonProps {
+  active: boolean
+  onClick: () => void
+  tooltipId: string
+  tooltipContent: string
+  icon: IconDefinition
+  activeIcon?: IconDefinition
+}
+
+const ActionButton: React.FC<ActionButtonProps> = React.memo(
+  ({ active, onClick, tooltipId, tooltipContent, icon, activeIcon = icon }) => (
+    <Button
+      variant='default'
+      active={active}
+      onClick={onClick}
+      data-tooltip-id={tooltipId}
+      data-tooltip-content={tooltipContent}
+    >
+      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={active ? activeIcon : icon} />
+    </Button>
+  ),
+)
 
 const Actions: FC = () => {
-  // Get multiple values from currentCall store
-  const { paused, muted, isRecording } = useSelector((state: RootState) => state.currentCall)
-  const parked = useSelector((state: RootState) => state.currentCall.parked)
+  const { t } = useTranslation()
+  const dispatch = useDispatch<Dispatch>()
 
-  // Get isOpen and view from island store
-  const { view, actionsExpanded, sideViewIsVisible, isConferenceList } = useSelector(
+  const { paused, muted, parked, transferring } = useSelector(
+    (state: RootState) => state.currentCall,
+  )
+  const { view, actionsExpanded, sideViewIsVisible } = useSelector(
     (state: RootState) => state.island,
   )
-  const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
   const { username, profile } = useSelector((state: RootState) => state?.currentUser)
-
-  const dispatch = useDispatch<Dispatch>()
 
   // Check if the actions should be expanded automatically
   const autoExpandedRef = useRef(false)
   // Check if the actions should be collapsed automatically
   const autoCollapsedRef = useRef(false)
 
-  // Check if user has enabled conference and view is different from waitingConference && the owner is the user
+  const isOwnerOfConference = useMemo(
+    () => username !== '' && conferenceStartedFrom === username,
+    [username, conferenceStartedFrom],
+  )
+
+  const shouldHideTransferButton = useMemo(
+    () => isActive && !isOwnerOfConference,
+    [isActive, isOwnerOfConference],
+  )
+
+  const shouldHideButtons = useMemo(
+    () => intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen,
+    [intrudeListenStatus],
+  )
+
+  const toggleMute = useCallback(() => {
+    muted ? unmuteCurrentCall() : muteCurrentCall()
+  }, [muted])
+
+  const togglePause = useCallback(() => {
+    paused ? unpauseCurrentCall() : pauseCurrentCall()
+  }, [paused])
+
+  const openKeypad = useCallback(() => {
+    dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
+    if (sideViewIsVisible) {
+      eventDispatch('phone-island-sideview-close', {})
+    }
+    eventDispatch('phone-island-call-keypad-opened', {})
+  }, [view, sideViewIsVisible, dispatch.island])
+
+  const toggleActionsExpanded = useCallback(() => {
+    const newState = !actionsExpanded
+    dispatch.island.toggleActionsExpanded(newState)
+    eventDispatch(`phone-island-call-actions-${newState ? 'opened' : 'closed'}`, {})
+    if (!newState) {
+      eventDispatch('phone-island-sideview-close', {})
+    }
+  }, [actionsExpanded, dispatch.island])
+
+  const toggleSideView = useCallback(() => {
+    const event = sideViewIsVisible ? 'phone-island-sideview-close' : 'phone-island-sideview-open'
+    eventDispatch(event, {})
+  }, [sideViewIsVisible])
+
+  const transfer = useCallback(() => {
+    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    if (sideViewIsVisible) {
+      eventDispatch('phone-island-sideview-close', {})
+    }
+    eventDispatch('phone-island-call-transfer-opened', {})
+  }, [view, sideViewIsVisible, dispatch.island])
+
+  const beginConference = useCallback(() => {
+    eventDispatch('phone-island-conference-list-open', {})
+    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
+    if (sideViewIsVisible) {
+      eventDispatch('phone-island-sideview-close', {})
+    }
+  }, [view, sideViewIsVisible, dispatch.island])
+
+  const addUserToConference = useCallback(async () => {
+    dispatch.island.setIslandView('waitingConference')
+    await startConference()
+  }, [dispatch.island])
+
+  const handleConferenceAction = useCallback(() => {
+    isActive ? addUserToConference() : beginConference()
+  }, [isActive, addUserToConference, beginConference])
+
   const shouldExpandActions = useMemo(() => {
     return (
       isActive &&
       view === 'call' &&
       !actionsExpanded &&
       !autoExpandedRef.current &&
-      username !== '' &&
-      conferenceStartedFrom !== '' &&
-      conferenceStartedFrom === username
+      isOwnerOfConference
     )
-  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+  }, [isActive, view, actionsExpanded, isOwnerOfConference])
 
   // Check if user is not the owner of the conference
   const shouldCollapseActions = useMemo(() => {
@@ -78,9 +167,9 @@ const Actions: FC = () => {
       actionsExpanded &&
       !autoCollapsedRef.current &&
       username !== '' &&
-      conferenceStartedFrom !== username
+      !isOwnerOfConference
     )
-  }, [isActive, view, actionsExpanded, conferenceStartedFrom])
+  }, [isActive, view, actionsExpanded, username, isOwnerOfConference])
 
   // Automatically expand actions if the user has enabled conference
   useEffect(() => {
@@ -100,42 +189,10 @@ const Actions: FC = () => {
     }
   }, [shouldCollapseActions, dispatch.island])
 
-  function openKeypad() {
-    dispatch.island.setIslandView(view !== 'keypad' ? 'keypad' : 'call')
-    // Check if sideView is visible and close it
-    if (sideViewIsVisible) {
-      eventDispatch('phone-island-sideview-close', {})
-    }
-    eventDispatch('phone-island-call-keypad-opened', {})
-  }
-  useEventListener('phone-island-call-keypad-open', () => {
-    openKeypad()
-  })
+  const cancelTransfer = useCallback(() => {
+    const sendDtmfFunc = isWebRTC() ? sendDTMF : sendPhysicalDTMF
 
-  function transfer() {
-    // Open the transfer view
-    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
-    // Check if sideView is visible and close it
-    if (sideViewIsVisible) {
-      eventDispatch('phone-island-sideview-close', {})
-    }
-    eventDispatch('phone-island-call-transfer-opened', {})
-  }
-
-  useEventListener('phone-island-call-transfer-open', () => {
-    transfer()
-  })
-  useEventListener('phone-island-call-transfer-cancel', () => {
-    cancelTransfer()
-  })
-
-  // Cancels the current transfer through dtmfs
-  function cancelTransfer() {
-    if (isWebRTC()) {
-      sendDTMF('*')
-    } else {
-      sendPhysicalDTMF('*')
-    }
+    sendDtmfFunc('*')
 
     const { audioPlayerPlaying } = store.getState().player
     // Check if the local audio is already playing and start playing
@@ -145,13 +202,9 @@ const Actions: FC = () => {
         loop: true,
       })
     }
-    setTimeout(() => {
-      if (isWebRTC()) {
-        sendDTMF('1')
-      } else {
-        sendPhysicalDTMF('1')
-      }
 
+    setTimeout(() => {
+      sendDtmfFunc('1')
       dispatch.player.stopAudioPlayer()
       // The workarround to disable transfer because of the wrong conv.connection value from ws
       if (transferring) {
@@ -162,8 +215,11 @@ const Actions: FC = () => {
 
       eventDispatch('phone-island-call-transfer-canceled', {})
     }, 500)
-  }
+  }, [transferring, dispatch.player, dispatch.currentCall])
 
+  useEventListener('phone-island-call-keypad-open', openKeypad)
+  useEventListener('phone-island-call-transfer-open', transfer)
+  useEventListener('phone-island-call-transfer-cancel', cancelTransfer)
   useEventListener('phone-island-call-actions-open', () => {
     dispatch.island.toggleActionsExpanded(true)
     eventDispatch('phone-island-call-actions-opened', {})
@@ -172,165 +228,112 @@ const Actions: FC = () => {
     dispatch.island.toggleActionsExpanded(false)
     eventDispatch('phone-island-call-actions-closed', {})
   })
-  function toggleActionsExpanded() {
-    if (actionsExpanded) {
-      dispatch.island.toggleActionsExpanded(false)
-      eventDispatch('phone-island-call-actions-closed', {})
-      eventDispatch('phone-island-sideview-close', {})
-    } else {
-      dispatch.island.toggleActionsExpanded(true)
-      eventDispatch('phone-island-call-actions-opened', {})
+
+  const mainGridClassName = useMemo(() => {
+    if (
+      intrudeListenStatus?.isListen ||
+      intrudeListenStatus?.isIntrude ||
+      (isActive && !isOwnerOfConference)
+    ) {
+      if (intrudeListenStatus.isIntrude) {
+        return 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+      }
+      if (isActive && !isOwnerOfConference) {
+        return 'pi-flex pi-items-center pi-justify-center pi-gap-4'
+      }
+      return 'pi-hidden'
     }
-  }
+    return 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
+  }, [intrudeListenStatus, isActive, isOwnerOfConference])
 
-  const beginConference = () => {
-    // Update island store and set conference list view to true
-    eventDispatch('phone-island-conference-list-open', {})
-    // Set the island view to transfer list
-    dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
-    // Check if sideView is visible and close it
-    if (sideViewIsVisible) {
-      eventDispatch('phone-island-sideview-close', {})
-    }
-  }
-
-  const addUserToConference = async () => {
-    dispatch.island.setIslandView('waitingConference')
-    const conferenceStarted = await startConference()
-  }
-
-  const { t } = useTranslation()
-  // Phone island header section
   return (
     <>
-      <div
-        className={`${
-          !intrudeListenStatus?.isListen &&
-          !intrudeListenStatus?.isIntrude &&
-          (!isActive || (isActive && conferenceStartedFrom === username))
-            ? 'pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
-            : intrudeListenStatus.isIntrude
-            ? 'pi-mb-6 pi-grid pi-grid-cols-1 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'
-            : isActive && conferenceStartedFrom !== username
-            ? 'pi-flex pi-items-center pi-justify-center pi-gap-4'
-            : 'pi-hidden'
-        } `}
-      >
-        {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
-          <Button
-            variant='default'
-            active={paused ? true : false}
-            onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
-            data-tooltip-id='tooltip-pause'
-            data-tooltip-content={paused ? `${t('Tooltip.Play')}` : `${t('Tooltip.Pause')}`}
-          >
-            {paused ? (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPlay} />
-            ) : (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faPause} />
-            )}
-          </Button>
+      <div className={mainGridClassName}>
+        {!shouldHideButtons && (
+          <ActionButton
+            active={paused}
+            onClick={togglePause}
+            tooltipId='tooltip-pause'
+            tooltipContent={paused ? t('Tooltip.Play') : t('Tooltip.Pause')}
+            icon={faPause}
+            activeIcon={faPlay}
+          />
         )}
+
         {!intrudeListenStatus?.isListen && (
+          <ActionButton
+            active={muted}
+            onClick={toggleMute}
+            tooltipId='tooltip-mute'
+            tooltipContent={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
+            icon={faMicrophone}
+            activeIcon={faMicrophoneSlash}
+          />
+        )}
+
+        {!shouldHideTransferButton && <TransferButton />}
+
+        {!shouldHideButtons && !shouldHideTransferButton && (
           <Button
-            variant='default'
-            active={muted ? true : false}
-            onClick={() => (muted ? unmuteCurrentCall() : muteCurrentCall())}
-            data-tooltip-id='tooltip-mute'
-            data-tooltip-content={muted ? `${t('Tooltip.Unmute')}` : `${t('Tooltip.Mute')}`}
+            active={actionsExpanded}
+            variant='transparent'
+            onClick={toggleActionsExpanded}
+            data-tooltip-id='tooltip-expand'
+            data-tooltip-content={actionsExpanded ? t('Tooltip.Collapse') : t('Tooltip.Expand')}
           >
-            {muted ? (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
-            ) : (
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
-            )}
+            <FontAwesomeIcon
+              className='pi-h-6 pi-w-6'
+              icon={actionsExpanded ? faAngleUp : faAngleDown}
+            />
           </Button>
         )}
-        {/* If user is in conference and is not the owner of the conference, hide the transfer button */}
-        {!(isActive && conferenceStartedFrom !== username) && <TransferButton />}
-        {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) &&
-          !(isActive && conferenceStartedFrom !== username) && (
+      </div>
+
+      {/* Actions expanded section */}
+      {actionsExpanded && (
+        <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
+          <ActionButton
+            active={view === 'keypad'}
+            onClick={openKeypad}
+            tooltipId='tooltip-keyboard'
+            tooltipContent={t('Tooltip.Keyboard')}
+            icon={faGridRound}
+          />
+
+          <ActionButton
+            active={parked}
+            onClick={parkCurrentCall}
+            tooltipId='tooltip-park'
+            tooltipContent={t('Tooltip.Park')}
+            icon={faSquareParking}
+          />
+
+          {profile?.macro_permissions?.settings?.permissions?.conference?.value && (
             <Button
-              active={actionsExpanded}
-              variant='transparent'
-              onClick={() => toggleActionsExpanded()}
-              data-tooltip-id='tooltip-expand'
+              data-stop-propagation={true}
+              variant='default'
+              onClick={handleConferenceAction}
+              data-tooltip-id='tooltip-conference'
               data-tooltip-content={
-                actionsExpanded ? `${t('Tooltip.Collapse')}` : `${t('Tooltip.Expand')}`
+                isActive ? t('Tooltip.Conference') || '' : t('Tooltip.Add user to conference') || ''
               }
             >
-              {actionsExpanded ? (
-                <FontAwesomeIcon
-                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                  icon={faChevronUp}
-                />
-              ) : (
-                <FontAwesomeIcon
-                  className='pi-text-gray-700 dark:pi-text-gray-200 pi-h-6 pi-w-6'
-                  icon={faChevronDown}
-                />
-              )}
+              <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
             </Button>
           )}
-      </div>
-      {/* Actions expanded section */}
-      {actionsExpanded ? (
-        <>
-          {' '}
-          <div className='pi-grid pi-grid-cols-4 pi-auto-cols-max pi-gap-y-5 pi-justify-items-center pi-place-items-center pi-justify-center'>
-            <Button
-              active={view === 'keypad'}
-              variant='default'
-              onClick={openKeypad}
-              data-tooltip-id='tooltip-keyboard'
-              data-tooltip-content={t('Tooltip.Keyboard') || ''}
-            >
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faGridRound} />
-            </Button>
-            <Button
-              active={parked}
-              variant='default'
-              onClick={parkCurrentCall}
-              data-tooltip-id='tooltip-park'
-              data-tooltip-content={t('Tooltip.Park') || ''}
-            >
-              <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faSquareParking} />
-            </Button>
-            {profile?.macro_permissions?.settings?.permissions?.conference?.value && (
-              <Button
-                data-stop-propagation={true}
-                variant='default'
-                onClick={() => (isActive ? addUserToConference() : beginConference())}
-                data-tooltip-id='tooltip-conference'
-                data-tooltip-content={
-                  isActive
-                    ? t('Tooltip.Conference') || ''
-                    : t('Tooltip.Add user to conference') || ''
-                }
-              >
-                <FontAwesomeIcon icon={isActive ? faPlus : faUserPlus} className='pi-h-6 pi-w-6' />
-              </Button>
-            )}
 
-            <Button
-              variant='default'
-              onClick={() =>
-                sideViewIsVisible
-                  ? eventDispatch('phone-island-sideview-close', {})
-                  : eventDispatch('phone-island-sideview-open', {})
-              }
-              data-tooltip-id='tooltip-sideView'
-              data-tooltip-content={t('Tooltip.Other actions') || ''}
-            >
-              <FontAwesomeIcon
-                className='pi-h-6 pi-w-6'
-                icon={sideViewIsVisible ? faClose : faOpen}
-              />
-            </Button>
-          </div>
-        </>
-      ) : (
-        <></>
+          <Button
+            variant='default'
+            onClick={toggleSideView}
+            data-tooltip-id='tooltip-sideView'
+            data-tooltip-content={t('Tooltip.Other actions') || ''}
+          >
+            <FontAwesomeIcon
+              className='pi-h-6 pi-w-6'
+              icon={sideViewIsVisible ? faClose : faOpen}
+            />
+          </Button>
+        </div>
       )}
       {/* Buttons tooltips */}
       <CustomThemedTooltip id='tooltip-transfer' place='bottom' />
@@ -345,4 +348,4 @@ const Actions: FC = () => {
   )
 }
 
-export default Actions
+export default React.memo(Actions)

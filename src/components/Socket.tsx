@@ -662,7 +662,7 @@ export const Socket: FC<SocketProps> = ({
       clearInterval(connectionCheckInterval.current)
       socket.current.close()
     }
-  }, [])
+  }, [hostName, username, authToken, uaType, dispatch])
 
   // Manage reload events
   useEffect(() => {

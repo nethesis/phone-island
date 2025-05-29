@@ -73,7 +73,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
     // Check and switch the view
     if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
       dispatch.island.setIslandView('waitingConference')
-    } else if (incoming || outgoing) {
+    } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
