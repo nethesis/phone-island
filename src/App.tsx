@@ -113,6 +113,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
     if (!firstAudioOutputInit) {
       eventDispatch('phone-island-call-start', { number: '*43' })
+      store.dispatch.island.setIslandView(null)
       store.dispatch.island.toggleAvoidToShow(true)
     }
 
