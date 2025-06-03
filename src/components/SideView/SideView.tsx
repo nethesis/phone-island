@@ -1,196 +1,187 @@
-import React, { FC, useEffect, useRef, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState, store } from '../../store'
+import React, { FC, useCallback, useMemo, memo, useEffect, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '../Button'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faArrowUpRightFromSquare,
   faDisplay,
   faStop,
   faVideo,
   faVideoSlash,
-  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
 import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
-import { getAvailableDevices } from '../../utils/deviceUtils'
-import { JanusTypes } from '../../types/webrtc'
-import JanusLib from '../../lib/webrtc/janus.js'
-import { checkWebCamPermission } from '../../lib/devices/devices'
+import { useSideViewLogic } from './hooks/useSideViewLogic'
+import { SideViewButton } from './components/SideViewButton'
+import { getParamUrl } from '../../services/user'
 
-const SideView: FC<SideViewTypes> = ({ isVisible }) => {
-  const dispatch = useDispatch<Dispatch>()
+const ANIMATION_CONFIG = {
+  initial: { x: -76 },
+  animate: { x: 4, transition: { duration: 0.1, ease: 'easeOut' } },
+  exit: { x: -76, transition: { duration: 0.1, ease: 'easeIn' } },
+} as const
+
+const STYLE_CONFIG = {
+  borderTopRightRadius: '20px',
+  borderBottomRightRadius: '20px',
+  width: '80px',
+  transformOrigin: 'right',
+} as const
+
+interface ButtonConfig {
+  active?: boolean
+  onClick: () => void | Promise<void>
+  tooltipId: string
+  tooltipContent: string
+  icon: any
+  disabled?: boolean
+}
+
+interface ButtonConfigWithKey extends ButtonConfig {
+  key: string
+}
+
+const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
-  const userInformation = useSelector((state: RootState) => state.currentUser)
-  const allUsersInformation = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
-  const [availableDevices, setAvailableDevices] = useState([])
-  const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
-  const janus = useRef<JanusTypes>(JanusLib)
+  const [hasValidUrl, setHasValidUrl] = useState(false)
 
-  const closeSideViewAndLaunchEvent = (viewType: any) => {
-    dispatch.island.toggleSideViewVisible(false)
-    if (viewType !== null) {
-      dispatch.island.setIslandView(viewType)
-    }
-  }
-
-  const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
-
-  const goToVideoCall = async () => {
-    let cameraPermission = await checkCameraPermission()
-    if (cameraPermission) {
-      closeSideViewAndLaunchEvent('video')
-
-      store.dispatch.currentCall.updateCurrentCall({
-        isLocalVideoEnabled: true,
-        isStartingVideoCall: true,
-      })
-    }
-  }
-
-  const checkCameraPermission = async () => {
-    if (videoInputDevices.length > 0) {
-      const isWebCamAccepted = await checkWebCamPermission()
-      if (isWebCamAccepted) {
-        setIsVideoCallButtonVisible(true)
-        return true
-      } else {
-        setIsVideoCallButtonVisible(false)
-        return false
-      }
-    } else {
-      setIsVideoCallButtonVisible(false)
-      return false
-    }
-  }
-
-  const goToScreenSharing = () => {
-    closeSideViewAndLaunchEvent('video')
-
-    store.dispatch.screenShare.update({
-      isStartingScreenShare: true,
-    })
-  }
+  const {
+    videoInputDevices,
+    isVideoCallButtonVisible,
+    canRecord,
+    canShareScreen,
+    canSwitchDevice,
+    showUrlButton,
+    goToVideoCall,
+    goToScreenSharing,
+    closeSideViewAndLaunchEvent,
+  } = useSideViewLogic(uaType)
 
   useEffect(() => {
-    // check available devices
+    const checkParamUrl = async () => {
+      try {
+        const paramUrlResponse: any = await getParamUrl()
+        // Verify that the response contains a valid URL (not empty)
+        const url = paramUrlResponse?.url || ''
+        const isValid = url && url.trim() !== ''
 
-    setAvailableDevices(getAvailableDevices(userInformation, allUsersInformation))
-  }, [])
+        setHasValidUrl(isValid)
+      } catch (error) {
+        setHasValidUrl(false)
+        console.error('Error fetching URL parameter:', error)
+      }
+    }
+
+    if (isVisible) {
+      checkParamUrl()
+    }
+  }, [isVisible])
+
+  const handleRecordClick = useCallback(() => {
+    recordCurrentCall(isRecording)
+  }, [isRecording])
+
+  const buttonConfigs = useMemo(() => {
+    const configs: (ButtonConfigWithKey | false)[] = [
+      canRecord && {
+        key: 'record',
+        active: isRecording,
+        onClick: handleRecordClick,
+        tooltipId: 'tooltip-record',
+        tooltipContent: isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || '',
+        icon: isRecording ? faStop : faRecord,
+      },
+      videoInputDevices?.length > 0 && {
+        key: 'video',
+        onClick: goToVideoCall,
+        tooltipId: 'tooltip-video',
+        tooltipContent: isVideoCallButtonVisible
+          ? t('Tooltip.Enable camera') || ''
+          : t('Tooltip.Enable camera permission') || '',
+        disabled: !isVideoCallButtonVisible,
+        icon: isVideoCallButtonVisible ? faVideo : faVideoSlash,
+      },
+      canShareScreen && {
+        key: 'screen-share',
+        onClick: goToScreenSharing,
+        tooltipId: 'tooltip-screen-share',
+        tooltipContent: t('Tooltip.Share screen') || '',
+        icon: faDisplay,
+      },
+      showUrlButton &&
+        hasValidUrl && {
+          key: 'url',
+          onClick: () => closeSideViewAndLaunchEvent('openUrl'),
+          tooltipId: 'tooltip-open-url',
+          tooltipContent: t('Tooltip.Open url') || '',
+          icon: faArrowUpRightFromSquare,
+        },
+      canSwitchDevice && {
+        key: 'switch-device',
+        onClick: () => closeSideViewAndLaunchEvent('switchDevice'),
+        tooltipId: 'tooltip-switch-device',
+        tooltipContent: t('Tooltip.Switch device') || '',
+        icon: faArrowsRepeat,
+      },
+    ]
+
+    return configs.filter((config): config is ButtonConfigWithKey => Boolean(config))
+  }, [
+    canRecord,
+    isRecording,
+    handleRecordClick,
+    t,
+    videoInputDevices?.length,
+    goToVideoCall,
+    isVideoCallButtonVisible,
+    canShareScreen,
+    goToScreenSharing,
+    showUrlButton,
+    hasValidUrl,
+    closeSideViewAndLaunchEvent,
+    canSwitchDevice,
+  ])
+
+  const containerClassName = useMemo(
+    () =>
+      `pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
+        isOpen ? 'pi-py-6' : 'pi-py-4'
+      }`,
+    [isOpen],
+  )
 
   return (
     <>
       <AnimatePresence>
         {isVisible && (
-          <motion.div
-            className={`pi-absolute pi-h-full pi-bg-gray-700 pi-flex pi-flex-col pi-items-center pi-text-gray-50 dark:pi-text-gray-50 -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
-              isOpen ? 'pi-py-6' : 'pi-py-4'
-            }`}
-            style={{
-              borderTopRightRadius: '20px',
-              borderBottomRightRadius: '20px',
-              width: '80px',
-              transformOrigin: 'right',
-            }}
-            initial={{ x: -76 }}
-            animate={{
-              x: 4,
-              transition: {
-                duration: 0.1,
-                ease: 'easeOut',
-              },
-            }}
-            exit={{
-              x: -76,
-              transition: {
-                duration: 0.1,
-                ease: 'easeIn',
-              },
-            }}
-          >
+          <motion.div className={containerClassName} style={STYLE_CONFIG} {...ANIMATION_CONFIG}>
             <div className='pi-flex pi-flex-col pi-items-center pi-gap-3.5 pi-flex-1 pi-ml-9'>
-              {/* Recording button */}
-              {userInformation?.profile?.macro_permissions?.settings?.permissions?.recording
-                ?.value && (
-                <Button
-                  active={isRecording}
-                  data-stop-propagation={true}
-                  variant='transparentSideView'
-                  onClick={() => recordCurrentCall(isRecording)}
-                  data-tooltip-id='tooltip-record'
-                  data-tooltip-content={
-                    isRecording ? t('Tooltip.Stop recording') || '' : t('Tooltip.Record') || ''
-                  }
-                >
-                  {isRecording ? (
-                    <FontAwesomeIcon icon={faStop} className='pi-h-5 pi-w-5 pi-text-white' />
-                  ) : (
-                    <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faRecord} />
-                  )}
-                </Button>
-              )}
-              {/* Videocall button - show only if there are video devices */}
-              {videoInputDevices?.length > 0 && (
-                <Button
-                  variant='transparentSideView'
-                  onClick={() => goToVideoCall()}
-                  data-tooltip-id='tooltip-video'
-                  data-tooltip-content={`${
-                    isVideoCallButtonVisible
-                      ? t('Tooltip.Enable camera') || ''
-                      : t('Tooltip.Enable camera permission') || ''
-                  }`}
-                  disabled={!isVideoCallButtonVisible}
-                  className={`${!isVideoCallButtonVisible ? 'pi-cursor-auto' : ''}`}
-                >
-                  <FontAwesomeIcon
-                    className='pi-h-5 pi-w-5 pi-text-white'
-                    icon={isVideoCallButtonVisible ? faVideo : faVideoSlash}
-                  />
-                </Button>
-              )}
-              {/* Share screen button */}
-              {janus.current.webRTCAdapter.browserDetails.browser !== 'safari' &&
-                userInformation?.profile?.macro_permissions?.nethvoice_cti?.permissions
-                  ?.screen_sharing?.value && (
-                  <Button
-                    variant='transparentSideView'
-                    onClick={() => goToScreenSharing()}
-                    data-tooltip-id='tooltip-screen-share'
-                    data-tooltip-content={t('Tooltip.Share screen') || ''}
-                  >
-                    <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faDisplay} />
-                  </Button>
-                )}
-              {/* Switch device button - show only if there are available devices */}
-              {availableDevices?.length > 0 && (
-                <Button
-                  variant='transparentSideView'
-                  data-tooltip-id='tooltip-switch-device'
-                  data-tooltip-content={t('Tooltip.Switch device') || ''}
-                  onClick={() => closeSideViewAndLaunchEvent('switchDevice')}
-                >
-                  <FontAwesomeIcon className='pi-h-5 pi-w-5 pi-text-white' icon={faArrowsRepeat} />
-                </Button>
-              )}
+              {buttonConfigs.map(({ key, ...config }) => (
+                <SideViewButton key={key} {...config} />
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
       <CustomThemedTooltip id='tooltip-record' place='left' />
       <CustomThemedTooltip id='tooltip-video' place='left' />
       <CustomThemedTooltip id='tooltip-screen-share' place='left' />
       <CustomThemedTooltip id='tooltip-switch-device' place='left' />
+      <CustomThemedTooltip id='tooltip-open-url' place='left' />
     </>
   )
-}
+})
+
+SideView.displayName = 'SideView'
 
 export default SideView
 
 interface SideViewTypes {
   isVisible: boolean
+  uaType?: string
 }

@@ -39,6 +39,76 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      colors: {
+        //text
+        primaryNeutral: '#111827', // gray-900
+        primaryNeutralDark: '#F9FAFB', // gray-50
+
+        primaryInvert: '#F9FAFB', // gray-50
+        primaryInvertDark: '#111827', // gray-900
+
+        //secondary
+        secondaryNeutral: '#374151', // gray-700
+        secondaryNeutralDark: '#E5E7EB', // gray-200
+
+        //tertiary
+        tertiaryNeutral: '#4b5563', // gray-600
+        tertiaryNeutralDark: '#D1D5DB', // gray-300
+
+        //surface
+
+        //surfaceBackground
+        surfaceBackground: '#F9FAFB', // gray-50
+        surfaceBackgroundDark: '#030712', // gray-950
+
+        //surfaceSidebar
+        surfaceSidebar: '#374151', // gray-700
+        surfaceSidebarDark: '#374151', // gray-700
+
+        //surfaceSidebarHover
+        surfaceSidebarHover: '#4B5563', // gray-600
+        surfaceSidebarHoverDark: '#4B5563', // gray-600
+
+        //button
+
+        // Active state
+        phoneIslandActive: '#374151', // Gray/700
+        phoneIslandActiveDark: '#D1D5DB', // Gray/300
+
+        // Hover state
+        phoneIslandHover: '#1F2937', // Gray/800
+        phoneIslandHoverDark: '#F9FAFB', // Gray/50
+
+        // Call state
+        phoneIslandCall: '#15803D', // Green/700
+        phoneIslandCallDark: '#22C55E', // Green/500
+
+        // Call hover state
+        phoneIslandCallHover: '#166534', // Green/800
+        phoneIslandCallHoverDark: '#86EFAC', // Green/300
+
+        // Close state
+        phoneIslandClose: '#B91C1C', // Red/700
+        phoneIslandCloseDark: '#EF4444', // Red/500
+
+        // Close hover state
+        phoneIslandCloseHover: '#991B1B', // Red/800
+        phoneIslandCloseHoverDark: '#FCA5A5', // Red/300
+
+        //icon
+
+        //iconWhite
+        iconWhite: '#FFFFFF', // white
+        iconWhiteDark: '#FFFFFF', // white
+
+        //iconPrimaryNeutral
+        iconPrimaryNeutral: '#111827', // gray-900
+        iconPrimaryNeutralDark: '#F9FAFB', // gray-50
+
+        //iconPrimaryInvert
+        iconPrimaryInvert: '#F9FAFB', // gray-50
+        iconPrimaryInvertDark: '#111827', // gray-900
+      },
     },
   },
   variants: {

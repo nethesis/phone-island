@@ -105,14 +105,18 @@ const Hangup: FC<HangupProps> = ({
           <Button
             onClick={() => {
               if (isPhysicalRecording) {
+                eventDispatch('phone-island-sideview-close', {})
                 hangupCurrentPhysicalRecording()
               } else if (isActive) {
                 if (conferenceStartedFrom === username && view === 'waitingConference') {
+                  eventDispatch('phone-island-sideview-close', {})
                   endConference()
                 } else {
+                  eventDispatch('phone-island-sideview-close', {})
                   handleHangup()
                 }
               } else {
+                eventDispatch('phone-island-sideview-close', {})
                 handleHangup()
               }
             }}

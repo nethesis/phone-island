@@ -73,7 +73,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
     // Check and switch the view
     if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
       dispatch.island.setIslandView('waitingConference')
-    } else if (incoming || outgoing) {
+    } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
@@ -115,7 +115,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
             <IslandDrag islandContainerRef={islandContainerRef}>
               {/* Add background call visibility logic */}
               <BackCall isVisible={isBackCallActive()} />
-              <SideView isVisible={sideViewIsVisible} />
+              <SideView isVisible={sideViewIsVisible} uaType={uaType}/>
               <IslandMotions>
                 {/* The views logic */}
                 <AlertGuard uaType={uaType}>

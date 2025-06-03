@@ -52,11 +52,113 @@ const CallTemplate = (args: any) => {
 
   const [tokenConfig, setTokenConfig] = useState<string[]>([])
 
+  // Audio/Video device states
+  const [selectedAudioInput, setSelectedAudioInput] = useState<any>('')
+  const [selectedAudioOutput, setSelectedAudioOutput] = useState<any>('')
+  const [selectedVideoInput, setSelectedVideoInput] = useState<any>('')
+  const [audioInputs, setAudioInputs] = useState<any[]>([])
+  const [audioOutputs, setAudioOutputs] = useState<any[]>([])
+  const [videoInputs, setVideoInputs] = useState<any[]>([])
+
   useEffect(() => {
     localStorage.setItem('phoneIslandToken', token)
     const config = Base64.atob(token || '').split(':')
     setTokenConfig(config)
   }, [token])
+
+  // Get stored device values from localStorage
+  const getStoredDeviceValues = () => {
+    try {
+      const audioInputStored = localStorage.getItem('phone-island-audio-input-device')
+      const audioOutputStored = localStorage.getItem('phone-island-audio-output-device')
+      const videoInputStored = localStorage.getItem('phone-island-video-input-device')
+
+      return {
+        audioInput: audioInputStored ? JSON.parse(audioInputStored) : null,
+        audioOutput: audioOutputStored ? JSON.parse(audioOutputStored) : null,
+        videoInput: videoInputStored ? JSON.parse(videoInputStored) : null,
+      }
+    } catch (error) {
+      console.error('Error parsing stored device values:', error)
+      return { audioInput: null, audioOutput: null, videoInput: null }
+    }
+  }
+
+  // Save device to localStorage
+  const saveDeviceToStorage = (key: string, deviceId: string) => {
+    try {
+      localStorage.setItem(key, JSON.stringify({ deviceId }))
+    } catch (error) {
+      console.error('Error saving device to localStorage:', error)
+    }
+  }
+
+  // Enumerate devices
+  useEffect(() => {
+    const checkInputOutputDevices = () => {
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((deviceInfos) => {
+          const audioInputs = deviceInfos.filter((device) => device.kind === 'audioinput')
+          const audioOutputs = deviceInfos.filter((device) => device.kind === 'audiooutput')
+          const videoInputs = deviceInfos.filter((device) => device.kind === 'videoinput')
+          setAudioInputs(audioInputs)
+          setAudioOutputs(audioOutputs)
+          setVideoInputs(videoInputs)
+        })
+        .catch((error) => {
+          console.error('Error enumerating devices:', error)
+        })
+    }
+
+    checkInputOutputDevices()
+
+    navigator.mediaDevices.addEventListener('devicechange', checkInputOutputDevices)
+
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', checkInputOutputDevices)
+    }
+  }, [])
+
+  // Set stored devices when devices are loaded
+  useEffect(() => {
+    const storedValues = getStoredDeviceValues()
+
+    if (storedValues.audioInput && audioInputs.length > 0) {
+      const storedAudioInput = audioInputs.find(
+        (device) => device.deviceId === storedValues.audioInput.deviceId,
+      )
+      if (storedAudioInput) {
+        setSelectedAudioInput(storedAudioInput)
+      }
+    }
+  }, [audioInputs])
+
+  useEffect(() => {
+    const storedValues = getStoredDeviceValues()
+
+    if (storedValues.audioOutput && audioOutputs.length > 0) {
+      const storedAudioOutput = audioOutputs.find(
+        (device) => device.deviceId === storedValues.audioOutput.deviceId,
+      )
+      if (storedAudioOutput) {
+        setSelectedAudioOutput(storedAudioOutput)
+      }
+    }
+  }, [audioOutputs])
+
+  useEffect(() => {
+    const storedValues = getStoredDeviceValues()
+
+    if (storedValues.videoInput && videoInputs.length > 0) {
+      const storedVideoInput = videoInputs.find(
+        (device) => device.deviceId === storedValues.videoInput.deviceId,
+      )
+      if (storedVideoInput) {
+        setSelectedVideoInput(storedVideoInput)
+      }
+    }
+  }, [videoInputs])
 
   const openKeypad = () => {
     setShowKeyboards(!showKeyboards)
@@ -491,6 +593,84 @@ const CallTemplate = (args: any) => {
               >
                 Send
               </Button>
+            </div>
+            {/* Audio/Video Device Selection */}
+            <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+              <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>
+                Audio and Video Settings
+              </h3>
+
+              {/* Audio Input Section */}
+              <div className='pi-mb-4'>
+                <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700 pi-mb-2'>
+                  Microphone
+                </label>
+                <select
+                  value={selectedAudioInput?.deviceId || ''}
+                  className='pi-w-full pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white'
+                  onChange={(e) => {
+                    const device = audioInputs.find((input) => input.deviceId === e.target.value)
+                    setSelectedAudioInput(device)
+                    saveDeviceToStorage('phone-island-audio-input-device', e.target.value)
+                    eventDispatch('phone-island-audio-input-change', { deviceId: e.target.value })
+                  }}
+                >
+                  <option value=''>Select audio input</option>
+                  {audioInputs.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Audio Output Section */}
+              <div className='pi-mb-4'>
+                <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700 pi-mb-2'>
+                  Speaker
+                </label>
+                <select
+                  value={selectedAudioOutput?.deviceId || ''}
+                  className='pi-w-full pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white'
+                  onChange={(e) => {
+                    const device = audioOutputs.find((output) => output.deviceId === e.target.value)
+                    setSelectedAudioOutput(device)
+                    saveDeviceToStorage('phone-island-audio-output-device', e.target.value)
+                    eventDispatch('phone-island-audio-output-change', { deviceId: e.target.value })
+                  }}
+                >
+                  <option value=''>Select audio output</option>
+                  {audioOutputs.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Video Input Section */}
+              <div className='pi-mb-4'>
+                <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700 pi-mb-2'>
+                  Camera
+                </label>
+                <select
+                  value={selectedVideoInput?.deviceId || ''}
+                  className='pi-w-full pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white'
+                  onChange={(e) => {
+                    const device = videoInputs.find((input) => input.deviceId === e.target.value)
+                    setSelectedVideoInput(device)
+                    saveDeviceToStorage('phone-island-video-input-device', e.target.value)
+                    eventDispatch('phone-island-video-input-change', { deviceId: e.target.value })
+                  }}
+                >
+                  <option value=''>Select video input</option>
+                  {videoInputs.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </>
