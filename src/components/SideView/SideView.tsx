@@ -44,10 +44,9 @@ interface ButtonConfigWithKey extends ButtonConfig {
 }
 
 const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
-  const { isOpen, paramUrl } = useSelector((state: RootState) => state.island)
+  const { isOpen } = useSelector((state: RootState) => state.island)
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
   const { t } = useTranslation()
-  const dispatch = useDispatch()
   const [hasValidUrl, setHasValidUrl] = useState(false)
 
   const {
@@ -64,30 +63,15 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
 
   useEffect(() => {
     const checkParamUrl = async () => {
-      if (paramUrl !== null) {
-        setHasValidUrl(true)
-        return
-      }
-
       try {
         const paramUrlResponse: any = await getParamUrl()
         // Verify that the response contains a valid URL (not empty)
-        const url = paramUrlResponse?.data?.url || ''
+        const url = paramUrlResponse?.url || ''
         const isValid = url && url.trim() !== ''
-
-        if (isValid) {
-          dispatch.island.setParamUrl(url)
-          dispatch.island.toggleParametersLoaded(true)
-        } else {
-          dispatch.island.setParamUrl(null)
-          dispatch.island.toggleParametersLoaded(false)
-        }
 
         setHasValidUrl(isValid)
       } catch (error) {
         setHasValidUrl(false)
-        dispatch.island.setParamUrl(null)
-        dispatch.island.toggleParametersLoaded(false)
         console.error('Error fetching URL parameter:', error)
       }
     }
@@ -95,7 +79,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     if (isVisible) {
       checkParamUrl()
     }
-  }, [isVisible, paramUrl, dispatch.island])
+  }, [isVisible])
 
   const handleRecordClick = useCallback(() => {
     recordCurrentCall(isRecording)

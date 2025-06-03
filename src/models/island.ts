@@ -21,8 +21,6 @@ const defaultState: IslandTypes = {
   previousView: null,
   avoidToShow: false,
   isFullScreen: false,
-  isUrlParamLoaded: false,
-  paramUrl: null,
 }
 
 export const island = createModel<RootModel>()({
@@ -68,12 +66,6 @@ export const island = createModel<RootModel>()({
     },
     toggleAvoidToShow: (state, payload: boolean) => {
       state.avoidToShow = payload
-    },
-    toggleParametersLoaded: (state, payload: boolean) => {
-      state.isUrlParamLoaded = payload
-    },
-    setParamUrl: (state, payload: string | null) => {
-      state.paramUrl = payload
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
@@ -167,6 +159,4 @@ interface IslandTypes {
   previousView?: IslandViewType | null
   avoidToShow?: boolean
   isFullScreen: boolean
-  isUrlParamLoaded: boolean
-  paramUrl: string | null
 }
