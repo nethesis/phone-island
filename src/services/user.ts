@@ -134,3 +134,22 @@ export async function setMainDevice(obj: any) {
     throw error
   }
 }
+
+/**
+ * Get parameter URL information
+ */
+export async function getParamUrl(): Promise<UserInfoTypes | undefined> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/user/paramurl`, {
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}

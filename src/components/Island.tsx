@@ -115,7 +115,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
             <IslandDrag islandContainerRef={islandContainerRef}>
               {/* Add background call visibility logic */}
               <BackCall isVisible={isBackCallActive()} />
-              <SideView isVisible={sideViewIsVisible} />
+              <SideView isVisible={sideViewIsVisible} uaType={uaType}/>
               <IslandMotions>
                 {/* The views logic */}
                 <AlertGuard uaType={uaType}>

@@ -6,7 +6,7 @@ import JanusLib from '../../../lib/webrtc/janus.js'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
 
-export const useSideViewLogic = () => {
+export const useSideViewLogic = (uaType?: string) => {
   const dispatch = useDispatch<Dispatch>()
   const userInformation = useSelector((state: RootState) => state.currentUser)
   const allUsersInformation = useSelector((state: RootState) => state.users)
@@ -69,13 +69,14 @@ export const useSideViewLogic = () => {
         janus.current.webRTCAdapter.browserDetails.browser !== 'safari' &&
         (permissions?.nethvoice_cti?.permissions?.screen_sharing?.value || false),
       canSwitchDevice: availableDevices?.length > 0,
-      showUrlButton: userInformation?.default_device?.type !== 'nethlink',
+      showUrlButton: userInformation?.default_device?.type !== 'nethlink' && uaType === 'desktop',
     }),
     [
       permissions?.settings?.permissions?.recording?.value,
       permissions?.nethvoice_cti?.permissions?.screen_sharing?.value,
       availableDevices?.length,
       userInformation?.default_device?.type,
+      uaType,
     ],
   )
 

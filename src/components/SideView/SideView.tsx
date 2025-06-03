@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useMemo, memo } from 'react'
-import { useSelector } from 'react-redux'
+import React, { FC, useCallback, useMemo, memo, useEffect, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -15,6 +15,7 @@ import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { useSideViewLogic } from './hooks/useSideViewLogic'
 import { SideViewButton } from './components/SideViewButton'
+import { getParamUrl } from '../../services/user'
 
 const ANIMATION_CONFIG = {
   initial: { x: -76 },
@@ -42,10 +43,12 @@ interface ButtonConfigWithKey extends ButtonConfig {
   key: string
 }
 
-const SideView: FC<SideViewTypes> = memo(({ isVisible }) => {
-  const { isOpen } = useSelector((state: RootState) => state.island)
+const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
+  const { isOpen, paramUrl } = useSelector((state: RootState) => state.island)
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
   const { t } = useTranslation()
+  const dispatch = useDispatch()
+  const [hasValidUrl, setHasValidUrl] = useState(false)
 
   const {
     videoInputDevices,
@@ -57,7 +60,42 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible }) => {
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
-  } = useSideViewLogic()
+  } = useSideViewLogic(uaType)
+
+  useEffect(() => {
+    const checkParamUrl = async () => {
+      if (paramUrl !== null) {
+        setHasValidUrl(true)
+        return
+      }
+
+      try {
+        const paramUrlResponse: any = await getParamUrl()
+        // Verify that the response contains a valid URL (not empty)
+        const url = paramUrlResponse?.data?.url || ''
+        const isValid = url && url.trim() !== ''
+
+        if (isValid) {
+          dispatch.island.setParamUrl(url)
+          dispatch.island.toggleParametersLoaded(true)
+        } else {
+          dispatch.island.setParamUrl(null)
+          dispatch.island.toggleParametersLoaded(false)
+        }
+
+        setHasValidUrl(isValid)
+      } catch (error) {
+        setHasValidUrl(false)
+        dispatch.island.setParamUrl(null)
+        dispatch.island.toggleParametersLoaded(false)
+        console.error('Error fetching URL parameter:', error)
+      }
+    }
+
+    if (isVisible) {
+      checkParamUrl()
+    }
+  }, [isVisible, paramUrl, dispatch.island])
 
   const handleRecordClick = useCallback(() => {
     recordCurrentCall(isRecording)
@@ -90,13 +128,14 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible }) => {
         tooltipContent: t('Tooltip.Share screen') || '',
         icon: faDisplay,
       },
-      showUrlButton && {
-        key: 'url',
-        onClick: () => closeSideViewAndLaunchEvent('openUrl'),
-        tooltipId: 'tooltip-open-url',
-        tooltipContent: t('Tooltip.Open url') || '',
-        icon: faArrowUpRightFromSquare,
-      },
+      showUrlButton &&
+        hasValidUrl && {
+          key: 'url',
+          onClick: () => closeSideViewAndLaunchEvent('openUrl'),
+          tooltipId: 'tooltip-open-url',
+          tooltipContent: t('Tooltip.Open url') || '',
+          icon: faArrowUpRightFromSquare,
+        },
       canSwitchDevice && {
         key: 'switch-device',
         onClick: () => closeSideViewAndLaunchEvent('switchDevice'),
@@ -118,6 +157,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible }) => {
     canShareScreen,
     goToScreenSharing,
     showUrlButton,
+    hasValidUrl,
     closeSideViewAndLaunchEvent,
     canSwitchDevice,
   ])
@@ -159,4 +199,5 @@ export default SideView
 
 interface SideViewTypes {
   isVisible: boolean
+  uaType?: string
 }
