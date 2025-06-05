@@ -339,7 +339,7 @@ export const Socket: FC<SocketProps> = ({
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
               eventDispatch('phone-island-alert-removed', {
-                type: 'socket_down'
+                type: 'socket_down',
               })
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
             },
@@ -367,6 +367,7 @@ export const Socket: FC<SocketProps> = ({
       // Handle authentication success message
       socket.current.on('authe_ok', () => {
         console.debug('Socket authentication success!')
+        eventDispatch('phone-island-socket-authorized', {})
       })
 
       socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
@@ -651,6 +652,10 @@ export const Socket: FC<SocketProps> = ({
 
       socket.current.on('newVoiceMessageCounter', (res: any) => {
         eventDispatch('phone-island-voicemail-received', { voicemailInfo: res })
+      })
+
+      socket.current.on('streamingSourceUpdate', (res: any) => {
+        eventDispatch('phone-island-streaming-information-received', { res })
       })
     }
 
