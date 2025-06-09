@@ -21,6 +21,7 @@ const defaultState: IslandTypes = {
   previousView: null,
   avoidToShow: false,
   isFullScreen: false,
+  isFromStreaming: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -76,6 +77,12 @@ export const island = createModel<RootModel>()({
         isFullScreen: payload,
       }
     },
+    setIsFromStreaming: (state, payload: boolean) => {
+      return {
+        ...state,
+        isFromStreaming: payload,
+      }
+    },
     resetPlayerClose: (state) => {
       return getResetState(state, false)
     },
@@ -122,6 +129,7 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     startPosition: preservedStartPosition,
     view: preservedView,
     avoidToShow: avoidToShow,
+    isFromStreaming: false,
     // Keep previousView if waitingConference
     previousView:
       state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
@@ -159,4 +167,5 @@ interface IslandTypes {
   previousView?: IslandViewType | null
   avoidToShow?: boolean
   isFullScreen: boolean
+  isFromStreaming: boolean
 }

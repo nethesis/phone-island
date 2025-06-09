@@ -153,3 +153,70 @@ export async function getParamUrl(): Promise<UserInfoTypes | undefined> {
     throw new Error(error)
   }
 }
+
+export async function getVideoSources(): Promise<UserInfoTypes | undefined> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/streaming/sources`, {
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export async function openVideoSource(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/streaming/open`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function subscribe(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/streaming/subscribe`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}
+
+export async function unsubscribe(obj: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/streaming/unsubscribe`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(obj),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    return true
+  } catch (error: any) {
+    throw error
+  }
+}

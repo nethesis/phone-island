@@ -19,7 +19,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     conferencing,
   } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
-  const { view, isOpen, actionsExpanded, sideViewIsVisible } = useSelector(
+  const { view, isOpen, actionsExpanded, sideViewIsVisible, isFromStreaming } = useSelector(
     (state: RootState) => state.island,
   )
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
@@ -73,10 +73,15 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               width: variants.call.expanded.listening.width,
               height: variants.call.expanded.listening.height,
             }
-          } else if (incoming) {
+          } else if (incoming && !isFromStreaming) {
             size = {
               width: variants.call.expanded.incoming.width,
               height: variants.call.expanded.incoming.height,
+            }
+          } else if (incoming && isFromStreaming) {
+            size = {
+              width: variants.call.expanded.incomingStreaming.width,
+              height: variants.call.expanded.incomingStreaming.height,
             }
           } else if (outgoing) {
             size = {
@@ -241,9 +246,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
       } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}
-      transition={{ 
+      transition={{
         duration: 0.15,
-        ease: "easeOut"
+        ease: 'easeOut',
       }}
     >
       {children}
