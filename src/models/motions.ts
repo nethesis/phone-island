@@ -96,6 +96,14 @@ const defaultState = {
       expanded: { width: 348, height: 360 },
       collapsed: { width: 180, height: 74 },
     },
+    streamingAnswer: {
+      expanded: {
+        width: 600,
+        height: 480,
+        padding: 0,
+      },
+      collapsed: commonCollapsed,
+    },
   },
 }
 

@@ -3,7 +3,7 @@
 
 import React, { type FC, useMemo, useCallback, memo } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faPhone,
@@ -27,6 +27,7 @@ import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import StreamingImage from '../StreamingImage'
+import { useDispatch } from 'react-redux'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -301,6 +302,15 @@ const CallView: FC<CallViewProps> = () => {
     return null
   }
 
+  // Initialize useDispatch
+  const dispatch = useDispatch<Dispatch>()
+
+  const setVideoStreamingAnswer = () => {
+    answerIncomingCall()
+    //set view as video streaming answer
+    dispatch.island.setIslandView('streamingAnswer')
+  }
+
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
       <div className={callViewClasses}>
@@ -318,7 +328,7 @@ const CallView: FC<CallViewProps> = () => {
               <div className='pi-flex pi-gap-2'>
                 <Hangup description={t('Tooltip.Hangup')} />
                 <Button
-                  onClick={answerIncomingCall}
+                  onClick={() => setVideoStreamingAnswer()}
                   variant='green'
                   data-tooltip-id='tooltip-answer'
                   data-tooltip-content={t('Tooltip.Answer') || ''}

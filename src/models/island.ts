@@ -148,6 +148,7 @@ type IslandViewType =
   | 'conference'
   | 'switchDevice'
   | 'waitingConference'
+  | 'streamingAnswer'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
 type ContactListViewType = 'main' | 'selectContactNumber'
 
