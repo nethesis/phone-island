@@ -48,6 +48,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
   const { t } = useTranslation()
   const [hasValidUrl, setHasValidUrl] = useState(false)
+  const [onlyQueues, setOnlyQueues] = useState<boolean | undefined>(undefined)
 
   const {
     videoInputDevices,
@@ -56,11 +57,11 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     canShareScreen,
     canSwitchDevice,
     showUrlButton,
+    isUrlButtonEnabled,
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
-  } = useSideViewLogic(uaType)
-
+  } = useSideViewLogic(uaType, onlyQueues)
   useEffect(() => {
     const checkParamUrl = async () => {
       try {
@@ -70,8 +71,10 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         const isValid = url && url.trim() !== ''
 
         setHasValidUrl(isValid)
+        setOnlyQueues(paramUrlResponse?.only_queues)
       } catch (error) {
         setHasValidUrl(false)
+        setOnlyQueues(undefined)
         console.error('Error fetching URL parameter:', error)
       }
     }
@@ -113,7 +116,8 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         icon: faDisplay,
       },
       showUrlButton &&
-        hasValidUrl && {
+        hasValidUrl &&
+        isUrlButtonEnabled && {
           key: 'url',
           onClick: () => closeSideViewAndLaunchEvent('openUrl'),
           tooltipId: 'tooltip-open-url',
@@ -142,6 +146,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     goToScreenSharing,
     showUrlButton,
     hasValidUrl,
+    isUrlButtonEnabled,
     closeSideViewAndLaunchEvent,
     canSwitchDevice,
   ])
