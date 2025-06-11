@@ -12,6 +12,7 @@ export const useSideViewLogic = (uaType?: string) => {
   const allUsersInformation = useSelector((state: RootState) => state.users)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
   const janus = useRef<any>(JanusLib)
+  const conversations = useSelector((state: RootState) => state.currentUser.conversations)
 
   const [availableDevices, setAvailableDevices] = useState([])
   const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
@@ -20,12 +21,25 @@ export const useSideViewLogic = (uaType?: string) => {
     (viewType: any) => {
       dispatch.island.toggleSideViewVisible(false)
       if (viewType === 'openUrl') {
-        eventDispatch('phone-island-url-parameter-opened', {})
+        const activeConversation = Object.values(conversations).find(
+          (conv) => Object.keys(conv).length > 0,
+        )
+        const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
+
+        const eventData = conversationData
+          ? {
+              counterpartNum: conversationData.counterpartNum,
+              counterpartName: conversationData.counterpartName,
+              owner: conversationData.owner,
+              uniqueId: conversationData.uniqueId,
+            }
+          : {}
+        eventDispatch('phone-island-url-parameter-opened', eventData)
       } else if (viewType !== null) {
         dispatch.island.setIslandView(viewType)
       }
     },
-    [dispatch.island],
+    [dispatch.island, conversations],
   )
 
   const checkCameraPermission = useCallback(async () => {
