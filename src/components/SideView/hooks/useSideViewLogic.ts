@@ -25,13 +25,16 @@ export const useSideViewLogic = (uaType?: string) => {
           (conv) => Object.keys(conv).length > 0,
         )
         const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
-
         const eventData = conversationData
           ? {
               counterpartNum: conversationData.counterpartNum,
               counterpartName: conversationData.counterpartName,
               owner: conversationData.owner,
               uniqueId: conversationData.uniqueId,
+              throughQueue: conversationData.throughQueue,
+              throughTrunk: conversationData.throughTrunk,
+              direction: conversationData.direction,
+              connected: conversationData.connected,
             }
           : {}
         eventDispatch('phone-island-url-parameter-opened', eventData)
