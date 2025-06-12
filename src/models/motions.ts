@@ -103,6 +103,11 @@ const defaultState = {
         height: 480,
         padding: 0,
       },
+      extraLarge: {
+        width: 780,
+        height: 624,
+        padding: 0,
+      },
       collapsed: commonCollapsed,
     },
   },

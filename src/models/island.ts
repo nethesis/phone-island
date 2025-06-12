@@ -22,6 +22,7 @@ const defaultState: IslandTypes = {
   avoidToShow: false,
   isFullScreen: false,
   isFromStreaming: false,
+  isExtraLarge: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -81,6 +82,12 @@ export const island = createModel<RootModel>()({
       return {
         ...state,
         isFromStreaming: payload,
+      }
+    },
+    setExtraLarge: (state, payload: boolean) => {
+      return {
+        ...state,
+        isExtraLarge: payload,
       }
     },
     resetPlayerClose: (state) => {
@@ -169,4 +176,5 @@ interface IslandTypes {
   avoidToShow?: boolean
   isFullScreen: boolean
   isFromStreaming: boolean
+  isExtraLarge: boolean
 }

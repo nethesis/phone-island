@@ -19,7 +19,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     conferencing,
   } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
-  const { view, isOpen, actionsExpanded, sideViewIsVisible, isFromStreaming } = useSelector(
+  const { view, isOpen, actionsExpanded, sideViewIsVisible, isFromStreaming, isExtraLarge } = useSelector(
     (state: RootState) => state.island,
   )
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
@@ -170,11 +170,17 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         break
       case 'streamingAnswer':
         size = isOpen
-          ? {
-            width: variants.streamingAnswer.expanded.width,
-            height: variants.streamingAnswer.expanded.height,
-            padding: variants.streamingAnswer.expanded.padding,
-          }
+          ? isExtraLarge
+            ? {
+              width: variants.streamingAnswer.extraLarge.width,
+              height: variants.streamingAnswer.extraLarge.height,
+              padding: variants.streamingAnswer.extraLarge.padding,
+            }
+            : {
+              width: variants.streamingAnswer.expanded.width,
+              height: variants.streamingAnswer.expanded.height,
+              padding: variants.streamingAnswer.expanded.padding,
+            }
           : {
             width: variants.streamingAnswer.collapsed.width,
             height: variants.streamingAnswer.collapsed.height,
@@ -224,7 +230,8 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     incomingWebRTC,
     incomingSocket,
     isActive,
-    isFromStreaming
+    isFromStreaming,
+    isExtraLarge
   ])
 
   useEffect(() => {
@@ -256,6 +263,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     incomingSocket,
     incomingWebRTC,
     isActive,
+    isExtraLarge,
   ])
 
   return (

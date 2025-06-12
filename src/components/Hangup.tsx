@@ -25,8 +25,8 @@ const Hangup: FC<HangupProps> = ({
   isPhysicalRecording,
   buttonsVariant = 'transparent',
   showFullscreenButton = false,
-  isFullscreen = false,
-  onToggleFullscreen,
+  isExtraLarge = false,
+  onToggleExtraLarge,
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
@@ -103,21 +103,21 @@ const Hangup: FC<HangupProps> = ({
             </div>
           )}
 
-          {/* fullscreen button */}
+          {/* expand/compress button for streaming */}
           {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && showFullscreenButton && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
                 variant={buttonsVariant}
-                onClick={onToggleFullscreen}
+                onClick={onToggleExtraLarge}
                 data-tooltip-id='tooltip-toggle-fullscreen-hangup'
                 data-tooltip-content={
-                  isFullscreen ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
+                  isExtraLarge ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
                 }
                 className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon
                   className='pi-h-6 pi-w-6'
-                  icon={isFullscreen ? faDownLeftAndUpRightToCenter : faUpRightAndDownLeftFromCenter}
+                  icon={isExtraLarge ? faDownLeftAndUpRightToCenter : faUpRightAndDownLeftFromCenter}
                 />
               </Button>
             </div>
@@ -210,4 +210,6 @@ interface HangupProps {
   showFullscreenButton?: boolean
   isFullscreen?: boolean
   onToggleFullscreen?: () => void
+  isExtraLarge?: boolean
+  onToggleExtraLarge?: () => void
 }

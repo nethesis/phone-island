@@ -48,7 +48,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
   const { role: screenShareRole, active: screenShareActive } = useSelector(
     (state: RootState) => state.screenShare,
   )
-  const { isOpen } = useSelector((state: RootState) => state.island)
+  const { isOpen, isExtraLarge } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
 
@@ -65,7 +65,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
   }, [streamingSourceNumber, videoSources, sourceImages])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const screenShareViewRef = useRef(null)
+  const streamingAnswerViewRef = useRef(null)
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -92,8 +92,8 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
       document.exitFullscreen()
     } else {
       // enter full screen
-      if (screenShareViewRef.current) {
-        ;(screenShareViewRef.current as HTMLElement).requestFullscreen()
+      if (streamingAnswerViewRef.current) {
+        ; (streamingAnswerViewRef.current as HTMLElement).requestFullscreen()
       }
     }
   }
@@ -132,10 +132,10 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     <>
       {isOpen ? (
         <div
-          ref={screenShareViewRef}
-          className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px] pi-w-[600px]'}
+          ref={streamingAnswerViewRef}
+          className={isFullscreen ? 'pi-h-screen pi-w-full' : isExtraLarge ? 'pi-h-[624px] pi-w-[780px]' : 'pi-h-[480px] pi-w-[600px]'}
         >
-          <div className={`pi-flex pi-relative pi-justify-center pi-w-full pi-h-[380px] pi-flex-col`}>
+          <div className={`${isFullscreen ? `pi-h-[500px]` : isExtraLarge ? `pi-h-[524px]` : `pi-h-[380px]`} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
             {/* Video container with rounded corners */}
             <div className='pi-relative pi-flex-1'>
               {/* Streaming source image or placeholder */}
@@ -143,7 +143,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 <img
                   src={streamingSourceImage}
                   alt='Streaming source'
-                  className='pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-object-cover'
+                  className='pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-object-cover pi-bg-red-200'
                 />
               ) : (
                 <div className='pi-w-full pi-h-full pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
@@ -154,51 +154,10 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 </div>
               )}
 
-              {/* Large remote screen */}
-              <video
-                autoPlay
-                muted={true}
-                ref={remoteScreen}
-                className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-absolute pi-top-0 pi-left-0 ${!screenShareActive || screenShareRole !== 'listener' ? 'pi-hidden' : ''
-                  }`}
-              ></video>
-              {/* Large local screen */}
-              <video
-                autoPlay
-                muted={true}
-                ref={localScreen}
-                className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-absolute pi-top-0 pi-left-0 ${!screenShareActive || screenShareRole !== 'publisher' ? 'pi-hidden' : ''
-                  }`}
-              ></video>
-              {/* Large remote video */}
-              <video
-                autoPlay
-                muted={true}
-                ref={largeRemoteVideo}
-                className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-absolute pi-top-0 pi-left-0 ${screenShareActive || showRemoteVideoPlaceHolder ? 'pi-hidden' : ''
-                  }`}
-              ></video>
-              {/* Small local video */}
-              <video
-                muted={true}
-                autoPlay
-                ref={localVideo}
-                className={`pi-max-w-32 pi-max-h-32 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg ${!isLocalVideoEnabled ? 'pi-hidden' : ''
-                  }`}
-              ></video>
-              {/* Small remote video */}
-              <video
-                muted={true}
-                autoPlay
-                ref={smallRemoteVideo}
-                className={`pi-max-w-32 pi-max-h-32 pi-absolute pi-top-32 pi-right-5 pi-rounded-lg ${!screenShareActive || showRemoteVideoPlaceHolder ? 'pi-hidden' : ''
-                  }`}
-              ></video>
-
               {/* Controls overlay (above the image with transparency) */}
-              <div className='pi-absolute pi-bottom-0 pi-left-0 pi-right-0 pi-bg-black/30 pi-p-4'>
+              <div className='pi-absolute pi-bottom-0 pi-left-0 pi-right-0 pi-bg-black/30 pi-p-4 pi-rounded-b-3xl'>
                 <div>
-                  <div className='pi-flex pi-items-center pi-justify-center pi-gap-4'>
+                  <div className='pi-flex pi-items-center pi-justify-center pi-gap-6'>
                     {/* Mute button */}
                     <Button
                       variant='default'
@@ -207,7 +166,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       data-tooltip-content={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
                     >
                       <FontAwesomeIcon
-                        className='pi-h-5 pi-w-5'
+                        className='pi-h-6 pi-w-6'
                         icon={muted ? faMicrophoneSlash : faMicrophone}
                       />
                     </Button>
@@ -220,7 +179,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       data-tooltip-content={t('VideoStreaming.Take a screenshot') || 'Take a screenshot'}
                     >
                       <FontAwesomeIcon
-                        className='pi-h-5 pi-w-5'
+                        className='pi-h-6 pi-w-6'
                         icon={faCamera}
                       />
                     </Button>
@@ -233,7 +192,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       data-tooltip-content={t('VideoStreaming.Open door') || 'Open door'}
                     >
                       <FontAwesomeIcon
-                        className='pi-h-5 pi-w-5'
+                        className='pi-h-6 pi-w-6'
                         icon={faLockOpen}
                       />
                     </Button>
@@ -243,12 +202,14 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
             </div>
 
             {/* Footer below the image */}
-            <div className='pi-bg-gray-950 pi-pt-4 pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
-              <Hangup 
-                buttonsVariant='default' 
+            <div className='pi-bg-surfaceBackground dark:pi-bg-surfaceBackgroundDark pi-pt-4 pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
+              <Hangup
+                buttonsVariant='default'
                 showFullscreenButton={true}
                 isFullscreen={isFullscreen}
                 onToggleFullscreen={toggleFullScreen}
+                isExtraLarge={isExtraLarge}
+                onToggleExtraLarge={() => dispatch.island.setExtraLarge(!isExtraLarge)}
               />
             </div>
 

@@ -370,7 +370,7 @@ const CallView: FC<CallViewProps> = () => {
                   variant='default'
                   onClick={handleStreamingUnlock}
                   data-tooltip-id='tooltip-unlock'
-                  data-tooltip-content={t('VideoStreaming.Unlock streaming') || 'Unlock streaming'}
+                  data-tooltip-content={t('VideoStreaming.Open door') || 'Open door'}
                 >
                   <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
                 </Button>
