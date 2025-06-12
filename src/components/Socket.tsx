@@ -84,6 +84,32 @@ export const Socket: FC<SocketProps> = ({
 
   useEffect(() => {
     /**
+     * Helper function to handle streaming source detection and subscription
+     */
+    const handleStreamingSource = (conv: ConversationTypes) => {
+      // Check if the call is from a streaming source
+      if (conv.counterpartNum && isFromStreaming(conv.counterpartNum)) {
+        // Set isFromStreaming flag to true
+        dispatch.island.setIsFromStreaming(true)
+
+        // Store the streaming source number in the currentCall state for future reference
+        dispatch.currentCall.updateCurrentCall({
+          streamingSourceNumber: conv.counterpartNum,
+        })
+
+        // Find the source ID and subscribe to streaming updates
+        const sourceId = getStreamingSourceId(conv.counterpartNum)
+        if (sourceId) {
+          // Subscribe to streaming updates
+          subscribe({ id: sourceId })
+            .catch((error) =>
+              console.error('Error subscribing to streaming source:', error),
+            )
+        }
+      }
+    }
+
+    /**
      * Manages event and data for the currentUser
      *
      * @param res The data from the socket
@@ -121,27 +147,8 @@ export const Socket: FC<SocketProps> = ({
           }
           switch (res.status) {
             case 'ringing':
-              // Check if the call is from a streaming source
-              if (conv.counterpartNum && isFromStreaming(conv.counterpartNum)) {
-                // Set isFromStreaming flag to true
-                dispatch.island.setIsFromStreaming(true)
-
-                // Store the streaming source number in the currentCall state for future reference
-                dispatch.currentCall.updateCurrentCall({
-                  streamingSourceNumber: conv.counterpartNum,
-                })
-
-                // Find the source ID and subscribe to streaming updates
-                const sourceId = getStreamingSourceId(conv.counterpartNum)
-                if (sourceId) {
-                  // Subscribe to streaming updates
-                  subscribe({ id: sourceId })
-                    .then(() => console.debug(`Subscribed to streaming source: ${sourceId}`))
-                    .catch((error) =>
-                      console.error('Error subscribing to streaming source:', error),
-                    )
-                }
-              }
+              // Handle streaming source for incoming calls
+              handleStreamingSource(conv)
 
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
@@ -157,10 +164,9 @@ export const Socket: FC<SocketProps> = ({
                   incomingSocket: true,
                   incoming: true,
                   username:
-                    `${
-                      extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
+                    `${extensions &&
+                    extensions[conv.counterpartNum] &&
+                    extensions[conv.counterpartNum].username
                     }` || '',
                   ownerExtension: conv.owner,
                 })
@@ -171,6 +177,9 @@ export const Socket: FC<SocketProps> = ({
               break
             // @ts-ignore
             case 'busy':
+              // Handle streaming source for outgoing calls
+              handleStreamingSource(conv)
+
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
                 (uaType === 'desktop' &&
@@ -186,10 +195,9 @@ export const Socket: FC<SocketProps> = ({
                     number: `${conv.counterpartNum}`,
                     ownerExtension: conv.owner,
                     username:
-                      `${
-                        extensions &&
-                        extensions[conv.counterpartNum] &&
-                        extensions[conv.counterpartNum].username
+                      `${extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
                       }` || '',
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
@@ -251,10 +259,9 @@ export const Socket: FC<SocketProps> = ({
                     displayName: getDisplayName(conv),
                     number: `${conv?.counterpartNum}`,
                     username:
-                      `${
-                        extensions &&
-                        extensions[conv?.counterpartNum] &&
-                        extensions[conv?.counterpartNum].username
+                      `${extensions &&
+                      extensions[conv?.counterpartNum] &&
+                      extensions[conv?.counterpartNum].username
                       }` || '',
                   })
                 }

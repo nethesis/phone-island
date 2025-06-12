@@ -83,10 +83,15 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               width: variants.call.expanded.incomingStreaming.width,
               height: variants.call.expanded.incomingStreaming.height,
             }
-          } else if (outgoing) {
+          } else if (outgoing && !isFromStreaming) {
             size = {
               width: variants.call.expanded.outgoing.width,
               height: variants.call.expanded.outgoing.height,
+            }
+          } else if (outgoing && isFromStreaming) {
+            size = {
+              width: variants.call.expanded.outgoingStreaming.width,
+              height: variants.call.expanded.outgoingStreaming.height,
             }
           }
         } else {
@@ -100,13 +105,13 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       case 'keypad':
         size = isOpen
           ? {
-              width: variants.keypad.expanded.width,
-              height: variants.keypad.expanded.height,
-            }
+            width: variants.keypad.expanded.width,
+            height: variants.keypad.expanded.height,
+          }
           : {
-              width: variants.transfer.collapsed.width,
-              height: variants.transfer.collapsed.height,
-            }
+            width: variants.transfer.collapsed.width,
+            height: variants.transfer.collapsed.height,
+          }
         break
 
       case 'video':
@@ -131,49 +136,49 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
       case 'conference':
         size = isOpen
           ? {
-              width: variants[view].expanded.width,
-              height: variants[view].expanded.height,
-            }
+            width: variants[view].expanded.width,
+            height: variants[view].expanded.height,
+          }
           : {
-              width: variants[view].collapsed.width,
-              height: variants[view].collapsed.height,
-            }
+            width: variants[view].collapsed.width,
+            height: variants[view].collapsed.height,
+          }
         break
 
       case 'switchDevice':
         size = isOpen
           ? {
-              width: variants.switchDevice.expanded.width,
-              height: variants.switchDevice.expanded.height,
-            }
+            width: variants.switchDevice.expanded.width,
+            height: variants.switchDevice.expanded.height,
+          }
           : {
-              width: variants.video.collapsed.width,
-              height: variants.video.collapsed.height,
-            }
+            width: variants.video.collapsed.width,
+            height: variants.video.collapsed.height,
+          }
         break
 
       case 'waitingConference':
         size = isOpen
           ? {
-              width: variants.waitingConference.expanded.width,
-              height: variants.waitingConference.expanded.height,
-            }
+            width: variants.waitingConference.expanded.width,
+            height: variants.waitingConference.expanded.height,
+          }
           : {
-              width: variants.waitingConference.collapsed.width,
-              height: variants.waitingConference.collapsed.height,
-            }
+            width: variants.waitingConference.collapsed.width,
+            height: variants.waitingConference.collapsed.height,
+          }
         break
       case 'streamingAnswer':
         size = isOpen
           ? {
-              width: variants.streamingAnswer.expanded.width,
-              height: variants.streamingAnswer.expanded.height,
-              padding: variants.streamingAnswer.expanded.padding,
-            }
+            width: variants.streamingAnswer.expanded.width,
+            height: variants.streamingAnswer.expanded.height,
+            padding: variants.streamingAnswer.expanded.padding,
+          }
           : {
-              width: variants.streamingAnswer.collapsed.width,
-              height: variants.streamingAnswer.collapsed.height,
-            }
+            width: variants.streamingAnswer.collapsed.width,
+            height: variants.streamingAnswer.collapsed.height,
+          }
         break
     }
 
@@ -185,14 +190,14 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         // If there is an alert and the island is open put the correct height
         isAlert && isOpen
           ? variants.alerts.height +
-            (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
+          (size.height === 0 ? alert_padding_expanded * 2 : alert_padding_expanded)
           : size.height
-      }px`,
+        }px`,
       borderRadius: isOpen
         ? `${border_radius_expanded}px`
         : isActive && view === 'waitingConference'
-        ? `${border_radius_collapsed_conference}px`
-        : `${border_radius_collapsed}px`,
+          ? `${border_radius_collapsed_conference}px`
+          : `${border_radius_collapsed}px`,
       padding: isOpen
         ? size.padding != undefined
           ? `${size.padding}px`
@@ -219,6 +224,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     incomingWebRTC,
     incomingSocket,
     isActive,
+    isFromStreaming
   ])
 
   useEffect(() => {
@@ -254,9 +260,8 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
-      className={`${
-        isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
-      } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
+      className={`${isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
+        } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}
       transition={{
         duration: 0.15,

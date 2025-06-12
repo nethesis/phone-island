@@ -311,14 +311,9 @@ const CallView: FC<CallViewProps> = () => {
   }
 
   const renderStreamingContent = useCallback(() => {
-    // If videoSources are not loaded yet, show skeleton
-    if (!videoSources || Object.keys(videoSources).length === 0) {
+    // Show skeleton while videoSources are loading or if streaming source number is not set yet
+    if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
       return <VideoStreamingSkeleton className="pi-w-full pi-h-40 pi-mt-4" />
-    }
-
-    // If we don't have streaming source number, show empty state
-    if (!streamingSourceNumber) {
-      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
     }
 
     // Find the streaming source

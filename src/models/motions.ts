@@ -30,6 +30,7 @@ const defaultState = {
         incoming: { width: 418, height: 96 },
         incomingStreaming: { width: 500, height: 278 },
         outgoing: { width: 418, height: 96 },
+        outgoingStreaming: { width: 500, height: 278 },
         accepted: {
           width: 348,
           height: 236,
