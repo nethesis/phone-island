@@ -127,5 +127,13 @@
     "extension": "Interno",
     "workphone": "Principale",
     "cellphone": "Cellulare"
+  },
+  "VideoStreaming": {
+    "Video not available": "Video non disponibile",
+    "The video feed is currently unavailable": "Il feed video non è attualmente disponibile",
+    "Loading video": "Caricamento video...",
+    "Take a screenshot": "Cattura schermata",
+    "Open door": "Apri porta",
+    "Unlock streaming": "Sblocca streaming"
   }
 }

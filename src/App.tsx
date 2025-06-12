@@ -271,9 +271,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Webrtc status debug informations: ', conferenceInformation)
   })
 
-  useEventListener('phone-island-screen-share-status', () => {
-    const screenShareInformation = store.getState().screenShare
-    console.log('Screen share status debug information: ', screenShareInformation)
+  useEventListener('phone-island-streaming-status', () => {
+    const streamingInformation = store.getState().streaming
+    console.log('Streaming status debug informations: ', streamingInformation)
   })
 
   useEventListener('phone-island-player-force-stop', () => {

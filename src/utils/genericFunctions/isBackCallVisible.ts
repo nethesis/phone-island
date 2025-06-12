@@ -16,7 +16,7 @@ export function isBackCallActive() {
     usersList && Object.values(usersList).some((user: any) => user.name === name)
 
   return (
-    ['keypad', 'transfer', 'settings', 'switchDevice'].includes(view) ||
+    ['keypad', 'transfer', 'settings', 'switchDevice', 'streamingAnswer'].includes(view) ||
     (view === 'video' && isOpen) ||
     transferring ||
     //check if conference is active

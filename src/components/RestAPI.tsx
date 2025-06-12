@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, type FC, useEffect, useLayoutEffect } from 'react'
-import { getCurrentUserInfo } from '../services/user'
+import { getCurrentUserInfo, getVideoSources } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
@@ -57,10 +57,18 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
         dispatch.users.updateEndpoints(usersEndpoints)
       }
     }
+    // Get all streaming source info and set to store
+    async function initVideoSources() {
+      const videoSources: any = await getVideoSources()
+      if (videoSources) {
+        dispatch.streaming.updateVideoSources(videoSources)
+      }
+    }
     // Call the needed APIs on startup
     if (fetchReady) {
       initCurrentUser()
       initUsersEndpoints()
+      initVideoSources()
     }
   }, [fetchReady])
 

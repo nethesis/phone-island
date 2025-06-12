@@ -40,6 +40,7 @@ const defaultState = {
   showRemoteVideoPlaceHolder: true,
   hasVideoTrackAdded: false,
   isStartingVideoCall: false,
+  streamingSourceNumber: '',
   chDest: new Array(),
   chSource: new Array(),
 }
@@ -243,6 +244,7 @@ export interface CurrentCallTypes {
   hasVideoTrackAdded?: boolean
   showRemoteVideoPlaceHolder?: boolean
   isStartingVideoCall?: boolean
+  streamingSourceNumber?: string
   chDest?: any
   chSource?: any
 }

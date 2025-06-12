@@ -33,6 +33,9 @@ import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
 import { ScreenSharingMessage } from './VideoView'
 import { checkMediaPermissions } from '../lib/devices/devices'
+import { isFromStreaming } from '../utils/streaming/isFromStreaming'
+import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
+import { subscribe } from '../services/user'
 
 interface SocketProps {
   children: ReactNode
@@ -81,6 +84,32 @@ export const Socket: FC<SocketProps> = ({
 
   useEffect(() => {
     /**
+     * Helper function to handle streaming source detection and subscription
+     */
+    const handleStreamingSource = (conv: ConversationTypes) => {
+      // Check if the call is from a streaming source
+      if (conv.counterpartNum && isFromStreaming(conv.counterpartNum)) {
+        // Set isFromStreaming flag to true
+        dispatch.island.setIsFromStreaming(true)
+
+        // Store the streaming source number in the currentCall state for future reference
+        dispatch.currentCall.updateCurrentCall({
+          streamingSourceNumber: conv.counterpartNum,
+        })
+
+        // Find the source ID and subscribe to streaming updates
+        const sourceId = getStreamingSourceId(conv.counterpartNum)
+        if (sourceId) {
+          // Subscribe to streaming updates
+          subscribe({ id: sourceId })
+            .catch((error) =>
+              console.error('Error subscribing to streaming source:', error),
+            )
+        }
+      }
+    }
+
+    /**
      * Manages event and data for the currentUser
      *
      * @param res The data from the socket
@@ -118,6 +147,9 @@ export const Socket: FC<SocketProps> = ({
           }
           switch (res.status) {
             case 'ringing':
+              // Handle streaming source for incoming calls
+              handleStreamingSource(conv)
+
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
                 (uaType === 'desktop' &&
@@ -132,10 +164,9 @@ export const Socket: FC<SocketProps> = ({
                   incomingSocket: true,
                   incoming: true,
                   username:
-                    `${
-                      extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
+                    `${extensions &&
+                    extensions[conv.counterpartNum] &&
+                    extensions[conv.counterpartNum].username
                     }` || '',
                   ownerExtension: conv.owner,
                 })
@@ -146,6 +177,9 @@ export const Socket: FC<SocketProps> = ({
               break
             // @ts-ignore
             case 'busy':
+              // Handle streaming source for outgoing calls
+              handleStreamingSource(conv)
+
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
                 (uaType === 'desktop' &&
@@ -180,6 +214,15 @@ export const Socket: FC<SocketProps> = ({
                     number: `${conv.counterpartNum}`,
                     startTime: `${getTimestampInSeconds()}`,
                   })
+
+                  // Check if this is a streaming call that was accepted
+                  const { isFromStreaming } = store.getState().island
+                  if (isFromStreaming && conv.direction === 'out') {
+                    // Set view to streamingAnswer for outgoing streaming calls when accepted
+                    setTimeout(() => {
+                      dispatch.island.setIslandView('streamingAnswer')
+                    }, 200)
+                  }
 
                   if (isPhysical()) {
                     checkDefaultDeviceConversationActive(conv)
@@ -226,10 +269,9 @@ export const Socket: FC<SocketProps> = ({
                     displayName: getDisplayName(conv),
                     number: `${conv?.counterpartNum}`,
                     username:
-                      `${
-                        extensions &&
-                        extensions[conv?.counterpartNum] &&
-                        extensions[conv?.counterpartNum].username
+                      `${extensions &&
+                      extensions[conv?.counterpartNum] &&
+                      extensions[conv?.counterpartNum].username
                       }` || '',
                   })
                 }
@@ -278,6 +320,8 @@ export const Socket: FC<SocketProps> = ({
           // Reset current call info
           dispatch.currentCall.reset()
           dispatch.physicalRecorder.setRecordingTempVariable(false)
+          // Reset isFromStreaming flag
+          dispatch.island.setIsFromStreaming(false)
         }
       }
     }
@@ -339,7 +383,7 @@ export const Socket: FC<SocketProps> = ({
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
               eventDispatch('phone-island-alert-removed', {
-                type: 'socket_down'
+                type: 'socket_down',
               })
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
             },
@@ -367,6 +411,7 @@ export const Socket: FC<SocketProps> = ({
       // Handle authentication success message
       socket.current.on('authe_ok', () => {
         console.debug('Socket authentication success!')
+        eventDispatch('phone-island-socket-authorized', {})
       })
 
       socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
@@ -651,6 +696,25 @@ export const Socket: FC<SocketProps> = ({
 
       socket.current.on('newVoiceMessageCounter', (res: any) => {
         eventDispatch('phone-island-voicemail-received', { voicemailInfo: res })
+      })
+
+      socket.current.on('streamingSourceUpdate', (res: any) => {
+        eventDispatch('phone-island-streaming-information-received', { res })
+        const streamingData = res.streaming || (res.res && res.res.streaming)
+
+        if (streamingData) {
+          const { source, image } = streamingData
+          if (source && image) {
+            const { isFromStreaming } = store.getState().island
+            const { streamingSourceNumber } = store.getState().currentCall
+            const sourceId = getStreamingSourceId(streamingSourceNumber)
+
+            dispatch.streaming.updateSourceImage({
+              source: source,
+              image: image,
+            })
+          }
+        }
       })
     }
 

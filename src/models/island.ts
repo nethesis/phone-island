@@ -21,6 +21,8 @@ const defaultState: IslandTypes = {
   previousView: null,
   avoidToShow: false,
   isFullScreen: false,
+  isFromStreaming: false,
+  isExtraLarge: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -76,6 +78,18 @@ export const island = createModel<RootModel>()({
         isFullScreen: payload,
       }
     },
+    setIsFromStreaming: (state, payload: boolean) => {
+      return {
+        ...state,
+        isFromStreaming: payload,
+      }
+    },
+    setExtraLarge: (state, payload: boolean) => {
+      return {
+        ...state,
+        isExtraLarge: payload,
+      }
+    },
     resetPlayerClose: (state) => {
       return getResetState(state, false)
     },
@@ -122,6 +136,7 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     startPosition: preservedStartPosition,
     view: preservedView,
     avoidToShow: avoidToShow,
+    isFromStreaming: false,
     // Keep previousView if waitingConference
     previousView:
       state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
@@ -140,6 +155,7 @@ type IslandViewType =
   | 'conference'
   | 'switchDevice'
   | 'waitingConference'
+  | 'streamingAnswer'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
 type ContactListViewType = 'main' | 'selectContactNumber'
 
@@ -159,4 +175,6 @@ interface IslandTypes {
   previousView?: IslandViewType | null
   avoidToShow?: boolean
   isFullScreen: boolean
+  isFromStreaming: boolean
+  isExtraLarge: boolean
 }

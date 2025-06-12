@@ -7,14 +7,14 @@ import { classNames } from '../utils'
 interface ButtonProps extends ComponentPropsWithRef<'button'> {
   children: ReactNode
   variant:
-    | 'red'
-    | 'green'
-    | 'default'
-    | 'neutral'
-    | 'transparent'
-    | 'transparentSideView'
-    | 'transparentSettings'
-    | 'gray'
+  | 'red'
+  | 'green'
+  | 'default'
+  | 'neutral'
+  | 'transparent'
+  | 'transparentSideView'
+  | 'transparentSettings'
+  | 'gray'
   active?: boolean
   conference?: boolean
 }

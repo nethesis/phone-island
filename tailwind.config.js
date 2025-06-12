@@ -132,5 +132,8 @@ module.exports = {
     'pi-border-green-600',
     'pi-text-green-500',
     'pi-bg-green-400',
+    'pi-h-[624px]',
+    'pi-w-[780px]',
+    'pi-h-[524px]',
   ],
 }
