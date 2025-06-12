@@ -356,14 +356,16 @@ const CallView: FC<CallViewProps> = () => {
 
               <div className='pi-flex pi-gap-2'>
                 <Hangup description={t('Tooltip.Hangup')} />
-                <Button
-                  onClick={() => setVideoStreamingAnswer()}
-                  variant='green'
-                  data-tooltip-id='tooltip-answer'
-                  data-tooltip-content={t('Tooltip.Answer') || ''}
-                >
-                  <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faPhone} />
-                </Button>
+                {!outgoing && (
+                  <Button
+                    onClick={() => setVideoStreamingAnswer()}
+                    variant='green'
+                    data-tooltip-id='tooltip-answer'
+                    data-tooltip-content={t('Tooltip.Answer') || ''}
+                  >
+                    <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faPhone} />
+                  </Button>
+                )}
                 <Button
                   variant='default'
                   onClick={handleStreamingUnlock}

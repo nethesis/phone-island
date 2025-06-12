@@ -195,9 +195,10 @@ export const Socket: FC<SocketProps> = ({
                     number: `${conv.counterpartNum}`,
                     ownerExtension: conv.owner,
                     username:
-                      `${extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
+                      `${
+                        extensions &&
+                        extensions[conv.counterpartNum] &&
+                        extensions[conv.counterpartNum].username
                       }` || '',
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
@@ -213,6 +214,15 @@ export const Socket: FC<SocketProps> = ({
                     number: `${conv.counterpartNum}`,
                     startTime: `${getTimestampInSeconds()}`,
                   })
+
+                  // Check if this is a streaming call that was accepted
+                  const { isFromStreaming } = store.getState().island
+                  if (isFromStreaming && conv.direction === 'out') {
+                    // Set view to streamingAnswer for outgoing streaming calls when accepted
+                    setTimeout(() => {
+                      dispatch.island.setIslandView('streamingAnswer')
+                    }, 200)
+                  }
 
                   if (isPhysical()) {
                     checkDefaultDeviceConversationActive(conv)
