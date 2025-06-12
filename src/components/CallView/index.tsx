@@ -309,7 +309,7 @@ const CallView: FC<CallViewProps> = () => {
     // Set view as video streaming answer with a small delay
     setTimeout(() => {
       dispatch.island.setIslandView('streamingAnswer')
-    }, 100)
+    }, 200)
   }
 
   const renderStreamingContent = useCallback(() => {

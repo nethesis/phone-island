@@ -32,7 +32,6 @@ import { AudioBars } from '../AudioBars'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { faCamera, faLockOpen } from '@fortawesome/free-solid-svg-icons'
 import { capitalizeFirstLetter, getISODateForFilename, handleStreamingUnlock } from '../../utils'
-import { openVideoSource } from '../../services/user'
 
 export interface StreamingAnswerViewProps { }
 
@@ -41,7 +40,6 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
   const {
     muted,
     startTime,
-    isRecording,
     paused,
     isLocalVideoEnabled,
     showRemoteVideoPlaceHolder,
@@ -82,6 +80,31 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
       largeRemoteVideo: largeRemoteVideo,
       smallRemoteVideo: smallRemoteVideo,
     })
+  }, [])
+
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement)
+  }
+
+  const toggleFullScreen = () => {
+    if (document.fullscreenElement) {
+      // exit full screen
+      document.exitFullscreen()
+    } else {
+      // enter full screen
+      if (screenShareViewRef.current) {
+        ;(screenShareViewRef.current as HTMLElement).requestFullscreen()
+      }
+    }
+  }
+
+  useEffect(() => {
+    // register for full screen change
+    addEventListener('fullscreenchange', handleFullscreenChange)
+
+    return () => {
+      removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
   }, [])
 
   const handleScreenshot = React.useCallback(() => {
@@ -221,8 +244,14 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
 
             {/* Footer below the image */}
             <div className='pi-bg-gray-950 pi-pt-4 pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
-              <Hangup buttonsVariant='default' />
+              <Hangup 
+                buttonsVariant='default' 
+                showFullscreenButton={true}
+                isFullscreen={isFullscreen}
+                onToggleFullscreen={toggleFullScreen}
+              />
             </div>
+
           </div>
 
           {/* Tooltips */}
