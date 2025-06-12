@@ -19,26 +19,19 @@ import {
   faVideoSlash,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
-import { eventDispatch, useEventListener, useIsomorphicLayoutEffect } from '../../utils'
+import { useIsomorphicLayoutEffect } from '../../utils'
 import Hangup from '../Hangup'
 import {
   muteCurrentCall,
-  pauseCurrentCall,
-  recordCurrentCall,
   unmuteCurrentCall,
-  unpauseCurrentCall,
 } from '../../lib/phone/call'
-import { JanusTrack, JanusTypes } from '../../types/webrtc'
-import JanusLib from '../../lib/webrtc/janus.js'
 import Avatar from '../CallView/Avatar'
 import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
-import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
-import { getInitials } from '../../lib/avatars/avatars'
 import { faCamera, faLockOpen } from '@fortawesome/free-solid-svg-icons'
-import { capitalizeFirstLetter, getISODateForFilename } from '../../utils'
+import { capitalizeFirstLetter, getISODateForFilename, handleStreamingUnlock } from '../../utils'
 import { openVideoSource } from '../../services/user'
 
 export interface StreamingAnswerViewProps { }
@@ -52,19 +45,14 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     paused,
     isLocalVideoEnabled,
     showRemoteVideoPlaceHolder,
-    hasVideoTrackAdded,
-    displayName,
-    isStartingVideoCall,
     streamingSourceNumber,
   } = useSelector((state: RootState) => state.currentCall)
   const { role: screenShareRole, active: screenShareActive } = useSelector(
     (state: RootState) => state.screenShare,
   )
-  const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
-  const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
+  const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
-  const userInfo = store.getState().currentUser
 
   // Get streaming source image
   const streamingSourceImage = React.useMemo(() => {
@@ -96,42 +84,26 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     })
   }, [])
 
-  const handleStreamingUnlock = React.useCallback(async () => {
-    if (!streamingSourceNumber || !videoSources) return
-
-    const source = Object.values(videoSources).find(
-      (source) => source.extension === streamingSourceNumber,
-    )
-    if (!source) return
-
-    try {
-      await openVideoSource({ id: source.id })
-      console.log('Door unlocked successfully')
-    } catch (error) {
-      console.error('Error unlocking door:', error)
-    }
-  }, [streamingSourceNumber, videoSources])
-
   const handleScreenshot = React.useCallback(() => {
     if (!streamingSourceNumber || !videoSources) return
 
     const source = Object.values(videoSources).find(
       (source) => source.extension === streamingSourceNumber,
     )
-    if (!source) return
+    if (!source || !source.image) return
 
     const filename = source.description
       ? `${capitalizeFirstLetter(source.description).replace(/\s+/g, '_')}_${getISODateForFilename()}_screenshot.jpg`
       : `screenshot_${getISODateForFilename()}.jpg`
 
-    // Create download link
+    // Create download link using the base64 image
     const link = document.createElement('a')
-    link.href = source.url || streamingSourceImage || ''
+    link.href = source.image
     link.download = filename
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }, [streamingSourceNumber, videoSources, streamingSourceImage])
+  }, [streamingSourceNumber, videoSources])
 
   return (
     <>
@@ -141,7 +113,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
           className={isFullscreen ? 'pi-h-screen' : 'pi-h-[480px] pi-w-[600px]'}
         >
           <div className={`pi-flex pi-relative pi-justify-center pi-w-full pi-h-[380px] pi-flex-col`}>
-            {/* Video container with rounded bottom corners */}
+            {/* Video container with rounded corners */}
             <div className='pi-relative pi-flex-1'>
               {/* Streaming source image or placeholder */}
               {streamingSourceImage ? (
@@ -159,7 +131,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 </div>
               )}
 
-              {/* large remote screen */}
+              {/* Large remote screen */}
               <video
                 autoPlay
                 muted={true}
@@ -167,7 +139,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-absolute pi-top-0 pi-left-0 ${!screenShareActive || screenShareRole !== 'listener' ? 'pi-hidden' : ''
                   }`}
               ></video>
-              {/* large local screen */}
+              {/* Large local screen */}
               <video
                 autoPlay
                 muted={true}
@@ -175,7 +147,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-absolute pi-top-0 pi-left-0 ${!screenShareActive || screenShareRole !== 'publisher' ? 'pi-hidden' : ''
                   }`}
               ></video>
-              {/* large remote video */}
+              {/* Large remote video */}
               <video
                 autoPlay
                 muted={true}
@@ -183,7 +155,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 className={`pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-absolute pi-top-0 pi-left-0 ${screenShareActive || showRemoteVideoPlaceHolder ? 'pi-hidden' : ''
                   }`}
               ></video>
-              {/* small local video */}
+              {/* Small local video */}
               <video
                 muted={true}
                 autoPlay
@@ -191,7 +163,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 className={`pi-max-w-32 pi-max-h-32 pi-absolute pi-top-5 pi-right-5 pi-rounded-lg ${!isLocalVideoEnabled ? 'pi-hidden' : ''
                   }`}
               ></video>
-              {/* small remote video */}
+              {/* Small remote video */}
               <video
                 muted={true}
                 autoPlay
@@ -222,7 +194,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       variant='default'
                       onClick={handleScreenshot}
                       data-tooltip-id='tooltip-screenshot-streaming'
-                      data-tooltip-content={t('Common.Take a screenshot') || 'Take a screenshot'}
+                      data-tooltip-content={t('VideoStreaming.Take a screenshot') || 'Take a screenshot'}
                     >
                       <FontAwesomeIcon
                         className='pi-h-5 pi-w-5'
@@ -235,7 +207,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       variant='default'
                       onClick={handleStreamingUnlock}
                       data-tooltip-id='tooltip-unlock-streaming'
-                      data-tooltip-content={t('Common.Open door') || 'Open door'}
+                      data-tooltip-content={t('VideoStreaming.Open door') || 'Open door'}
                     >
                       <FontAwesomeIcon
                         className='pi-h-5 pi-w-5'
@@ -263,7 +235,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
           <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen' place='bottom' />
         </div>
       ) : (
-        // collapsed view
+        // Collapsed view
         <>
           <div className='pi-flex pi-justify-between pi-items-center'>
             <Avatar />

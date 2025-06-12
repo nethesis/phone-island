@@ -127,5 +127,13 @@
     "extension": "Extension",
     "workphone": "Main phone",
     "cellphone": "Mobile phone"
+  },
+  "VideoStreaming": {
+    "Video not available": "Video not available",
+    "The video feed is currently unavailable": "The video feed is currently unavailable",
+    "Loading video": "Loading video...",
+    "Take a screenshot": "Take a screenshot",
+    "Open door": "Open door",
+    "Unlock streaming": "Unlock streaming"
   }
 }

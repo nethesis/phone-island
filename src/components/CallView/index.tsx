@@ -27,6 +27,9 @@ import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import StreamingImage from '../StreamingImage'
+import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
+import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
+import { handleStreamingUnlock } from '../../utils'
 import { useDispatch } from 'react-redux'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
@@ -63,6 +66,7 @@ const CallView: FC<CallViewProps> = () => {
   const { isListen, isIntrude, isListenExtension, isIntrudeExtension } = listenState
   const { data: alertsData } = useSelector((state: RootState) => state.alerts)
   const currentUser = useSelector((state: RootState) => state.currentUser)
+  const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
 
   const activeAlerts = useMemo(
     () => Object.values(alertsData).filter((alert: any) => alert.active),
@@ -153,9 +157,8 @@ const CallView: FC<CallViewProps> = () => {
       columns = 'pi-grid-cols-[24px_66px_24px]'
     }
 
-    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${
-      isOpen ? 'start' : 'center'
-    } pi-justify-center pi-w-full`
+    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${isOpen ? 'start' : 'center'
+      } pi-justify-center pi-w-full`
   }, [isOpen, accepted, incoming, outgoing])
 
   const getGridClasses = useMemo(() => {
@@ -164,10 +167,6 @@ const CallView: FC<CallViewProps> = () => {
     if (accepted) return 'pi-grid-cols-1 pi-justify-items-center'
     return 'pi-grid-cols-1 pi-justify-items-end'
   }, [shouldShowStreamingImage, outgoing, accepted])
-
-  const handleStreamingUnlock = useCallback(() => {
-    console.log('Streaming unlock requested')
-  }, [])
 
   const renderStatusIcon = useCallback(() => {
     const iconSizeClass = isOpen
@@ -307,9 +306,42 @@ const CallView: FC<CallViewProps> = () => {
 
   const setVideoStreamingAnswer = () => {
     answerIncomingCall()
-    //set view as video streaming answer
+    // Set view as video streaming answer
     dispatch.island.setIslandView('streamingAnswer')
   }
+
+  const renderStreamingContent = useCallback(() => {
+    // If videoSources are not loaded yet, show skeleton
+    if (!videoSources || Object.keys(videoSources).length === 0) {
+      return <VideoStreamingSkeleton className="pi-w-full pi-h-40 pi-mt-4" />
+    }
+
+    // If we don't have streaming source number, show empty state
+    if (!streamingSourceNumber) {
+      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
+    }
+
+    // Find the streaming source
+    const source = Object.values(videoSources).find(
+      (source) => source.extension === streamingSourceNumber,
+    )
+
+    // If source doesn't exist, show empty state
+    if (!source) {
+      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
+    }
+
+    // Check if image is available
+    const hasImage = sourceImages[source.id] || source.image
+
+    // If no image available, show empty state
+    if (!hasImage) {
+      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
+    }
+
+    // If we have an image, show StreamingImage component
+    return <StreamingImage />
+  }, [streamingSourceNumber, videoSources, sourceImages])
 
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
@@ -339,14 +371,14 @@ const CallView: FC<CallViewProps> = () => {
                   variant='default'
                   onClick={handleStreamingUnlock}
                   data-tooltip-id='tooltip-unlock'
-                  data-tooltip-content={t('Tooltip.Unlock streaming') || 'Unlock streaming'}
+                  data-tooltip-content={t('VideoStreaming.Unlock streaming') || 'Unlock streaming'}
                 >
                   <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
                 </Button>
               </div>
             </div>
 
-            <StreamingImage />
+            {renderStreamingContent()}
           </>
         ) : (
           <>
@@ -394,4 +426,4 @@ const CallView: FC<CallViewProps> = () => {
 
 export default memo(CallView)
 
-export interface CallViewProps {}
+export interface CallViewProps { }
