@@ -306,8 +306,10 @@ const CallView: FC<CallViewProps> = () => {
 
   const setVideoStreamingAnswer = () => {
     answerIncomingCall()
-    // Set view as video streaming answer
-    dispatch.island.setIslandView('streamingAnswer')
+    // Set view as video streaming answer with a small delay
+    setTimeout(() => {
+      dispatch.island.setIslandView('streamingAnswer')
+    }, 100)
   }
 
   const renderStreamingContent = useCallback(() => {
@@ -412,9 +414,8 @@ const CallView: FC<CallViewProps> = () => {
         )}
       </div>
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
-      <CustomThemedTooltip id='tooltip-unlock-left' place='left' />
-      <CustomThemedTooltip id='tooltip-answer' place='top' />
-      <CustomThemedTooltip id='tooltip-unlock' place='top' />
+      <CustomThemedTooltip id='tooltip-answer' place='left' />
+      <CustomThemedTooltip id='tooltip-unlock' place='left' />
     </div>
   )
 }
