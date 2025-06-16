@@ -23,16 +23,9 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
    * Event listner for phone-island-call-* events
    */
   // Clean up phone number from unwanted characters
-  const sanitizePhoneNumber = (number: string): string => {
-    // Check if the number starts with *, #, or +
-    const prefixMatch = number.match(/^[*#+]+/)
-    const prefix = prefixMatch ? prefixMatch[0] : ''
-
-    // Remove all non-numeric characters (excluding + only if it's at the beginning)
-    let sanitized = number.replace(/[^\d]/g, '')
-
-    // Ensure + is kept only at the start if it was originally there
-    return prefix + sanitized
+  const sanitizePhoneNumber = (number: string): any => {
+    // Keep only numbers (0-9) and special characters (+, *, #)
+    return number.replace(/[^0-9+*#]/g, '')
   }
 
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
