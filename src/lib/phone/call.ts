@@ -34,6 +34,8 @@ import dtmfAudios from '../../static/dtmf'
 import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
+import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
+import { unsubscribe } from '../../services/user'
 
 /**
  * Starts a call to a number
@@ -99,7 +101,9 @@ export function forceHangupConversation() {
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted } = store.getState().currentCall
+  const { outgoing, accepted, streamingSourceNumber } = store.getState().currentCall
+  const { isFromStreaming } = store.getState().island
+  
   if (outgoing || accepted) {
     if (isWebRTC()) {
       hangup()
@@ -109,6 +113,23 @@ export function hangupCurrentCall() {
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
+    
+    // If call was from a streaming source, unsubscribe and clear images
+    if (isFromStreaming && streamingSourceNumber) {
+      const sourceId = getStreamingSourceId(streamingSourceNumber)
+      if (sourceId) {
+        // Unsubscribe from streaming updates
+        unsubscribe({ id: sourceId })
+          .then(() => console.debug(`Unsubscribed from streaming source: ${sourceId}`))
+          .catch(error => console.error('Error unsubscribing from streaming source:', error))
+        
+        // Clear source images to free up memory
+        store.dispatch.streaming.clearSourceImages()
+      }
+    }
+    
+    // Reset isFromStreaming flag
+    store.dispatch.island.setIsFromStreaming(false)
   }
   // Caller close the call before the call is accepted
   eventDispatch('phone-island-call-ended', {})

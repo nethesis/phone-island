@@ -23,6 +23,7 @@ import VideoView from './VideoView'
 import { WaitingConferenceView } from './ConferenceView'
 import { store } from '../store'
 import { ContactListView } from './ContactView/ContactListView'
+import StreamingAnswerView from './StreamingAnswerView'
 
 /**
  * Provides the Island logic
@@ -115,7 +116,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
             <IslandDrag islandContainerRef={islandContainerRef}>
               {/* Add background call visibility logic */}
               <BackCall isVisible={isBackCallActive()} />
-              <SideView isVisible={sideViewIsVisible} uaType={uaType}/>
+              <SideView isVisible={sideViewIsVisible} uaType={uaType} />
               <IslandMotions>
                 {/* The views logic */}
                 <AlertGuard uaType={uaType}>
@@ -131,6 +132,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
                       video: VideoView ? <VideoView /> : null,
                       switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
                       waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
+                      streamingAnswer: StreamingAnswerView ? <StreamingAnswerView /> : null,
                     }
 
                     return currentView in views && views[currentView as keyof typeof views] ? (

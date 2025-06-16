@@ -21,6 +21,7 @@ import { screenShare } from './screenShare'
 import { websocket } from './websocket'
 import { mediaDevices } from './mediaDevices'
 import { conference } from './conference'
+import { streaming } from './streaming'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -42,6 +43,7 @@ export interface RootModel extends Models<RootModel> {
   websocket: typeof websocket
   physicalRecorder: typeof physicalRecorder
   mediaDevices: typeof mediaDevices
+  streaming: typeof streaming
 }
 
 export const models: RootModel = {
@@ -64,4 +66,5 @@ export const models: RootModel = {
   websocket,
   physicalRecorder,
   mediaDevices,
+  streaming,
 }

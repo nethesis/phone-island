@@ -28,7 +28,9 @@ const defaultState = {
     call: {
       expanded: {
         incoming: { width: 418, height: 96 },
+        incomingStreaming: { width: 500, height: 278 },
         outgoing: { width: 418, height: 96 },
+        outgoingStreaming: { width: 500, height: 278 },
         accepted: {
           width: 348,
           height: 236,
@@ -94,6 +96,19 @@ const defaultState = {
     waitingConference: {
       expanded: { width: 348, height: 360 },
       collapsed: { width: 180, height: 74 },
+    },
+    streamingAnswer: {
+      expanded: {
+        width: 600,
+        height: 480,
+        padding: 0,
+      },
+      extraLarge: {
+        width: 936,
+        height: 748,
+        padding: 0,
+      },
+      collapsed: commonCollapsed,
     },
   },
 }

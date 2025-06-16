@@ -5,7 +5,7 @@ import React, { type FC } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from './Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownLeftAndUpRightToCenter, faGear, faPhone } from '@fortawesome/free-solid-svg-icons'
+import { faDownLeftAndUpRightToCenter, faGear, faPhone, faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons'
 import { endConference, hangupCurrentCall, hangupCurrentPhysicalRecording } from '../lib/phone/call'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../store'
@@ -24,6 +24,9 @@ const Hangup: FC<HangupProps> = ({
   description,
   isPhysicalRecording,
   buttonsVariant = 'transparent',
+  showFullscreenButton = false,
+  isExtraLarge = false,
+  onToggleExtraLarge,
 }) => {
   const { transferring, incoming, accepted } = useSelector((state: RootState) => state.currentCall)
   const dispatch = useDispatch<Dispatch>()
@@ -59,6 +62,14 @@ const Hangup: FC<HangupProps> = ({
 
   const { t } = useTranslation()
 
+  // Helper function to determine tooltip content
+  const getToggleTooltipContent = () => {
+    if (view === 'streamingAnswer') {
+      return isExtraLarge ? t('Tooltip.Decrease') : t('Tooltip.Increase')
+    }
+    return t('Tooltip.Toggle fullscreen')
+  }
+
   // Close side view and open settings view
   const closeSideViewOpenSettings = () => {
     if (sideViewIsVisible) {
@@ -71,22 +82,20 @@ const Hangup: FC<HangupProps> = ({
   return (
     <>
       <div
-        className={` ${
-          transferring
-            ? 'pi-grid pi-w-full pi-space-x-2 pi-justify-start'
-            : 'pi-flex pi-justify-center'
-        }`}
+        className={` ${transferring
+          ? 'pi-grid pi-w-full pi-space-x-2 pi-justify-start'
+          : 'pi-flex pi-justify-center'
+          }`}
       >
         {/* The button to hangup the currentCall */}
         <motion.div
-          className={`${
-            transferring && description
-              ? 'pi-grid pi-grid-cols-4 pi-ml-4 pi-justify-start'
-              : 'pi-flex pi-w-12'
-          } `}
+          className={`${transferring && description
+            ? 'pi-grid pi-grid-cols-4 pi-ml-4 pi-justify-start'
+            : 'pi-flex pi-w-12'
+            } `}
         >
           {/* collapse phone island button */}
-          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && !showFullscreenButton && (
             <div className='pi-grid pi-grid-cols-1'>
               <Button
                 variant={buttonsVariant}
@@ -98,6 +107,24 @@ const Hangup: FC<HangupProps> = ({
                 className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
+              </Button>
+            </div>
+          )}
+
+          {/* expand/compress button for streaming */}
+          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && showFullscreenButton && (
+            <div className='pi-grid pi-grid-cols-1'>
+              <Button
+                variant={buttonsVariant}
+                onClick={onToggleExtraLarge}
+                data-tooltip-id='tooltip-toggle-fullscreen-hangup'
+                data-tooltip-content={getToggleTooltipContent()}
+                className={`${transferring && description ? '' : 'pi--ml-28'}`}
+              >
+                <FontAwesomeIcon
+                  className='pi-h-6 pi-w-6'
+                  icon={isExtraLarge ? faDownLeftAndUpRightToCenter : faUpRightAndDownLeftFromCenter}
+                />
               </Button>
             </div>
           )}
@@ -121,11 +148,10 @@ const Hangup: FC<HangupProps> = ({
               }
             }}
             variant='red'
-            className={`${
-              transferring && description
-                ? 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full pi-col-span-2'
-                : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
-            }`}
+            className={`${transferring && description
+              ? 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full pi-col-span-2'
+              : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
+              }`}
             data-tooltip-id={
               (description && transferring) || (view === 'waitingConference' && isActive)
                 ? 'tooltip-top-transfer'
@@ -135,10 +161,9 @@ const Hangup: FC<HangupProps> = ({
               description && transferring
                 ? description
                 : view === 'waitingConference' && isActive
-                ? t('Conference.End conference')
-                : `${t('Tooltip.Hangup')}`
+                  ? t('Conference.End conference')
+                  : `${t('Tooltip.Hangup')}`
             }
-            // data-tooltip-placement="top"
           >
             <FontAwesomeIcon className='pi-rotate-135 pi-h-6 pi-w-6' icon={faPhone} />
             {transferring && description && (
@@ -156,9 +181,8 @@ const Hangup: FC<HangupProps> = ({
               onClick={() => closeSideViewOpenSettings()}
               data-tooltip-id='tooltip-settings-view'
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
-              className={`${
-                transferring && description ? 'pi-ml-5' : 'pi-justify-end pi-ml-16'
-              } pi-flex pi-items-center`}
+              className={`${transferring && description ? 'pi-ml-5' : 'pi-justify-end pi-ml-16'
+                } pi-flex pi-items-center`}
             >
               <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
             </Button>
@@ -169,6 +193,7 @@ const Hangup: FC<HangupProps> = ({
       <CustomThemedTooltip className='pi-z-20' id='tooltip-top-transfer' place='top' />
       <CustomThemedTooltip className='pi-z-20' id='tooltip-open-close-phone-island' place='right' />
       <CustomThemedTooltip className='pi-z-20' id='tooltip-settings-view' place='left' />
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-toggle-fullscreen-hangup' place='top' />
     </>
   )
 }
@@ -181,11 +206,16 @@ interface HangupProps {
   description?: any
   isPhysicalRecording?: boolean
   buttonsVariant?:
-    | 'transparent'
-    | 'default'
-    | 'red'
-    | 'green'
-    | 'neutral'
-    | 'transparentSideView'
-    | 'transparentSettings'
+  | 'transparent'
+  | 'default'
+  | 'red'
+  | 'green'
+  | 'neutral'
+  | 'transparentSideView'
+  | 'transparentSettings'
+  showFullscreenButton?: boolean
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
+  isExtraLarge?: boolean
+  onToggleExtraLarge?: () => void
 }

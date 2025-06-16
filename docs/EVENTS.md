@@ -1058,6 +1058,18 @@ eventDispatch(`<event-name>`, `<data-object>`)
   }
   ```
 
+- `phone-island-socket-authorized` Indicates that socket it's been authorized
+
+  ```json
+  {}
+  ```
+
+- `phone-island-streaming-information-received` Indicates that streaming devices received url update
+
+  ```json
+  {}
+  ```
+
 ## Debug events
 
 - `phone-island-view-changed` Force to change phone-island view
