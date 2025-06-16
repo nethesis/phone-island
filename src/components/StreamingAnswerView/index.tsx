@@ -125,9 +125,9 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
       {isOpen ? (
         <div
           ref={streamingAnswerViewRef}
-          className={isFullscreen ? 'pi-h-screen pi-w-full' : isExtraLarge ? 'pi-h-[624px] pi-w-[780px]' : 'pi-h-[480px] pi-w-[600px]'}
+          className={isFullscreen ? 'pi-h-screen pi-w-full' : isExtraLarge ? 'pi-h-[748px] pi-w-[936px]' : 'pi-h-[480px] pi-w-[600px]'}
         >
-          <div className={`${isFullscreen ? `pi-h-[500px]` : isExtraLarge ? `pi-h-[524px]` : `pi-h-[380px]`} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
+          <div className={`${isFullscreen ? `pi-h-[500px]` : isExtraLarge ? `pi-h-[648px]` : `pi-h-[380px]`} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
             {/* Video container with rounded corners */}
             <div className='pi-relative pi-flex-1'>
               {/* Streaming source image or placeholder */}

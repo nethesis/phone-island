@@ -62,6 +62,14 @@ const Hangup: FC<HangupProps> = ({
 
   const { t } = useTranslation()
 
+  // Helper function to determine tooltip content
+  const getToggleTooltipContent = () => {
+    if (view === 'streamingAnswer') {
+      return isExtraLarge ? t('Tooltip.Decrease') : t('Tooltip.Increase')
+    }
+    return t('Tooltip.Toggle fullscreen')
+  }
+
   // Close side view and open settings view
   const closeSideViewOpenSettings = () => {
     if (sideViewIsVisible) {
@@ -110,9 +118,7 @@ const Hangup: FC<HangupProps> = ({
                 variant={buttonsVariant}
                 onClick={onToggleExtraLarge}
                 data-tooltip-id='tooltip-toggle-fullscreen-hangup'
-                data-tooltip-content={
-                  isExtraLarge ? t('Tooltip.Exit fullscreen') : t('Tooltip.Enter fullscreen')
-                }
+                data-tooltip-content={getToggleTooltipContent()}
                 className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon

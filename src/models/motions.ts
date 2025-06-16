@@ -104,8 +104,8 @@ const defaultState = {
         padding: 0,
       },
       extraLarge: {
-        width: 780,
-        height: 624,
+        width: 936,
+        height: 748,
         padding: 0,
       },
       collapsed: commonCollapsed,
