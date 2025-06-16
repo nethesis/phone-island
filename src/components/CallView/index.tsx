@@ -83,6 +83,20 @@ const CallView: FC<CallViewProps> = () => {
     [isFromStreaming, streamingSourceNumber, accepted],
   )
 
+  // Check if unlock button should be shown and get tooltip text
+  const unlockData = useMemo(() => {
+    if (!streamingSourceNumber || !videoSources) return { canUnlock: false, tooltipText: '' }
+
+    const source = Object.values(videoSources).find(
+      (source) => source?.extension === streamingSourceNumber,
+    )
+
+    const canUnlock = Boolean(source?.cmdOpen && source?.cmdOpen.trim() !== '')
+    const tooltipText = canUnlock && source ? `${t('VideoStreaming.Open')}: ${source?.description}` : ''
+
+    return { canUnlock, tooltipText }
+  }, [streamingSourceNumber, videoSources, t])
+
   const hasValidUsername = useMemo(() => username !== '' && username !== 'undefined', [username])
 
   const renderLandlinePhoneDiv = useCallback(
@@ -366,14 +380,17 @@ const CallView: FC<CallViewProps> = () => {
                     <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faPhone} />
                   </Button>
                 )}
-                <Button
-                  variant='default'
-                  onClick={handleStreamingUnlock}
-                  data-tooltip-id='tooltip-unlock'
-                  data-tooltip-content={t('VideoStreaming.Open door') || 'Open door'}
-                >
-                  <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
-                </Button>
+                {/* Open door button - only show if cmdOpen is valid */}
+                {unlockData?.canUnlock && (
+                  <Button
+                    variant='default'
+                    onClick={handleStreamingUnlock}
+                    data-tooltip-id='tooltip-unlock'
+                    data-tooltip-content={unlockData?.tooltipText}
+                  >
+                    <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
+                  </Button>
+                )}
               </div>
             </div>
 

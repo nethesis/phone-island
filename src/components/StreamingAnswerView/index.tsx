@@ -7,15 +7,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faCompress,
-  faDisplay,
-  faExpand,
   faMicrophone,
   faMicrophoneSlash,
-  faPause,
-  faPlay,
-  faStop,
-  faVideo,
   faVideoSlash,
 } from '@fortawesome/free-solid-svg-icons'
 import { t } from 'i18next'
@@ -41,28 +34,27 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     muted,
     startTime,
     paused,
-    isLocalVideoEnabled,
-    showRemoteVideoPlaceHolder,
     streamingSourceNumber,
   } = useSelector((state: RootState) => state.currentCall)
-  const { role: screenShareRole, active: screenShareActive } = useSelector(
-    (state: RootState) => state.screenShare,
-  )
   const { isOpen, isExtraLarge } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
 
-  // Get streaming source image
-  const streamingSourceImage = React.useMemo(() => {
-    if (!streamingSourceNumber || !videoSources) return null
+  // Get streaming source image and check if unlock is available
+  const streamingSourceData = React.useMemo(() => {
+    if (!streamingSourceNumber || !videoSources) return { image: null, canUnlock: false, tooltipText: '' }
 
     const source = Object.values(videoSources).find(
       (source) => source.extension === streamingSourceNumber,
     )
-    if (!source) return null
+    if (!source) return { image: null, canUnlock: false, tooltipText: '' }
 
-    return sourceImages[source.id] || source.image || null
-  }, [streamingSourceNumber, videoSources, sourceImages])
+    const image = sourceImages[source.id] || source.image || null
+    const canUnlock = Boolean(source.cmdOpen && source.cmdOpen.trim() !== '')
+    const tooltipText = canUnlock ? `${t('VideoStreaming.Open')}: ${source.description}` : ''
+
+    return { image, canUnlock, tooltipText }
+  }, [streamingSourceNumber, videoSources, sourceImages, t])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
   const streamingAnswerViewRef = useRef(null)
@@ -139,11 +131,11 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
             {/* Video container with rounded corners */}
             <div className='pi-relative pi-flex-1'>
               {/* Streaming source image or placeholder */}
-              {streamingSourceImage ? (
+              {streamingSourceData.image ? (
                 <img
-                  src={streamingSourceImage}
+                  src={streamingSourceData.image}
                   alt='Streaming source'
-                  className='pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-object-cover pi-bg-red-200'
+                  className='pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-object-cover'
                 />
               ) : (
                 <div className='pi-w-full pi-h-full pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
@@ -184,18 +176,20 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       />
                     </Button>
 
-                    {/* Open door button */}
-                    <Button
-                      variant='default'
-                      onClick={handleStreamingUnlock}
-                      data-tooltip-id='tooltip-unlock-streaming'
-                      data-tooltip-content={t('VideoStreaming.Open door') || 'Open door'}
-                    >
-                      <FontAwesomeIcon
-                        className='pi-h-6 pi-w-6'
-                        icon={faLockOpen}
-                      />
-                    </Button>
+                    {/* Open door button - only show if cmdOpen is valid */}
+                    {streamingSourceData?.canUnlock && (
+                      <Button
+                        variant='default'
+                        onClick={handleStreamingUnlock}
+                        data-tooltip-id='tooltip-unlock-streaming'
+                        data-tooltip-content={streamingSourceData?.tooltipText}
+                      >
+                        <FontAwesomeIcon
+                          className='pi-h-6 pi-w-6'
+                          icon={faLockOpen}
+                        />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
