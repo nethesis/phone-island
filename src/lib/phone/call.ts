@@ -626,6 +626,7 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
 
 export async function handleAttendedTransfer(number: string, dispatch: Dispatch) {
   // Send attended transfer message
+  unpauseCurrentCall()
   const transferringMessageSent = await attendedTransfer(number)
   if (transferringMessageSent) {
     // Set transferring and disable pause
