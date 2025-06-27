@@ -6,7 +6,7 @@ import JanusLib from '../../../lib/webrtc/janus.js'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
 
-export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean) => {
+export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam?: string) => {
   const dispatch = useDispatch<Dispatch>()
   const userInformation = useSelector((state: RootState) => state.currentUser)
   const allUsersInformation = useSelector((state: RootState) => state.users)
@@ -38,6 +38,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean) => {
               throughTrunk: conversationData.throughTrunk,
               direction: conversationData.direction,
               connected: conversationData.connected,
+              url: urlParam,
             }
             eventDispatch('phone-island-url-parameter-opened', eventData)
           } else if (
@@ -54,6 +55,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean) => {
               throughTrunk: conversationData.throughTrunk,
               direction: conversationData.direction,
               connected: conversationData.connected,
+              url: urlParam,
             }
             eventDispatch('phone-island-url-parameter-opened', eventData)
           }
@@ -62,7 +64,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean) => {
         dispatch.island.setIslandView(viewType)
       }
     },
-    [dispatch.island, conversations, onlyQueues],
+    [dispatch.island, conversations, onlyQueues, urlParam],
   )
 
   const checkCameraPermission = useCallback(async () => {
