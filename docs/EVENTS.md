@@ -981,7 +981,17 @@ eventDispatch(`<event-name>`, `<data-object>`)
 - `phone-island-url-parameter-opened` Indicates that user has clicked on url parameter button
 
   ```json
-  {}
+  {
+    "counterpartNum": "1234",
+    "counterpartName": "Antonio test",
+    "owner": "91269",
+    "uniqueId": "21234",
+    "throughQueue": true,
+    "throughTrunk": false,
+    "direction": "in",
+    "connected": true,
+    "url": "www.google.it/$CALLER_NUMBER-$CALLER_NAME-$CALLED-$UNIQUEID"
+  }
   ```
 
 ## Server and Socket Dispatch Events - phone-island-server-* | phone-island-socket-*
