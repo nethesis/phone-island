@@ -49,6 +49,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
   const { t } = useTranslation()
   const [hasValidUrl, setHasValidUrl] = useState(false)
   const [onlyQueues, setOnlyQueues] = useState<boolean | undefined>(undefined)
+  const [urlParam, setUrlParam] = useState<string | undefined>(undefined)
 
   const {
     videoInputDevices,
@@ -61,7 +62,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
-  } = useSideViewLogic(uaType, onlyQueues)
+  } = useSideViewLogic(uaType, onlyQueues, urlParam)
   useEffect(() => {
     const checkParamUrl = async () => {
       try {
@@ -72,9 +73,11 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
 
         setHasValidUrl(isValid)
         setOnlyQueues(paramUrlResponse?.only_queues)
+        setUrlParam(url)
       } catch (error) {
         setHasValidUrl(false)
         setOnlyQueues(undefined)
+        setUrlParam(undefined)
         console.error('Error fetching URL parameter:', error)
       }
     }
