@@ -104,7 +104,7 @@ export const ConferenceUsersList: FC<ConferenceUsersListProps> = ({}) => {
                 <div className='pi-flex pi-items-center pi-gap-3 pi-truncate'>
                   <UserAvatar user={user} />
                   <span className='pi-font-medium pi-text-sm pi-text-gray-700 dark:pi-text-gray-200 pi-truncate pi-w-32'>
-                    {user?.name}
+                    {user?.name || user?.extenId}
                   </span>
                 </div>
                 {isOwnerInside ? (
