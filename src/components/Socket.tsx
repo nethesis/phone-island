@@ -39,6 +39,7 @@ import { subscribe } from '../services/user'
 
 interface SocketProps {
   children: ReactNode
+  hostProtocol: string
   hostName: string
   username: string
   authToken: string
@@ -48,6 +49,7 @@ interface SocketProps {
 }
 
 export const Socket: FC<SocketProps> = ({
+  hostProtocol,
   hostName,
   username,
   authToken,
@@ -330,7 +332,7 @@ export const Socket: FC<SocketProps> = ({
      * Initialize socket connection and listeners
      */
     const initSocketConnection = () => {
-      socket.current = io('https://' + hostName, {
+      socket.current = io(hostProtocol + '://' + hostName, {
         upgrade: false,
         transports: ['websocket'],
         reconnection: true,
