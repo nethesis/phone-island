@@ -126,18 +126,27 @@ export const useSideViewLogic = (uaType?: string) => {
     )
     const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
 
+    // If param url type is 'never', return false
+    if (paramUrlData.openParamUrlType === 'never') {
+      return false;
+    }
+
+
     if (!conversationData?.connected || conversationData?.direction !== 'in') {
-      return false
+      return false;
     }
 
-    if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
-      return true
-    } else if (!paramUrlData.onlyQueues && (conversationData?.throughTrunk || conversationData?.throughQueue)) {
-      return true
+    // open param url type is set to 'button'
+    if (paramUrlData.openParamUrlType === 'button') {
+      if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
+        return true;
+      } else if (!paramUrlData.onlyQueues && (conversationData?.throughTrunk || conversationData?.throughQueue)) {
+        return true;
+      }
     }
 
-    return false
-  }, [conversations, paramUrlData.onlyQueues])
+    return false;
+  }, [conversations, paramUrlData.onlyQueues, paramUrlData.openParamUrlType])
 
   useEffect(() => {
     if (userInformation && allUsersInformation) {
