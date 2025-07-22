@@ -11,6 +11,7 @@ import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './uti
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
+import { getParamUrl } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
@@ -107,8 +108,43 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-video-input-changed', {})
   })
 
-  const [firstRenderI18n, setFirstRenderI18n] = useState(true)
+  const [firstRender, setFirstRender] = useState(true)
   const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
+
+  // Initialize application on first render
+  useEffect(() => {
+    const initParamUrl = async () => {
+      console.log("Iniziando initParamUrl")
+      try {
+        const paramUrlResponse: any = await getParamUrl()
+        const url = paramUrlResponse?.url || ''
+        const isValid = url && url.trim() !== ''
+
+        // Save data inside the store
+        store.dispatch.paramUrl.setParamUrl({
+          url: url,
+          onlyQueues: paramUrlResponse?.only_queues || false,
+          hasValidUrl: isValid,
+        })
+
+      } catch (error) {
+        console.error('Error fetching URL parameter:', error)
+        store.dispatch.paramUrl.setParamUrl({
+          url: '',
+          onlyQueues: false,
+          hasValidUrl: false,
+        })
+      }
+    }
+
+    if (firstRender) {
+      // Initialize i18n
+      initI18n()
+      // Initialize param URL
+      initParamUrl()
+      setFirstRender(false)
+    }
+  }, [firstRender])
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
     if (!firstAudioOutputInit) {
@@ -150,14 +186,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     const viewType = data?.viewType
     store.dispatch.island.setIslandView(viewType)
   })
-
-  //initialize i18n
-  useEffect(() => {
-    if (firstRenderI18n) {
-      initI18n()
-      setFirstRenderI18n(false)
-    }
-  }, [firstRenderI18n])
 
   const remoteAudioElement: any = store.getState().player.remoteAudio
 
@@ -274,6 +302,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-streaming-status', () => {
     const streamingInformation = store.getState().streaming
     console.log('Streaming status debug informations: ', streamingInformation)
+  })
+
+  useEventListener('phone-island-paramurl-status', () => {
+    const paramurl = store.getState().paramUrl
+    console.log('Paramurl status debug informations: ', paramurl)
   })
 
   useEventListener('phone-island-player-force-stop', () => {

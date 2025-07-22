@@ -416,6 +416,14 @@ const CallTemplate = (args: any) => {
                 Streaming status
               </Button>
 
+               <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-paramurl-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Paramurl status
+              </Button>
+
               <Button
                 variant='red'
                 onClick={() => eventDispatch('phone-island-recording-open', {})}

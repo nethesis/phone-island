@@ -6,10 +6,11 @@ import JanusLib from '../../../lib/webrtc/janus.js'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
 
-export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam?: string) => {
+export const useSideViewLogic = (uaType?: string) => {
   const dispatch = useDispatch<Dispatch>()
   const userInformation = useSelector((state: RootState) => state.currentUser)
   const allUsersInformation = useSelector((state: RootState) => state.users)
+  const paramUrlData = useSelector((state: RootState) => state.paramUrl)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
   const janus = useRef<any>(JanusLib)
   const conversations = useSelector((state: RootState) => state.currentUser.conversations)
@@ -27,7 +28,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
         const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
 
         if (conversationData?.connected && conversationData?.direction === 'in') {
-          if (onlyQueues && conversationData?.throughQueue) {
+          if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
             // Open URL only for queue calls when onlyQueues is true
             const eventData = {
               counterpartNum: conversationData.counterpartNum,
@@ -38,11 +39,11 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
               throughTrunk: conversationData.throughTrunk,
               direction: conversationData.direction,
               connected: conversationData.connected,
-              url: urlParam,
+              url: paramUrlData.url,
             }
             eventDispatch('phone-island-url-parameter-opened', eventData)
           } else if (
-            !onlyQueues &&
+            !paramUrlData.onlyQueues &&
             (conversationData?.throughTrunk || conversationData?.throughQueue)
           ) {
             // Open URL for both trunk and queue calls when onlyQueues is false
@@ -55,7 +56,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
               throughTrunk: conversationData.throughTrunk,
               direction: conversationData.direction,
               connected: conversationData.connected,
-              url: urlParam,
+              url: paramUrlData.url,
             }
             eventDispatch('phone-island-url-parameter-opened', eventData)
           }
@@ -64,7 +65,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
         dispatch.island.setIslandView(viewType)
       }
     },
-    [dispatch.island, conversations, onlyQueues, urlParam],
+    [dispatch.island, conversations, paramUrlData],
   )
 
   const checkCameraPermission = useCallback(async () => {
@@ -129,14 +130,14 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
       return false
     }
 
-    if (onlyQueues && conversationData?.throughQueue) {
+    if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
       return true
-    } else if (!onlyQueues && (conversationData?.throughTrunk || conversationData?.throughQueue)) {
+    } else if (!paramUrlData.onlyQueues && (conversationData?.throughTrunk || conversationData?.throughQueue)) {
       return true
     }
 
     return false
-  }, [conversations, onlyQueues])
+  }, [conversations, paramUrlData.onlyQueues])
 
   useEffect(() => {
     if (userInformation && allUsersInformation) {
@@ -151,6 +152,7 @@ export const useSideViewLogic = (uaType?: string, onlyQueues?: boolean, urlParam
     videoInputDevices,
     isVideoCallButtonVisible,
     isUrlButtonEnabled,
+    hasValidUrl: paramUrlData.hasValidUrl,
     ...userCapabilities,
     goToVideoCall,
     goToScreenSharing,
