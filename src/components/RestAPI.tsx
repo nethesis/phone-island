@@ -50,6 +50,8 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
         // Update open param URL type if it exists in paramurl store
         if (userInfo.settings && userInfo.settings.open_param_url) {
           dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
+        } else {
+          dispatch.paramUrl.setOpenParamUrlType('never');
         }
 
         // Inizialize all extensions after user initialization

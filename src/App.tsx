@@ -114,7 +114,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   // Initialize application on first render
   useEffect(() => {
     const initParamUrl = async () => {
-      console.log("Iniziando initParamUrl")
       try {
         const paramUrlResponse: any = await getParamUrl()
         const url = paramUrlResponse?.url || ''
@@ -267,6 +266,89 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-call-status', () => {
     const callInformation = store.getState().currentCall
     console.log('Call status debug informations: ', callInformation)
+  })
+
+  const openParameterizedUrl = (callerNum: any, callerName: any, called: any, uniqueId: any) => {
+    const paramUrlInfo = store.getState().paramUrl
+
+    if (!paramUrlInfo?.hasValidUrl) {
+      return
+    }
+
+    const paramUrl = paramUrlInfo.url || ''
+
+    if (!paramUrl) {
+      return
+    }
+
+    const { urlOpened } = store.getState().island
+    const openParamUrlType = paramUrlInfo.openParamUrlType
+
+    if (urlOpened && openParamUrlType !== 'button') {
+      return
+    }
+
+    let processedUrl = paramUrl
+
+    if (processedUrl.includes('$CALLER_NUMBER') && callerNum) {
+      processedUrl = processedUrl.replace(/\$CALLER_NUMBER/g, encodeURIComponent(callerNum))
+    }
+    if (processedUrl.includes('$CALLER_NAME') && callerName) {
+      processedUrl = processedUrl.replace(/\$CALLER_NAME/g, encodeURIComponent(callerName))
+    }
+    if (processedUrl.includes('$UNIQUEID') && uniqueId) {
+      processedUrl = processedUrl.replace(/\$UNIQUEID/g, encodeURIComponent(uniqueId))
+    }
+    if (processedUrl.includes('$CALLED') && called) {
+      processedUrl = processedUrl.replace(/\$CALLED/g, encodeURIComponent(called))
+    }
+    if (processedUrl.includes('{phone}') && callerNum) {
+      processedUrl = processedUrl.replace(/\{phone\}/g, encodeURIComponent(callerNum))
+    }
+
+    const formattedUrl = processedUrl.startsWith('http') ? processedUrl : `https://${processedUrl}`
+
+    const newWindow = window.open('about:blank', '_blank')
+    if (newWindow) {
+      newWindow.location.href = formattedUrl
+      store.dispatch.island.setUrlOpened(true)
+    }
+  }
+
+  useEventListener('phone-island-url-parameter-opened', (data) => {
+    const paramUrlInfo = store.getState().paramUrl
+
+    if (!paramUrlInfo.hasValidUrl) {
+      return
+    }
+
+    const { urlOpened } = store.getState().island
+    if (urlOpened) {
+      return
+    }
+
+    const onlyQueues = paramUrlInfo.onlyQueues || false
+
+    if (data?.direction === 'in') {
+      if (onlyQueues === true && data?.throughQueue === true) {
+        openParameterizedUrl(
+          data?.counterpartNum,
+          data?.counterpartName,
+          data?.owner,
+          data?.uniqueId
+        )
+      } else if (
+        onlyQueues === false &&
+        (data?.throughTrunk === true || data?.throughQueue === true)
+      ) {
+        openParameterizedUrl(
+          data?.counterpartNum,
+          data?.counterpartName,
+          data?.owner,
+          data?.uniqueId
+        )
+      }
+    }
   })
 
   useEventListener('phone-island-user-status', () => {

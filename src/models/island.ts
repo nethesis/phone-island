@@ -23,6 +23,7 @@ const defaultState: IslandTypes = {
   isFullScreen: false,
   isFromStreaming: false,
   isExtraLarge: false,
+  urlOpened: false,
 }
 
 export const island = createModel<RootModel>()({
@@ -68,6 +69,10 @@ export const island = createModel<RootModel>()({
     },
     toggleAvoidToShow: (state, payload: boolean) => {
       state.avoidToShow = payload
+    },
+    setUrlOpened: (state, payload: boolean) => {
+      state.urlOpened = payload
+      return state
     },
     resetSettingsView: (state) => {
       state.settingsView = 'main'
@@ -177,4 +182,5 @@ interface IslandTypes {
   isFullScreen: boolean
   isFromStreaming: boolean
   isExtraLarge: boolean
+  urlOpened: boolean
 }

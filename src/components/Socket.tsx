@@ -212,6 +212,22 @@ export const Socket: FC<SocketProps> = ({
                 store.dispatch.island.setIslandView('call')
 
                 eventDispatch('phone-island-call-ringing', {})
+                const { openParamUrlType } = store.getState().paramUrl
+                const { urlOpened } = store.getState().island
+
+                if (openParamUrlType === 'ringing' && !urlOpened) {
+                  store.dispatch.island.setUrlOpened(false)
+                  eventDispatch('phone-island-url-parameter-opened', {
+                    counterpartNum: conv.counterpartNum,
+                    counterpartName: getDisplayName(conv),
+                    owner: conv.owner,
+                    uniqueId: conv.uniqueId,
+                    throughQueue: conv.throughQueue,
+                    throughTrunk: conv.throughTrunk,
+                    direction: conv.direction,
+                    connected: conv.connected
+                  })
+                }
               }
               break
             // @ts-ignore

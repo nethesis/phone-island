@@ -28,44 +28,23 @@ export const useSideViewLogic = (uaType?: string) => {
         const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
 
         if (conversationData?.connected && conversationData?.direction === 'in') {
-          if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
-            // Open URL only for queue calls when onlyQueues is true
-            const eventData = {
-              counterpartNum: conversationData.counterpartNum,
-              counterpartName: conversationData.counterpartName,
-              owner: conversationData.owner,
-              uniqueId: conversationData.uniqueId,
-              throughQueue: conversationData.throughQueue,
-              throughTrunk: conversationData.throughTrunk,
-              direction: conversationData.direction,
-              connected: conversationData.connected,
-              url: paramUrlData.url,
-            }
-            eventDispatch('phone-island-url-parameter-opened', eventData)
-          } else if (
-            !paramUrlData.onlyQueues &&
-            (conversationData?.throughTrunk || conversationData?.throughQueue)
-          ) {
-            // Open URL for both trunk and queue calls when onlyQueues is false
-            const eventData = {
-              counterpartNum: conversationData.counterpartNum,
-              counterpartName: conversationData.counterpartName,
-              owner: conversationData.owner,
-              uniqueId: conversationData.uniqueId,
-              throughQueue: conversationData.throughQueue,
-              throughTrunk: conversationData.throughTrunk,
-              direction: conversationData.direction,
-              connected: conversationData.connected,
-              url: paramUrlData.url,
-            }
-            eventDispatch('phone-island-url-parameter-opened', eventData)
+          const eventData = {
+            counterpartNum: conversationData.counterpartNum,
+            counterpartName: conversationData.counterpartName,
+            owner: conversationData.owner,
+            uniqueId: conversationData.uniqueId,
+            throughQueue: conversationData.throughQueue,
+            throughTrunk: conversationData.throughTrunk,
+            direction: conversationData.direction,
+            connected: conversationData.connected,
           }
+          eventDispatch('phone-island-url-parameter-opened', eventData)
         }
       } else if (viewType !== null) {
         dispatch.island.setIslandView(viewType)
       }
     },
-    [dispatch.island, conversations, paramUrlData],
+    [dispatch.island, conversations],
   )
 
   const checkCameraPermission = useCallback(async () => {
@@ -128,24 +107,26 @@ export const useSideViewLogic = (uaType?: string) => {
 
     // If param url type is 'never', return false
     if (paramUrlData.openParamUrlType === 'never') {
-      return false;
+      return false
     }
 
-
     if (!conversationData?.connected || conversationData?.direction !== 'in') {
-      return false;
+      return false
     }
 
     // open param url type is set to 'button'
     if (paramUrlData.openParamUrlType === 'button') {
       if (paramUrlData.onlyQueues && conversationData?.throughQueue) {
-        return true;
-      } else if (!paramUrlData.onlyQueues && (conversationData?.throughTrunk || conversationData?.throughQueue)) {
-        return true;
+        return true
+      } else if (
+        !paramUrlData.onlyQueues &&
+        (conversationData?.throughTrunk || conversationData?.throughQueue)
+      ) {
+        return true
       }
     }
 
-    return false;
+    return false
   }, [conversations, paramUrlData.onlyQueues, paramUrlData.openParamUrlType])
 
   useEffect(() => {
