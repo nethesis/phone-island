@@ -499,6 +499,60 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-conference-list-closed', {})
   })
 
+  // Listen for conversations updates to handle 'answered' preference for parameterized URL
+  useEventListener('phone-island-conversations', (data: any) => {
+    // Get the current username (first key in the data object)
+    const username = Object.keys(data)[0]
+
+    if (username) {
+      const conversations = data[username].conversations
+      const paramUrlInfo = store.getState().paramUrl
+      const { urlOpened } = store.getState().island
+
+      // Only proceed if URL is valid and not already opened
+      if (!paramUrlInfo.hasValidUrl || urlOpened) {
+        return
+      }
+
+      // Check if the openParamUrlType is set to 'answered'
+      if (paramUrlInfo.openParamUrlType === 'answered') {
+        // Check if there are any conversations
+        if (conversations && Object.keys(conversations).length > 0) {
+          // Get the first conversation (usually there's only one active call)
+          const convId = Object.keys(conversations)[0]
+          const conv = conversations[convId]
+
+          // Check conditions: must be connected and incoming
+          if (conv?.connected && conv?.direction === 'in') {
+            const onlyQueues = paramUrlInfo.onlyQueues || false
+
+            // Check queue conditions based on preferences
+            if (onlyQueues === true && conv?.throughQueue === true) {
+              // Open URL only for queue calls when onlyQueues is true
+              openParameterizedUrl(
+                conv.counterpartNum,
+                conv.counterpartName,
+                conv.owner,
+                conv.uniqueId
+              )
+            } else if (
+              onlyQueues === false &&
+              (conv?.throughTrunk === true || conv?.throughQueue === true)
+            ) {
+              // Open URL for both trunk and queue calls when onlyQueues is false
+              openParameterizedUrl(
+                conv.counterpartNum,
+                conv.counterpartName,
+                conv.owner,
+                conv.uniqueId
+              )
+            }
+          }
+        }
+      }
+    }
+  })
+
   return (
     <>
       <Provider store={store}>
