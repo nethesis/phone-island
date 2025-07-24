@@ -23,7 +23,7 @@ import {
 import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { Base64 } from 'js-base64'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
-import { setMainDevice } from '../services/user'
+import { setMainDevice, setIncomingCallsPreference } from '../services/user'
 
 const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
@@ -275,7 +275,9 @@ const CallTemplate = (args: any) => {
 
   const [mainDeviceType, setMainDeviceType] = useState('')
   const [noMobileListDevice, setNoMobileListDevice]: any = useState([])
+  const [urlOpenType, setUrlOpenType] = useState('never')
   const { endpoints, default_device } = store.getState().currentUser
+
   useEffect(() => {
     if (endpoints) {
       let extensionObj: any = endpoints
@@ -294,8 +296,38 @@ const CallTemplate = (args: any) => {
         setNoMobileListDevice(filteredDevices)
       }
     }
+
+    // Get current URL open type from store
+    const { openParamUrlType } = store.getState().paramUrl
+    if (openParamUrlType) {
+      setUrlOpenType(openParamUrlType)
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [default_device])
+
+  // Handle URL param type change
+  const handleUrlOpenTypeChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.id
+    setUrlOpenType(newValue)
+
+    // Update store
+    store.dispatch.paramUrl.setOpenParamUrlType(newValue)
+
+    try {
+      // Salva la preferenza sul server
+      await setIncomingCallsPreference({ open_param_url: newValue })
+
+      // Show success toast notification
+      setShowToast(true)
+      setToastMessage(`URL open preference set to: ${newValue}`)
+    } catch (error) {
+      // Show error toast notification
+      setShowToast(true)
+      setToastMessage(`Error saving URL open preference: ${error}`)
+      console.error('Error saving URL open preference:', error)
+    }
+  }
 
   const setMainDeviceId = async (device: any) => {
     let deviceExtension: any = {}
@@ -417,6 +449,14 @@ const CallTemplate = (args: any) => {
               </Button>
 
               <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-paramurl-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Paramurl status
+              </Button>
+
+              <Button
                 variant='red'
                 onClick={() => eventDispatch('phone-island-recording-open', {})}
                 className='pi-text-sm pi-w-full'
@@ -490,6 +530,102 @@ const CallTemplate = (args: any) => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* open param url type change - Radio buttons instead of dropdown */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>
+              Select Open Param URL Type
+            </h3>
+            <div className='pi-space-y-4'>
+              {/* Ringing option */}
+              <div className='pi-flex pi-items-start'>
+                <div className='pi-flex pi-h-5 pi-items-center'>
+                  <input
+                    id='ringing'
+                    name='urlOpenType'
+                    type='radio'
+                    checked={urlOpenType === 'ringing'}
+                    onChange={handleUrlOpenTypeChange}
+                    className='pi-h-4 pi-w-4 pi-border-gray-300 pi-text-emerald-600 focus:pi-ring-2 focus:pi-ring-emerald-500'
+                  />
+                </div>
+                <div className='pi-ml-3 pi-text-sm'>
+                  <label
+                    htmlFor='ringing'
+                    className='pi-font-medium pi-text-gray-700'
+                  >
+                    When the call is ringing
+                  </label>
+                </div>
+              </div>
+
+              {/* Answered option */}
+              <div className='pi-flex pi-items-start'>
+                <div className='pi-flex pi-h-5 pi-items-center'>
+                  <input
+                    id='answered'
+                    name='urlOpenType'
+                    type='radio'
+                    checked={urlOpenType === 'answered'}
+                    onChange={handleUrlOpenTypeChange}
+                    className='pi-h-4 pi-w-4 pi-border-gray-300 pi-text-emerald-600 focus:pi-ring-2 focus:pi-ring-emerald-500'
+                  />
+                </div>
+                <div className='pi-ml-3 pi-text-sm'>
+                  <label
+                    htmlFor='answered'
+                    className='pi-font-medium pi-text-gray-700'
+                  >
+                    When the call is answered
+                  </label>
+                </div>
+              </div>
+
+              {/* Button option */}
+              <div className='pi-flex pi-items-start'>
+                <div className='pi-flex pi-h-5 pi-items-center'>
+                  <input
+                    id='button'
+                    name='urlOpenType'
+                    type='radio'
+                    checked={urlOpenType === 'button'}
+                    onChange={handleUrlOpenTypeChange}
+                    className='pi-h-4 pi-w-4 pi-border-gray-300 pi-text-emerald-600 focus:pi-ring-2 focus:pi-ring-emerald-500'
+                  />
+                </div>
+                <div className='pi-ml-3 pi-text-sm'>
+                  <label
+                    htmlFor='button'
+                    className='pi-font-medium pi-text-gray-700'
+                  >
+                    When clicking the button on the Phone Island
+                  </label>
+                </div>
+              </div>
+
+              {/* Never option */}
+              <div className='pi-flex pi-items-start'>
+                <div className='pi-flex pi-h-5 pi-items-center'>
+                  <input
+                    id='never'
+                    name='urlOpenType'
+                    type='radio'
+                    checked={urlOpenType === 'never'}
+                    onChange={handleUrlOpenTypeChange}
+                    className='pi-h-4 pi-w-4 pi-border-gray-300 pi-text-emerald-600 focus:pi-ring-2 focus:pi-ring-emerald-500'
+                  />
+                </div>
+                <div className='pi-ml-3 pi-text-sm'>
+                  <label
+                    htmlFor='never'
+                    className='pi-font-medium pi-text-gray-700'
+                  >
+                    Never
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Main device choose */}

@@ -8,6 +8,7 @@ import { currentCall } from './currentCall'
 import { currentUser } from './currentUser'
 import { fetchDefaults } from './fetchDefaults'
 import { island } from './island'
+import { paramUrl } from './paramUrl'
 import { avatars } from './avatars'
 import { users } from './users'
 import { alerts } from './alerts'
@@ -31,6 +32,7 @@ export interface RootModel extends Models<RootModel> {
   currentUser: typeof currentUser
   fetchDefaults: typeof fetchDefaults
   island: typeof island
+  paramUrl: typeof paramUrl
   avatars: typeof avatars
   users: typeof users
   alerts: typeof alerts
@@ -54,6 +56,7 @@ export const models: RootModel = {
   currentUser,
   fetchDefaults,
   island,
+  paramUrl,
   avatars,
   users,
   alerts,

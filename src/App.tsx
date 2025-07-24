@@ -11,6 +11,7 @@ import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './uti
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
+import { getParamUrl } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
@@ -107,8 +108,42 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-video-input-changed', {})
   })
 
-  const [firstRenderI18n, setFirstRenderI18n] = useState(true)
+  const [firstRender, setFirstRender] = useState(true)
   const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
+
+  // Initialize application on first render
+  useEffect(() => {
+    const initParamUrl = async () => {
+      try {
+        const paramUrlResponse: any = await getParamUrl()
+        const url = paramUrlResponse?.url || ''
+        const isValid = url && url.trim() !== ''
+
+        // Save data inside the store
+        store.dispatch.paramUrl.setParamUrl({
+          url: url,
+          onlyQueues: paramUrlResponse?.only_queues || false,
+          hasValidUrl: isValid,
+        })
+
+      } catch (error) {
+        console.error('Error fetching URL parameter:', error)
+        store.dispatch.paramUrl.setParamUrl({
+          url: '',
+          onlyQueues: false,
+          hasValidUrl: false,
+        })
+      }
+    }
+
+    if (firstRender) {
+      // Initialize i18n
+      initI18n()
+      // Initialize param URL
+      initParamUrl()
+      setFirstRender(false)
+    }
+  }, [firstRender])
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
     if (!firstAudioOutputInit) {
@@ -150,14 +185,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     const viewType = data?.viewType
     store.dispatch.island.setIslandView(viewType)
   })
-
-  //initialize i18n
-  useEffect(() => {
-    if (firstRenderI18n) {
-      initI18n()
-      setFirstRenderI18n(false)
-    }
-  }, [firstRenderI18n])
 
   const remoteAudioElement: any = store.getState().player.remoteAudio
 
@@ -241,6 +268,97 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Call status debug informations: ', callInformation)
   })
 
+  const openParameterizedUrl = (callerNum: any, callerName: any, called: any, uniqueId: any) => {
+    const paramUrlInfo = store.getState().paramUrl
+
+    if (!paramUrlInfo?.hasValidUrl) {
+      return
+    }
+
+    const paramUrl = paramUrlInfo.url || ''
+
+    if (!paramUrl) {
+      return
+    }
+
+    const { urlOpened } = store.getState().island
+    const openParamUrlType = paramUrlInfo.openParamUrlType
+
+    if (urlOpened && openParamUrlType !== 'button') {
+      return
+    }
+
+    let processedUrl = paramUrl
+
+    if (processedUrl.includes('$CALLER_NUMBER') && callerNum) {
+      processedUrl = processedUrl.replace(/\$CALLER_NUMBER/g, encodeURIComponent(callerNum))
+    }
+    if (processedUrl.includes('$CALLER_NAME') && callerName) {
+      processedUrl = processedUrl.replace(/\$CALLER_NAME/g, encodeURIComponent(callerName))
+    }
+    if (processedUrl.includes('$UNIQUEID') && uniqueId) {
+      processedUrl = processedUrl.replace(/\$UNIQUEID/g, encodeURIComponent(uniqueId))
+    }
+    if (processedUrl.includes('$CALLED') && called) {
+      processedUrl = processedUrl.replace(/\$CALLED/g, encodeURIComponent(called))
+    }
+    if (processedUrl.includes('{phone}') && callerNum) {
+      processedUrl = processedUrl.replace(/\{phone\}/g, encodeURIComponent(callerNum))
+    }
+
+    const formattedUrl = processedUrl.startsWith('http') ? processedUrl : `https://${processedUrl}`
+
+    if (uaType !== 'mobile') {
+      const newWindow = window.open('about:blank', '_blank')
+      if (newWindow) {
+        newWindow.location.href = formattedUrl
+        store.dispatch.island.setUrlOpened(true)
+      }
+    } else {
+      eventDispatch('phone-island-url-parameter-opened-external', { formattedUrl })
+    }
+  }
+
+  useEventListener('phone-island-already-opened-external-page', () => {
+    store.dispatch.island.setUrlOpened(true)
+  })
+
+  useEventListener('phone-island-url-parameter-opened', (data) => {
+    const paramUrlInfo = store.getState().paramUrl
+
+    if (!paramUrlInfo.hasValidUrl) {
+      return
+    }
+
+    const { urlOpened } = store.getState().island
+    if (urlOpened) {
+      return
+    }
+
+    const onlyQueues = paramUrlInfo.onlyQueues || false
+
+    if (data?.direction === 'in') {
+      if (onlyQueues === true && data?.throughQueue === true) {
+        openParameterizedUrl(
+          data?.counterpartNum,
+          data?.counterpartName,
+          data?.owner,
+          data?.uniqueId
+        )
+      } else if (
+        onlyQueues === false &&
+        (data?.throughTrunk === true || data?.throughQueue === true)
+      ) {
+        openParameterizedUrl(
+          data?.counterpartNum,
+          data?.counterpartName,
+          data?.owner,
+          data?.uniqueId
+        )
+      }
+    }
+  })
+
   useEventListener('phone-island-user-status', () => {
     const userInformation = store.getState().currentUser
     console.log('User status debug informations: ', userInformation)
@@ -274,6 +392,11 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-streaming-status', () => {
     const streamingInformation = store.getState().streaming
     console.log('Streaming status debug informations: ', streamingInformation)
+  })
+
+  useEventListener('phone-island-paramurl-status', () => {
+    const paramurl = store.getState().paramUrl
+    console.log('Paramurl status debug informations: ', paramurl)
   })
 
   useEventListener('phone-island-player-force-stop', () => {
@@ -382,6 +505,60 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-conference-list-close', () => {
     store.dispatch.island.toggleConferenceList(false)
     eventDispatch('phone-island-conference-list-closed', {})
+  })
+
+  // Listen for conversations updates to handle 'answered' preference for parameterized URL
+  useEventListener('phone-island-conversations', (data: any) => {
+    // Get the current username (first key in the data object)
+    const username = Object.keys(data)[0]
+
+    if (username) {
+      const conversations = data[username].conversations
+      const paramUrlInfo = store.getState().paramUrl
+      const { urlOpened } = store.getState().island
+
+      // Only proceed if URL is valid and not already opened
+      if (!paramUrlInfo.hasValidUrl || urlOpened) {
+        return
+      }
+
+      // Check if the openParamUrlType is set to 'answered'
+      if (paramUrlInfo.openParamUrlType === 'answered') {
+        // Check if there are any conversations
+        if (conversations && Object.keys(conversations).length > 0) {
+          // Get the first conversation (usually there's only one active call)
+          const convId = Object.keys(conversations)[0]
+          const conv = conversations[convId]
+
+          // Check conditions: must be connected and incoming
+          if (conv?.connected && conv?.direction === 'in') {
+            const onlyQueues = paramUrlInfo.onlyQueues || false
+
+            // Check queue conditions based on preferences
+            if (onlyQueues === true && conv?.throughQueue === true) {
+              // Open URL only for queue calls when onlyQueues is true
+              openParameterizedUrl(
+                conv.counterpartNum,
+                conv.counterpartName,
+                conv.owner,
+                conv.uniqueId
+              )
+            } else if (
+              onlyQueues === false &&
+              (conv?.throughTrunk === true || conv?.throughQueue === true)
+            ) {
+              // Open URL for both trunk and queue calls when onlyQueues is false
+              openParameterizedUrl(
+                conv.counterpartNum,
+                conv.counterpartName,
+                conv.owner,
+                conv.uniqueId
+              )
+            }
+          }
+        }
+      }
+    }
   })
 
   return (

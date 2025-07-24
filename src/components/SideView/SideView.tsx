@@ -15,7 +15,6 @@ import { recordCurrentCall } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { useSideViewLogic } from './hooks/useSideViewLogic'
 import { SideViewButton } from './components/SideViewButton'
-import { getParamUrl } from '../../services/user'
 
 const ANIMATION_CONFIG = {
   initial: { x: -76 },
@@ -47,9 +46,6 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { isRecording } = useSelector((state: RootState) => state.currentCall)
   const { t } = useTranslation()
-  const [hasValidUrl, setHasValidUrl] = useState(false)
-  const [onlyQueues, setOnlyQueues] = useState<boolean | undefined>(undefined)
-  const [urlParam, setUrlParam] = useState<string | undefined>(undefined)
 
   const {
     videoInputDevices,
@@ -57,35 +53,12 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     canRecord,
     canShareScreen,
     canSwitchDevice,
-    showUrlButton,
     isUrlButtonEnabled,
+    hasValidUrl,
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
-  } = useSideViewLogic(uaType, onlyQueues, urlParam)
-  useEffect(() => {
-    const checkParamUrl = async () => {
-      try {
-        const paramUrlResponse: any = await getParamUrl()
-        // Verify that the response contains a valid URL (not empty)
-        const url = paramUrlResponse?.url || ''
-        const isValid = url && url.trim() !== ''
-
-        setHasValidUrl(isValid)
-        setOnlyQueues(paramUrlResponse?.only_queues)
-        setUrlParam(url)
-      } catch (error) {
-        setHasValidUrl(false)
-        setOnlyQueues(undefined)
-        setUrlParam(undefined)
-        console.error('Error fetching URL parameter:', error)
-      }
-    }
-
-    if (isVisible) {
-      checkParamUrl()
-    }
-  }, [isVisible])
+  } = useSideViewLogic(uaType)
 
   const handleRecordClick = useCallback(() => {
     recordCurrentCall(isRecording)
@@ -118,15 +91,14 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         tooltipContent: t('Tooltip.Share screen') || '',
         icon: faDisplay,
       },
-      showUrlButton &&
-        hasValidUrl &&
-        isUrlButtonEnabled && {
-          key: 'url',
-          onClick: () => closeSideViewAndLaunchEvent('openUrl'),
-          tooltipId: 'tooltip-open-url',
-          tooltipContent: t('Tooltip.Open url') || '',
-          icon: faArrowUpRightFromSquare,
-        },
+      hasValidUrl &&
+      isUrlButtonEnabled && {
+        key: 'url',
+        onClick: () => closeSideViewAndLaunchEvent('openUrl'),
+        tooltipId: 'tooltip-open-url',
+        tooltipContent: t('Tooltip.Open url') || '',
+        icon: faArrowUpRightFromSquare,
+      },
       canSwitchDevice && {
         key: 'switch-device',
         onClick: () => closeSideViewAndLaunchEvent('switchDevice'),
@@ -147,7 +119,6 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     isVideoCallButtonVisible,
     canShareScreen,
     goToScreenSharing,
-    showUrlButton,
     hasValidUrl,
     isUrlButtonEnabled,
     closeSideViewAndLaunchEvent,
@@ -156,8 +127,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
 
   const containerClassName = useMemo(
     () =>
-      `pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
-        isOpen ? 'pi-py-6' : 'pi-py-4'
+      `pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${isOpen ? 'pi-py-6' : 'pi-py-4'
       }`,
     [isOpen],
   )

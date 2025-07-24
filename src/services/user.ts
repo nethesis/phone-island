@@ -220,3 +220,28 @@ export async function unsubscribe(obj: any) {
     throw error
   }
 }
+
+export async function setIncomingCallsPreference(settingsStatus: any) {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/user/settings`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify(settingsStatus),
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const contentType = response.headers.get('content-type')
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text()
+      return text ? JSON.parse(text) : {}
+    }
+
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error updating user settings:', error)
+    throw error
+  }
+}
