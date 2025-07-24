@@ -152,27 +152,6 @@ export const Socket: FC<SocketProps> = ({
               // Handle streaming source for incoming calls
               handleStreamingSource(conv)
 
-              // Get updated user info
-              if (!isUpdatingUserInfo.current) {
-                isUpdatingUserInfo.current = true
-                getCurrentUserInfo().then((userInfo) => {
-                  if (userInfo) {
-                    dispatch.currentUser.updateCurrentUser(userInfo)
-                    if (userInfo.settings && userInfo.settings.open_param_url) {
-                      dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
-                    } else {
-                      dispatch.paramUrl.setOpenParamUrlType('never');
-                    }
-                  }
-                }).catch((error) => {
-                  console.error('Error getting current user info:', error)
-                }).finally(() => {
-                  setTimeout(() => {
-                    isUpdatingUserInfo.current = false
-                  }, 100)
-                })
-              }
-
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
                 (uaType === 'desktop' &&
@@ -180,6 +159,26 @@ export const Socket: FC<SocketProps> = ({
                     (default_device?.type === undefined && !hasOnlineNethlink()) ||
                     (!hasOnlineNethlink() && default_device?.type === 'physical')))
               ) {
+                // Get updated user info
+                if (!isUpdatingUserInfo.current) {
+                  isUpdatingUserInfo.current = true
+                  getCurrentUserInfo().then((userInfo) => {
+                    if (userInfo) {
+                      dispatch.currentUser.updateCurrentUser(userInfo)
+                      if (userInfo.settings && userInfo.settings.open_param_url) {
+                        dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
+                      } else {
+                        dispatch.paramUrl.setOpenParamUrlType('never');
+                      }
+                    }
+                  }).catch((error) => {
+                    console.error('Error getting current user info:', error)
+                  }).finally(() => {
+                    setTimeout(() => {
+                      isUpdatingUserInfo.current = false
+                    }, 100)
+                  })
+                }
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),

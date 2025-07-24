@@ -315,9 +315,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
         store.dispatch.island.setUrlOpened(true)
       }
     } else {
-      eventDispatch('phone-island-custom-link-open', { formattedUrl })
+      eventDispatch('phone-island-url-parameter-opened-external', { formattedUrl })
     }
   }
+
+  useEventListener('phone-island-already-opened-external-page', () => {
+    store.dispatch.island.setUrlOpened(true)
+  })
 
   useEventListener('phone-island-url-parameter-opened', (data) => {
     const paramUrlInfo = store.getState().paramUrl
