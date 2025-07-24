@@ -308,10 +308,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
     const formattedUrl = processedUrl.startsWith('http') ? processedUrl : `https://${processedUrl}`
 
-    const newWindow = window.open('about:blank', '_blank')
-    if (newWindow) {
-      newWindow.location.href = formattedUrl
-      store.dispatch.island.setUrlOpened(true)
+    if (uaType !== 'mobile') {
+      const newWindow = window.open('about:blank', '_blank')
+      if (newWindow) {
+        newWindow.location.href = formattedUrl
+        store.dispatch.island.setUrlOpened(true)
+      }
+    } else {
+      eventDispatch('phone-island-custom-link-open', { formattedUrl })
     }
   }
 

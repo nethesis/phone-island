@@ -53,7 +53,6 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     canRecord,
     canShareScreen,
     canSwitchDevice,
-    showUrlButton,
     isUrlButtonEnabled,
     hasValidUrl,
     goToVideoCall,
@@ -92,15 +91,14 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         tooltipContent: t('Tooltip.Share screen') || '',
         icon: faDisplay,
       },
-      showUrlButton &&
-        hasValidUrl &&
-        isUrlButtonEnabled && {
-          key: 'url',
-          onClick: () => closeSideViewAndLaunchEvent('openUrl'),
-          tooltipId: 'tooltip-open-url',
-          tooltipContent: t('Tooltip.Open url') || '',
-          icon: faArrowUpRightFromSquare,
-        },
+      hasValidUrl &&
+      isUrlButtonEnabled && {
+        key: 'url',
+        onClick: () => closeSideViewAndLaunchEvent('openUrl'),
+        tooltipId: 'tooltip-open-url',
+        tooltipContent: t('Tooltip.Open url') || '',
+        icon: faArrowUpRightFromSquare,
+      },
       canSwitchDevice && {
         key: 'switch-device',
         onClick: () => closeSideViewAndLaunchEvent('switchDevice'),
@@ -121,7 +119,6 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     isVideoCallButtonVisible,
     canShareScreen,
     goToScreenSharing,
-    showUrlButton,
     hasValidUrl,
     isUrlButtonEnabled,
     closeSideViewAndLaunchEvent,
@@ -130,8 +127,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
 
   const containerClassName = useMemo(
     () =>
-      `pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${
-        isOpen ? 'pi-py-6' : 'pi-py-4'
+      `pi-absolute pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-items-center pi-text-iconWhite dark:pi-text-iconWhiteDark -pi-mr-10 pi-right-0 -pi-z-10 pi-pointer-events-auto ${isOpen ? 'pi-py-6' : 'pi-py-4'
       }`,
     [isOpen],
   )

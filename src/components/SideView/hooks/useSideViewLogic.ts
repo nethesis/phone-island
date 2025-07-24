@@ -88,7 +88,6 @@ export const useSideViewLogic = (uaType?: string) => {
         janus.current.webRTCAdapter.browserDetails.browser !== 'safari' &&
         (permissions?.nethvoice_cti?.permissions?.screen_sharing?.value || false),
       canSwitchDevice: availableDevices?.length > 0,
-      showUrlButton: userInformation?.default_device?.type !== 'nethlink' && uaType === 'desktop',
     }),
     [
       permissions?.settings?.permissions?.recording?.value,
