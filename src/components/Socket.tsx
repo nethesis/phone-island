@@ -158,6 +158,11 @@ export const Socket: FC<SocketProps> = ({
                 getCurrentUserInfo().then((userInfo) => {
                   if (userInfo) {
                     dispatch.currentUser.updateCurrentUser(userInfo)
+                    if (userInfo.settings && userInfo.settings.open_param_url) {
+                      dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
+                    } else {
+                      dispatch.paramUrl.setOpenParamUrlType('never');
+                    }
                   }
                 }).catch((error) => {
                   console.error('Error getting current user info:', error)
