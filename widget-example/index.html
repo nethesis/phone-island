@@ -1,33 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+    <title>Phone Island Widget Integration Example</title>
+
     <!-- IMPORT THE WIDGET CSS -->
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.css"
     />
-    <!-- IMPORT THE WIDGET CSS -->
-    <title>Phone island widget</title>
-  </head>
-  <body>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .integration-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .controls button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls button.danger {
+            background-color: #dc3545;
+        }
+
+        .controls button.danger:hover {
+            background-color: #c82333;
+        }
+
+        .controls button.success {
+            background-color: #28a745;
+        }
+
+        .controls button.success:hover {
+            background-color: #218838;
+        }
+
+        #status {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .call-input {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            align-items: center;
+        }
+
+        .call-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .call-input button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .device-selector {
+            margin: 10px 0;
+        }
+
+        .device-selector select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-left: 10px;
+        }
+
+        .event-log {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .theme-selector {
+            margin: 10px 0;
+        }
+
+        .theme-selector button {
+            margin-right: 10px;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .theme-selector button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .token-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .token-info code {
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <button id="callButton">Call</button>
-    <!-- DEFINE THE PHONE ISLAND CONTAINER -->
+
+    <div class="integration-panel">
+        <h1>📱 Phone Island Widget Integration Example</h1>
+
+        <div class="token-info">
+            <strong>⚠️ Configuration Required:</strong><br>
+            Replace <code>YOUR_BASE64_ENCODED_TOKEN_HERE</code> in the phone-island div below with your actual Base64 encoded token.
+            <br><br>
+            <strong>Token Format:</strong> <code>server:username:secret:extension:token</code> (Base64 encoded)
+        </div>
+
+        <!-- Status Display -->
+        <div id="status">
+            <strong>Status:</strong> <span id="statusContent">Initializing...</span>
+        </div>
+
+        <!-- Call Input -->
+        <div class="call-input">
+            <label for="phoneNumber"><strong>Phone Number:</strong></label>
+            <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g. 200)" value="200">
+            <button id="callBtn" class="success">📞 Call</button>
+            <button id="endCallBtn" class="danger">📴 End Call</button>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+            <strong>Theme:</strong>
+            <button id="lightTheme" class="active">☀️ Light</button>
+            <button id="darkTheme">🌙 Dark</button>
+        </div>
+
+        <!-- Device Management -->
+        <div class="device-selector">
+            <strong>WebRTC Device:</strong>
+            <button id="attachDevice" class="success">🔗 Attach WebRTC</button>
+            <button id="detachDevice" class="danger">🔌 Detach WebRTC</button>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+            <button id="expandBtn">📏 Expand</button>
+            <button id="compressBtn">📐 Compress</button>
+            <button id="muteBtn">🔇 Mute</button>
+            <button id="unmuteBtn">🔊 Unmute</button>
+            <button id="holdBtn">⏸️ Hold</button>
+            <button id="unholdBtn">▶️ Unhold</button>
+            <button id="openSideview">📋 Open Menu</button>
+            <button id="closeSideview">❌ Close Menu</button>
+            <button id="checkConnection">🌐 Check Connection</button>
+            <button id="debugStatus">🐛 Debug Status</button>
+        </div>
+
+        <!-- Event Log -->
+        <div class="event-log" id="eventLog">
+            <div>📡 Event Log (real-time events will appear here)...</div>
+        </div>
+    </div>
+
+    <!-- DEFINE THE PHONE ISLAND CONTAINER WITH YOUR TOKEN -->
     <div
       class="phone-island"
-      data-config="bnYtc2ViOmZvbzI6YzI5ODFkYzZlN2FkMzMyNDZiODc4NDA1ZDg4MDE5ZTU1ZmU2ZTM3OTo5MTIxMjphZmFhNmYzYTRlYmQyNWYzZTNjYjYzYmU3Nzg1NzY1Nw=="
+      data-config="YOUR_BASE64_ENCODED_TOKEN_HERE"
       ua-type="desktop"
     ></div>
+
     <!-- IMPORT THE WIDGET JS -->
     <script
       type="text/javascript"
       src="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.js"
     ></script>
-    <!-- IMPORT THE WIDGET JS -->
+
+    <!-- INTEGRATION SCRIPT -->
     <script type="text/javascript" src="./index.js"></script>
-  </body>
+</body>
 </html>
