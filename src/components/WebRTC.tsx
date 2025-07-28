@@ -20,7 +20,6 @@ interface WebRTCProps {
   children: ReactNode
   sipExten: string
   sipSecret: string
-  hostProtocol: string
   hostName: string
   sipHost: string
   sipPort: string
@@ -30,7 +29,6 @@ interface WebRTCProps {
 }
 
 export const WebRTC: FC<WebRTCProps> = ({
-  hostProtocol, 
   hostName,
   sipExten,
   sipSecret,
@@ -64,7 +62,7 @@ export const WebRTC: FC<WebRTCProps> = ({
       }),
       callback: function () {
         const janusInstance = new janus.current({
-          server: `${hostProtocol}://${hostName}/janus`,
+          server: `https://${hostName}/janus`,
           success: () => {
             if (janusInstance.attach) {
               // Use Janus Sip Plugin
