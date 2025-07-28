@@ -33,14 +33,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   uaType,
 }: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
-  const HOST_PROTOCOL: string = 'https'
-  const HOST_NAME: string = CONFIG.length === 8 ? `${CONFIG[0]}:${CONFIG[1]}` : CONFIG[0]
-  const USERNAME: string = CONFIG.length === 8 ? CONFIG[2] : CONFIG[1]
-  const AUTH_TOKEN: string = CONFIG.length === 8 ? CONFIG[3] : CONFIG[2]
-  const SIP_EXTEN: string = CONFIG.length === 8 ? CONFIG[4] : CONFIG[3]
-  const SIP_SECRET: string = CONFIG.length === 8 ? CONFIG[5] : CONFIG[4]
-  const SIP_HOST: string = CONFIG.length === 8 ? CONFIG[6] : CONFIG[5]
-  const SIP_PORT: string = CONFIG.length === 8 ? CONFIG[7] : CONFIG[6]
+  const HOST_NAME: string = CONFIG[0]
+  const USERNAME: string = CONFIG[1]
+  const AUTH_TOKEN: string = CONFIG[2]
+  const SIP_EXTEN: string = CONFIG[3]
+  const SIP_SECRET: string = CONFIG[4]
+  const SIP_HOST: string = CONFIG[5]
+  const SIP_PORT: string = CONFIG[6]
 
   // Initialize the state to manage the reload events
   const [reload, setReload] = useState<boolean>(false)
@@ -571,7 +570,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     <>
       <Provider store={store}>
         <WebRTC
-          hostProtocol={HOST_PROTOCOL}
           hostName={HOST_NAME}
           sipExten={SIP_EXTEN}
           sipSecret={SIP_SECRET}
@@ -581,9 +579,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           reloadedCallback={() => setReloadedWebRTC(true)}
           uaType={uaType}
         >
-          <RestAPI hostProtocol={HOST_PROTOCOL} hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
+          <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket
-              hostProtocol={HOST_PROTOCOL}
               hostName={HOST_NAME}
               username={USERNAME}
               authToken={AUTH_TOKEN}
