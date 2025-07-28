@@ -406,6 +406,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   useEventListener('phone-island-sideview-open', () => {
     store.dispatch.island.toggleSideViewVisible(true)
+    store.dispatch.island.setUrlOpened(false)
     eventDispatch('phone-island-sideview-opened', {})
   })
 
@@ -511,8 +512,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-conversations', (data: any) => {
     // Get the current username (first key in the data object)
     const username = Object.keys(data)[0]
+    const currentUsernameInformation: any = store.getState().currentUser?.username
 
-    if (username) {
+    if (username === currentUsernameInformation) {
       const conversations = data[username].conversations
       const paramUrlInfo = store.getState().paramUrl
       const { urlOpened } = store.getState().island
