@@ -10,20 +10,20 @@ import { getAllExtensions } from '../services/astproxy'
 import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
 
-export const RestAPI: FC<RestAPIProps> = ({ hostProtocol, hostName, username, authToken, children }) => {
+export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
   const { fetchReady } = useSelector((state: RootState) => state.fetchDefaults)
 
   useEffect(() => {
-    if (authToken && hostProtocol && hostName) {
+    if (authToken && hostName) {
       // Initialize API defaults
-      dispatch.fetchDefaults.updateFetchBaseURL(`${hostProtocol}://${hostName}/api`)
+      dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/api`)
       dispatch.fetchDefaults.updateFetchHeaders({
         Authorization: `Bearer ${authToken}`,
       })
       dispatch.fetchDefaults.setFetchReady()
     }
-  }, [authToken, hostProtocol, hostName])
+  }, [authToken, hostName])
 
   useEffect(() => {
     // Get all extensions info and set to store
@@ -84,7 +84,6 @@ export const RestAPI: FC<RestAPIProps> = ({ hostProtocol, hostName, username, au
 
 interface RestAPIProps {
   children: ReactNode
-  hostProtocol: string
   hostName: string
   username: string
   authToken: string
