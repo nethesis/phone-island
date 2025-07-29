@@ -9,6 +9,7 @@ const defaultState: ParamUrlTypes = {
   onlyQueues: false,
   hasValidUrl: false,
   openParamUrlType: 'never',
+  throughTrunk: false,
 }
 
 export const paramUrl = createModel<RootModel>()({
@@ -16,13 +17,21 @@ export const paramUrl = createModel<RootModel>()({
   reducers: {
     setParamUrl: (
       state,
-      payload: { url?: string; onlyQueues?: boolean; hasValidUrl?: boolean; openParamUrlType?: string },
+      payload: {
+        url?: string
+        onlyQueues?: boolean
+        hasValidUrl?: boolean
+        openParamUrlType?: string
+        throughTrunk?: boolean
+      },
     ) => {
       return {
         url: payload.url || '',
         onlyQueues: payload.onlyQueues || false,
         hasValidUrl: payload.hasValidUrl || false,
         openParamUrlType: payload.openParamUrlType || state.openParamUrlType,
+        throughTrunk:
+          payload.throughTrunk !== undefined ? payload.throughTrunk : state.throughTrunk,
       }
     },
     setOpenParamUrlType: (state, payload: string) => {
@@ -31,8 +40,16 @@ export const paramUrl = createModel<RootModel>()({
         openParamUrlType: payload,
       }
     },
+    setThroughTrunk: (state, payload: boolean) => {
+      return {
+        ...state,
+        throughTrunk: payload,
+      }
+    },
     reset: () => {
-      return defaultState
+      return {
+        ...defaultState,
+      }
     },
   },
 })
@@ -42,4 +59,5 @@ interface ParamUrlTypes {
   onlyQueues: boolean
   hasValidUrl: boolean
   openParamUrlType: string
+  throughTrunk: boolean
 }

@@ -15,6 +15,7 @@ import { getParamUrl } from './services/user'
 import { isEmpty } from './utils/genericFunctions/isEmpty'
 import { checkInternetConnection } from './utils/genericFunctions/checkConnection'
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
+import { isFromTrunk } from './lib/user/extensions'
 
 interface PhoneIslandProps {
   dataConfig: string
@@ -125,7 +126,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           onlyQueues: paramUrlResponse?.only_queues || false,
           hasValidUrl: isValid,
         })
-
       } catch (error) {
         console.error('Error fetching URL parameter:', error)
         store.dispatch.paramUrl.setParamUrl({
@@ -336,6 +336,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     }
 
     const onlyQueues = paramUrlInfo.onlyQueues || false
+    const throughTrunk = isFromTrunk(data?.counterpartNum)
+    store.dispatch.paramUrl.setThroughTrunk(throughTrunk)
 
     if (data?.direction === 'in') {
       if (onlyQueues === true && data?.throughQueue === true) {
@@ -343,17 +345,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           data?.counterpartNum,
           data?.counterpartName,
           data?.owner,
-          data?.uniqueId
+          data?.uniqueId,
         )
-      } else if (
-        onlyQueues === false &&
-        (data?.throughTrunk === true || data?.throughQueue === true)
-      ) {
+      } else if (onlyQueues === false && (throughTrunk === true || data?.throughQueue === true)) {
         openParameterizedUrl(
           data?.counterpartNum,
           data?.counterpartName,
           data?.owner,
-          data?.uniqueId
+          data?.uniqueId,
         )
       }
     }
@@ -441,6 +440,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
       store.dispatch.island.resetIslandStore()
+      store.dispatch.paramUrl.setThroughTrunk(false)
     }
   })
 
@@ -535,6 +535,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           // Check conditions: must be connected and incoming
           if (conv?.connected && conv?.direction === 'in') {
             const onlyQueues = paramUrlInfo.onlyQueues || false
+            const calculatedThroughTrunk = isFromTrunk(conv.counterpartNum)
+            // Update throughTrunk in paramUrl store
+            store.dispatch.paramUrl.setThroughTrunk(calculatedThroughTrunk)
 
             // Check queue conditions based on preferences
             if (onlyQueues === true && conv?.throughQueue === true) {
@@ -543,18 +546,18 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
                 conv.counterpartNum,
                 conv.counterpartName,
                 conv.owner,
-                conv.uniqueId
+                conv.uniqueId,
               )
             } else if (
               onlyQueues === false &&
-              (conv?.throughTrunk === true || conv?.throughQueue === true)
+              (calculatedThroughTrunk === true || conv?.throughQueue === true)
             ) {
               // Open URL for both trunk and queue calls when onlyQueues is false
               openParameterizedUrl(
                 conv.counterpartNum,
                 conv.counterpartName,
                 conv.owner,
-                conv.uniqueId
+                conv.uniqueId,
               )
             }
           }

@@ -4,6 +4,7 @@
 import { UserExtensionTypes } from '../../types'
 import { store } from '../../store'
 import { ExtensionTypes } from '../../types'
+import { isFromTrunk } from '../phone/trunk'
 
 /**
  * Retrive the webrtc extensions for currentUser extensions
@@ -14,7 +15,9 @@ export function getWebrtcExtensions(): UserExtensionTypes | UserExtensionTypes[]
   // Get endpoints currentUser store
   const { endpoints } = store.getState().currentUser
   if (endpoints?.extension && endpoints.extension.length > 0) {
-    const webrtcExtensions = endpoints?.extension.filter((extension) => extension?.type === 'webrtc' || extension?.type === 'nethlink')
+    const webrtcExtensions = endpoints?.extension.filter(
+      (extension) => extension?.type === 'webrtc' || extension?.type === 'nethlink',
+    )
     return webrtcExtensions.length === 1
       ? webrtcExtensions[0]
       : webrtcExtensions.length > 1
@@ -61,3 +64,5 @@ export function getExtensionsList(): string[] {
   const { endpoints } = store.getState().currentUser
   return endpoints?.extension.map((extension) => extension.id) || []
 }
+
+export { isFromTrunk }

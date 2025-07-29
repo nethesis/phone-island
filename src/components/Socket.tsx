@@ -37,6 +37,7 @@ import { checkMediaPermissions } from '../lib/devices/devices'
 import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
 import { subscribe } from '../services/user'
+import { isFromTrunk } from '../lib/user/extensions'
 
 interface SocketProps {
   children: ReactNode
@@ -103,10 +104,9 @@ export const Socket: FC<SocketProps> = ({
         const sourceId = getStreamingSourceId(conv.counterpartNum)
         if (sourceId) {
           // Subscribe to streaming updates
-          subscribe({ id: sourceId })
-            .catch((error) =>
-              console.error('Error subscribing to streaming source:', error),
-            )
+          subscribe({ id: sourceId }).catch((error) =>
+            console.error('Error subscribing to streaming source:', error),
+          )
         }
       }
     }
@@ -162,22 +162,25 @@ export const Socket: FC<SocketProps> = ({
                 // Get updated user info
                 if (!isUpdatingUserInfo.current) {
                   isUpdatingUserInfo.current = true
-                  getCurrentUserInfo().then((userInfo) => {
-                    if (userInfo) {
-                      dispatch.currentUser.updateCurrentUser(userInfo)
-                      if (userInfo.settings && userInfo.settings.open_param_url) {
-                        dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
-                      } else {
-                        dispatch.paramUrl.setOpenParamUrlType('never');
+                  getCurrentUserInfo()
+                    .then((userInfo) => {
+                      if (userInfo) {
+                        dispatch.currentUser.updateCurrentUser(userInfo)
+                        if (userInfo.settings && userInfo.settings.open_param_url) {
+                          dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url)
+                        } else {
+                          dispatch.paramUrl.setOpenParamUrlType('never')
+                        }
                       }
-                    }
-                  }).catch((error) => {
-                    console.error('Error getting current user info:', error)
-                  }).finally(() => {
-                    setTimeout(() => {
-                      isUpdatingUserInfo.current = false
-                    }, 100)
-                  })
+                    })
+                    .catch((error) => {
+                      console.error('Error getting current user info:', error)
+                    })
+                    .finally(() => {
+                      setTimeout(() => {
+                        isUpdatingUserInfo.current = false
+                      }, 100)
+                    })
                 }
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
@@ -186,12 +189,12 @@ export const Socket: FC<SocketProps> = ({
                   incomingSocket: true,
                   incoming: true,
                   username:
-                    `${extensions &&
-                    extensions[conv.counterpartNum] &&
-                    extensions[conv.counterpartNum].username
+                    `${
+                      extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
                     }` || '',
                   ownerExtension: conv.owner,
-
                 })
                 let callInformations = {
                   conversationId: conv.id,
@@ -199,9 +202,10 @@ export const Socket: FC<SocketProps> = ({
                   counterpartNum: `${conv.counterpartNum}`,
                   ownerExtension: conv.owner,
                   username:
-                    `${extensions &&
-                    extensions[conv.counterpartNum] &&
-                    extensions[conv.counterpartNum].username
+                    `${
+                      extensions &&
+                      extensions[conv.counterpartNum] &&
+                      extensions[conv.counterpartNum].username
                     }` || '',
                   chDest: conv?.chDest || {},
                   chSource: conv?.chSource || {},
@@ -220,6 +224,12 @@ export const Socket: FC<SocketProps> = ({
                 const { urlOpened } = store.getState().island
 
                 if (openParamUrlType === 'ringing' && !urlOpened) {
+                  // Calculate throughTrunk based on counterpartNum
+                  const calculatedThroughTrunk = isFromTrunk(conv.counterpartNum)
+
+                  // Update throughTrunk in paramUrl store
+                  store.dispatch.paramUrl.setThroughTrunk(calculatedThroughTrunk)
+
                   store.dispatch.island.setUrlOpened(false)
                   eventDispatch('phone-island-url-parameter-opened', {
                     counterpartNum: conv.counterpartNum,
@@ -227,9 +237,9 @@ export const Socket: FC<SocketProps> = ({
                     owner: conv.owner,
                     uniqueId: conv.uniqueId,
                     throughQueue: conv.throughQueue,
-                    throughTrunk: conv.throughTrunk,
+                    throughTrunk: calculatedThroughTrunk,
                     direction: conv.direction,
-                    connected: conv.connected
+                    connected: conv.connected,
                   })
                 }
               }
@@ -254,9 +264,10 @@ export const Socket: FC<SocketProps> = ({
                     number: `${conv.counterpartNum}`,
                     ownerExtension: conv.owner,
                     username:
-                      `${extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
+                      `${
+                        extensions &&
+                        extensions[conv.counterpartNum] &&
+                        extensions[conv.counterpartNum].username
                       }` || '',
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
@@ -327,9 +338,10 @@ export const Socket: FC<SocketProps> = ({
                     displayName: getDisplayName(conv),
                     number: `${conv?.counterpartNum}`,
                     username:
-                      `${extensions &&
-                      extensions[conv?.counterpartNum] &&
-                      extensions[conv?.counterpartNum].username
+                      `${
+                        extensions &&
+                        extensions[conv?.counterpartNum] &&
+                        extensions[conv?.counterpartNum].username
                       }` || '',
                   })
                 }
