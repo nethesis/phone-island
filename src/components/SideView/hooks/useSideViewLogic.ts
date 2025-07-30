@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../../store'
 import { getAvailableDevices } from '../../../utils/deviceUtils'
 import JanusLib from '../../../lib/webrtc/janus.js'
+import { isFromTrunk } from '../../../lib/user/extensions'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
 
@@ -119,7 +120,7 @@ export const useSideViewLogic = (uaType?: string) => {
         return true
       } else if (
         !paramUrlData.onlyQueues &&
-        (conversationData?.throughTrunk || conversationData?.throughQueue)
+        (isFromTrunk(conversationData.counterpartNum) || conversationData?.throughQueue)
       ) {
         return true
       }
