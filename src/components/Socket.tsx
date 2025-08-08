@@ -405,6 +405,7 @@ export const Socket: FC<SocketProps> = ({
         transports: ['websocket'],
         reconnection: true,
         reconnectionDelay: 2000,
+        path: '/api/ws',
       })
 
       // save websocket to store
