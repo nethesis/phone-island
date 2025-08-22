@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.styleTransformValues=function(e){var t=window.getComputedStyle(e).transform;if("none"===t||void 0===t)return{x:0,y:0,z:0};var r=t.includes("3d")?"3d":"2d",d=t.match(/matrix.*\((.+)\)/)[1].split(", ");return"2d"===r?{x:d[4],y:d[5],z:0}:"3d"===r?{x:d[12],y:d[13],z:d[14]}:void 0};
+//# sourceMappingURL=styleTransformValues.js.map

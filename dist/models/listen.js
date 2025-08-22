@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("../node_modules/@rematch/core/dist/core.esm.js"),t={isListen:!1,isListenExtension:"",isIntrude:!1,isIntrudeExtension:""},s=e.createModel()({state:t,reducers:{setUpdateListenStatus:function(e,t,s){return e.isListen=t,e.isListenExtension=s,e},setUpdateIntrudeStatus:function(e,t,s){return e.isIntrude=t,e.isIntrudeExtension=s,e},reset:function(){return t}}});exports.listen=s;
+//# sourceMappingURL=listen.js.map

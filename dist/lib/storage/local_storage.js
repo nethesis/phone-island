@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),require("react");var e=require("../../utils/genericFunctions/localStorage.js");require("../../store/index.js");exports.loadCache=function(t,r){var c=(e.getJSONItem("caches-".concat(r))||{})[t];if(!(c&&c._expiration&&(new Date).getTime()>c._expiration))return c},exports.saveCache=function(t,r,c,a){if(c){var i=e.getJSONItem("caches-".concat(c))||{},o=r;o._expiration=a,i[t]=o,e.setJSONItem("caches-".concat(c),i)}};
+//# sourceMappingURL=local_storage.js.map

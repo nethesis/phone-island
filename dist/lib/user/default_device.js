@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("../../store/index.js");exports.isPhysical=function(){var t=e.store.getState().currentUser.default_device;return"physical"===(null==t?void 0:t.type)},exports.isWebRTC=function(){var t=e.store.getState().currentUser.default_device;return"webrtc"===(null==t?void 0:t.type)||"nethlink"===(null==t?void 0:t.type)};
+//# sourceMappingURL=default_device.js.map

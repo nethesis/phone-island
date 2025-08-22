@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("react"),t=require("./useIsomorphicLayoutEffect.js");exports.useEventListener=function(r,n,u){void 0===u&&(u=window);var i=e.useRef();t.useIsomorphicLayoutEffect((function(){i.current=n}),[n]),e.useEffect((function(){if(u&&u.addEventListener){var e=function(e){return i.current(e.detail)};return u.addEventListener(r,e),function(){u.removeEventListener(r,e)}}}),[r,u])};
+//# sourceMappingURL=useEventListener.js.map

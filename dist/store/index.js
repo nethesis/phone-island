@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("../node_modules/@rematch/core/dist/core.esm.js"),s=require("../models/index.js"),r=require("../node_modules/@rematch/immer/dist/immer.esm.js"),m=require("../node_modules/@rematch/select/dist/select.esm.js");require("../node_modules/immer/dist/immer.esm.mjs.js").setAutoFreeze(!1);var t=e.init({models:s.models,plugins:[r.default(),m.default()]});exports.store=t;
+//# sourceMappingURL=index.js.map

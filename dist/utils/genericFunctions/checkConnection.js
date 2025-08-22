@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var e=require("../../node_modules/tslib/tslib.es6.js");exports.checkInternetConnection=function(){return e.__awaiter(void 0,void 0,void 0,(function(){return e.__generator(this,(function(e){switch(e.label){case 0:return e.trys.push([0,2,,3]),[4,fetch("https://www.google.com",{mode:"no-cors"})];case 1:return e.sent(),[2,!0];case 2:return e.sent(),[2,!1];case 3:return[2]}}))}))};
+//# sourceMappingURL=checkConnection.js.map

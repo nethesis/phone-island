@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});exports.__exports={};
+//# sourceMappingURL=use-sync-external-store-shim.development.js.map
