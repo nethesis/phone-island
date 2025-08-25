@@ -1451,3 +1451,26 @@ Get phone-island resize information
   "padding": "24px"
 }
 ```
+
+### User informations Events
+
+#### `phone-island-user-informations-update`
+Indicates new informations about main user
+
+```json
+{
+  "name": "test",
+  "username": "user",
+  "mainPresence": "online",
+  "presence": "online",
+  "endpoints": {},
+  "presenceOnBusy": "callforward",
+  "presenceOnUnavailable": "online",
+  "recallOnBusy": "disabled",
+  "profile": {},
+  "default_device": {},
+  "lkhash": "",
+  "proxy_fqdn": "",
+  "settings": {}
+}
+```

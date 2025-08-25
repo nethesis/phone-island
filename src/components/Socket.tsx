@@ -166,6 +166,7 @@ export const Socket: FC<SocketProps> = ({
                     .then((userInfo) => {
                       if (userInfo) {
                         dispatch.currentUser.updateCurrentUser(userInfo)
+                        eventDispatch('phone-island-user-informations-update', { ...userInfo })
                         if (userInfo.settings && userInfo.settings.open_param_url) {
                           dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url)
                         } else {

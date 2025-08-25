@@ -9,6 +9,7 @@ import { Dispatch, RootState } from '../store'
 import { getAllExtensions } from '../services/astproxy'
 import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
+import { eventDispatch } from '../utils'
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -45,13 +46,13 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
       const userInfo = await getCurrentUserInfo()
       if (userInfo) {
         dispatch.currentUser.updateCurrentUser(userInfo)
+        eventDispatch('phone-island-user-informations-update', { ...userInfo })
         dispatch.currentUser.setCurrentUserReady(true)
-
         // Update open param URL type if it exists in paramurl store
         if (userInfo.settings && userInfo.settings.open_param_url) {
-          dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url);
+          dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url)
         } else {
-          dispatch.paramUrl.setOpenParamUrlType('never');
+          dispatch.paramUrl.setOpenParamUrlType('never')
         }
 
         // Inizialize all extensions after user initialization
