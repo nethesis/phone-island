@@ -54,8 +54,9 @@ export function dispatchExtensions(event: ExtensionTypes) {
  * The dispatch function for the extenUpdate event
  *
  * @param event The extenUpdate event from socket
+ * @param extensionType The type of the extension (webrtc, mobile, nethlink, physical)
  */
-export function dispatchConversations(event: ExtensionTypes) {
+export function dispatchConversations(event: ExtensionTypes, extensionType?: string) {
   const data: any = {
     [event.username]: {
       conversations: event?.conversations,
@@ -68,6 +69,7 @@ export function dispatchConversations(event: ExtensionTypes) {
       ip: event?.ip,
       exten: event?.exten,
       name: event?.name,
+      extensionType: extensionType,
     },
   }
   // Dispatch the event on window for external handlers
