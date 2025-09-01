@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC } from 'react'
+import React, { type FC, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,8 @@ import {
   faMicrophoneSlash,
   faUserPlus,
   faUsers,
+  faVolumeHigh,
+  faVolumeXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch } from '../../utils'
 import Timer from '../CallView/Timer'
@@ -22,13 +24,14 @@ import { joinConference, muteAllUsersConference } from '../../lib/phone/call'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import { AudioBars } from '../AudioBars'
 import AvatarGroup from '../AvatarGroup'
+import { muteCurrentCall, unmuteCurrentCall } from '../../lib/phone/call'
 
 export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
   const { isOwnerInside, isConferenceMuted, conferenceStartTime, conferenceId, usersList } =
     useSelector((state: RootState) => state.conference)
   const { view, sideViewIsVisible, isOpen } = useSelector((state: RootState) => state.island)
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
-  const { paused } = useSelector((state: RootState) => state.currentCall)
+  const { paused, muted } = useSelector((state: RootState) => state.currentCall)
   const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
 
@@ -57,6 +60,10 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
       joinConference()
     }, 800)
   }
+
+  const toggleMute = useCallback(() => {
+    muted ? unmuteCurrentCall() : muteCurrentCall()
+  }, [muted])
 
   return (
     <>
@@ -109,6 +116,19 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                 <>
                   <Button
                     variant='default'
+                    active={muted}
+                    onClick={toggleMute}
+                    data-tooltip-id='tooltip-mute'
+                    data-tooltip-content={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
+                  >
+                    {muted ? (
+                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
+                    ) : (
+                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
+                    )}
+                  </Button>
+                  <Button
+                    variant='default'
                     active={isConferenceMuted ? true : false}
                     onClick={() => handleMuteParticipant()}
                     data-tooltip-id='tooltip-all-user-muted'
@@ -119,9 +139,9 @@ export const WaitingConferenceView: FC<WaitingConferenceViewProps> = () => {
                     }
                   >
                     {isConferenceMuted ? (
-                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophoneSlash} />
+                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVolumeXmark} />
                     ) : (
-                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faMicrophone} />
+                      <FontAwesomeIcon className='pi-h-6 pi-w-6' icon={faVolumeHigh} />
                     )}
                   </Button>
                   <Button

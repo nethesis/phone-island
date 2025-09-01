@@ -511,7 +511,8 @@ export const Socket: FC<SocketProps> = ({
             (extensionType === 'physical' || extensionType === 'mobile')) ||
           res?.cause === 'user_busy' ||
           res?.cause === 'not_defined' ||
-          res?.cause === 'call_rejected'
+          res?.cause === 'call_rejected' ||
+          res?.cause === 'interworking'
         ) {
           // Reset phone island visibility after 2 seconds to avoid glitches
           setTimeout(() => {
@@ -582,6 +583,7 @@ export const Socket: FC<SocketProps> = ({
         const { extensions }: any = store.getState().users
         const deviceMap: any = {}
 
+        const userInformation = store.getState().currentUser
         // Create a map of extensions for each user
         for (const key in extensions) {
           const user: any = extensions[key].username
@@ -598,6 +600,17 @@ export const Socket: FC<SocketProps> = ({
 
         // Initialize conversation
         let conv = res.conversations[Object.keys(res.conversations)[0]] || {}
+
+        // Check if this is a mobile extension call for the current user
+        let isMobileExtensionCall = false
+        if (res?.username === username && !isEmpty(conv) && conv?.owner) {
+          const matchingExtension = userInformation?.endpoints?.extension?.find(
+            (ext: any) => ext.id === conv.owner,
+          )
+          if (matchingExtension && matchingExtension.type === 'mobile') {
+            isMobileExtensionCall = true
+          }
+        }
 
         // Update all extensions and send the dispatch event
         dispatchExtensions(res)
@@ -621,12 +634,15 @@ export const Socket: FC<SocketProps> = ({
           if (!hasNonEmptyConversation) {
             // Conversation is empty and there is no conversation for the user
             dispatchConversations(res)
+          } else {
+            // Dispatch conversation event
+            dispatchConversations(res)
           }
-        } else {
-          // Dispatch conversation event
-          dispatchConversations(res)
         }
 
+        if (isMobileExtensionCall) {
+          store.dispatch.island.toggleAvoidToShow(true)
+        }
         // Handle only the events of the user
         if (res.username === username) {
           handleCurrentUserEvents(res, conv)
