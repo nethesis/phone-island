@@ -495,7 +495,7 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('extenHangup', (res: any) => {
         const { endpoints, username } = store.getState().currentUser
         const { isActive, conferenceStartedFrom } = store.getState().conference
-        const { view } = store.getState().island
+        const { view, previewCallFromMobileOrNethlink } = store.getState().island
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
@@ -509,6 +509,9 @@ export const Socket: FC<SocketProps> = ({
         if (
           (res.cause === 'normal_clearing' &&
             (extensionType === 'physical' || extensionType === 'mobile')) ||
+          (res.cause === 'normal_clearing' &&
+            extensionType === 'webrtc' &&
+            previewCallFromMobileOrNethlink) ||
           res?.cause === 'user_busy' ||
           res?.cause === 'not_defined' ||
           res?.cause === 'call_rejected' ||
@@ -517,6 +520,7 @@ export const Socket: FC<SocketProps> = ({
           // Reset phone island visibility after 2 seconds to avoid glitches
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
+            store.dispatch.island.setPreviewCallFromMobileOrNethlink(false)
           }, 500)
           if (isActive && conferenceStartedFrom !== username) {
             store.dispatch.conference.resetConference()
@@ -570,6 +574,8 @@ export const Socket: FC<SocketProps> = ({
         ) {
           // Avoid to show phone island in case of answer from physical or mobile device
           store.dispatch.island.toggleAvoidToShow(true)
+          // Set the preview call flag
+          store.dispatch.island.setPreviewCallFromMobileOrNethlink(true)
           // Launch an event to advert the user that the call it's answered from another device
           eventDispatch('phone-island-call-answered', { extensionType })
         }
@@ -642,6 +648,7 @@ export const Socket: FC<SocketProps> = ({
 
         if (isMobileExtensionCall) {
           store.dispatch.island.toggleAvoidToShow(true)
+          store.dispatch.island.setPreviewCallFromMobileOrNethlink(true)
         }
         // Handle only the events of the user
         if (res.username === username) {
