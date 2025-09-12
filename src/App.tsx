@@ -172,7 +172,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           eventDispatch('phone-island-call-end', {})
           store.dispatch.island.toggleAvoidToShow(false)
         })
-    }, 500)
+    }, 1000)
   })
 
   // Listen for the operator status change
