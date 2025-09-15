@@ -640,9 +640,6 @@ export const Socket: FC<SocketProps> = ({
           if (!hasNonEmptyConversation) {
             // Conversation is empty and there is no conversation for the user
             dispatchConversations(res)
-          } else {
-            // Dispatch conversation event
-            dispatchConversations(res)
           }
         }
 
