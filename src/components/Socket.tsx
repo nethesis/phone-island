@@ -641,6 +641,9 @@ export const Socket: FC<SocketProps> = ({
             // Conversation is empty and there is no conversation for the user
             dispatchConversations(res)
           }
+        } else if (!isMobileExtensionCall) {
+          // Dispatch conversation event
+          dispatchConversations(res)
         }
 
         if (isMobileExtensionCall) {
