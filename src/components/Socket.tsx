@@ -646,7 +646,7 @@ export const Socket: FC<SocketProps> = ({
           dispatchConversations(res)
         }
 
-        if (isMobileExtensionCall) {
+        if (isMobileExtensionCall && res?.status === 'busy' && res?.username === username) {
           store.dispatch.island.toggleAvoidToShow(true)
           store.dispatch.island.setPreviewCallFromMobileOrNethlink(true)
         }
