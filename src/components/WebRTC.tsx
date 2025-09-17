@@ -13,7 +13,7 @@ import { checkMediaPermissions } from '../lib/devices/devices'
 import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
-import { eventDispatch, useEventListener } from '../utils'
+import { eventDispatch, useEventListener, getJSONItem } from '../utils'
 import { isPhysical } from '../lib/user/default_device'
 
 interface WebRTCProps {
@@ -531,6 +531,19 @@ export const WebRTC: FC<WebRTCProps> = ({
                       janus.current.attachMediaStream
                     ) {
                       janus.current.attachMediaStream(remoteAudioElement.current, stream)
+
+                      // Apply saved audio output device if available
+                      const defaultAudioOutputDevice: any = getJSONItem('phone-island-audio-output-device')
+
+                      if (defaultAudioOutputDevice?.deviceId) {
+                        remoteAudioElement.current.setSinkId(defaultAudioOutputDevice.deviceId)
+                          .then(() => {
+                            console.info('Audio output device applied successfully to new stream:', defaultAudioOutputDevice.deviceId)
+                          })
+                          .catch((err) => {
+                            console.warn('Failed to apply saved audio output device to new stream:', err)
+                          })
+                      }
                     }
                     // Save the new audio stream to the store
                     store.dispatch.webrtc.updateRemoteAudioStream(stream)

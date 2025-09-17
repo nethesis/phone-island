@@ -146,33 +146,88 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   }, [firstRender])
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
-    if (!firstAudioOutputInit) {
-      store.dispatch.island.setIslandView(null)
-      store.dispatch.island.toggleAvoidToShow(true)
-      eventDispatch('phone-island-call-start', { number: '*43' })
+    const trySetSinkId = async () => {
+      const remoteAudioElement: any = store.getState().player.remoteAudio
+
+      if (!remoteAudioElement?.current) {
+        console.warn('Remote audio element not available')
+        return
+      }
+
+      try {
+        // Try to set sink ID directly first (works if audio element is already active)
+        await remoteAudioElement.current.setSinkId(data.deviceId)
+        console.info('Default audio output device changed successfully!')
+
+        // Save device to localStorage
+        setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+        eventDispatch('phone-island-audio-output-changed', {})
+
+      } catch (err) {
+        console.log('Direct setSinkId failed, trying with temporary stream:', err)
+
+        try {
+          // Create a temporary silent audio stream to activate the audio element
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+          const oscillator = audioContext.createOscillator()
+          const gainNode = audioContext.createGain()
+
+          // Create silent audio
+          oscillator.frequency.setValueAtTime(440, audioContext.currentTime)
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime) // Silent
+
+          oscillator.connect(gainNode)
+
+          // Get MediaStream from audio context
+          const destination = audioContext.createMediaStreamDestination()
+          gainNode.connect(destination)
+
+          // Set the stream to the audio element
+          remoteAudioElement.current.srcObject = destination.stream
+
+          // Start the oscillator
+          oscillator.start()
+
+          // Try setSinkId again after a short delay
+          setTimeout(async () => {
+            try {
+              await remoteAudioElement.current.setSinkId(data.deviceId)
+              console.info('Default audio output device changed successfully with temporary stream!')
+
+              // Clean up temporary stream
+              oscillator.stop()
+              audioContext.close()
+              remoteAudioElement.current.srcObject = null
+
+              // Save device to localStorage
+              setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+              eventDispatch('phone-island-audio-output-changed', {})
+
+            } catch (finalErr) {
+              console.error('Final setSinkId attempt failed:', finalErr)
+
+              // Clean up on failure
+              oscillator.stop()
+              audioContext.close()
+              remoteAudioElement.current.srcObject = null
+
+              // Save device preference anyway for future calls
+              setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+              eventDispatch('phone-island-audio-output-changed', {})
+            }
+          }, 100)
+
+        } catch (streamErr) {
+          console.error('Failed to create temporary audio stream:', streamErr)
+
+          // Fallback: save device preference for future calls
+          setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
+          eventDispatch('phone-island-audio-output-changed', {})
+        }
+      }
     }
 
-    setTimeout(() => {
-      const remoteAudioElement: any = store.getState().player.remoteAudio
-      // set audio output
-      remoteAudioElement?.current
-        .setSinkId(data.deviceId)
-        .then(function () {
-          console.info('Default audio output device change with success!')
-          // set device to localstorage
-          setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
-
-          // dispatch event
-          eventDispatch('phone-island-audio-output-changed', {})
-          eventDispatch('phone-island-call-end', {})
-          store.dispatch.island.toggleAvoidToShow(false)
-        })
-        .catch(function (err) {
-          console.error('Default audio output device change error:', err)
-          eventDispatch('phone-island-call-end', {})
-          store.dispatch.island.toggleAvoidToShow(false)
-        })
-    }, 500)
+    trySetSinkId()
   })
 
   // Listen for the operator status change
