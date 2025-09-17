@@ -99,14 +99,48 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-detached', {})
   })
 
-  useEventListener('phone-island-audio-input-change', (data: DeviceInputOutputTypes) => {
-    setJSONItem('phone-island-audio-input-device', { deviceId: data.deviceId })
+  useEventListener('phone-island-audio-input-change', async (data: DeviceInputOutputTypes) => {
+    let targetDeviceId = data.deviceId
+
+    // Check if the requested device is available
+    if (targetDeviceId && targetDeviceId !== 'default') {
+      const isAvailable = await isAudioInputDeviceAvailable(targetDeviceId)
+
+      if (!isAvailable) {
+        console.warn(`Audio input device ${targetDeviceId} not available, falling back to default device`)
+        targetDeviceId = await getDefaultAudioInputDevice()
+      }
+    }
+
+    // Save the final device choice
+    setJSONItem('phone-island-audio-input-device', { deviceId: targetDeviceId })
     eventDispatch('phone-island-audio-input-changed', {})
+
+    if (targetDeviceId !== data.deviceId) {
+      console.info(`Audio input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+    }
   })
 
-  useEventListener('phone-island-video-input-change', (data: DeviceInputOutputTypes) => {
-    setJSONItem('phone-island-video-input-device', { deviceId: data.deviceId })
+  useEventListener('phone-island-video-input-change', async (data: DeviceInputOutputTypes) => {
+    let targetDeviceId = data.deviceId
+
+    // Check if the requested device is available
+    if (targetDeviceId && targetDeviceId !== 'default') {
+      const isAvailable = await isVideoInputDeviceAvailable(targetDeviceId)
+
+      if (!isAvailable) {
+        console.warn(`Video input device ${targetDeviceId} not available, falling back to default device`)
+        targetDeviceId = await getDefaultVideoInputDevice()
+      }
+    }
+
+    // Save the final device choice
+    setJSONItem('phone-island-video-input-device', { deviceId: targetDeviceId })
     eventDispatch('phone-island-video-input-changed', {})
+
+    if (targetDeviceId !== data.deviceId) {
+      console.info(`Video input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+    }
   })
 
   const [firstRender, setFirstRender] = useState(true)
@@ -180,6 +214,84 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       return defaultDevice ? defaultDevice.deviceId : 'default'
     } catch (err) {
       console.warn('Error getting default device:', err)
+      return 'default'
+    }
+  }
+
+  // Helper function to check if an audio input device is available
+  const isAudioInputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return false
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+
+      return audioInputDevices.some(device => device.deviceId === deviceId)
+    } catch (err) {
+      console.warn('Error checking audio input device availability:', err)
+      return false
+    }
+  }
+
+  // Helper function to get default audio input device
+  const getDefaultAudioInputDevice = async (): Promise<string> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return 'default'
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+
+      // Find the default device (usually has deviceId 'default' or is the first one)
+      const defaultDevice = audioInputDevices.find(device =>
+        device.deviceId === 'default' || device.deviceId === ''
+      ) || audioInputDevices[0]
+
+      return defaultDevice ? defaultDevice.deviceId : 'default'
+    } catch (err) {
+      console.warn('Error getting default audio input device:', err)
+      return 'default'
+    }
+  }
+
+  // Helper function to check if a video input device is available
+  const isVideoInputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return false
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+
+      return videoInputDevices.some(device => device.deviceId === deviceId)
+    } catch (err) {
+      console.warn('Error checking video input device availability:', err)
+      return false
+    }
+  }
+
+  // Helper function to get default video input device
+  const getDefaultVideoInputDevice = async (): Promise<string> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return 'default'
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+
+      // Find the default device (usually has deviceId 'default' or is the first one)
+      const defaultDevice = videoInputDevices.find(device =>
+        device.deviceId === 'default' || device.deviceId === ''
+      ) || videoInputDevices[0]
+
+      return defaultDevice ? defaultDevice.deviceId : 'default'
+    } catch (err) {
+      console.warn('Error getting default video input device:', err)
       return 'default'
     }
   }
