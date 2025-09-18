@@ -10,7 +10,7 @@ import JanusLib from '../webrtc/janus'
 import { JanusTypes } from '../../types'
 import { store } from '../../store'
 import { isPhysical } from '../user/default_device'
-import { getJSONItem } from '../../utils'
+import { getJSONItem, setJSONItem } from '../../utils'
 import { eventDispatch} from '../../utils/genericFunctions/eventDispatch'
 
 const Janus: JanusTypes = JanusLib
@@ -150,7 +150,17 @@ export const getCurrentVideoInputDeviceId = function () {
   if (deviceFound) {
     return currentDeviceId
   } else {
-    return null
+    // Fallback to default device
+    const defaultDevice = videoInputDevices.find(device => device.deviceId === 'default' || device.deviceId === '') || videoInputDevices[0]
+    const fallbackDeviceId = defaultDevice ? defaultDevice.deviceId : 'default'
+
+    if (currentDeviceId !== null && fallbackDeviceId !== currentDeviceId) {
+      console.warn(`Video input device ${currentDeviceId} no longer available, falling back to default device`)
+      // Update localStorage with the fallback device
+      setJSONItem('phone-island-video-input-device', { deviceId: fallbackDeviceId })
+    }
+
+    return fallbackDeviceId
   }
 }
 
@@ -164,7 +174,17 @@ export const getCurrentAudioInputDeviceId = function () {
   if (deviceFound) {
     return currentDeviceId
   } else {
-    return null
+    // Fallback to default device
+    const defaultDevice = audioInputDevices.find(device => device.deviceId === 'default' || device.deviceId === '') || audioInputDevices[0]
+    const fallbackDeviceId = defaultDevice ? defaultDevice.deviceId : 'default'
+
+    if (currentDeviceId !== null && fallbackDeviceId !== currentDeviceId) {
+      console.warn(`Audio input device ${currentDeviceId} no longer available, falling back to default device`)
+      // Update localStorage with the fallback device
+      setJSONItem('phone-island-audio-input-device', { deviceId: fallbackDeviceId })
+    }
+
+    return fallbackDeviceId
   }
 }
 
@@ -178,6 +198,16 @@ export const getCurrentAudioOutputDeviceId = function () {
   if (deviceFound) {
     return currentDeviceId
   } else {
-    return null
+    // Fallback to default device
+    const defaultDevice = audioOutputDevices.find(device => device.deviceId === 'default' || device.deviceId === '') || audioOutputDevices[0]
+    const fallbackDeviceId = defaultDevice ? defaultDevice.deviceId : 'default'
+
+    if (currentDeviceId !== null && fallbackDeviceId !== currentDeviceId) {
+      console.warn(`Audio output device ${currentDeviceId} no longer available, falling back to default device`)
+      // Update localStorage with the fallback device
+      setJSONItem('phone-island-audio-output-device', { deviceId: fallbackDeviceId })
+    }
+
+    return fallbackDeviceId
   }
 }

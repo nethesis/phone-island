@@ -99,14 +99,48 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-detached', {})
   })
 
-  useEventListener('phone-island-audio-input-change', (data: DeviceInputOutputTypes) => {
-    setJSONItem('phone-island-audio-input-device', { deviceId: data.deviceId })
+  useEventListener('phone-island-audio-input-change', async (data: DeviceInputOutputTypes) => {
+    let targetDeviceId = data.deviceId
+
+    // Check if the requested device is available
+    if (targetDeviceId && targetDeviceId !== 'default') {
+      const isAvailable = await isAudioInputDeviceAvailable(targetDeviceId)
+
+      if (!isAvailable) {
+        console.warn(`Audio input device ${targetDeviceId} not available, falling back to default device`)
+        targetDeviceId = await getDefaultAudioInputDevice()
+      }
+    }
+
+    // Save the final device choice
+    setJSONItem('phone-island-audio-input-device', { deviceId: targetDeviceId })
     eventDispatch('phone-island-audio-input-changed', {})
+
+    if (targetDeviceId !== data.deviceId) {
+      console.info(`Audio input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+    }
   })
 
-  useEventListener('phone-island-video-input-change', (data: DeviceInputOutputTypes) => {
-    setJSONItem('phone-island-video-input-device', { deviceId: data.deviceId })
+  useEventListener('phone-island-video-input-change', async (data: DeviceInputOutputTypes) => {
+    let targetDeviceId = data.deviceId
+
+    // Check if the requested device is available
+    if (targetDeviceId && targetDeviceId !== 'default') {
+      const isAvailable = await isVideoInputDeviceAvailable(targetDeviceId)
+
+      if (!isAvailable) {
+        console.warn(`Video input device ${targetDeviceId} not available, falling back to default device`)
+        targetDeviceId = await getDefaultVideoInputDevice()
+      }
+    }
+
+    // Save the final device choice
+    setJSONItem('phone-island-video-input-device', { deviceId: targetDeviceId })
     eventDispatch('phone-island-video-input-changed', {})
+
+    if (targetDeviceId !== data.deviceId) {
+      console.info(`Video input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+    }
   })
 
   const [firstRender, setFirstRender] = useState(true)
@@ -145,34 +179,245 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     }
   }, [firstRender])
 
+  // Helper function to check if an audio output device is available
+  const isAudioOutputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return false
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput')
+
+      return audioOutputDevices.some(device => device.deviceId === deviceId)
+    } catch (err) {
+      console.warn('Error checking device availability:', err)
+      return false
+    }
+  }
+
+  // Helper function to get default audio output device
+  const getDefaultAudioOutputDevice = async (): Promise<string> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return 'default'
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput')
+
+      // Find the default device (usually has deviceId 'default' or is the first one)
+      const defaultDevice = audioOutputDevices.find(device =>
+        device.deviceId === 'default' || device.deviceId === ''
+      ) || audioOutputDevices[0]
+
+      return defaultDevice ? defaultDevice.deviceId : 'default'
+    } catch (err) {
+      console.warn('Error getting default device:', err)
+      return 'default'
+    }
+  }
+
+  // Helper function to check if an audio input device is available
+  const isAudioInputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return false
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+
+      return audioInputDevices.some(device => device.deviceId === deviceId)
+    } catch (err) {
+      console.warn('Error checking audio input device availability:', err)
+      return false
+    }
+  }
+
+  // Helper function to get default audio input device
+  const getDefaultAudioInputDevice = async (): Promise<string> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return 'default'
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+
+      // Find the default device (usually has deviceId 'default' or is the first one)
+      const defaultDevice = audioInputDevices.find(device =>
+        device.deviceId === 'default' || device.deviceId === ''
+      ) || audioInputDevices[0]
+
+      return defaultDevice ? defaultDevice.deviceId : 'default'
+    } catch (err) {
+      console.warn('Error getting default audio input device:', err)
+      return 'default'
+    }
+  }
+
+  // Helper function to check if a video input device is available
+  const isVideoInputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return false
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+
+      return videoInputDevices.some(device => device.deviceId === deviceId)
+    } catch (err) {
+      console.warn('Error checking video input device availability:', err)
+      return false
+    }
+  }
+
+  // Helper function to get default video input device
+  const getDefaultVideoInputDevice = async (): Promise<string> => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return 'default'
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+
+      // Find the default device (usually has deviceId 'default' or is the first one)
+      const defaultDevice = videoInputDevices.find(device =>
+        device.deviceId === 'default' || device.deviceId === ''
+      ) || videoInputDevices[0]
+
+      return defaultDevice ? defaultDevice.deviceId : 'default'
+    } catch (err) {
+      console.warn('Error getting default video input device:', err)
+      return 'default'
+    }
+  }
+
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
-    if (!firstAudioOutputInit) {
-      store.dispatch.island.setIslandView(null)
-      store.dispatch.island.toggleAvoidToShow(true)
-      eventDispatch('phone-island-call-start', { number: '*43' })
+    const trySetSinkId = async () => {
+      const remoteAudioElement: any = store.getState().player.remoteAudio
+
+      if (!remoteAudioElement?.current) {
+        console.warn('Remote audio element not available')
+        return
+      }
+
+      let targetDeviceId = data.deviceId
+
+      // Check if the requested device is available
+      if (targetDeviceId && targetDeviceId !== 'default') {
+        const isAvailable = await isAudioOutputDeviceAvailable(targetDeviceId)
+
+        if (!isAvailable) {
+          console.warn(`Audio output device ${targetDeviceId} not available, falling back to default device`)
+          targetDeviceId = await getDefaultAudioOutputDevice()
+
+          // Update localStorage with the fallback device
+          setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+        }
+      }
+
+      try {
+        // Try to set sink ID directly first (works if audio element is already active)
+        await remoteAudioElement.current.setSinkId(targetDeviceId)
+        console.info('Default audio output device changed successfully!')
+
+        // Save device to localStorage
+        setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+        eventDispatch('phone-island-audio-output-changed', {})
+
+      } catch (err) {
+        console.log('Direct setSinkId failed, trying with temporary stream:', err)
+
+        try {
+          // Create a temporary silent audio stream to activate the audio element
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+          const oscillator = audioContext.createOscillator()
+          const gainNode = audioContext.createGain()
+
+          // Create silent audio
+          oscillator.frequency.setValueAtTime(440, audioContext.currentTime)
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime) // Silent
+
+          oscillator.connect(gainNode)
+
+          // Get MediaStream from audio context
+          const destination = audioContext.createMediaStreamDestination()
+          gainNode.connect(destination)
+
+          // Set the stream to the audio element
+          remoteAudioElement.current.srcObject = destination.stream
+
+          // Start the oscillator
+          oscillator.start()
+
+          // Try setSinkId again after a short delay
+          setTimeout(async () => {
+            try {
+              await remoteAudioElement.current.setSinkId(targetDeviceId)
+              console.info('Default audio output device changed successfully with temporary stream!')
+
+              // Clean up temporary stream
+              oscillator.stop()
+              audioContext.close()
+              remoteAudioElement.current.srcObject = null
+
+              // Save device to localStorage
+              setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+              eventDispatch('phone-island-audio-output-changed', {})
+
+            } catch (finalErr) {
+              console.error('Final setSinkId attempt failed:', finalErr)
+
+              // Clean up on failure
+              oscillator.stop()
+              audioContext.close()
+              remoteAudioElement.current.srcObject = null
+
+              // If original device failed and we're not already using default, try default
+              if (targetDeviceId !== 'default') {
+                console.log('Trying fallback to default device')
+                try {
+                  await remoteAudioElement.current.setSinkId('default')
+                  setJSONItem('phone-island-audio-output-device', { deviceId: 'default' })
+                  console.info('Fallback to default audio device successful')
+                } catch (defaultErr) {
+                  console.error('Even default device failed:', defaultErr)
+                }
+              }
+
+              // Save device preference anyway for future calls
+              setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+              eventDispatch('phone-island-audio-output-changed', {})
+            }
+          }, 100)
+
+        } catch (streamErr) {
+          console.error('Failed to create temporary audio stream:', streamErr)
+
+          // Final fallback: try default device
+          if (targetDeviceId !== 'default') {
+            try {
+              await remoteAudioElement.current.setSinkId('default')
+              setJSONItem('phone-island-audio-output-device', { deviceId: 'default' })
+              console.info('Emergency fallback to default audio device successful')
+            } catch (defaultErr) {
+              console.error('Emergency fallback to default device failed:', defaultErr)
+              setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+            }
+          } else {
+            setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
+          }
+
+          eventDispatch('phone-island-audio-output-changed', {})
+        }
+      }
     }
 
-    setTimeout(() => {
-      const remoteAudioElement: any = store.getState().player.remoteAudio
-      // set audio output
-      remoteAudioElement?.current
-        .setSinkId(data.deviceId)
-        .then(function () {
-          console.info('Default audio output device change with success!')
-          // set device to localstorage
-          setJSONItem('phone-island-audio-output-device', { deviceId: data.deviceId })
-
-          // dispatch event
-          eventDispatch('phone-island-audio-output-changed', {})
-          eventDispatch('phone-island-call-end', {})
-          store.dispatch.island.toggleAvoidToShow(false)
-        })
-        .catch(function (err) {
-          console.error('Default audio output device change error:', err)
-          eventDispatch('phone-island-call-end', {})
-          store.dispatch.island.toggleAvoidToShow(false)
-        })
-    }, 500)
+    trySetSinkId()
   })
 
   // Listen for the operator status change

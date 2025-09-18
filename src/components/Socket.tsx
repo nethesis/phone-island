@@ -510,7 +510,7 @@ export const Socket: FC<SocketProps> = ({
           (res.cause === 'normal_clearing' &&
             (extensionType === 'physical' || extensionType === 'mobile')) ||
           (res.cause === 'normal_clearing' &&
-            extensionType === 'webrtc' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink') &&
             previewCallFromMobileOrNethlink) ||
           res?.cause === 'user_busy' ||
           res?.cause === 'not_defined' ||
