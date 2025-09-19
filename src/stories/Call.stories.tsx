@@ -820,7 +820,7 @@ const CallTemplate = (args: any) => {
         </>
       )}
 
-      <PhoneIsland dataConfig={token.toString()} showAlways={false} {...args} uaType={'desktop'} />
+      <PhoneIsland dataConfig={token.toString()} showAlways={false} {...args} uaType={'desktop'} urlParamWithEvent />
 
       {/* Toast Notification */}
       {showToast && (

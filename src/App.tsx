@@ -21,6 +21,7 @@ interface PhoneIslandProps {
   dataConfig: string
   showAlways?: boolean
   uaType: string
+  urlParamWithEvent?: boolean
 }
 
 interface DeviceInputOutputTypes {
@@ -31,6 +32,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   dataConfig,
   showAlways = false,
   uaType,
+  urlParamWithEvent = false
 }: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
@@ -553,7 +555,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
     const formattedUrl = processedUrl.startsWith('http') ? processedUrl : `https://${processedUrl}`
 
-    if (uaType !== 'mobile') {
+    if (uaType !== 'mobile' && !urlParamWithEvent) {
       const newWindow = window.open('about:blank', '_blank')
       if (newWindow) {
         newWindow.location.href = formattedUrl

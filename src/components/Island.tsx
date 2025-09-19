@@ -30,7 +30,7 @@ import StreamingAnswerView from './StreamingAnswerView'
  *
  * @param showAlways Sets the Island ever visible
  */
-export const Island: FC<IslandProps> = ({ showAlways, uaType }) => {
+export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
@@ -162,4 +162,5 @@ Island.displayName = 'Island'
 interface IslandProps {
   showAlways?: boolean
   uaType?: string
+  urlParamWithEvent?: boolean
 }
