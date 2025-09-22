@@ -11,20 +11,62 @@ import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
 import { eventDispatch } from '../utils'
 
+// Global variable to track which API mode works for this session
+let apiMode: 'new' | 'legacy' | 'unknown' = 'unknown'
+
+// Export function to get current API mode
+export const getApiMode = () => apiMode
+
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
   const { fetchReady } = useSelector((state: RootState) => state.fetchDefaults)
 
   useEffect(() => {
-    if (authToken && hostName) {
-      // Initialize API defaults
-      dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/api`)
-      dispatch.fetchDefaults.updateFetchHeaders({
-        Authorization: `Bearer ${authToken}`,
-      })
-      dispatch.fetchDefaults.setFetchReady()
+    if (authToken && hostName && username) {
+      const initializeAPI = async () => {
+        if (apiMode === 'unknown') {
+          // First time: test new API format
+          try {
+            const response = await fetch(`https://${hostName}/api/user/me`, {
+              headers: {
+                'Authorization': `Bearer ${authToken}`
+              },
+            })
+
+            if (response.ok) {
+              // New API format works
+              apiMode = 'new'
+            } else if (response.status === 404 || response.status === 401) {
+              // Fallback to legacy API format
+              apiMode = 'legacy'
+            } else {
+              throw new Error(`API test failed with status: ${response.status}`)
+            }
+          } catch (error) {
+            // Network error or other issues, fallback to legacy API
+            apiMode = 'legacy'
+          }
+        }
+
+        // Set the appropriate configuration based on the determined mode
+        if (apiMode === 'new') {
+          dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/api`)
+          dispatch.fetchDefaults.updateFetchHeaders({
+            Authorization: `Bearer ${authToken}`,
+          })
+        } else {
+          dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/webrest`)
+          dispatch.fetchDefaults.updateFetchHeaders({
+            Authorization: `${username}:${authToken}`,
+          })
+        }
+
+        dispatch.fetchDefaults.setFetchReady()
+      }
+
+      initializeAPI()
     }
-  }, [authToken, hostName])
+  }, [authToken, hostName, username])
 
   useEffect(() => {
     // Get all extensions info and set to store

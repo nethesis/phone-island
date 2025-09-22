@@ -5,6 +5,7 @@ import React, { type ReactNode, FC, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
+import { getApiMode } from './RestAPI'
 import { getDisplayName } from '../lib/phone/conversation'
 import { getCurrentUserInfo } from '../services/user'
 import {
@@ -401,13 +402,21 @@ export const Socket: FC<SocketProps> = ({
      * Initialize socket connection and listeners
      */
     const initSocketConnection = () => {
-      socket.current = io('https://' + hostName, {
+      const currentApiMode = getApiMode()
+
+      const socketOptions: any = {
         upgrade: false,
         transports: ['websocket'],
         reconnection: true,
         reconnectionDelay: 2000,
-        path: '/api/ws',
-      })
+      }
+
+      // Only set path for new API mode
+      if (currentApiMode === 'new') {
+        socketOptions.path = '/api/ws'
+      }
+
+      socket.current = io('https://' + hostName, socketOptions)
 
       // save websocket to store
       dispatch.websocket.update({ socket: socket.current })
