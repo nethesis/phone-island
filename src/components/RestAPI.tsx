@@ -16,15 +16,15 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
   const { fetchReady } = useSelector((state: RootState) => state.fetchDefaults)
 
   useEffect(() => {
-    if (username && authToken && hostName) {
+    if (authToken && hostName) {
       // Initialize API defaults
-      dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/webrest`)
+      dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/api`)
       dispatch.fetchDefaults.updateFetchHeaders({
-        Authorization: `${username}:${authToken}`,
+        Authorization: `Bearer ${authToken}`,
       })
       dispatch.fetchDefaults.setFetchReady()
     }
-  }, [username, authToken, hostName])
+  }, [authToken, hostName])
 
   useEffect(() => {
     // Get all extensions info and set to store
