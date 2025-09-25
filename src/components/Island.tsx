@@ -24,6 +24,7 @@ import { WaitingConferenceView } from './ConferenceView'
 import { store } from '../store'
 import { ContactListView } from './ContactView/ContactListView'
 import StreamingAnswerView from './StreamingAnswerView'
+import { OperatorBusyView } from './OperatorBusyView'
 
 /**
  * Provides the Island logic
@@ -110,6 +111,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
         (view === 'waitingConference' && isActive) ||
         (view === 'transfer' && isActive) ||
         (view === 'settings' && isActive) ||
+        (view === 'operatorBusy' ) ||
         (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))) &&
         !avoidToShow && (
           <>
@@ -133,6 +135,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
                       switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
                       waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
                       streamingAnswer: StreamingAnswerView ? <StreamingAnswerView /> : null,
+                      operatorBusy: OperatorBusyView ? <OperatorBusyView /> : null,
                     }
 
                     return currentView in views && views[currentView as keyof typeof views] ? (

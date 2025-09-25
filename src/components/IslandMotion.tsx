@@ -186,6 +186,17 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             height: variants.streamingAnswer.collapsed.height,
           }
         break
+        case 'operatorBusy':
+        size = isOpen
+          ? {
+            width: variants.operatorBusy.expanded.width,
+            height: variants.operatorBusy.expanded.height,
+          }
+          : {
+            width: variants.operatorBusy.collapsed.width,
+            height: variants.operatorBusy.collapsed.height,
+          }
+        break
     }
 
     const isAlert: boolean = activeAlertsCount > 0

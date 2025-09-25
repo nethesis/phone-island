@@ -110,6 +110,10 @@ const defaultState = {
       },
       collapsed: commonCollapsed,
     },
+    operatorBusy: {
+      expanded: { width: 400, height: 104 },
+      collapsed: { width: 400, height: 104 },
+    },
   },
 }
 

@@ -18,6 +18,7 @@ import {
   faPhone,
   faSun,
   faTimes,
+  faUser,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
@@ -551,10 +552,7 @@ const CallTemplate = (args: any) => {
                   />
                 </div>
                 <div className='pi-ml-3 pi-text-sm'>
-                  <label
-                    htmlFor='ringing'
-                    className='pi-font-medium pi-text-gray-700'
-                  >
+                  <label htmlFor='ringing' className='pi-font-medium pi-text-gray-700'>
                     When the call is ringing
                   </label>
                 </div>
@@ -573,10 +571,7 @@ const CallTemplate = (args: any) => {
                   />
                 </div>
                 <div className='pi-ml-3 pi-text-sm'>
-                  <label
-                    htmlFor='answered'
-                    className='pi-font-medium pi-text-gray-700'
-                  >
+                  <label htmlFor='answered' className='pi-font-medium pi-text-gray-700'>
                     When the call is answered
                   </label>
                 </div>
@@ -595,10 +590,7 @@ const CallTemplate = (args: any) => {
                   />
                 </div>
                 <div className='pi-ml-3 pi-text-sm'>
-                  <label
-                    htmlFor='button'
-                    className='pi-font-medium pi-text-gray-700'
-                  >
+                  <label htmlFor='button' className='pi-font-medium pi-text-gray-700'>
                     When clicking the button on the Phone Island
                   </label>
                 </div>
@@ -617,10 +609,7 @@ const CallTemplate = (args: any) => {
                   />
                 </div>
                 <div className='pi-ml-3 pi-text-sm'>
-                  <label
-                    htmlFor='never'
-                    className='pi-font-medium pi-text-gray-700'
-                  >
+                  <label htmlFor='never' className='pi-font-medium pi-text-gray-700'>
                     Never
                   </label>
                 </div>
@@ -693,6 +682,14 @@ const CallTemplate = (args: any) => {
                 }
               >
                 <FontAwesomeIcon icon={faUsers} className='pi-w-5 pi-h-5' />
+              </Button>
+              <Button
+                variant='default'
+                onClick={() =>
+                  eventDispatch('phone-island-view-changed', { viewType: 'operatorBusy' })
+                }
+              >
+                <FontAwesomeIcon icon={faUser} className='pi-w-5 pi-h-5' />
               </Button>
             </div>
           </div>
@@ -820,7 +817,13 @@ const CallTemplate = (args: any) => {
         </>
       )}
 
-      <PhoneIsland dataConfig={token.toString()} showAlways={false} {...args} uaType={'desktop'} urlParamWithEvent />
+      <PhoneIsland
+        dataConfig={token.toString()}
+        showAlways={false}
+        {...args}
+        uaType={'desktop'}
+        urlParamWithEvent
+      />
 
       {/* Toast Notification */}
       {showToast && (

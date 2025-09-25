@@ -61,12 +61,14 @@
     "Exit fullscreen": "Esci da schermo intero",
     "Open url": "Apri URL esterno",
     "Increase": "Ingrandisci",
-    "Decrease": "Riduci"
+    "Decrease": "Riduci",
+    "Close": "Chiudi"
   },
   "Call": {
     "In progress...": "In corso...",
     "Outgoing call": "Chiamata in uscita",
-    "Incoming call": "Chiamata in arrivo"
+    "Incoming call": "Chiamata in arrivo",
+    "Number busy": "Numero occupato..."
   },
   "Transfer": {
     "No contacts found": "Nessun contatto trovato"
