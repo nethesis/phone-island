@@ -727,7 +727,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       (view === 'waitingConference' && isActive) ||
       (view === 'transfer' && isActive) ||
       (view === 'settings' && isActive) ||
-      (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))
+      (view === 'settings' && (previousView === 'recorder' || previousView === 'player')) ||
+      (view === 'operatorBusy' && !isActive)
 
     // Reset the island store only if:
     // 1. The island should not remain visible

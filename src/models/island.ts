@@ -25,6 +25,11 @@ const defaultState: IslandTypes = {
   isExtraLarge: false,
   urlOpened: false,
   previewCallFromMobileOrNethlink: false,
+  operatorBusy: {
+    isActive: false,
+    calledNumber: null,
+    callerNumber: null,
+  },
 }
 
 export const island = createModel<RootModel>()({
@@ -106,6 +111,27 @@ export const island = createModel<RootModel>()({
     resetIslandStore: (state) => {
       return getResetState(state, true)
     },
+    setOperatorBusyCalledNumber: (state, payload: string) => {
+      state.operatorBusy.calledNumber = payload
+      return state
+    },
+    setOperatorBusyActive: (state, payload: { callerNumber: string }) => {
+      state.operatorBusy.isActive = true
+      state.operatorBusy.callerNumber = payload.callerNumber
+      return state
+    },
+    resetOperatorBusy: (state) => {
+      state.operatorBusy.isActive = false
+      state.operatorBusy.callerNumber = null
+      // Keep calledNumber for potential reuse
+      return state
+    },
+    resetOperatorBusyCompletely: (state) => {
+      state.operatorBusy.isActive = false
+      state.operatorBusy.calledNumber = null
+      state.operatorBusy.callerNumber = null
+      return state
+    },
   },
   effects: (dispatch) => ({
     handleToggleIsOpen: (_: void, rootState) => {
@@ -151,6 +177,12 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     // Keep previousView if waitingConference
     previousView:
       state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
+    // Preserve calledNumber for potential operator busy scenarios
+    operatorBusy: {
+      isActive: false,
+      calledNumber: state.operatorBusy.calledNumber,
+      callerNumber: null,
+    },
   }
 }
 
@@ -167,6 +199,7 @@ type IslandViewType =
   | 'switchDevice'
   | 'waitingConference'
   | 'streamingAnswer'
+  | 'operatorBusy'
 type SettingsViewType = 'microphone' | 'audioInput' | 'videoInput' | 'theme' | 'main'
 type ContactListViewType = 'main' | 'selectContactNumber'
 
@@ -190,4 +223,9 @@ interface IslandTypes {
   isExtraLarge: boolean
   urlOpened: boolean
   previewCallFromMobileOrNethlink: boolean
+  operatorBusy: {
+    isActive: boolean
+    calledNumber: string | null
+    callerNumber: string | null
+  }
 }
