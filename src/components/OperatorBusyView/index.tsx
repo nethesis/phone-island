@@ -7,26 +7,14 @@ import { RootState, Dispatch } from '../../store'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark, faUser } from '@fortawesome/free-solid-svg-icons'
-import { hangupCurrentCall } from '../../lib/phone/call'
-import { motion } from 'framer-motion'
-
-const iconVariants = {
-  open: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '26px',
-  },
-  closed: {
-    width: '24px',
-    height: '24px',
-    borderRadius: '26px',
-  },
-}
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { GenericAvatar } from '../GenericAvatar'
+import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
-  const { isOpen, operatorBusy } = useSelector((state: RootState) => state.island)
+  const { operatorBusy } = useSelector((state: RootState) => state.island)
   const { avatars } = useSelector((state: RootState) => state.avatars)
+  const { extensions } = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
 
@@ -39,26 +27,61 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
     dispatch.island.setIslandView(null)
   }, [dispatch])
 
-  // Get avatar URL based on caller number
-  const avatarUrl = useMemo(() => {
-    if (operatorBusy.callerNumber && avatars?.[operatorBusy.callerNumber]) {
-      return avatars[operatorBusy.callerNumber]
+  // Get the username of the operator based on called extension number
+  const operatorUsername = useMemo(() => {
+    // Check if we have the called number and extensions are loaded
+    if (operatorBusy?.calledNumber && extensions) {
+      // Find the extension that matches the called number
+      const extension = Object.values(extensions).find(
+        (ext) => ext.exten === operatorBusy?.calledNumber,
+      )
+      // Return the username if found
+      return extension ? extension?.username : null
     }
     return null
-  }, [avatars, operatorBusy.callerNumber])
+  }, [extensions, operatorBusy?.calledNumber])
 
-  // Format display text - show the called number (the number we tried to call)
+  // Get avatar URL based on operator's username
+  const avatarUrl = useMemo(() => {
+    // If we have the username and avatars, look for the avatar
+    if (operatorUsername && avatars && avatars[operatorUsername]) {
+      return avatars[operatorUsername]
+    }
+    return null
+  }, [avatars, operatorUsername])
+
+  // Check if the called number is an operator (has username)
+  const isOperator = useMemo(() => {
+    return operatorUsername !== null
+  }, [operatorUsername])
+
+  // Format display text - show the operator name or called number
   const displayText = useMemo(() => {
-    if (operatorBusy.calledNumber && operatorBusy.calledNumber !== '') {
-      return operatorBusy.calledNumber
+    if (extensions && operatorBusy?.calledNumber && operatorBusy?.calledNumber !== '') {
+      // Try to get the extension to display the name if available
+      const extension = Object.values(extensions).find(
+        (ext) => ext?.exten === operatorBusy?.calledNumber,
+      )
+
+      // If we found the extension and it has a name, show the name
+      if (extension && extension?.name && extension?.name !== '') {
+        return extension?.name
+      }
+
+      // Otherwise just show the extension number
+      return operatorBusy?.calledNumber
     }
     //fallback string
     return '-'
-  }, [operatorBusy.calledNumber])
+  }, [operatorBusy?.calledNumber, extensions])
 
   const statusText = useMemo(() => {
+    // If it's an operator, show "User busy", otherwise show "Number busy"
+    if (isOperator) {
+      return t('Call.User busy') || 'User busy...'
+    }
     return t('Call.Number busy') || 'Number busy...'
-  }, [t])
+  }, [t, isOperator])
 
   // Stop busy tone when component unmounts
   useEffect(() => {
@@ -73,30 +96,14 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
         {/* Left side - Avatar and info */}
         <div className='pi-flex pi-items-center pi-space-x-3'>
           {/* Avatar */}
-          <motion.div className='pi-relative' animate='open' variants={iconVariants}>
-            <motion.div
-              className='pi-relative pi-z-30 pi-bg-gray-500 dark:pi-bg-gray-600 pi-rounded-full pi-bg-cover pi-flex pi-items-center pi-justify-center'
-              style={{
-                backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-              animate='open'
-              variants={iconVariants}
-            >
-              {!avatarUrl && (
-                <FontAwesomeIcon icon={faUser} className='pi-text-white pi-text-2xl' />
-              )}
-            </motion.div>
-          </motion.div>
+          <GenericAvatar avatarUrl={avatarUrl} size='open' showPulseEffect={false} />
 
           {/* Number and status */}
           <div className='pi-flex pi-flex-col'>
-            <div className='pi-text-lg pi-font-semibold pi-text-gray-900 dark:pi-text-gray-50 pi-leading-tight'>
+            <div className='pi-text-lg pi-font-medium pi-text-primaryNeutral dark:pi-text-primaryNeutralDark'>
               {displayText}
             </div>
-            <div className='pi-text-sm pi-text-gray-600 dark:pi-text-gray-400 pi-leading-tight'>
+            <div className='pi-text-sm pi-font-regular pi-text-primaryNeutral dark:pi-text-primaryNeutralDark'>
               {statusText}
             </div>
           </div>
@@ -104,15 +111,16 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
 
         {/* Right side - Close button */}
         <Button
-          variant='transparent'
+          variant='default'
           onClick={handleClose}
-          className='pi-p-2 pi-rounded-full pi-bg-gray-600 dark:pi-bg-gray-700 hover:pi-bg-gray-700 dark:hover:pi-bg-gray-600'
+          className='pi-p-2'
           data-tooltip-id='tooltip-close-busy-call'
           data-tooltip-content={t('Tooltip.Close') || 'Close'}
         >
-          <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5 pi-text-white' />
+          <FontAwesomeIcon icon={faXmark} className='pi-w-5 pi-h-5' />
         </Button>
       </div>
+      <CustomThemedTooltip className='pi-z-20' id='tooltip-close-busy-call' place='left' />
     </>
   )
 }

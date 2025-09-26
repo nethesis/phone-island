@@ -565,21 +565,20 @@ export const Socket: FC<SocketProps> = ({
         if (res?.cause === 'user_busy') {
           // Set operator busy active with caller information
           store.dispatch.island.setOperatorBusyActive({
-            callerNumber: res.callerNum || 'Unknown'
+            callerNumber: res.callerNum || 'Unknown',
           })
-          
-          // Play busy tone
-          store.dispatch.player.updateStartAudioPlayer({ 
-            src: busyRingtone, 
-            loop: false 
-          })
-          
+
           // Stop busy tone after 4 seconds
           setTimeout(() => {
             store.dispatch.player.stopAudioPlayer()
           }, 4000)
-          
+
           setTimeout(() => {
+            // Play busy tone
+            store.dispatch.player.updateStartAudioPlayer({
+              src: busyRingtone,
+              loop: true,
+            })
             store.dispatch.island.setIslandView('operatorBusy')
           }, 400)
         }
