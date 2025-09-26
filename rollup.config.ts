@@ -3,7 +3,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import typescript from '@rollup/plugin-typescript'
 import postcss from 'rollup-plugin-postcss'
 import babel from '@rollup/plugin-babel'
-import { terser } from 'rollup-plugin-terser'
+import terser from '@rollup/plugin-terser'
 import { getFiles } from './scripts/buildUtils'
 import json from '@rollup/plugin-json'
 
@@ -21,7 +21,7 @@ export default {
   ],
   plugins: [
     json({
-      include: ['public/locales/**/*.json'],
+      include: ['public/locales/**/*.json', 'package.json'],
       compact: true
     }),
     resolve({
