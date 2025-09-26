@@ -61,12 +61,15 @@
     "Exit fullscreen": "Exit fullscreen",
     "Open url": "Open external URL",
     "Increase": "Increase",
-    "Decrease": "Decrease"
+    "Decrease": "Decrease",
+    "Close": "Close"
   },
   "Call": {
     "In progress...": "In progress...",
     "Outgoing call": "Outgoing call",
-    "Incoming call": "Incoming call"
+    "Incoming call": "Incoming call",
+    "Number busy": "Number busy...",
+    "User busy": "User busy..."
   },
   "Transfer": {
     "No contacts found": "No contacts found"

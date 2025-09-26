@@ -8,6 +8,7 @@ import { io } from 'socket.io-client'
 import { getApiMode } from './RestAPI'
 import { getDisplayName } from '../lib/phone/conversation'
 import { getCurrentUserInfo } from '../services/user'
+import busyRingtone from '../static/busy_ringtone'
 import {
   dispatchMainPresence,
   dispatchConversations,
@@ -560,6 +561,26 @@ export const Socket: FC<SocketProps> = ({
           view !== 'waitingConference'
         ) {
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+        }
+        if (res?.cause === 'user_busy') {
+          // Set operator busy active with caller information
+          store.dispatch.island.setOperatorBusyActive({
+            callerNumber: res.callerNum || 'Unknown',
+          })
+
+          // Stop busy tone after 4 seconds
+          setTimeout(() => {
+            store.dispatch.player.stopAudioPlayer()
+          }, 4000)
+
+          setTimeout(() => {
+            // Play busy tone
+            store.dispatch.player.updateStartAudioPlayer({
+              src: busyRingtone,
+              loop: true,
+            })
+            store.dispatch.island.setIslandView('operatorBusy')
+          }, 400)
         }
       })
 

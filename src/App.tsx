@@ -1,7 +1,7 @@
 import React, { type FC, useState, useEffect } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
-import { store } from './store'
+import { store, downloadStoresAsJSON } from './store'
 import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 import { initI18n } from './lib/i18n'
@@ -650,6 +650,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     console.log('Audio player is interrupted')
   })
 
+  // Download all stores as JSON file - for debugging and backup
+  useEventListener('phone-island-stores-download', () => {
+    downloadStoresAsJSON()
+    eventDispatch('phone-island-stores-downloaded', {})
+  })
+
   useEventListener('phone-island-sideview-open', () => {
     store.dispatch.island.toggleSideViewVisible(true)
     store.dispatch.island.setUrlOpened(false)
@@ -727,7 +733,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       (view === 'waitingConference' && isActive) ||
       (view === 'transfer' && isActive) ||
       (view === 'settings' && isActive) ||
-      (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))
+      (view === 'settings' && (previousView === 'recorder' || previousView === 'player')) ||
+      (view === 'operatorBusy' && !isActive)
 
     // Reset the island store only if:
     // 1. The island should not remain visible

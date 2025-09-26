@@ -43,6 +43,12 @@ import { unsubscribe } from '../../services/user'
  */
 export function callNumber(number: string, sipHost: string) {
   const sipURI = `sip:${number}@${sipHost}`
+  
+  // Reset any previous operator busy state when starting a new call
+  store.dispatch.island.resetOperatorBusy()
+  // Save the called number for potential operator busy scenarios
+  store.dispatch.island.setOperatorBusyCalledNumber(number)
+  
   if (isWebRTC()) {
     callSipURI(sipURI)
   } else {
@@ -61,6 +67,8 @@ export function answerIncomingCall() {
   } else {
     answerPhysical()
   }
+  // Reset operator busy completely when call is answered successfully
+  store.dispatch.island.resetOperatorBusyCompletely()
 }
 
 /**
@@ -131,6 +139,8 @@ export function hangupCurrentCall() {
     // Reset isFromStreaming flag
     store.dispatch.island.setIsFromStreaming(false)
   }
+  // Reset operator busy state when call ends
+  store.dispatch.island.resetOperatorBusy()
   // Caller close the call before the call is accepted
   eventDispatch('phone-island-call-ended', {})
 }
