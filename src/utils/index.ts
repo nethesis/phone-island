@@ -16,6 +16,7 @@ export * from './genericFunctions/classNames'
 export * from './genericFunctions/localStorage'
 export * from './genericFunctions/withTimeout'
 export * from './genericFunctions/stringUtils'
+export * from './genericFunctions/storeExport'
 
 // Streaming utilities
 export * from './streaming/streamingUtils'

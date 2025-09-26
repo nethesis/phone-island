@@ -694,6 +694,20 @@ const CallTemplate = (args: any) => {
             </div>
           </div>
 
+          {/* Store Export Controls */}
+          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4 pi-mt-4'>
+            <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>Store Export</h3>
+            <Button
+              variant='default'
+              className='pi-flex pi-items-center pi-justify-center pi-gap-2'
+              onClick={() => {
+                eventDispatch('phone-island-stores-download', {})
+              }}
+            >
+              <span>Donwload JSON</span>
+            </Button>
+          </div>
+
           {/* Audio Controls */}
           <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
             <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>Audio change</h3>
