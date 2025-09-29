@@ -841,6 +841,12 @@ export const Socket: FC<SocketProps> = ({
           }
         }
       })
+
+      // Handle satellite/transcription messages
+      socket.current.on('satellite/transcription', (transcriptionData: any) => {
+        // Dispatch the transcription event to external listeners
+        eventDispatch('phone-island-conversation-transcription', transcriptionData)
+      })
     }
 
     initSocketConnection()

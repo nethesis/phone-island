@@ -155,6 +155,160 @@
             border-radius: 3px;
             font-family: monospace;
         }
+
+        /* Transcription Window Styles */
+        .transcription-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            height: 70%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .transcription-container.visible {
+            display: flex;
+        }
+
+        .transcription-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transcription-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .transcription-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .transcription-status {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+        }
+
+        .transcription-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .transcription-message {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .transcription-message.speaker {
+            border-left: 4px solid #007bff;
+            background: linear-gradient(90deg, rgba(0,123,255,0.05) 0%, white 100%);
+        }
+
+        .transcription-message.counterpart {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(90deg, rgba(40,167,69,0.05) 0%, white 100%);
+        }
+
+        .transcription-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .transcription-speaker {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .transcription-timestamp {
+            font-size: 11px;
+        }
+
+        .transcription-text {
+            font-size: 16px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .transcription-text.interim {
+            font-style: italic;
+            opacity: 0.7;
+            color: #6c757d;
+            background-color: rgba(108, 117, 125, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 2px solid #6c757d;
+        }
+
+        .transcription-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .transcription-overlay.visible {
+            display: block;
+        }
+
+        .transcription-controls {
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .transcription-controls button {
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .transcription-controls button:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .transcription-controls button.active {
+            background: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -209,11 +363,41 @@
             <button id="closeSideview">❌ Close Menu</button>
             <button id="checkConnection">🌐 Check Connection</button>
             <button id="debugStatus">🐛 Debug Status</button>
+            <button id="openTranscription" class="success">💬 Open Transcriptions</button>
         </div>
 
         <!-- Event Log -->
         <div class="event-log" id="eventLog">
             <div>📡 Event Log (real-time events will appear here)...</div>
+        </div>
+    </div>
+
+    <!-- Transcription Window Overlay -->
+    <div class="transcription-overlay" id="transcriptionOverlay"></div>
+
+    <!-- Transcription Window -->
+    <div class="transcription-container" id="transcriptionContainer">
+        <div class="transcription-header">
+            <h3>💬 Live Transcriptions</h3>
+            <button class="transcription-close" id="transcriptionClose">✕</button>
+        </div>
+
+        <div class="transcription-status" id="transcriptionStatus">
+            Status: Connecting to transcription service...
+        </div>
+
+        <div class="transcription-messages" id="transcriptionMessages">
+            <div style="text-align: center; color: #6c757d; padding: 20px;">
+                🎙️ Waiting for transcription messages...
+            </div>
+        </div>
+
+        <div class="transcription-controls">
+            <button id="clearTranscriptions">🗑️ Clear</button>
+            <button id="autoScrollToggle" class="active">📜 Auto-scroll</button>
+            <span style="margin-left: auto; font-size: 12px; color: #6c757d;">
+                Messages: <span id="messageCount">0</span>
+            </span>
         </div>
     </div>
 

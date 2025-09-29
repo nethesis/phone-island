@@ -1474,3 +1474,35 @@ Indicates new informations about main user
   "settings": {}
 }
 ```
+
+#### `phone-island-conversation-transcription`
+Indicates that a real-time transcription message has been received for an active conversation. This event is triggered when the system receives transcription data from the middleware.
+
+```json
+{
+  "uniqueid": "1759147339.1198",
+  "transcription": "Hello, how can I help you today?",
+  "timestamp": 25.55,
+  "speaker_name": "Antonio Colapietro",
+  "speaker_number": "202",
+  "speaker_counterpart_name": "Lorenzo Di Carlantonio",
+  "speaker_counterpart_number": "204",
+  "is_final": true
+}
+```
+
+**Parameters:**
+- `uniqueid`: Unique identifier for the conversation
+- `transcription`: The transcribed text content
+- `timestamp`: Time offset in seconds from the start of the conversation
+- `speaker_name`: Display name of the person speaking
+- `speaker_number`: Phone number/extension of the speaker
+- `speaker_counterpart_name`: Display name of the other party in the conversation
+- `speaker_counterpart_number`: Phone number/extension of the other party
+- `is_final`: Boolean indicating if this is a final transcription (`true`) or interim result (`false`)
+
+**Usage Notes:**
+- Interim results (`is_final: false`) may be updated multiple times as speech recognition refines the text
+- Final results (`is_final: true`) represent the completed, stable transcription
+- Only users who are participants in the conversation (matching speaker or counterpart) will receive these events
+- This event requires the phone-island to be connected to a middleware that supports transcription services
