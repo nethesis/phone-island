@@ -63,3 +63,24 @@ export interface QueueUpdateWaitingCallersTypes {
   position: string
   waitingTime: number
 }
+
+export interface ParkingUpdateEventTypes {
+  [parking: string]: ParkingUpdateTypes
+}
+
+export interface ParkingUpdateTypes {
+  name: string
+  parking: string
+  timeout: number
+  parkedCaller: ParkingCallerTypes
+}
+
+export interface ParkingCallerTypes {
+  num: string
+  name: string
+  parking: string
+  channel: string
+  timeout: number
+  parkeeNum: string
+  parkeeName: string
+}
