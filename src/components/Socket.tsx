@@ -713,10 +713,10 @@ export const Socket: FC<SocketProps> = ({
         dispatchServerReload()
       })
 
-      // `serverReload` is the socket event when server is reloaded
-      socket.current.on('parkingUpdate', () => {
-        // Dispatch serverReload event
-        dispatchParkingUpdate()
+      // `parkingUpdate` is the socket event when a call is parked or unparked
+      socket.current.on('parkingUpdate', (event) => {
+        // Dispatch parking update event with the parking information
+        dispatchParkingUpdate(event)
       })
 
       // `actionNethLink` is the socket event when user make a call or a action from NethLink and has a physical device

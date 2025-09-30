@@ -10,6 +10,8 @@ import type {
   QueuesEventType,
   QueueUpdateMemberTypes,
   QueuesMemberEventType,
+  ParkingUpdateTypes,
+  ParkingUpdateEventTypes,
 } from '../types'
 
 /**
@@ -127,9 +129,12 @@ export function dispatchServerReload() {
  *
  * @param event The parking update event from socket
  */
-export function dispatchParkingUpdate() {
+export function dispatchParkingUpdate(event: ParkingUpdateTypes) {
+  const data: ParkingUpdateEventTypes = {
+    [event.parking]: event,
+  }
   // Dispatch the event on window for external handlers
-  eventDispatch('phone-island-parking-update', {})
+  eventDispatch('phone-island-parking-update', data)
 }
 
 /**
