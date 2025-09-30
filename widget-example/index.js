@@ -137,6 +137,58 @@ function clearTranscriptionMessages() {
 }
 
 // ===========================================
+// TOKEN DECODING AND USER DATA
+// ===========================================
+
+// Decode Base64 token and extract user information
+function decodeToken(base64Token) {
+    try {
+        // Decode Base64
+        const decodedString = atob(base64Token);
+        console.log('Decoded token string:', decodedString);
+
+        // Format: server:username:jwt_token:extension:token_id:host:port
+        // Example: cti3.demo-heron.sf.nethserver.net:lorenzo:eyJhbG...W4:204:79938b8a...:127.0.0.1:20107
+        const parts = decodedString.split(':');
+
+        if (parts.length !== 7) {
+            throw new Error(`Invalid token format - expected 7 parts, got ${parts.length}`);
+        }
+
+        const server = parts[0];
+        const username = parts[1];
+        const jwt = parts[2];
+        const extension = parts[3];
+        const tokenId = parts[4];
+        const host = parts[5];
+        const port = parts[6];
+
+        console.log('Parsed token:', { server, username, extension, host, port });
+
+        return {
+            server: server,
+            username: username,
+            secret: jwt, // This is the JWT token
+            extension: extension,
+            token: tokenId,
+            host: host,
+            port: port
+        };
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        throw new Error('Failed to decode token');
+    }
+}
+
+// Display user information from token
+function displayUserInfo(tokenData) {
+    document.getElementById('userUsername').textContent = tokenData.username;
+    document.getElementById('userExtension').textContent = tokenData.extension;
+    document.getElementById('userServer').textContent = tokenData.server;
+    document.getElementById('userInfo').classList.remove('hidden');
+}
+
+// ===========================================
 // UTILITY FUNCTIONS
 // ===========================================
 
@@ -149,13 +201,28 @@ function dispatchPhoneIslandEvent(eventName, data = {}) {
     logEvent(`🚀 DISPATCHED: ${eventName}`, data);
 }
 
+// Track last status to avoid duplicate updates
+let lastStatus = '';
+let lastStatusTime = 0;
+
 // Helper function to update status
-function updateStatus(message) {
+function updateStatus(message, force = false) {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastStatusTime;
+
+    // Avoid duplicate status updates within 2 seconds unless forced
+    if (!force && message === lastStatus && timeSinceLastUpdate < 2000) {
+        return;
+    }
+
     const statusElement = document.getElementById('statusContent');
     if (statusElement) {
         statusElement.innerHTML = message;
     }
     logEvent(`📊 STATUS: ${message}`);
+
+    lastStatus = message;
+    lastStatusTime = now;
 }
 
 // Helper function to log events
@@ -251,11 +318,12 @@ window.addEventListener('phone-island-theme-changed', (event) => {
 
 // UI events
 window.addEventListener('phone-island-sideview-opened', (event) => {
-    updateStatus('📋 Side menu opened');
+    updateStatus('📋 Side menu opened', true);
 });
 
 window.addEventListener('phone-island-sideview-closed', (event) => {
-    updateStatus('❌ Side menu closed');
+    // Only log, don't update status for menu close
+    logEvent('📋 Side menu closed');
 });
 
 window.addEventListener('phone-island-fullscreen-entered', (event) => {
@@ -284,16 +352,18 @@ window.addEventListener('phone-island-queue-update', (event) => {
 
 // Connection status events
 window.addEventListener('phone-island-internet-disconnected', (event) => {
-    updateStatus('⚠️ Internet connection lost');
+    updateStatus('⚠️ Internet connection lost', true); // Force update for disconnection
 });
 
 window.addEventListener('phone-island-internet-connected', (event) => {
-    updateStatus('✅ Internet connection restored');
+    // Only log, don't update status for repeated connection events
+    logEvent('🌐 Internet connection restored');
 });
 
 // Error and alert events
 window.addEventListener('phone-island-alert-removed', (event) => {
-    logEvent('🗑️ Alert removed');
+    // Don't log every alert removal, it's too noisy
+    // logEvent('🗑️ Alert removed');
 });
 
 // Server events
@@ -363,10 +433,113 @@ window.addEventListener('phone-island-screen-share-left', (event) => {
 });
 
 // ===========================================
+// LOGIN AND INITIALIZATION
+// ===========================================
+
+function initializeWidget(base64Token) {
+    try {
+        // Decode token and get user data
+        const tokenData = decodeToken(base64Token);
+        console.log('Token data:', tokenData);
+
+        // Set the token in the widget BEFORE the script loads
+        const phoneIslandWidget = document.getElementById('phoneIslandWidget');
+        phoneIslandWidget.setAttribute('data-config', base64Token);
+
+        // Display user info
+        displayUserInfo(tokenData);
+
+        // Hide login container and show main panel
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('mainPanel').classList.remove('hidden');
+
+        // Reload the page to initialize the widget with the new token
+        // We need to store the token in sessionStorage so it persists after reload
+        sessionStorage.setItem('phoneIslandToken', base64Token);
+        sessionStorage.setItem('phoneIslandUserData', JSON.stringify(tokenData));
+
+        // Reload the page
+        window.location.reload();
+
+        return true;
+    } catch (error) {
+        console.error('Initialization error:', error);
+        const registrationStatus = document.getElementById('registrationStatus');
+        registrationStatus.textContent = `❌ Error: ${error.message}`;
+        registrationStatus.classList.remove('hidden');
+        registrationStatus.classList.add('error');
+        return false;
+    }
+}
+
+// ===========================================
 // UI EVENT HANDLERS
 // ===========================================
 
 function init() {
+    // Check if we have a stored token from a previous session
+    const storedToken = sessionStorage.getItem('phoneIslandToken');
+    const storedUserData = sessionStorage.getItem('phoneIslandUserData');
+
+    if (storedToken && storedUserData) {
+        // Token exists, set it and show main panel
+        const phoneIslandWidget = document.getElementById('phoneIslandWidget');
+        phoneIslandWidget.setAttribute('data-config', storedToken);
+
+        const tokenData = JSON.parse(storedUserData);
+        displayUserInfo(tokenData);
+
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('mainPanel').classList.remove('hidden');
+
+        updateStatus('✅ Widget initialized successfully');
+        logEvent('🔐 Widget initialized with user:', tokenData.username);
+    }
+
+    // Login handler
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const tokenInput = document.getElementById('tokenInput');
+            const token = tokenInput.value.trim();
+
+            if (!token) {
+                alert('Please enter a valid token');
+                return;
+            }
+
+            const registrationStatus = document.getElementById('registrationStatus');
+            registrationStatus.textContent = '🔄 Initializing...';
+            registrationStatus.classList.remove('hidden', 'error', 'success');
+
+            // Initialize widget with token
+            initializeWidget(token);
+        });
+    }
+
+    // Allow Enter key to submit
+    const tokenInput = document.getElementById('tokenInput');
+    if (tokenInput) {
+        tokenInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
+        });
+    }
+
+    // Logout handler
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Clear session storage
+            sessionStorage.removeItem('phoneIslandToken');
+            sessionStorage.removeItem('phoneIslandUserData');
+
+            // Reload page to show login screen
+            window.location.reload();
+        });
+    }
+
     // Call controls
     const callBtn = document.getElementById('callBtn');
     if (callBtn) {
@@ -565,10 +738,36 @@ function init() {
         });
     }
 
-    // Initialize
-    updateStatus('🚀 Phone Island integration ready');
-    logEvent('🎯 Integration script loaded and ready');
+    // Initialize - Login screen is shown by default
+    logEvent('🎯 Integration script loaded - waiting for token input');
 }
+
+// Listen for Janus registration success
+window.addEventListener('phone-island-socket-connected', (event) => {
+    const janusStatus = document.getElementById('janusStatus');
+    if (janusStatus) {
+        janusStatus.textContent = '✅ Connected to Janus server!';
+        janusStatus.classList.add('success');
+    }
+});
+
+// Listen for registration messages from console (if available)
+const originalLog = console.log;
+console.log = function(...args) {
+    originalLog.apply(console, args);
+
+    // Check for Janus registration messages
+    const message = args.join(' ');
+    if (message.includes('Successfully registered as')) {
+        const janusStatus = document.getElementById('janusStatus');
+        if (janusStatus) {
+            const match = message.match(/registered as (\d+)/);
+            const extension = match ? match[1] : 'unknown';
+            janusStatus.textContent = `✅ Successfully registered on Janus as ${extension}!`;
+            janusStatus.classList.add('success');
+        }
+    }
+};
 
 // ===========================================
 // TRANSCRIPTION WINDOW CONTROLS

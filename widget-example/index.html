@@ -156,6 +156,84 @@
             font-family: monospace;
         }
 
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .login-container button:hover {
+            background-color: #218838;
+        }
+
+        .user-info {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .user-info h3 {
+            margin-top: 0;
+            color: #155724;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .registration-status {
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #004085;
+        }
+
+        .registration-status.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .registration-status.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
         /* Transcription Window Styles */
         .transcription-container {
             position: fixed;
@@ -314,14 +392,30 @@
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
-    <div class="integration-panel">
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <h1>📱 Phone Island Widget - Login</h1>
+        <p>Enter your Base64 token to initialize the widget:</p>
+        <input type="text" id="tokenInput" placeholder="Base64 Token (e.g. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)">
+        <button id="loginBtn">🔐 Initialize Widget</button>
+        <div class="registration-status hidden" id="registrationStatus"></div>
+    </div>
+
+    <div class="integration-panel hidden" id="mainPanel">
         <h1>📱 Phone Island Widget Integration Example</h1>
 
-        <div class="token-info">
-            <strong>⚠️ Configuration Required:</strong><br>
-            Replace <code>YOUR_BASE64_ENCODED_TOKEN_HERE</code> in the phone-island div below with your actual Base64 encoded token.
-            <br><br>
-            <strong>Token Format:</strong> <code>server:username:secret:extension:token</code> (Base64 encoded)
+        <!-- User Info Display -->
+        <div class="user-info hidden" id="userInfo">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>👤 User Information</h3>
+                <button id="logoutBtn" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🚪 Logout</button>
+            </div>
+            <p><strong>Username:</strong> <span id="userUsername">-</span></p>
+            <p><strong>Extension:</strong> <span id="userExtension">-</span></p>
+            <p><strong>Server:</strong> <span id="userServer">-</span></p>
+            <div class="registration-status" id="janusStatus">
+                🔄 Waiting for Janus registration...
+            </div>
         </div>
 
         <!-- Status Display -->
@@ -401,17 +495,27 @@
         </div>
     </div>
 
-    <!-- DEFINE THE PHONE ISLAND CONTAINER WITH YOUR TOKEN -->
+    <!-- DEFINE THE PHONE ISLAND CONTAINER (TOKEN WILL BE SET DYNAMICALLY) -->
     <div
       class="phone-island"
-      data-config="YOUR_BASE64_ENCODED_TOKEN_HERE"
+      data-config=""
       ua-type="desktop"
+      id="phoneIslandWidget"
     ></div>
+
+    <!-- PRE-INITIALIZATION SCRIPT - Sets token before widget loads -->
+    <script type="text/javascript">
+        // Check if we have a stored token and set it before widget loads
+        const storedToken = sessionStorage.getItem('phoneIslandToken');
+        if (storedToken) {
+            document.getElementById('phoneIslandWidget').setAttribute('data-config', storedToken);
+        }
+    </script>
 
     <!-- IMPORT THE WIDGET JS -->
     <script
       type="text/javascript"
-      src="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.js"
+      src="index.widget.js"
     ></script>
 
     <!-- INTEGRATION SCRIPT -->
