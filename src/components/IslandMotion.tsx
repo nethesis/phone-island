@@ -19,7 +19,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     conferencing,
   } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
-  const { view, isOpen, actionsExpanded, sideViewIsVisible, isFromStreaming, isExtraLarge } = useSelector(
+  const { view, isOpen, actionsExpanded, sideViewIsVisible,transcriptionViewIsVisible, isFromStreaming, isExtraLarge } = useSelector(
     (state: RootState) => state.island,
   )
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
@@ -271,6 +271,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     padding_expanded,
     alert_padding_expanded,
     sideViewIsVisible,
+    transcriptionViewIsVisible,
     incomingSocket,
     incomingWebRTC,
     isActive,

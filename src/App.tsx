@@ -667,6 +667,28 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-sideview-closed', {})
   })
 
+  useEventListener('phone-island-transcription-close', () => {
+    store.dispatch.island.toggleTranscriptionViewVisible(false)
+    eventDispatch('phone-island-transcription-closed', {})
+  })
+
+  useEventListener('phone-island-transcription-open', () => {
+    store.dispatch.island.toggleTranscriptionViewVisible(true)
+    eventDispatch('phone-island-transcription-opened', {})
+  })
+
+  useEventListener('phone-island-transcription-close', () => {
+    store.dispatch.island.toggleTranscriptionViewVisible(false)
+    eventDispatch('phone-island-transcription-closed', {})
+  })
+
+  useEventListener('phone-island-transcription-toggle', () => {
+    const { transcriptionViewIsVisible } = store.getState().island
+    const newState = !transcriptionViewIsVisible
+    store.dispatch.island.toggleTranscriptionViewVisible(newState)
+    eventDispatch(newState ? 'phone-island-transcription-opened' : 'phone-island-transcription-closed', {})
+  })
+
   useEventListener('phone-island-size-change', (args: any) => {
     const { sideViewIsVisible } = store.getState().island
 
@@ -692,6 +714,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
+      eventDispatch('phone-island-transcription-close', {})
       store.dispatch.island.resetIslandStore()
       store.dispatch.paramUrl.setThroughTrunk(false)
     }
@@ -753,6 +776,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
+      eventDispatch('phone-island-transcription-close', {})
       store.dispatch.island.resetIslandStore()
     }
   })

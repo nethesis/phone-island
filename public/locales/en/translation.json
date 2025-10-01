@@ -60,6 +60,7 @@
     "Enter fullscreen": "Enter fullscreen",
     "Exit fullscreen": "Exit fullscreen",
     "Open url": "Open external URL",
+    "Open transcription": "Open transcription",
     "Increase": "Increase",
     "Decrease": "Decrease",
     "Close": "Close"
@@ -141,5 +142,11 @@
     "Open": "Open",
     "Open door": "Open door",
     "Unlock streaming": "Unlock streaming"
+  },
+  "TranscriptionView": {
+    "New message": "New message",
+    "New messages": "{{count}} new messages",
+    "Transcribing": "transcribing...",
+    "Showing messages": "Showing last {{visible}} of {{total}} messages"
   }
 }

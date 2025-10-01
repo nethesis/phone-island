@@ -67,7 +67,7 @@ const Actions: FC = () => {
   const { paused, muted, parked, transferring } = useSelector(
     (state: RootState) => state.currentCall,
   )
-  const { view, actionsExpanded, sideViewIsVisible } = useSelector(
+  const { view, actionsExpanded, sideViewIsVisible, transcriptionViewIsVisible } = useSelector(
     (state: RootState) => state.island,
   )
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
@@ -107,30 +107,44 @@ const Actions: FC = () => {
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
     }
+    if (transcriptionViewIsVisible) {
+      eventDispatch('phone-island-transcription-close', {})
+    }
     eventDispatch('phone-island-call-keypad-opened', {})
-  }, [view, sideViewIsVisible, dispatch.island])
+  }, [view, sideViewIsVisible, transcriptionViewIsVisible, dispatch.island])
 
   const toggleActionsExpanded = useCallback(() => {
+    eventDispatch('phone-island-transcription-close', {})
     const newState = !actionsExpanded
     dispatch.island.toggleActionsExpanded(newState)
     eventDispatch(`phone-island-call-actions-${newState ? 'opened' : 'closed'}`, {})
     if (!newState) {
       eventDispatch('phone-island-sideview-close', {})
     }
-  }, [actionsExpanded, dispatch.island])
+  }, [actionsExpanded, transcriptionViewIsVisible, dispatch.island])
 
   const toggleSideView = useCallback(() => {
-    const event = sideViewIsVisible ? 'phone-island-sideview-close' : 'phone-island-sideview-open'
-    eventDispatch(event, {})
-  }, [sideViewIsVisible])
+    if (sideViewIsVisible) {
+      eventDispatch('phone-island-sideview-close', {})
+    } else {
+      // When opening SideView, close TranscriptionView if it's open
+      if (transcriptionViewIsVisible) {
+        eventDispatch('phone-island-transcription-close', {})
+      }
+      eventDispatch('phone-island-sideview-open', {})
+    }
+  }, [sideViewIsVisible, transcriptionViewIsVisible])
 
   const transfer = useCallback(() => {
     dispatch.island.setIslandView(view !== 'transfer' ? 'transfer' : 'call')
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
     }
+    if (transcriptionViewIsVisible) {
+      eventDispatch('phone-island-transcription-close', {})
+    }
     eventDispatch('phone-island-call-transfer-opened', {})
-  }, [view, sideViewIsVisible, dispatch.island])
+  }, [view, sideViewIsVisible, transcriptionViewIsVisible, dispatch.island])
 
   const beginConference = useCallback(() => {
     eventDispatch('phone-island-conference-list-open', {})
@@ -138,7 +152,10 @@ const Actions: FC = () => {
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
     }
-  }, [view, sideViewIsVisible, dispatch.island])
+    if (transcriptionViewIsVisible) {
+      eventDispatch('phone-island-transcription-close', {})
+    }
+  }, [view, sideViewIsVisible, transcriptionViewIsVisible, dispatch.island])
 
   const addUserToConference = useCallback(async () => {
     dispatch.island.setIslandView('waitingConference')

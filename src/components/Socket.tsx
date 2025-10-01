@@ -729,6 +729,7 @@ export const Socket: FC<SocketProps> = ({
         switch (data.message) {
           case 'screenSharingStart':
             dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
             dispatch.screenShare.update({
@@ -738,6 +739,7 @@ export const Socket: FC<SocketProps> = ({
             break
           case 'screenSharingStop':
             dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
             dispatch.screenShare.update({

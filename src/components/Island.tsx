@@ -25,6 +25,7 @@ import { store } from '../store'
 import { ContactListView } from './ContactView/ContactListView'
 import StreamingAnswerView from './StreamingAnswerView'
 import { OperatorBusyView } from './OperatorBusyView'
+import { TranscriptionView } from './TranscriptionView'
 
 /**
  * Provides the Island logic
@@ -35,7 +36,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  const { view, sideViewIsVisible, avoidToShow, previousView } = useSelector(
+  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } = useSelector(
     (state: RootState) => state.island,
   )
   const { recording } = useSelector((state: RootState) => ({
@@ -119,6 +120,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
               {/* Add background call visibility logic */}
               <BackCall isVisible={isBackCallActive()} />
               <SideView isVisible={sideViewIsVisible} uaType={uaType} />
+              <TranscriptionView isVisible={transcriptionViewIsVisible} />
               <IslandMotions>
                 {/* The views logic */}
                 <AlertGuard uaType={uaType}>

@@ -8,6 +8,7 @@ import {
   faStop,
   faVideo,
   faVideoSlash,
+  faCommentDots,
 } from '@fortawesome/free-solid-svg-icons'
 import { faArrowsRepeat, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
@@ -58,6 +59,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
+    openTranscriptionView,
   } = useSideViewLogic(uaType)
 
   const handleRecordClick = useCallback(() => {
@@ -99,6 +101,13 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         tooltipContent: t('Tooltip.Open url') || '',
         icon: faArrowUpRightFromSquare,
       },
+      {
+        key: 'transcription',
+        onClick: openTranscriptionView,
+        tooltipId: 'tooltip-transcription',
+        tooltipContent: t('Tooltip.Open transcription') || 'Open transcription',
+        icon: faCommentDots,
+      },
       canSwitchDevice && {
         key: 'switch-device',
         onClick: () => closeSideViewAndLaunchEvent('switchDevice'),
@@ -122,6 +131,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     hasValidUrl,
     isUrlButtonEnabled,
     closeSideViewAndLaunchEvent,
+    openTranscriptionView,
     canSwitchDevice,
   ])
 
@@ -149,6 +159,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
       <CustomThemedTooltip id='tooltip-record' place='left' />
       <CustomThemedTooltip id='tooltip-video' place='left' />
       <CustomThemedTooltip id='tooltip-screen-share' place='left' />
+      <CustomThemedTooltip id='tooltip-transcription' place='left' />
       <CustomThemedTooltip id='tooltip-switch-device' place='left' />
       <CustomThemedTooltip id='tooltip-open-url' place='left' />
     </>
