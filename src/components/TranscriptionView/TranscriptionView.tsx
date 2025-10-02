@@ -6,11 +6,14 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { useEventListener } from '../../utils'
+import { useEventListener, eventDispatch } from '../../utils'
+import { Button } from '../Button'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleUp, faArrowDown, faVectorSquare } from '@fortawesome/free-solid-svg-icons'
 
 const ANIMATION_CONFIG = {
   initial: { height: 0, opacity: 0 },
-  animate: { height: '300px', opacity: 1 },
+  animate: { height: '360px', opacity: 1 },
   exit: { height: 0, opacity: 0 },
   transition: {
     duration: 0.1,
@@ -40,8 +43,91 @@ interface TranscriptionMessage {
   isFinal: boolean
 }
 
+// Component for animated dots when message is not final
+const TypingDots: FC = () => {
+  return (
+    <div className='pi-inline-flex pi-items-center pi-gap-1 pi-ml-2'>
+      <motion.div
+        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+      />
+      <motion.div
+        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+      />
+      <motion.div
+        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+      />
+    </div>
+  )
+}
+
+const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = ({
+  text,
+  isFinal,
+  speed = 50,
+}) => {
+  const [displayText, setDisplayText] = useState('')
+  const [showCursor, setShowCursor] = useState(!isFinal)
+
+  useEffect(() => {
+    if (isFinal) {
+      setDisplayText(text)
+      setShowCursor(false)
+      return
+    }
+
+    let currentIndex = 0
+    setDisplayText('')
+
+    const typeInterval = setInterval(() => {
+      if (currentIndex < text.length) {
+        setDisplayText(text.slice(0, currentIndex + 1))
+        currentIndex++
+      } else {
+        clearInterval(typeInterval)
+        if (!isFinal) {
+          setShowCursor(true)
+        }
+      }
+    }, speed)
+
+    return () => clearInterval(typeInterval)
+  }, [text, isFinal, speed])
+
+  useEffect(() => {
+    if (!showCursor) return
+
+    const cursorInterval = setInterval(() => {
+      setShowCursor((prev) => !prev)
+    }, 500)
+
+    return () => clearInterval(cursorInterval)
+  }, [showCursor])
+
+  return (
+    <div className='pi-inline-flex pi-items-center pi-flex-wrap'>
+      <span
+        className={`${
+          isFinal
+            ? 'pi-text-white'
+            : 'pi-text-gray-200'
+        }`}
+      >
+        {displayText}
+      </span>
+      {!isFinal && <TypingDots />}
+    </div>
+  )
+}
+
 const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const { isOpen } = useSelector((state: RootState) => state.island)
+  const currentUser = useSelector((state: RootState) => state.currentUser)
   const { t } = useTranslation()
 
   const [allMessages, setAllMessages] = useState<TranscriptionMessage[]>([])
@@ -57,6 +143,23 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const BUFFER_MESSAGES = 10
   const SCROLL_DEBOUNCE_MS = 100
 
+  // Function to check if a speaker number belongs to current user
+  const isMyNumber = (speakerNumber: string): boolean => {
+    if (!currentUser || !speakerNumber) return false
+
+    // Check main extension from endpoints
+    if (currentUser.endpoints?.mainextension?.[0]?.id === speakerNumber) return true
+
+    // Check other extensions in endpoints
+    if (currentUser.endpoints?.extension) {
+      return Object.values(currentUser.endpoints.extension).some(
+        (ext: any) => ext.id === speakerNumber || ext.exten === speakerNumber,
+      )
+    }
+
+    return false
+  }
+
   // Update visible messages when all messages change
   useEffect(() => {
     const startIndex = Math.max(0, allMessages.length - MAX_VISIBLE_MESSAGES)
@@ -66,9 +169,11 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
 
   // Handle incoming transcription messages
   const addTranscriptionMessage = (data: any) => {
+    const uniqueId = `${data.uniqueid}_${data.timestamp}`
+    
     const message: TranscriptionMessage = {
-      id: data.uniqueid || Date.now().toString(),
-      timestamp: data.timestamp || Date.now() / 1000,
+      id: uniqueId,
+      timestamp: data.timestamp || 0,
       speaker: data.speaker_name || 'Unknown',
       speakerNumber: data.speaker_number || '',
       counterpart: data.speaker_counterpart_name || '',
@@ -78,25 +183,17 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     }
 
     setAllMessages((prevMessages) => {
-      const lastMessage = prevMessages[prevMessages.length - 1]
-
-      if (!message.isFinal) {
-        if (lastMessage && lastMessage.speaker === message.speaker && !lastMessage.isFinal) {
-          const updatedMessages = [...prevMessages]
-          updatedMessages[updatedMessages.length - 1] = message
-          return updatedMessages
-        } else {
-          return [...prevMessages, message]
-        }
+      // Check if message with same unique ID already exists
+      const existingMessageIndex = prevMessages.findIndex(msg => msg.id === uniqueId)
+      
+      if (existingMessageIndex !== -1) {
+        // Update existing message (same uniqueid + timestamp)
+        const updatedMessages = [...prevMessages]
+        updatedMessages[existingMessageIndex] = message
+        return updatedMessages
       } else {
-        // Final message
-        if (lastMessage && lastMessage.speaker === message.speaker && !lastMessage.isFinal) {
-          const updatedMessages = [...prevMessages]
-          updatedMessages[updatedMessages.length - 1] = message
-          return updatedMessages
-        } else {
-          return [...prevMessages, message]
-        }
+        // Add new message - each uniqueid + timestamp combination is a separate message
+        return [...prevMessages, message]
       }
     })
   }
@@ -153,7 +250,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
         }
-      }, 100) 
+      }, 100)
     } else if (userScrolled && !autoScroll) {
       // If user has scrolled up and there's a new message, show the indicator
       setHasNewContent(true)
@@ -173,104 +270,30 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     addTranscriptionMessage(transcriptionData)
   })
 
-  // Format timestamp
+  // Format timestamp - converts seconds from call start to MM:SS format
   const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const minutes = Math.floor(timestamp / 60)
+    const seconds = Math.floor(timestamp % 60)
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
   }
 
   // Skeleton component for loading state
   const TranscriptionSkeleton: FC = () => (
-    <div className='pi-space-y-4 pi-animate-pulse'>
-      {[1, 2].map((i) => (
-        <div key={i} className='pi-flex pi-flex-col pi-gap-2'>
-          {/* Speaker skeleton */}
-          <div className='pi-flex pi-items-center pi-justify-between'>
-            <div className='pi-h-4 pi-bg-iconWhite pi-bg-opacity-20 pi-rounded pi-w-24'></div>
-            <div className='pi-h-3 pi-bg-iconWhite pi-bg-opacity-20 pi-rounded pi-w-12'></div>
-          </div>
-
-          {/* Message skeleton */}
-          <div className='pi-p-3 pi-rounded-lg pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-border-l-3 pi-border-blue-400'>
-            <div className='pi-space-y-2'>
-              <div className='pi-h-4 pi-bg-iconWhite pi-bg-opacity-20 pi-rounded pi-w-full'></div>
-              <div className='pi-h-4 pi-bg-iconWhite pi-bg-opacity-20 pi-rounded pi-w-3/4'></div>
-              {i === 2 && (
-                <div className='pi-h-4 pi-bg-iconWhite pi-bg-opacity-20 pi-rounded pi-w-1/2'></div>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className='pi-space-y-2 pi-animate-pulse'>
+      {/* First shorter bar */}
+      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-2/5'></div>
+      {/* Second longer bar */}
+      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-4/5'></div>
+      {/* First shorter bar */}
+      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-2/5'></div>
+      {/* Third medium bar */}
+      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-4/5'></div>
     </div>
   )
 
-  const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = ({
-    text,
-    isFinal,
-    speed = 50,
-  }) => {
-    const [displayText, setDisplayText] = useState('')
-    const [showCursor, setShowCursor] = useState(!isFinal)
 
-    useEffect(() => {
-      if (isFinal) {
-        setDisplayText(text)
-        setShowCursor(false)
-        return
-      }
 
-      let currentIndex = 0
-      setDisplayText('')
-
-      const typeInterval = setInterval(() => {
-        if (currentIndex < text.length) {
-          setDisplayText(text.slice(0, currentIndex + 1))
-          currentIndex++
-        } else {
-          clearInterval(typeInterval)
-          if (!isFinal) {
-            setShowCursor(true)
-          }
-        }
-      }, speed)
-
-      return () => clearInterval(typeInterval)
-    }, [text, isFinal, speed])
-
-    useEffect(() => {
-      if (!showCursor) return
-
-      const cursorInterval = setInterval(() => {
-        setShowCursor((prev) => !prev)
-      }, 500)
-
-      return () => clearInterval(cursorInterval)
-    }, [showCursor])
-
-    return (
-      <span
-        className={`${
-          isFinal
-            ? 'pi-text-iconWhite dark:pi-text-iconWhiteDark'
-            : 'pi-text-iconWhite dark:pi-text-iconWhiteDark pi-opacity-80'
-        }`}
-      >
-        {displayText}
-        {!isFinal && (
-          <span
-            className={`pi-inline-block pi-w-2 pi-h-5 pi-bg-blue-400 pi-ml-1 ${
-              showCursor ? 'pi-opacity-100' : 'pi-opacity-0'
-            }`}
-          >
-            |
-          </span>
-        )}
-      </span>
-    )
-  }
-
-  const containerClassName = `pi-absolute pi-w-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-flex pi-flex-col pi-text-iconWhite dark:pi-text-iconWhiteDark pi-top-[13rem] pi-left-0 -pi-z-10 pi-pointer-events-auto ${
-    isOpen ? 'pi-px-6' : 'pi-px-4'
+  const containerClassName = `pi-absolute pi-w-full pi-bg-elevationL2 pi-flex pi-flex-col pi-text-iconWhite dark:pi-text-iconWhiteDark pi-top-[13rem] pi-left-0 -pi-z-10 pi-pointer-events-auto
   }`
 
   return (
@@ -278,110 +301,111 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
       <AnimatePresence>
         {isVisible && (
           <motion.div className={containerClassName} style={STYLE_CONFIG} {...ANIMATION_CONFIG}>
-            <div className='pi-h-full pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark pi-rounded-lg pi-overflow-hidden pi-opacity-80 pi-relative'>
-              <AnimatePresence>
-                {hasNewContent && userScrolled && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                    className='pi-absolute pi-top-3 pi-left-1/2 pi-transform pi--translate-x-1/2 pi-z-20 pi-mt-9'
-                  >
-                    <button
-                      onClick={scrollToBottom}
-                      className='pi-bg-blue-500 hover:pi-bg-blue-600 pi-text-white pi-px-4 pi-py-2 pi-rounded-full pi-text-sm pi-shadow-lg pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-border-blue-400 pi-backdrop-blur-sm'
-                    >
-                      <svg
-                        className='pi-w-4 pi-h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
+            <div className='pi-h-full pi-rounded-lg pi-overflow-hidden pi-opacity-80 pi-bg-elevationL2 dark:pi-bg-elevationL2Dark pi-relative pi-flex pi-flex-col pi-border-2 pi-border-gray-400 dark:pi-border-gray-600 pi-shadow-lg'>
+              {/* Main Content Card */}
+              <div className='pi-flex-1 pi-pt-4 pi-px-4 pi-mt-8'>
+                <div className='pi-h-60 pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-border pi-border-gray-200 dark:pi-border-gray-700 pi-overflow-hidden pi-flex pi-flex-col'>
+                  <AnimatePresence>
+                    {hasNewContent && userScrolled && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                        className='pi-absolute pi-top-16 pi-left-0 pi-right-0 pi-flex pi-justify-center pi-z-20'
                       >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M19 14l-7 7m0 0l-7-7m7 7V3'
-                        />
-                      </svg>
-                      {unseenMessagesCount > 1
-                        ? t('TranscriptionView.New messages', { count: unseenMessagesCount })
-                        : t('TranscriptionView.New message')}
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        <button
+                          onClick={scrollToBottom}
+                          className='pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300 pi-text-primaryInvert dark:pi-text-primaryInvertDark pi-px-4 pi-py-2 pi-rounded-full pi-text-sm pi-shadow-lg pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-backdrop-blur-sm'
+                        >
+                          <FontAwesomeIcon icon={faArrowDown} className='pi-w-4 pi-h-4' />
+                          {unseenMessagesCount > 1
+                            ? t('TranscriptionView.New messages')
+                            : t('TranscriptionView.New message')}
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-              <div
-                ref={scrollContainerRef}
-                onScroll={handleScroll}
-                className={`pi-h-full pi-p-4 pi-mt-9 ${
-                  visibleMessages.length > 0
-                    ? 'pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-200 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
-                    : 'pi-overflow-hidden'
-                }`}
-              >
-                {visibleMessages.length === 0 ? (
-                  <TranscriptionSkeleton />
-                ) : (
-                  <div className='pi-space-y-4'>
-                    {/* Show indicator if there are more messages than displayed */}
-                    {allMessages.length > MAX_VISIBLE_MESSAGES && (
-                      <div className='pi-text-center pi-py-2 pi-text-xs pi-text-gray-500 dark:pi-text-gray-400 pi-border-b pi-border-gray-200 dark:pi-border-gray-700'>
-                        {t('TranscriptionView.Showing messages', {
-                          visible: visibleMessages.length,
-                          total: allMessages.length,
-                        })}
+                  <div
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                    className={`pi-flex-1 pi-p-4 ${
+                      visibleMessages.length > 0
+                        ? 'pi-overflow-y-auto pi-scrollbar-thin pi-scrollbar-thumb-gray-400 pi-scrollbar-thumb-rounded-full pi-scrollbar-thumb-opacity-50 pi-scrollbar-track-gray-200 dark:pi-scrollbar-track-gray-900 pi-scrollbar-track-rounded-full pi-scrollbar-track-opacity-25'
+                        : 'pi-overflow-hidden'
+                    }`}
+                  >
+                    {visibleMessages.length === 0 ? (
+                      <TranscriptionSkeleton />
+                    ) : (
+                      <div className='pi-space-y-4'>
+                        {/* Show indicator if there are more messages than displayed */}
+                        {allMessages.length > MAX_VISIBLE_MESSAGES && (
+                          <div className='pi-text-center pi-py-2 pi-text-xs pi-text-gray-500 dark:pi-text-gray-400 pi-border-b pi-border-gray-200 dark:pi-border-gray-700'>
+                            {t('TranscriptionView.Showing messages', {
+                              visible: visibleMessages.length,
+                              total: allMessages.length,
+                            })}
+                          </div>
+                        )}
+
+                        {visibleMessages.map((message, index) => (
+                          <motion.div
+                            key={message.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className='pi-mb-4'
+                          >
+                            {/* Speaker Name */}
+                            <div className='pi-mb-2'>
+                              <span className='pi-font-semibold pi-text-white pi-text-sm'>
+                                {isMyNumber(message.speakerNumber)
+                                  ? t('Common.Me', 'Me')
+                                  : message.speaker}
+                              </span>
+                            </div>
+
+                            {/* Message Bubble with Background */}
+                            <div
+                              className={`pi-relative pi-p-3 pi-rounded-lg ${
+                                isMyNumber(message.speakerNumber)
+                                  ? 'pi-bg-gray-200 dark:pi-bg-gray-600'
+                                  : 'pi-bg-indigo-100 dark:pi-bg-indigo-700'
+                              } ${message.isFinal ? 'pi-opacity-100' : 'pi-opacity-90'}`}
+                            >
+                              <div className='pi-flex pi-items-start pi-justify-between pi-gap-3'>
+                                <div className='pi-flex-1'>
+                                  <TypewriterText
+                                    text={message.text}
+                                    isFinal={message.isFinal}
+                                    speed={30}
+                                  />
+                                </div>
+                                {/* Timestamp on the right */}
+                                <div className='pi-text-xs pi-text-gray-500 dark:pi-text-gray-400 pi-flex-shrink-0 pi-mt-1'>
+                                  {formatTimestamp(message.timestamp)}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                        <div ref={messagesEndRef} className='pi-pb-4' />
                       </div>
                     )}
-
-                    {visibleMessages.map((message, index) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className='pi-flex pi-flex-col pi-gap-2'
-                      >
-                        {/* Speaker Info */}
-                        <div className='pi-flex pi-items-center pi-justify-between'>
-                          <div className='pi-flex pi-items-center pi-gap-2'>
-                            <span className='pi-font-semibold pi-text-blue-300 pi-text-sm'>
-                              {message.speaker}
-                            </span>
-                            {message.speakerNumber && (
-                              <span className='pi-text-xs pi-text-iconWhite dark:pi-text-iconWhiteDark pi-opacity-50'>
-                                ({message.speakerNumber})
-                              </span>
-                            )}
-                          </div>
-                          <span className='pi-text-xs pi-text-iconWhite dark:pi-text-iconWhiteDark pi-opacity-50'>
-                            {formatTimestamp(message.timestamp)}
-                          </span>
-                        </div>
-
-                        {/* Message Content */}
-                        <div
-                          className={`pi-p-3 pi-rounded-lg pi-bg-surfaceSidebar dark:pi-bg-surfaceSidebarDark ${
-                            message.isFinal ? 'pi-opacity-100' : 'pi-opacity-90'
-                          } pi-border-l-3 pi-border-blue-400`}
-                        >
-                          <TypewriterText
-                            text={message.text}
-                            isFinal={message.isFinal}
-                            speed={30}
-                          />
-                          {!message.isFinal && (
-                            <div className='pi-text-xs pi-text-iconWhite dark:pi-text-iconWhiteDark pi-opacity-40 pi-mt-1'>
-                              {t('TranscriptionView.Transcribing', 'transcribing...')}
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                    <div ref={messagesEndRef} className='pi-pb-4' />
                   </div>
-                )}
+                </div>
+              </div>
+
+              {/* Footer with Close Button */}
+              <div className='pi-flex pi-items-center pi-justify-center pi-py-2 pi-border-t-2'>
+                <button
+                  onClick={() => eventDispatch('phone-island-transcription-close', {})}
+                  className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-20 pi-rounded-fullpi-px-4 pi-py-2 pi-rounded-full pi-text-sm pi-shadow-lg pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-backdrop-blur-sm'
+                >
+                  <FontAwesomeIcon icon={faAngleUp} className='pi-w-4 pi-h-4' />
+                  {t('Common.Close')}
+                </button>
               </div>
             </div>
           </motion.div>

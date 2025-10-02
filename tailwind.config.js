@@ -69,6 +69,9 @@ module.exports = {
         surfaceSidebarHover: '#4B5563', // gray-600
         surfaceSidebarHoverDark: '#4B5563', // gray-600
 
+        //elavation
+        elevationL2: '#F3F4F6', //gray-100
+        elevationL2Dark: '#1F2937', // gray-800
         //button
 
         // Active state

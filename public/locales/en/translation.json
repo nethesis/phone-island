@@ -13,6 +13,7 @@
     "Close": "Close",
     "Back": "Back",
     "More actions": "More actions",
+    "Me": "Me",
     "plus_x_others": "+{{count}} others",
     "Phone number entered": "Phone number entered",
     "Record message": "Record message",
@@ -145,7 +146,7 @@
   },
   "TranscriptionView": {
     "New message": "New message",
-    "New messages": "{{count}} new messages",
+    "New messages": "New messages",
     "Transcribing": "transcribing...",
     "Showing messages": "Showing last {{visible}} of {{total}} messages"
   }
