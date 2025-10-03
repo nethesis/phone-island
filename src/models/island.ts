@@ -172,6 +172,8 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     : defaultState.view
   const avoidToShow = state.avoidToShow
 
+  eventDispatch('phone-island-transcription-close', {})
+
   return {
     ...defaultState,
     startPosition: preservedStartPosition,

@@ -148,6 +148,7 @@
     "New message": "Nuovo messaggio",
     "New messages": "Nuovi messaggi",
     "Transcribing": "trascrizione in corso...",
-    "Showing messages": "Mostrati gli ultimi {{visible}} di {{total}} messaggi"
+    "Showing messages": "Mostrati gli ultimi {{visible}} di {{total}} messaggi",
+    "Is speaking": "sta parlando"
   }
 }

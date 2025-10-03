@@ -7,9 +7,8 @@ import { RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
-import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleUp, faArrowDown, faVectorSquare } from '@fortawesome/free-solid-svg-icons'
+import { faAngleUp, faArrowDown } from '@fortawesome/free-solid-svg-icons'
 
 const ANIMATION_CONFIG = {
   initial: { height: 0, opacity: 0 },
@@ -43,46 +42,21 @@ interface TranscriptionMessage {
   isFinal: boolean
 }
 
-// Component for animated dots when message is not final
-const TypingDots: FC = () => {
-  return (
-    <div className='pi-inline-flex pi-items-center pi-gap-1 pi-ml-2'>
-      <motion.div
-        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
-        animate={{ opacity: [0.3, 1, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-      />
-      <motion.div
-        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
-        animate={{ opacity: [0.3, 1, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-      />
-      <motion.div
-        className='pi-w-1 pi-h-1 pi-bg-blue-300 pi-rounded-full'
-        animate={{ opacity: [0.3, 1, 0.3] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-      />
-    </div>
-  )
-}
-
 const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = ({
   text,
   isFinal,
   speed = 50,
 }) => {
   const [displayText, setDisplayText] = useState('')
-  const [showCursor, setShowCursor] = useState(!isFinal)
 
   useEffect(() => {
     if (isFinal) {
       setDisplayText(text)
-      setShowCursor(false)
       return
     }
 
-    let currentIndex = 0
     setDisplayText('')
+    let currentIndex = 0
 
     const typeInterval = setInterval(() => {
       if (currentIndex < text.length) {
@@ -90,29 +64,15 @@ const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = (
         currentIndex++
       } else {
         clearInterval(typeInterval)
-        if (!isFinal) {
-          setShowCursor(true)
-        }
       }
     }, speed)
 
     return () => clearInterval(typeInterval)
   }, [text, isFinal, speed])
 
-  useEffect(() => {
-    if (!showCursor) return
-
-    const cursorInterval = setInterval(() => {
-      setShowCursor((prev) => !prev)
-    }, 500)
-
-    return () => clearInterval(cursorInterval)
-  }, [showCursor])
-
   return (
     <div className='pi-inline-flex pi-items-center pi-flex-wrap'>
       <span>{displayText}</span>
-      {!isFinal && <TypingDots />}
     </div>
   )
 }
@@ -385,6 +345,36 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
                                 </div>
                               </div>
                             </div>
+
+                            {!message.isFinal && message.text.trim() !== '' && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className='pi-mt-1 pi-ml-3 pi-flex pi-items-center pi-gap-1'
+                              >
+                                <span className='pi-text-xs pi-text-gray-400 dark:pi-text-gray-500 pi-italic'>
+                                  {t('TranscriptionView.Is speaking', '')}
+                                </span>
+                                <div className='pi-inline-flex pi-items-center pi-gap-1'>
+                                  <motion.div
+                                    className='pi-w-1 pi-h-1 pi-bg-gray-400 dark:pi-bg-gray-500 pi-rounded-full'
+                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                                  />
+                                  <motion.div
+                                    className='pi-w-1 pi-h-1 pi-bg-gray-400 dark:pi-bg-gray-500 pi-rounded-full'
+                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                                  />
+                                  <motion.div
+                                    className='pi-w-1 pi-h-1 pi-bg-gray-400 dark:pi-bg-gray-500 pi-rounded-full'
+                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                                  />
+                                </div>
+                              </motion.div>
+                            )}
                           </motion.div>
                         ))}
                         <div ref={messagesEndRef} className='pi-pb-4' />

@@ -148,6 +148,7 @@
     "New message": "New message",
     "New messages": "New messages",
     "Transcribing": "transcribing...",
-    "Showing messages": "Showing last {{visible}} of {{total}} messages"
+    "Showing messages": "Showing last {{visible}} of {{total}} messages",
+    "Is speaking": "is speaking"
   }
 }

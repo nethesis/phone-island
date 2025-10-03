@@ -74,7 +74,6 @@ const Hangup: FC<HangupProps> = ({
   const closeSideViewOpenSettings = () => {
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
-      eventDispatch('phone-island-transcription-close', {})
     }
     dispatch.island.setIslandView('settings')
   }

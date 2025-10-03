@@ -875,9 +875,6 @@ export const Socket: FC<SocketProps> = ({
     }
   }, [hostName, username, authToken, uaType, dispatch])
 
-  const testSocketConnection = () => {
-    socket.current.emit('start_transcription', {})
-  }
   // Manage reload events
   useEffect(() => {
     if (reload) {
