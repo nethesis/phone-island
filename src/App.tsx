@@ -716,8 +716,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
-      eventDispatch('phone-island-transcription-close', {})
-      store.dispatch.island.resetIslandStore()
+      store.dispatch.island.handleResetIslandStore()
       store.dispatch.paramUrl.setThroughTrunk(false)
     }
   })
@@ -778,8 +777,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
-      eventDispatch('phone-island-transcription-close', {})
-      store.dispatch.island.resetIslandStore()
+      store.dispatch.island.handleResetIslandStore()
     }
   })
 

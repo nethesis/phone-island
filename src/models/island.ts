@@ -115,6 +115,12 @@ export const island = createModel<RootModel>()({
     resetIslandStore: (state) => {
       return getResetState(state, true)
     },
+    _resetIslandStoreInternal: (state) => {
+      return getResetState(state, true)
+    },
+    _resetPlayerCloseInternal: (state) => {
+      return getResetState(state, false)
+    },
     setOperatorBusyCalledNumber: (state, payload: string) => {
       state.operatorBusy.calledNumber = payload
       return state
@@ -155,6 +161,14 @@ export const island = createModel<RootModel>()({
         dispatch.island.toggleIsOpen(!rootState.island.isOpen)
       }
     },
+    handleResetIslandStore: () => {
+      dispatch.island._resetIslandStoreInternal()
+      eventDispatch('phone-island-transcription-close', {})
+    },
+    handleResetPlayerClose: () => {
+      dispatch.island._resetPlayerCloseInternal()
+      eventDispatch('phone-island-transcription-close', {})
+    },
   }),
 })
 
@@ -171,8 +185,6 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     ? state.view
     : defaultState.view
   const avoidToShow = state.avoidToShow
-
-  eventDispatch('phone-island-transcription-close', {})
 
   return {
     ...defaultState,
