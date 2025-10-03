@@ -111,22 +111,14 @@ const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = (
 
   return (
     <div className='pi-inline-flex pi-items-center pi-flex-wrap'>
-      <span
-        className={`${
-          isFinal
-            ? 'pi-text-white'
-            : 'pi-text-gray-200'
-        }`}
-      >
-        {displayText}
-      </span>
+      <span className={`${isFinal ? 'pi-text-white' : 'pi-text-gray-200'}`}>{displayText}</span>
       {!isFinal && <TypingDots />}
     </div>
   )
 }
 
 const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
-  const { isOpen } = useSelector((state: RootState) => state.island)
+  const { actionsExpanded, view } = useSelector((state: RootState) => state.island)
   const currentUser = useSelector((state: RootState) => state.currentUser)
   const { t } = useTranslation()
 
@@ -170,7 +162,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   // Handle incoming transcription messages
   const addTranscriptionMessage = (data: any) => {
     const uniqueId = `${data.uniqueid}_${data.timestamp}`
-    
+
     const message: TranscriptionMessage = {
       id: uniqueId,
       timestamp: data.timestamp || 0,
@@ -184,8 +176,8 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
 
     setAllMessages((prevMessages) => {
       // Check if message with same unique ID already exists
-      const existingMessageIndex = prevMessages.findIndex(msg => msg.id === uniqueId)
-      
+      const existingMessageIndex = prevMessages.findIndex((msg) => msg.id === uniqueId)
+
       if (existingMessageIndex !== -1) {
         // Update existing message (same uniqueid + timestamp)
         const updatedMessages = [...prevMessages]
@@ -291,9 +283,8 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     </div>
   )
 
-
-
-  const containerClassName = `pi-absolute pi-w-full pi-bg-elevationL2 pi-flex pi-flex-col pi-text-iconWhite dark:pi-text-iconWhiteDark pi-top-[13rem] pi-left-0 -pi-z-10 pi-pointer-events-auto
+  const containerClassName = `pi-absolute pi-w-full pi-bg-elevationL2 pi-flex pi-flex-col pi-text-iconWhite dark:pi-text-iconWhiteDark pi-left-0 -pi-z-10 pi-pointer-events-auto ${
+    view === 'settings' || actionsExpanded ? 'pi-top-[17rem]' : 'pi-top-[13rem]'
   }`
 
   return (

@@ -22,7 +22,7 @@ import {
   dispatchDefaultDeviceUpdate,
 } from '../events'
 import { store } from '../store'
-import { eventDispatch, withTimeout } from '../utils'
+import { eventDispatch, useEventListener, withTimeout } from '../utils'
 import type {
   ConversationTypes,
   ExtensionTypes,
@@ -67,6 +67,20 @@ export const Socket: FC<SocketProps> = ({
 
   // get user information
   const userInformation = useSelector((state: RootState) => state.currentUser)
+
+  // Event listener for starting transcription
+  useEventListener('phone-island-start-transcription', () => {
+    if (socket.current) {
+      socket.current.emit('start_transcription', {})
+    }
+  })
+
+  // Event listener for stopping transcription
+  useEventListener('phone-island-stop-transcription', () => {
+    if (socket.current) {
+      socket.current.emit('stop_transcription', {})
+    }
+  })
 
   const checkDefaultDeviceConversationActive = (conv: any) => {
     dispatch.currentCall.updateCurrentCall({
@@ -861,6 +875,9 @@ export const Socket: FC<SocketProps> = ({
     }
   }, [hostName, username, authToken, uaType, dispatch])
 
+  const testSocketConnection = () => {
+    socket.current.emit('start_transcription', {})
+  }
   // Manage reload events
   useEffect(() => {
     if (reload) {

@@ -114,7 +114,6 @@ const Actions: FC = () => {
   }, [view, sideViewIsVisible, transcriptionViewIsVisible, dispatch.island])
 
   const toggleActionsExpanded = useCallback(() => {
-    eventDispatch('phone-island-transcription-close', {})
     const newState = !actionsExpanded
     dispatch.island.toggleActionsExpanded(newState)
     eventDispatch(`phone-island-call-actions-${newState ? 'opened' : 'closed'}`, {})
