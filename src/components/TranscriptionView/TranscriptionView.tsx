@@ -111,7 +111,7 @@ const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = (
 
   return (
     <div className='pi-inline-flex pi-items-center pi-flex-wrap'>
-      <span className={`${isFinal ? 'pi-text-white' : 'pi-text-gray-200'}`}>{displayText}</span>
+      <span>{displayText}</span>
       {!isFinal && <TypingDots />}
     </div>
   )
@@ -131,7 +131,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [autoScroll, setAutoScroll] = useState(true)
 
-  const MAX_VISIBLE_MESSAGES = 50
+  const MAX_VISIBLE_MESSAGES = 100
   const BUFFER_MESSAGES = 10
   const SCROLL_DEBOUNCE_MS = 100
 
@@ -273,13 +273,13 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const TranscriptionSkeleton: FC = () => (
     <div className='pi-space-y-2 pi-animate-pulse'>
       {/* First shorter bar */}
-      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-2/5'></div>
+      <div className='pi-h-4 pi-bg-gray-200 dark:pi-bg-gray-700 pi-rounded pi-w-2/5'></div>
       {/* Second longer bar */}
-      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-4/5'></div>
+      <div className='pi-h-4 pi-bg-gray-200 dark:pi-bg-gray-700 pi-rounded pi-w-4/5'></div>
       {/* First shorter bar */}
-      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-2/5'></div>
+      <div className='pi-h-4 pi-bg-gray-200 dark:pi-bg-gray-700 pi-rounded pi-w-2/5'></div>
       {/* Third medium bar */}
-      <div className='pi-h-4 pi-bg-gray-600 pi-rounded pi-w-4/5'></div>
+      <div className='pi-h-4 pi-bg-gray-200 dark:pi-bg-gray-700 pi-rounded pi-w-4/5'></div>
     </div>
   )
 
@@ -292,7 +292,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
       <AnimatePresence>
         {isVisible && (
           <motion.div className={containerClassName} style={STYLE_CONFIG} {...ANIMATION_CONFIG}>
-            <div className='pi-h-full pi-rounded-lg pi-overflow-hidden pi-opacity-80 pi-bg-elevationL2 dark:pi-bg-elevationL2Dark pi-relative pi-flex pi-flex-col pi-border-2 pi-border-gray-400 dark:pi-border-gray-600 pi-shadow-lg'>
+            <div className='pi-h-full pi-rounded-lg pi-overflow-hidden pi-bg-elevationL2 dark:pi-bg-elevationL2Dark pi-relative pi-flex pi-flex-col pi-border-2 pi-border-gray-100 dark:pi-border-gray-600 pi-shadow-lg'>
               {/* Main Content Card */}
               <div className='pi-flex-1 pi-pt-4 pi-px-4 pi-mt-8'>
                 <div className='pi-h-60 pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-border pi-border-gray-200 dark:pi-border-gray-700 pi-overflow-hidden pi-flex pi-flex-col'>
@@ -350,7 +350,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
                           >
                             {/* Speaker Name */}
                             <div className='pi-mb-2'>
-                              <span className='pi-font-semibold pi-text-white pi-text-sm'>
+                              <span className='pi-font-medium pi-text-xs pi-text-secondaryNeutral dark:pi-text-secondaryNeutralDark'>
                                 {isMyNumber(message.speakerNumber)
                                   ? t('Common.Me', 'Me')
                                   : message.speaker}
@@ -359,11 +359,11 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
 
                             {/* Message Bubble with Background */}
                             <div
-                              className={`pi-relative pi-p-3 pi-rounded-lg ${
+                              className={`pi-relative pi-p-3 pi-rounded-lg pi-text-xs pi-font-regular ${
                                 isMyNumber(message.speakerNumber)
-                                  ? 'pi-bg-gray-200 dark:pi-bg-gray-600'
-                                  : 'pi-bg-indigo-100 dark:pi-bg-indigo-700'
-                              } ${message.isFinal ? 'pi-opacity-100' : 'pi-opacity-90'}`}
+                                  ? 'pi-text-gray-800 dark:pi-text-gray-100 pi-bg-gray-200 dark:pi-bg-gray-600'
+                                  : 'pi-text-indigo-800 dark:pi-text-indigo-100 pi-bg-indigo-100 dark:pi-bg-indigo-700'
+                              }`}
                             >
                               <div className='pi-flex pi-items-start pi-justify-between pi-gap-3'>
                                 <div className='pi-flex-1'>
@@ -374,7 +374,13 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
                                   />
                                 </div>
                                 {/* Timestamp on the right */}
-                                <div className='pi-text-xs pi-text-gray-500 dark:pi-text-gray-400 pi-flex-shrink-0 pi-mt-1'>
+                                <div
+                                  className={`pi-flex-shrink-0 pi-mt-1 pi-text-xs pi-font-regular ${
+                                    isMyNumber(message.speakerNumber)
+                                      ? 'pi-text-gray-800 dark:pi-text-gray-100 pi-bg-gray-200 dark:pi-bg-gray-600'
+                                      : 'pi-text-indigo-800 dark:pi-text-indigo-100 pi-bg-indigo-100 dark:pi-bg-indigo-700'
+                                  }`}
+                                >
                                   {formatTimestamp(message.timestamp)}
                                 </div>
                               </div>
@@ -389,10 +395,10 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
               </div>
 
               {/* Footer with Close Button */}
-              <div className='pi-flex pi-items-center pi-justify-center pi-py-2 pi-border-t-2'>
+              <div className='pi-flex pi-items-center pi-justify-center pi-py-2'>
                 <button
                   onClick={() => eventDispatch('phone-island-transcription-close', {})}
-                  className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-20 pi-rounded-fullpi-px-4 pi-py-2 pi-rounded-full pi-text-sm pi-shadow-lg pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-backdrop-blur-sm'
+                  className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral pi-outline-none pi-border-transparent dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-24 pi-rounded-fullpi-px-4 pi-py-2 pi-rounded-full pi-text-lg  pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-backdrop-blur-sm'
                 >
                   <FontAwesomeIcon icon={faAngleUp} className='pi-w-4 pi-h-4' />
                   {t('Common.Close')}

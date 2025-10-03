@@ -139,7 +139,6 @@ export const useSideViewLogic = (uaType?: string) => {
   const openTranscriptionView = useCallback(() => {
     // Close SideView, collapse actions, and open TranscriptionView
     dispatch.island.toggleSideViewVisible(false)
-    dispatch.island.toggleActionsExpanded(false)
     setTimeout(() => {
       eventDispatch('phone-island-transcription-open', {})
     }, 100)

@@ -669,10 +669,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   useEventListener('phone-island-transcription-close', () => {
     store.dispatch.island.toggleTranscriptionViewVisible(false)
+    eventDispatch('phone-island-stop-transcription', {})
     eventDispatch('phone-island-transcription-closed', {})
   })
 
   useEventListener('phone-island-transcription-open', () => {
+    eventDispatch('phone-island-start-transcription', {})
     store.dispatch.island.toggleTranscriptionViewVisible(true)
     eventDispatch('phone-island-transcription-opened', {})
   })
