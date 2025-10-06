@@ -692,7 +692,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-size-change', (args: any) => {
-    const { sideViewIsVisible } = store.getState().island
+    const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } = store.getState().island
 
     // Get current dimensions from args
     const { sizeInformation } = args
@@ -702,6 +702,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       ...sizeInformation,
       right: sideViewIsVisible ? '42px' : '0px',
       top: isBackCallActive() ? '40px' : '0px',
+      bottom: transcriptionViewIsVisible && actionsExpanded ? '335px' : transcriptionViewIsVisible && !actionsExpanded ? '330px' : '0px',
     }
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
   })
