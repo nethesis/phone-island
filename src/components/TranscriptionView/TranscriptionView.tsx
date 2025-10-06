@@ -390,7 +390,7 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
                   onClick={() => eventDispatch('phone-island-transcription-close', {})}
                   className='pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral pi-outline-none pi-border-transparent dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-24 pi-rounded-fullpi-px-4 pi-py-2 pi-rounded-full pi-text-lg  pi-flex pi-items-center pi-gap-2 pi-transition-all pi-duration-200 pi-border pi-backdrop-blur-sm'
                 >
-                  <FontAwesomeIcon icon={faAngleUp} className='pi-w-4 pi-h-4' />
+                  <FontAwesomeIcon icon={faAngleUp} className='pi-w-4 pi-h-4 pi-ml-1' />
                   {t('Common.Close')}
                 </button>
               </div>
