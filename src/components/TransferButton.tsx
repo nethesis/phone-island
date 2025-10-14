@@ -20,7 +20,7 @@ interface TransferButtonProps {
 }
 
 export const TransferButton: FC<TransferButtonProps> = ({ tooltipPlace = 'bottom' }) => {
-  const { view, sideViewIsVisible } = useSelector((state: RootState) => state.island)
+  const { view, sideViewIsVisible, transcriptionViewIsVisible } = useSelector((state: RootState) => state.island)
   const dispatch = useDispatch<Dispatch>()
   const transferring = useSelector((state: RootState) => state.currentCall.transferring)
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
@@ -32,6 +32,10 @@ export const TransferButton: FC<TransferButtonProps> = ({ tooltipPlace = 'bottom
     // Check if sideView is visible and close it
     if (sideViewIsVisible) {
       eventDispatch('phone-island-sideview-close', {})
+    }
+    // Check if transcriptionView is visible and close it
+    if (transcriptionViewIsVisible) {
+      eventDispatch('phone-island-transcription-close', {})
     }
     eventDispatch('phone-island-call-transfer-opened', {})
   }
