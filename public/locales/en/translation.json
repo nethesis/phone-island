@@ -13,6 +13,7 @@
     "Close": "Close",
     "Back": "Back",
     "More actions": "More actions",
+    "Me": "Me",
     "plus_x_others": "+{{count}} others",
     "Phone number entered": "Phone number entered",
     "Record message": "Record message",
@@ -60,6 +61,7 @@
     "Enter fullscreen": "Enter fullscreen",
     "Exit fullscreen": "Exit fullscreen",
     "Open url": "Open external URL",
+    "Open transcription": "Open transcription",
     "Increase": "Increase",
     "Decrease": "Decrease",
     "Close": "Close"
@@ -141,5 +143,12 @@
     "Open": "Open",
     "Open door": "Open door",
     "Unlock streaming": "Unlock streaming"
+  },
+  "TranscriptionView": {
+    "New message": "New message",
+    "New messages": "New messages",
+    "Transcribing": "transcribing...",
+    "Showing messages": "Showing last {{visible}} of {{total}} messages",
+    "Is speaking": "is speaking"
   }
 }

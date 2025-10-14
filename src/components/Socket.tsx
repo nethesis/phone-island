@@ -22,7 +22,7 @@ import {
   dispatchDefaultDeviceUpdate,
 } from '../events'
 import { store } from '../store'
-import { eventDispatch, withTimeout } from '../utils'
+import { eventDispatch, useEventListener, withTimeout } from '../utils'
 import type {
   ConversationTypes,
   ExtensionTypes,
@@ -67,6 +67,20 @@ export const Socket: FC<SocketProps> = ({
 
   // get user information
   const userInformation = useSelector((state: RootState) => state.currentUser)
+
+  // Event listener for starting transcription
+  useEventListener('phone-island-start-transcription', () => {
+    if (socket.current) {
+      socket.current.emit('start_transcription', {})
+    }
+  })
+
+  // Event listener for stopping transcription
+  useEventListener('phone-island-stop-transcription', () => {
+    if (socket.current) {
+      socket.current.emit('stop_transcription', {})
+    }
+  })
 
   const checkDefaultDeviceConversationActive = (conv: any) => {
     dispatch.currentCall.updateCurrentCall({
@@ -729,6 +743,7 @@ export const Socket: FC<SocketProps> = ({
         switch (data.message) {
           case 'screenSharingStart':
             dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
             dispatch.screenShare.update({
@@ -738,6 +753,7 @@ export const Socket: FC<SocketProps> = ({
             break
           case 'screenSharingStop':
             dispatch.island.toggleSideViewVisible(false)
+            dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
             dispatch.screenShare.update({
@@ -840,6 +856,12 @@ export const Socket: FC<SocketProps> = ({
             })
           }
         }
+      })
+
+      // Handle satellite/transcription messages
+      socket.current.on('satellite/transcription', (transcriptionData: any) => {
+        // Dispatch the transcription event to external listeners
+        eventDispatch('phone-island-conversation-transcription', transcriptionData)
       })
     }
 

@@ -17,6 +17,7 @@ const defaultState: IslandTypes = {
   settingsView: 'main',
   contactListView: 'main',
   sideViewIsVisible: false,
+  transcriptionViewIsVisible: false,
   isConferenceList: false,
   previousView: null,
   avoidToShow: false,
@@ -70,6 +71,9 @@ export const island = createModel<RootModel>()({
     toggleSideViewVisible: (state, payload: boolean) => {
       state.sideViewIsVisible = payload
     },
+    toggleTranscriptionViewVisible: (state, payload: boolean) => {
+      state.transcriptionViewIsVisible = payload
+    },
     toggleConferenceList: (state, payload: boolean) => {
       state.isConferenceList = payload
     },
@@ -111,6 +115,12 @@ export const island = createModel<RootModel>()({
     resetIslandStore: (state) => {
       return getResetState(state, true)
     },
+    _resetIslandStoreInternal: (state) => {
+      return getResetState(state, true)
+    },
+    _resetPlayerCloseInternal: (state) => {
+      return getResetState(state, false)
+    },
     setOperatorBusyCalledNumber: (state, payload: string) => {
       state.operatorBusy.calledNumber = payload
       return state
@@ -146,9 +156,18 @@ export const island = createModel<RootModel>()({
         eventDispatch('phone-island-' + (rootState.island.isOpen ? 'compressed' : 'expanded'), {})
         if (rootState.island.isOpen) {
           eventDispatch('phone-island-sideview-close', {})
+          eventDispatch('phone-island-transcription-close', {})
         }
         dispatch.island.toggleIsOpen(!rootState.island.isOpen)
       }
+    },
+    handleResetIslandStore: () => {
+      dispatch.island._resetIslandStoreInternal()
+      eventDispatch('phone-island-transcription-close', {})
+    },
+    handleResetPlayerClose: () => {
+      dispatch.island._resetPlayerCloseInternal()
+      eventDispatch('phone-island-transcription-close', {})
     },
   }),
 })
@@ -215,6 +234,7 @@ interface IslandTypes {
   settingsView: SettingsViewType
   contactListView: ContactListViewType
   sideViewIsVisible: boolean
+  transcriptionViewIsVisible: boolean
   isConferenceList: boolean
   previousView?: IslandViewType | null
   avoidToShow?: boolean

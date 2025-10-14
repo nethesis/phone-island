@@ -155,19 +155,267 @@
             border-radius: 3px;
             font-family: monospace;
         }
+
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .login-container button:hover {
+            background-color: #218838;
+        }
+
+        .user-info {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .user-info h3 {
+            margin-top: 0;
+            color: #155724;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .registration-status {
+            background-color: #cce5ff;
+            border: 1px solid #b8daff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #004085;
+        }
+
+        .registration-status.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .registration-status.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Transcription Window Styles */
+        .transcription-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            height: 70%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .transcription-container.visible {
+            display: flex;
+        }
+
+        .transcription-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transcription-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .transcription-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .transcription-status {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+        }
+
+        .transcription-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .transcription-message {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .transcription-message.speaker {
+            border-left: 4px solid #007bff;
+            background: linear-gradient(90deg, rgba(0,123,255,0.05) 0%, white 100%);
+        }
+
+        .transcription-message.counterpart {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(90deg, rgba(40,167,69,0.05) 0%, white 100%);
+        }
+
+        .transcription-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .transcription-speaker {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .transcription-timestamp {
+            font-size: 11px;
+        }
+
+        .transcription-text {
+            font-size: 16px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .transcription-text.interim {
+            font-style: italic;
+            opacity: 0.7;
+            color: #6c757d;
+            background-color: rgba(108, 117, 125, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 2px solid #6c757d;
+        }
+
+        .transcription-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .transcription-overlay.visible {
+            display: block;
+        }
+
+        .transcription-controls {
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .transcription-controls button {
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .transcription-controls button:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .transcription-controls button.active {
+            background: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
-    <div class="integration-panel">
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <h1>📱 Phone Island Widget - Login</h1>
+        <p>Enter your Base64 token to initialize the widget:</p>
+        <input type="text" id="tokenInput" placeholder="Base64 Token (e.g. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)">
+        <button id="loginBtn">🔐 Initialize Widget</button>
+        <div class="registration-status hidden" id="registrationStatus"></div>
+    </div>
+
+    <div class="integration-panel hidden" id="mainPanel">
         <h1>📱 Phone Island Widget Integration Example</h1>
 
-        <div class="token-info">
-            <strong>⚠️ Configuration Required:</strong><br>
-            Replace <code>YOUR_BASE64_ENCODED_TOKEN_HERE</code> in the phone-island div below with your actual Base64 encoded token.
-            <br><br>
-            <strong>Token Format:</strong> <code>server:username:secret:extension:token</code> (Base64 encoded)
+        <!-- User Info Display -->
+        <div class="user-info hidden" id="userInfo">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>👤 User Information</h3>
+                <button id="logoutBtn" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🚪 Logout</button>
+            </div>
+            <p><strong>Username:</strong> <span id="userUsername">-</span></p>
+            <p><strong>Extension:</strong> <span id="userExtension">-</span></p>
+            <p><strong>Server:</strong> <span id="userServer">-</span></p>
+            <div class="registration-status" id="janusStatus">
+                🔄 Waiting for Janus registration...
+            </div>
         </div>
 
         <!-- Status Display -->
@@ -209,6 +457,7 @@
             <button id="closeSideview">❌ Close Menu</button>
             <button id="checkConnection">🌐 Check Connection</button>
             <button id="debugStatus">🐛 Debug Status</button>
+            <button id="openTranscription" class="success">💬 Open Transcriptions</button>
         </div>
 
         <!-- Event Log -->
@@ -217,17 +466,56 @@
         </div>
     </div>
 
-    <!-- DEFINE THE PHONE ISLAND CONTAINER WITH YOUR TOKEN -->
+    <!-- Transcription Window Overlay -->
+    <div class="transcription-overlay" id="transcriptionOverlay"></div>
+
+    <!-- Transcription Window -->
+    <div class="transcription-container" id="transcriptionContainer">
+        <div class="transcription-header">
+            <h3>💬 Live Transcriptions</h3>
+            <button class="transcription-close" id="transcriptionClose">✕</button>
+        </div>
+
+        <div class="transcription-status" id="transcriptionStatus">
+            Status: Connecting to transcription service...
+        </div>
+
+        <div class="transcription-messages" id="transcriptionMessages">
+            <div style="text-align: center; color: #6c757d; padding: 20px;">
+                🎙️ Waiting for transcription messages...
+            </div>
+        </div>
+
+        <div class="transcription-controls">
+            <button id="clearTranscriptions">🗑️ Clear</button>
+            <button id="autoScrollToggle" class="active">📜 Auto-scroll</button>
+            <span style="margin-left: auto; font-size: 12px; color: #6c757d;">
+                Messages: <span id="messageCount">0</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- DEFINE THE PHONE ISLAND CONTAINER (TOKEN WILL BE SET DYNAMICALLY) -->
     <div
       class="phone-island"
-      data-config="YOUR_BASE64_ENCODED_TOKEN_HERE"
+      data-config=""
       ua-type="desktop"
+      id="phoneIslandWidget"
     ></div>
+
+    <!-- PRE-INITIALIZATION SCRIPT - Sets token before widget loads -->
+    <script type="text/javascript">
+        // Check if we have a stored token and set it before widget loads
+        const storedToken = sessionStorage.getItem('phoneIslandToken');
+        if (storedToken) {
+            document.getElementById('phoneIslandWidget').setAttribute('data-config', storedToken);
+        }
+    </script>
 
     <!-- IMPORT THE WIDGET JS -->
     <script
       type="text/javascript"
-      src="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.js"
+      src="index.widget.js"
     ></script>
 
     <!-- INTEGRATION SCRIPT -->

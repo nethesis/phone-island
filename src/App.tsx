@@ -667,8 +667,32 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-sideview-closed', {})
   })
 
+  useEventListener('phone-island-transcription-close', () => {
+    store.dispatch.island.toggleTranscriptionViewVisible(false)
+    eventDispatch('phone-island-stop-transcription', {})
+    eventDispatch('phone-island-transcription-closed', {})
+  })
+
+  useEventListener('phone-island-transcription-open', () => {
+    eventDispatch('phone-island-start-transcription', {})
+    store.dispatch.island.toggleTranscriptionViewVisible(true)
+    eventDispatch('phone-island-transcription-opened', {})
+  })
+
+  useEventListener('phone-island-transcription-close', () => {
+    store.dispatch.island.toggleTranscriptionViewVisible(false)
+    eventDispatch('phone-island-transcription-closed', {})
+  })
+
+  useEventListener('phone-island-transcription-toggle', () => {
+    const { transcriptionViewIsVisible } = store.getState().island
+    const newState = !transcriptionViewIsVisible
+    store.dispatch.island.toggleTranscriptionViewVisible(newState)
+    eventDispatch(newState ? 'phone-island-transcription-opened' : 'phone-island-transcription-closed', {})
+  })
+
   useEventListener('phone-island-size-change', (args: any) => {
-    const { sideViewIsVisible } = store.getState().island
+    const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } = store.getState().island
 
     // Get current dimensions from args
     const { sizeInformation } = args
@@ -678,6 +702,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       ...sizeInformation,
       right: sideViewIsVisible ? '42px' : '0px',
       top: isBackCallActive() ? '40px' : '0px',
+      bottom: transcriptionViewIsVisible && actionsExpanded ? '335px' : transcriptionViewIsVisible && !actionsExpanded ? '330px' : '0px',
     }
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
   })
@@ -692,7 +717,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
-      store.dispatch.island.resetIslandStore()
+      store.dispatch.island.handleResetIslandStore()
       store.dispatch.paramUrl.setThroughTrunk(false)
     }
   })
@@ -753,7 +778,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
       eventDispatch('phone-island-size-change', { sizeInformation })
       eventDispatch('phone-island-sideview-close', {})
-      store.dispatch.island.resetIslandStore()
+      store.dispatch.island.handleResetIslandStore()
     }
   })
 

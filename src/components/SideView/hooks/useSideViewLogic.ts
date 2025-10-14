@@ -136,6 +136,19 @@ export const useSideViewLogic = (uaType?: string) => {
     }
   }, [userInformation, allUsersInformation])
 
+  const openTranscriptionView = useCallback(() => {
+    // Close SideView, collapse actions, and open TranscriptionView
+    dispatch.island.toggleSideViewVisible(false)
+    setTimeout(() => {
+      eventDispatch('phone-island-transcription-open', {})
+    }, 100)
+  }, [dispatch.island])
+
+  const isTranscriptionEnabled = useMemo(
+    () => userInformation?.call_transcription_enabled || false,
+    [userInformation?.call_transcription_enabled],
+  )
+
   return {
     userInformation,
     availableDevices,
@@ -143,9 +156,11 @@ export const useSideViewLogic = (uaType?: string) => {
     isVideoCallButtonVisible,
     isUrlButtonEnabled,
     hasValidUrl: paramUrlData.hasValidUrl,
+    isTranscriptionEnabled,
     ...userCapabilities,
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
+    openTranscriptionView,
   }
 }

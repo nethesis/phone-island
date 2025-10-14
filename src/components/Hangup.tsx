@@ -133,17 +133,21 @@ const Hangup: FC<HangupProps> = ({
             onClick={() => {
               if (isPhysicalRecording) {
                 eventDispatch('phone-island-sideview-close', {})
+                eventDispatch('phone-island-transcription-close', {})
                 hangupCurrentPhysicalRecording()
               } else if (isActive) {
                 if (conferenceStartedFrom === username && view === 'waitingConference') {
                   eventDispatch('phone-island-sideview-close', {})
+                  eventDispatch('phone-island-transcription-close', {})
                   endConference()
                 } else {
                   eventDispatch('phone-island-sideview-close', {})
+                  eventDispatch('phone-island-transcription-close', {})
                   handleHangup()
                 }
               } else {
                 eventDispatch('phone-island-sideview-close', {})
+                eventDispatch('phone-island-transcription-close', {})
                 handleHangup()
               }
             }}

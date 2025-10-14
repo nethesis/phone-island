@@ -4,25 +4,225 @@
 'use strict';
 
 // ===========================================
+// TRANSCRIPTION EVENT HANDLING
+// ===========================================
+
+let transcriptionMessages = [];
+let autoScroll = true;
+let messageCount = 0;
+
+// Add transcription message to display
+function addTranscriptionMessage(data) {
+    console.log('Adding transcription message:', data);
+
+    const message = {
+        id: data.uniqueid || Date.now(),
+        timestamp: data.timestamp || Date.now() / 1000,
+        speaker: data.speaker_name || 'Unknown',
+        speakerNumber: data.speaker_number || '',
+        counterpart: data.speaker_counterpart_name || '',
+        counterpartNumber: data.speaker_counterpart_number || '',
+        text: data.transcription || '',
+        isFinal: data.is_final || false
+    };
+
+    console.log('Processed message object:', message);
+
+    const lastMessage = transcriptionMessages[transcriptionMessages.length - 1];
+
+    if (!message.isFinal) {
+        // INTERIM MESSAGE - Update if same speaker or create new message if is different
+        if (lastMessage &&
+            lastMessage.speaker === message.speaker &&
+            !lastMessage.isFinal) {
+            // Update message of the same speaker
+            console.log('Updating existing interim message');
+            transcriptionMessages[transcriptionMessages.length - 1] = message;
+        } else {
+            // Create new message for new speaker
+            console.log('Creating new interim message');
+            transcriptionMessages.push(message);
+            messageCount++;
+            updateMessageCount();
+        }
+    } else {
+        // FINAL MESSAGE
+        if (lastMessage &&
+            lastMessage.speaker === message.speaker &&
+            !lastMessage.isFinal) {
+            // Finalize message
+            console.log('Finalizing existing interim message');
+            transcriptionMessages[transcriptionMessages.length - 1] = message;
+        } else {
+            // Crea new message after a new speaker
+            console.log('Creating new final message');
+            transcriptionMessages.push(message);
+            messageCount++;
+            updateMessageCount();
+        }
+    }
+
+    console.log('Current messages array:', transcriptionMessages);
+    renderTranscriptionMessages();
+}
+
+// Render all transcription messages
+function renderTranscriptionMessages() {
+    console.log('Rendering transcription messages. Count:', transcriptionMessages.length);
+    const container = document.getElementById('transcriptionMessages');
+    if (!container) {
+        console.error('transcriptionMessages container not found!');
+        return;
+    }
+
+    if (transcriptionMessages.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: #6c757d; padding: 20px;">
+                🎙️ Waiting for transcription messages...
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = transcriptionMessages.map(message => {
+        const time = new Date(message.timestamp * 1000).toLocaleTimeString();
+        const speaker = message.speaker || 'Unknown';
+        const speakerInfo = message.speakerNumber ? `${speaker} (${message.speakerNumber})` : speaker;
+
+        // Determine message type based on speaker - use first message to establish roles
+        const firstMessage = transcriptionMessages[0];
+        const messageClass = firstMessage && message.speaker === firstMessage.speaker ? 'speaker' : 'counterpart';
+
+        return `
+            <div class="transcription-message ${messageClass}">
+                <div class="transcription-meta">
+                    <span class="transcription-speaker">${speakerInfo}</span>
+                    <span class="transcription-timestamp">${time}</span>
+                </div>
+                <div class="transcription-text ${message.isFinal ? '' : 'interim'}">
+                    ${message.text}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Auto-scroll to bottom if enabled
+    if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+// Update transcription status
+function updateTranscriptionStatus(status) {
+    const statusElement = document.getElementById('transcriptionStatus');
+    if (statusElement) {
+        statusElement.textContent = `Status: ${status}`;
+    }
+}
+
+// Update message count
+function updateMessageCount() {
+    const countElement = document.getElementById('messageCount');
+    if (countElement) {
+        countElement.textContent = messageCount;
+    }
+}
+
+// Clear all transcription messages
+function clearTranscriptionMessages() {
+    transcriptionMessages = [];
+    messageCount = 0;
+    updateMessageCount();
+    renderTranscriptionMessages();
+}
+
+// ===========================================
+// TOKEN DECODING AND USER DATA
+// ===========================================
+
+// Decode Base64 token and extract user information
+function decodeToken(base64Token) {
+    try {
+        // Decode Base64
+        const decodedString = atob(base64Token);
+        console.log('Decoded token string:', decodedString);
+
+        // Format: server:username:jwt_token:extension:token_id:host:port
+        // Example: cti3.demo-heron.sf.nethserver.net:lorenzo:eyJhbG...W4:204:79938b8a...:127.0.0.1:20107
+        const parts = decodedString.split(':');
+
+        if (parts.length !== 7) {
+            throw new Error(`Invalid token format - expected 7 parts, got ${parts.length}`);
+        }
+
+        const server = parts[0];
+        const username = parts[1];
+        const jwt = parts[2];
+        const extension = parts[3];
+        const tokenId = parts[4];
+        const host = parts[5];
+        const port = parts[6];
+
+        console.log('Parsed token:', { server, username, extension, host, port });
+
+        return {
+            server: server,
+            username: username,
+            secret: jwt, // This is the JWT token
+            extension: extension,
+            token: tokenId,
+            host: host,
+            port: port
+        };
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        throw new Error('Failed to decode token');
+    }
+}
+
+// Display user information from token
+function displayUserInfo(tokenData) {
+    document.getElementById('userUsername').textContent = tokenData.username;
+    document.getElementById('userExtension').textContent = tokenData.extension;
+    document.getElementById('userServer').textContent = tokenData.server;
+    document.getElementById('userInfo').classList.remove('hidden');
+}
+
+// ===========================================
 // UTILITY FUNCTIONS
 // ===========================================
 
 // Helper function to dispatch events to phone-island
 function dispatchPhoneIslandEvent(eventName, data = {}) {
-    const event = new CustomEvent(eventName, { 
-        detail: data 
+    const event = new CustomEvent(eventName, {
+        detail: data
     });
     window.dispatchEvent(event);
     logEvent(`🚀 DISPATCHED: ${eventName}`, data);
 }
 
+// Track last status to avoid duplicate updates
+let lastStatus = '';
+let lastStatusTime = 0;
+
 // Helper function to update status
-function updateStatus(message) {
+function updateStatus(message, force = false) {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastStatusTime;
+
+    // Avoid duplicate status updates within 2 seconds unless forced
+    if (!force && message === lastStatus && timeSinceLastUpdate < 2000) {
+        return;
+    }
+
     const statusElement = document.getElementById('statusContent');
     if (statusElement) {
         statusElement.innerHTML = message;
     }
     logEvent(`📊 STATUS: ${message}`);
+
+    lastStatus = message;
+    lastStatusTime = now;
 }
 
 // Helper function to log events
@@ -118,11 +318,12 @@ window.addEventListener('phone-island-theme-changed', (event) => {
 
 // UI events
 window.addEventListener('phone-island-sideview-opened', (event) => {
-    updateStatus('📋 Side menu opened');
+    updateStatus('📋 Side menu opened', true);
 });
 
 window.addEventListener('phone-island-sideview-closed', (event) => {
-    updateStatus('❌ Side menu closed');
+    // Only log, don't update status for menu close
+    logEvent('📋 Side menu closed');
 });
 
 window.addEventListener('phone-island-fullscreen-entered', (event) => {
@@ -151,16 +352,18 @@ window.addEventListener('phone-island-queue-update', (event) => {
 
 // Connection status events
 window.addEventListener('phone-island-internet-disconnected', (event) => {
-    updateStatus('⚠️ Internet connection lost');
+    updateStatus('⚠️ Internet connection lost', true); // Force update for disconnection
 });
 
 window.addEventListener('phone-island-internet-connected', (event) => {
-    updateStatus('✅ Internet connection restored');
+    // Only log, don't update status for repeated connection events
+    logEvent('🌐 Internet connection restored');
 });
 
 // Error and alert events
 window.addEventListener('phone-island-alert-removed', (event) => {
-    logEvent('🗑️ Alert removed');
+    // Don't log every alert removal, it's too noisy
+    // logEvent('🗑️ Alert removed');
 });
 
 // Server events
@@ -205,6 +408,13 @@ window.addEventListener('phone-island-video-disabled', (event) => {
     updateStatus('📹 Video disabled');
 });
 
+// Transcription events (new event from phone-island)
+window.addEventListener('phone-island-conversation-transcription', (event) => {
+    const transcriptionData = event.detail;
+    logEvent('💬 Transcription received', transcriptionData);
+    addTranscriptionMessage(transcriptionData);
+});
+
 // Screen share events
 window.addEventListener('phone-island-screen-share-started', (event) => {
     updateStatus('🖥️ Screen sharing started');
@@ -223,18 +433,121 @@ window.addEventListener('phone-island-screen-share-left', (event) => {
 });
 
 // ===========================================
+// LOGIN AND INITIALIZATION
+// ===========================================
+
+function initializeWidget(base64Token) {
+    try {
+        // Decode token and get user data
+        const tokenData = decodeToken(base64Token);
+        console.log('Token data:', tokenData);
+
+        // Set the token in the widget BEFORE the script loads
+        const phoneIslandWidget = document.getElementById('phoneIslandWidget');
+        phoneIslandWidget.setAttribute('data-config', base64Token);
+
+        // Display user info
+        displayUserInfo(tokenData);
+
+        // Hide login container and show main panel
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('mainPanel').classList.remove('hidden');
+
+        // Reload the page to initialize the widget with the new token
+        // We need to store the token in sessionStorage so it persists after reload
+        sessionStorage.setItem('phoneIslandToken', base64Token);
+        sessionStorage.setItem('phoneIslandUserData', JSON.stringify(tokenData));
+
+        // Reload the page
+        window.location.reload();
+
+        return true;
+    } catch (error) {
+        console.error('Initialization error:', error);
+        const registrationStatus = document.getElementById('registrationStatus');
+        registrationStatus.textContent = `❌ Error: ${error.message}`;
+        registrationStatus.classList.remove('hidden');
+        registrationStatus.classList.add('error');
+        return false;
+    }
+}
+
+// ===========================================
 // UI EVENT HANDLERS
 // ===========================================
 
 function init() {
+    // Check if we have a stored token from a previous session
+    const storedToken = sessionStorage.getItem('phoneIslandToken');
+    const storedUserData = sessionStorage.getItem('phoneIslandUserData');
+
+    if (storedToken && storedUserData) {
+        // Token exists, set it and show main panel
+        const phoneIslandWidget = document.getElementById('phoneIslandWidget');
+        phoneIslandWidget.setAttribute('data-config', storedToken);
+
+        const tokenData = JSON.parse(storedUserData);
+        displayUserInfo(tokenData);
+
+        document.getElementById('loginContainer').classList.add('hidden');
+        document.getElementById('mainPanel').classList.remove('hidden');
+
+        updateStatus('✅ Widget initialized successfully');
+        logEvent('🔐 Widget initialized with user:', tokenData.username);
+    }
+
+    // Login handler
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const tokenInput = document.getElementById('tokenInput');
+            const token = tokenInput.value.trim();
+
+            if (!token) {
+                alert('Please enter a valid token');
+                return;
+            }
+
+            const registrationStatus = document.getElementById('registrationStatus');
+            registrationStatus.textContent = '🔄 Initializing...';
+            registrationStatus.classList.remove('hidden', 'error', 'success');
+
+            // Initialize widget with token
+            initializeWidget(token);
+        });
+    }
+
+    // Allow Enter key to submit
+    const tokenInput = document.getElementById('tokenInput');
+    if (tokenInput) {
+        tokenInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
+        });
+    }
+
+    // Logout handler
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Clear session storage
+            sessionStorage.removeItem('phoneIslandToken');
+            sessionStorage.removeItem('phoneIslandUserData');
+
+            // Reload page to show login screen
+            window.location.reload();
+        });
+    }
+
     // Call controls
     const callBtn = document.getElementById('callBtn');
     if (callBtn) {
         callBtn.addEventListener('click', () => {
             const phoneNumber = document.getElementById('phoneNumber').value;
             if (phoneNumber) {
-                dispatchPhoneIslandEvent('phone-island-call-start', { 
-                    number: phoneNumber 
+                dispatchPhoneIslandEvent('phone-island-call-start', {
+                    number: phoneNumber
                 });
             } else {
                 alert('Please enter a phone number');
@@ -326,8 +639,8 @@ function init() {
     const lightTheme = document.getElementById('lightTheme');
     if (lightTheme) {
         lightTheme.addEventListener('click', () => {
-            dispatchPhoneIslandEvent('phone-island-theme-change', { 
-                selectedTheme: 'light' 
+            dispatchPhoneIslandEvent('phone-island-theme-change', {
+                selectedTheme: 'light'
             });
             setActiveTheme('light');
         });
@@ -336,8 +649,8 @@ function init() {
     const darkTheme = document.getElementById('darkTheme');
     if (darkTheme) {
         darkTheme.addEventListener('click', () => {
-            dispatchPhoneIslandEvent('phone-island-theme-change', { 
-                selectedTheme: 'dark' 
+            dispatchPhoneIslandEvent('phone-island-theme-change', {
+                selectedTheme: 'dark'
             });
             setActiveTheme('dark');
         });
@@ -387,9 +700,104 @@ function init() {
         });
     }
 
-    // Initialize
-    updateStatus('🚀 Phone Island integration ready');
-    logEvent('🎯 Integration script loaded and ready');
+    // Transcription window controls
+    const openTranscription = document.getElementById('openTranscription');
+    if (openTranscription) {
+        openTranscription.addEventListener('click', () => {
+            openTranscriptionWindow();
+        });
+    }
+
+    const transcriptionClose = document.getElementById('transcriptionClose');
+    if (transcriptionClose) {
+        transcriptionClose.addEventListener('click', () => {
+            closeTranscriptionWindow();
+        });
+    }
+
+    const transcriptionOverlay = document.getElementById('transcriptionOverlay');
+    if (transcriptionOverlay) {
+        transcriptionOverlay.addEventListener('click', () => {
+            closeTranscriptionWindow();
+        });
+    }
+
+    const clearTranscriptions = document.getElementById('clearTranscriptions');
+    if (clearTranscriptions) {
+        clearTranscriptions.addEventListener('click', () => {
+            clearTranscriptionMessages();
+        });
+    }
+
+    const autoScrollToggle = document.getElementById('autoScrollToggle');
+    if (autoScrollToggle) {
+        autoScrollToggle.addEventListener('click', () => {
+            autoScroll = !autoScroll;
+            autoScrollToggle.classList.toggle('active', autoScroll);
+            autoScrollToggle.textContent = autoScroll ? '📜 Auto-scroll' : '📜 Manual';
+        });
+    }
+
+    // Initialize - Login screen is shown by default
+    logEvent('🎯 Integration script loaded - waiting for token input');
+}
+
+// Listen for Janus registration success
+window.addEventListener('phone-island-socket-connected', (event) => {
+    const janusStatus = document.getElementById('janusStatus');
+    if (janusStatus) {
+        janusStatus.textContent = '✅ Connected to Janus server!';
+        janusStatus.classList.add('success');
+    }
+});
+
+// Listen for registration messages from console (if available)
+const originalLog = console.log;
+console.log = function(...args) {
+    originalLog.apply(console, args);
+
+    // Check for Janus registration messages
+    const message = args.join(' ');
+    if (message.includes('Successfully registered as')) {
+        const janusStatus = document.getElementById('janusStatus');
+        if (janusStatus) {
+            const match = message.match(/registered as (\d+)/);
+            const extension = match ? match[1] : 'unknown';
+            janusStatus.textContent = `✅ Successfully registered on Janus as ${extension}!`;
+            janusStatus.classList.add('success');
+        }
+    }
+};
+
+// ===========================================
+// TRANSCRIPTION WINDOW CONTROLS
+// ===========================================
+
+function openTranscriptionWindow() {
+    const container = document.getElementById('transcriptionContainer');
+    const overlay = document.getElementById('transcriptionOverlay');
+
+    if (container && overlay) {
+        container.classList.add('visible');
+        overlay.classList.add('visible');
+
+        // Update status to show we're ready to receive transcriptions
+        updateTranscriptionStatus('🟢 Ready to receive transcriptions');
+
+        logEvent('💬 Transcription window opened');
+    }
+}
+
+function closeTranscriptionWindow() {
+    const container = document.getElementById('transcriptionContainer');
+    const overlay = document.getElementById('transcriptionOverlay');
+
+    if (container && overlay) {
+        container.classList.remove('visible');
+        overlay.classList.remove('visible');
+
+        logEvent('❌ Transcription window closed');
+    }
 }
 
 // ===========================================
@@ -399,34 +807,34 @@ function init() {
 function setActiveTheme(theme) {
     const lightBtn = document.getElementById('lightTheme');
     const darkBtn = document.getElementById('darkTheme');
-    
+
     if (lightBtn) lightBtn.classList.toggle('active', theme === 'light');
     if (darkBtn) darkBtn.classList.toggle('active', theme === 'dark');
 }
 
 // Audio device management functions
 function changeAudioInput(deviceId) {
-    dispatchPhoneIslandEvent('phone-island-audio-input-change', { 
-        deviceId: deviceId 
+    dispatchPhoneIslandEvent('phone-island-audio-input-change', {
+        deviceId: deviceId
     });
 }
 
 function changeAudioOutput(deviceId) {
-    dispatchPhoneIslandEvent('phone-island-audio-output-change', { 
-        deviceId: deviceId 
+    dispatchPhoneIslandEvent('phone-island-audio-output-change', {
+        deviceId: deviceId
     });
 }
 
 // Call management functions
 function transferCall(number) {
-    dispatchPhoneIslandEvent('phone-island-call-transfer', { 
-        number: number 
+    dispatchPhoneIslandEvent('phone-island-call-transfer', {
+        number: number
     });
 }
 
 function sendDTMF(key) {
-    dispatchPhoneIslandEvent('phone-island-call-keypad-send', { 
-        key: key 
+    dispatchPhoneIslandEvent('phone-island-call-keypad-send', {
+        key: key
     });
 }
 
