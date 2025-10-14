@@ -144,6 +144,11 @@ export const useSideViewLogic = (uaType?: string) => {
     }, 100)
   }, [dispatch.island])
 
+  const isTranscriptionEnabled = useMemo(
+    () => userInformation?.call_transcription_enabled || false,
+    [userInformation?.call_transcription_enabled],
+  )
+
   return {
     userInformation,
     availableDevices,
@@ -151,6 +156,7 @@ export const useSideViewLogic = (uaType?: string) => {
     isVideoCallButtonVisible,
     isUrlButtonEnabled,
     hasValidUrl: paramUrlData.hasValidUrl,
+    isTranscriptionEnabled,
     ...userCapabilities,
     goToVideoCall,
     goToScreenSharing,

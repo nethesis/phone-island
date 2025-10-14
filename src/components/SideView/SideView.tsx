@@ -56,6 +56,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     canSwitchDevice,
     isUrlButtonEnabled,
     hasValidUrl,
+    isTranscriptionEnabled,
     goToVideoCall,
     goToScreenSharing,
     closeSideViewAndLaunchEvent,
@@ -101,7 +102,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
         tooltipContent: t('Tooltip.Open url') || '',
         icon: faArrowUpRightFromSquare,
       },
-      {
+      isTranscriptionEnabled && {
         key: 'transcription',
         onClick: openTranscriptionView,
         tooltipId: 'tooltip-transcription',
@@ -132,6 +133,7 @@ const SideView: FC<SideViewTypes> = memo(({ isVisible, uaType }) => {
     isUrlButtonEnabled,
     closeSideViewAndLaunchEvent,
     openTranscriptionView,
+    isTranscriptionEnabled,
     canSwitchDevice,
   ])
 
