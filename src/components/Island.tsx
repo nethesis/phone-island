@@ -50,6 +50,10 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
   const { isActive } = useSelector((state: RootState) => state.conference)
 
+  // Get user information for device logic
+  const { default_device, endpoints, username } = useSelector((state: RootState) => state.currentUser)
+  const { extensions } = useSelector((state: RootState) => state.users)
+
   // The Container reference
   const islandContainerRef = useRef<any>(null)
 
@@ -96,6 +100,24 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
     }, 200)
   }, [view])
 
+  // Check if there's an online NethLink device
+  const hasOnlineNethlink = () => {
+    if (!extensions || !username) return false
+
+    // Get all extensions for current user
+    const userExtensions: any = Object.values(extensions).filter(
+      (ext) => ext?.username === username,
+    )
+
+    // Check if any extension is nethlink type and online
+    return userExtensions?.some((ext) => {
+      const endpointExtension = endpoints?.extension.find(
+        (endpoint) => endpoint.id === ext?.exten,
+      )
+      return endpointExtension?.type === 'nethlink' && ext?.status !== 'offline'
+    })
+  }
+
   return (
     <div
       ref={islandContainerRef}
@@ -112,7 +134,12 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
         (view === 'waitingConference' && isActive) ||
         (view === 'transfer' && isActive) ||
         (view === 'settings' && isActive) ||
-        (view === 'operatorBusy' ) ||
+        (view === 'operatorBusy' &&
+          ((uaType === 'mobile' && hasOnlineNethlink()) ||
+            (uaType === 'desktop' &&
+              (default_device?.type === 'webrtc' ||
+                (default_device?.type === undefined && !hasOnlineNethlink()) ||
+                (!hasOnlineNethlink() && default_device?.type === 'physical'))))) ||
         (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))) &&
         !avoidToShow && (
           <>

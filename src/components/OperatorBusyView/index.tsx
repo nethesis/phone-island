@@ -78,9 +78,9 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
   const statusText = useMemo(() => {
     // If it's an operator, show "User busy", otherwise show "Number busy"
     if (isOperator) {
-      return t('Call.User busy') || 'User busy...'
+      return t('Call.User busy')
     }
-    return t('Call.Number busy') || 'Number busy...'
+    return t('Call.Number busy')
   }, [t, isOperator])
 
   // Stop busy tone when component unmounts
