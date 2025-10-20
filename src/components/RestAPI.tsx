@@ -11,11 +11,42 @@ import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
 import { eventDispatch } from '../utils'
 
-// Global variable to track which API mode works for this session
-let apiMode: 'new' | 'legacy' | 'unknown' = 'unknown'
+// Storage key for API mode
+const API_MODE_STORAGE_KEY = 'phone_island_api_mode'
 
-// Export function to get current API mode
-export const getApiMode = () => apiMode
+// Function to get saved API mode from localStorage
+const getSavedApiMode = (username: string): 'new' | 'legacy' | 'unknown' => {
+  try {
+    const saved = localStorage.getItem(`${API_MODE_STORAGE_KEY}_${username}`)
+    if (saved === 'new' || saved === 'legacy') {
+      return saved
+    }
+  } catch (error) {
+    console.warn('Failed to read API mode from localStorage:', error)
+  }
+  return 'unknown'
+}
+
+// Function to save API mode to localStorage
+const saveApiMode = (username: string, mode: 'new' | 'legacy') => {
+  try {
+    localStorage.setItem(`${API_MODE_STORAGE_KEY}_${username}`, mode)
+  } catch (error) {
+    console.warn('Failed to save API mode to localStorage:', error)
+  }
+}
+
+// Export function to get current API mode from localStorage
+export const getApiMode = (username: string) => getSavedApiMode(username)
+
+// Export function to reset API mode (useful for error recovery)
+export const resetApiMode = (username: string) => {
+  try {
+    localStorage.removeItem(`${API_MODE_STORAGE_KEY}_${username}`)
+  } catch (error) {
+    console.warn('Failed to reset API mode in localStorage:', error)
+  }
+}
 
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
@@ -24,8 +55,11 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
   useEffect(() => {
     if (authToken && hostName && username) {
       const initializeAPI = async () => {
-        if (apiMode === 'unknown') {
-          // First time: test new API format
+        let currentApiMode = getSavedApiMode(username)
+
+        // If mode is unknown or we need to test, probe the API
+        if (currentApiMode === 'unknown') {
+          // First time or after reset: test new API format
           try {
             const response = await fetch(`https://${hostName}/api/user/me`, {
               headers: {
@@ -35,21 +69,24 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
 
             if (response.ok) {
               // New API format works
-              apiMode = 'new'
+              currentApiMode = 'new'
+              saveApiMode(username, 'new')
             } else if (response.status === 404 || response.status === 401) {
               // Fallback to legacy API format
-              apiMode = 'legacy'
+              currentApiMode = 'legacy'
+              saveApiMode(username, 'legacy')
             } else {
               throw new Error(`API test failed with status: ${response.status}`)
             }
           } catch (error) {
             // Network error or other issues, fallback to legacy API
-            apiMode = 'legacy'
+            currentApiMode = 'legacy'
+            saveApiMode(username, 'legacy')
           }
         }
 
         // Set the appropriate configuration based on the determined mode
-        if (apiMode === 'new') {
+        if (currentApiMode === 'new') {
           dispatch.fetchDefaults.updateFetchBaseURL(`https://${hostName}/api`)
           dispatch.fetchDefaults.updateFetchHeaders({
             Authorization: `Bearer ${authToken}`,
