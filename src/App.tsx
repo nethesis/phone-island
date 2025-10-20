@@ -32,7 +32,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   dataConfig,
   showAlways = false,
   uaType,
-  urlParamWithEvent = false
+  urlParamWithEvent = false,
 }: PhoneIslandProps) => {
   const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
   const HOST_NAME: string = CONFIG[0]
@@ -109,7 +109,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       const isAvailable = await isAudioInputDeviceAvailable(targetDeviceId)
 
       if (!isAvailable) {
-        console.warn(`Audio input device ${targetDeviceId} not available, falling back to default device`)
+        console.warn(
+          `Audio input device ${targetDeviceId} not available, falling back to default device`,
+        )
         targetDeviceId = await getDefaultAudioInputDevice()
       }
     }
@@ -119,7 +121,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-audio-input-changed', {})
 
     if (targetDeviceId !== data.deviceId) {
-      console.info(`Audio input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+      console.info(
+        `Audio input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`,
+      )
     }
   })
 
@@ -131,7 +135,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       const isAvailable = await isVideoInputDeviceAvailable(targetDeviceId)
 
       if (!isAvailable) {
-        console.warn(`Video input device ${targetDeviceId} not available, falling back to default device`)
+        console.warn(
+          `Video input device ${targetDeviceId} not available, falling back to default device`,
+        )
         targetDeviceId = await getDefaultVideoInputDevice()
       }
     }
@@ -141,7 +147,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-video-input-changed', {})
 
     if (targetDeviceId !== data.deviceId) {
-      console.info(`Video input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`)
+      console.info(
+        `Video input device changed from ${data.deviceId} to ${targetDeviceId} (fallback)`,
+      )
     }
   })
 
@@ -189,9 +197,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput')
+      const audioOutputDevices = devices.filter((device) => device.kind === 'audiooutput')
 
-      return audioOutputDevices.some(device => device.deviceId === deviceId)
+      return audioOutputDevices.some((device) => device.deviceId === deviceId)
     } catch (err) {
       console.warn('Error checking device availability:', err)
       return false
@@ -206,12 +214,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput')
+      const audioOutputDevices = devices.filter((device) => device.kind === 'audiooutput')
 
       // Find the default device (usually has deviceId 'default' or is the first one)
-      const defaultDevice = audioOutputDevices.find(device =>
-        device.deviceId === 'default' || device.deviceId === ''
-      ) || audioOutputDevices[0]
+      const defaultDevice =
+        audioOutputDevices.find(
+          (device) => device.deviceId === 'default' || device.deviceId === '',
+        ) || audioOutputDevices[0]
 
       return defaultDevice ? defaultDevice.deviceId : 'default'
     } catch (err) {
@@ -228,9 +237,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+      const audioInputDevices = devices.filter((device) => device.kind === 'audioinput')
 
-      return audioInputDevices.some(device => device.deviceId === deviceId)
+      return audioInputDevices.some((device) => device.deviceId === deviceId)
     } catch (err) {
       console.warn('Error checking audio input device availability:', err)
       return false
@@ -245,12 +254,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const audioInputDevices = devices.filter(device => device.kind === 'audioinput')
+      const audioInputDevices = devices.filter((device) => device.kind === 'audioinput')
 
       // Find the default device (usually has deviceId 'default' or is the first one)
-      const defaultDevice = audioInputDevices.find(device =>
-        device.deviceId === 'default' || device.deviceId === ''
-      ) || audioInputDevices[0]
+      const defaultDevice =
+        audioInputDevices.find(
+          (device) => device.deviceId === 'default' || device.deviceId === '',
+        ) || audioInputDevices[0]
 
       return defaultDevice ? defaultDevice.deviceId : 'default'
     } catch (err) {
@@ -267,9 +277,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+      const videoInputDevices = devices.filter((device) => device.kind === 'videoinput')
 
-      return videoInputDevices.some(device => device.deviceId === deviceId)
+      return videoInputDevices.some((device) => device.deviceId === deviceId)
     } catch (err) {
       console.warn('Error checking video input device availability:', err)
       return false
@@ -284,12 +294,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const videoInputDevices = devices.filter(device => device.kind === 'videoinput')
+      const videoInputDevices = devices.filter((device) => device.kind === 'videoinput')
 
       // Find the default device (usually has deviceId 'default' or is the first one)
-      const defaultDevice = videoInputDevices.find(device =>
-        device.deviceId === 'default' || device.deviceId === ''
-      ) || videoInputDevices[0]
+      const defaultDevice =
+        videoInputDevices.find(
+          (device) => device.deviceId === 'default' || device.deviceId === '',
+        ) || videoInputDevices[0]
 
       return defaultDevice ? defaultDevice.deviceId : 'default'
     } catch (err) {
@@ -314,7 +325,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
         const isAvailable = await isAudioOutputDeviceAvailable(targetDeviceId)
 
         if (!isAvailable) {
-          console.warn(`Audio output device ${targetDeviceId} not available, falling back to default device`)
+          console.warn(
+            `Audio output device ${targetDeviceId} not available, falling back to default device`,
+          )
           targetDeviceId = await getDefaultAudioOutputDevice()
 
           // Update localStorage with the fallback device
@@ -330,7 +343,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
         // Save device to localStorage
         setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
         eventDispatch('phone-island-audio-output-changed', {})
-
       } catch (err) {
         console.log('Direct setSinkId failed, trying with temporary stream:', err)
 
@@ -360,7 +372,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
           setTimeout(async () => {
             try {
               await remoteAudioElement.current.setSinkId(targetDeviceId)
-              console.info('Default audio output device changed successfully with temporary stream!')
+              console.info(
+                'Default audio output device changed successfully with temporary stream!',
+              )
 
               // Clean up temporary stream
               oscillator.stop()
@@ -370,7 +384,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
               // Save device to localStorage
               setJSONItem('phone-island-audio-output-device', { deviceId: targetDeviceId })
               eventDispatch('phone-island-audio-output-changed', {})
-
             } catch (finalErr) {
               console.error('Final setSinkId attempt failed:', finalErr)
 
@@ -396,7 +409,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
               eventDispatch('phone-island-audio-output-changed', {})
             }
           }, 100)
-
         } catch (streamErr) {
           console.error('Failed to create temporary audio stream:', streamErr)
 
@@ -688,11 +700,15 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     const { transcriptionViewIsVisible } = store.getState().island
     const newState = !transcriptionViewIsVisible
     store.dispatch.island.toggleTranscriptionViewVisible(newState)
-    eventDispatch(newState ? 'phone-island-transcription-opened' : 'phone-island-transcription-closed', {})
+    eventDispatch(
+      newState ? 'phone-island-transcription-opened' : 'phone-island-transcription-closed',
+      {},
+    )
   })
 
   useEventListener('phone-island-size-change', (args: any) => {
-    const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } = store.getState().island
+    const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =
+      store.getState().island
 
     // Get current dimensions from args
     const { sizeInformation } = args
@@ -702,7 +718,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       ...sizeInformation,
       right: sideViewIsVisible ? '42px' : '0px',
       top: isBackCallActive() ? '40px' : '0px',
-      bottom: transcriptionViewIsVisible && actionsExpanded ? '335px' : transcriptionViewIsVisible && !actionsExpanded ? '330px' : '0px',
+      bottomTranscription:
+        transcriptionViewIsVisible && actionsExpanded
+          ? '335px'
+          : transcriptionViewIsVisible && !actionsExpanded
+          ? '330px'
+          : '0px',
     }
     eventDispatch('phone-island-size-changed', { sizes: updatedSizeInformation })
   })

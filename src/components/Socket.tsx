@@ -417,7 +417,7 @@ export const Socket: FC<SocketProps> = ({
      * Initialize socket connection and listeners
      */
     const initSocketConnection = () => {
-      const currentApiMode = getApiMode()
+      const currentApiMode = getApiMode(username)
 
       const socketOptions: any = {
         upgrade: false,
