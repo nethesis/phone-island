@@ -547,6 +547,7 @@ export const Socket: FC<SocketProps> = ({
             store.dispatch.island.toggleAvoidToShow(false)
             store.dispatch.island.setPreviewCallFromMobileOrNethlink(false)
           }, 500)
+          // Only reset conference if there are no more participants or if user is not in a conference
           if (isActive && conferenceStartedFrom !== username) {
             store.dispatch.conference.resetConference()
           }
@@ -566,6 +567,25 @@ export const Socket: FC<SocketProps> = ({
           conferenceStartedFrom !== username
         ) {
           store.dispatch.conference.resetConference()
+        }
+        // if conference owner and added participant refuses or hangs up with normal_clearing
+        if (
+          ((res.cause === 'normal_clearing' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink')) ||
+            res?.cause === 'call_rejected') &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          const { usersList } = store.getState().conference
+          // Check if there are still participants in the conference
+          const hasParticipants = usersList && Object.keys(usersList).length > 0
+
+          if (!hasParticipants) {
+            store.dispatch.conference.resetConference()
+          } else {
+            // If there are still participants, keep the waitingConference view
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }
         }
         // if conference owner call the call with the added user inside conference
         if (
