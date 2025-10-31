@@ -524,70 +524,118 @@ export const Socket: FC<SocketProps> = ({
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
-
-        // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
         const extensionType: any = connectedExtension?.type
 
-        // If cause is normal_clearing and extension is physical or mobile
-        // Clean phone-island visibility also after user_busy ( useful for physical devices )
-        if (
-          (res.cause === 'normal_clearing' &&
-            (extensionType === 'physical' || extensionType === 'mobile')) ||
-          (res.cause === 'normal_clearing' &&
-            (extensionType === 'webrtc' || extensionType === 'nethlink') &&
-            previewCallFromMobileOrNethlink) ||
-          res?.cause === 'user_busy' ||
-          res?.cause === 'not_defined' ||
-          res?.cause === 'call_rejected' ||
-          res?.cause === 'interworking'
-        ) {
-          // Reset phone island visibility after 2 seconds to avoid glitches
+        // Helper functions
+        const resetPhoneIslandVisibility = () => {
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
             store.dispatch.island.setPreviewCallFromMobileOrNethlink(false)
           }, 500)
-          // Only reset conference if there are no more participants or if user is not in a conference
-          if (isActive && conferenceStartedFrom !== username) {
-            store.dispatch.conference.resetConference()
-          }
-        } else if (
-          res?.cause === 'normal_circuit_congestion' &&
-          isActive &&
-          conferenceStartedFrom === username
-        ) {
-          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
-        } else if (
-          (res.cause === 'normal_clearing' ||
+        }
+
+        const shouldResetPhoneIslandVisibility = () => {
+          const isPhysicalOrMobileWithNormalClearing =
+            res.cause === 'normal_clearing' &&
+            (extensionType === 'physical' || extensionType === 'mobile')
+
+          const isWebRtcOrNethLinkWithPreview =
+            res.cause === 'normal_clearing' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink') &&
+            previewCallFromMobileOrNethlink
+
+          return (
+            isPhysicalOrMobileWithNormalClearing ||
+            isWebRtcOrNethLinkWithPreview ||
             res?.cause === 'user_busy' ||
             res?.cause === 'not_defined' ||
-            res?.cause === 'call_rejected') &&
-          (extensionType === 'webrtc' || extensionType === 'nethlink') &&
-          isActive &&
-          conferenceStartedFrom !== username
-        ) {
-          store.dispatch.conference.resetConference()
+            res?.cause === 'call_rejected' ||
+            res?.cause === 'interworking'
+          )
         }
-        // if conference owner and added participant refuses or hangs up with normal_clearing
-        if (
-          ((res.cause === 'normal_clearing' &&
-            (extensionType === 'webrtc' || extensionType === 'nethlink')) ||
-            res?.cause === 'call_rejected') &&
-          isActive &&
-          conferenceStartedFrom === username
-        ) {
+
+        const handleConferenceParticipantHangup = () => {
+          if (!isActive) return
+
+          // If user is not the conference owner
+          if (conferenceStartedFrom !== username) {
+            store.dispatch.conference.resetConference()
+            return
+          }
+
+          // If user is the conference owner, check if there are still participants
           const { usersList } = store.getState().conference
-          // Check if there are still participants in the conference
           const hasParticipants = usersList && Object.keys(usersList).length > 0
 
           if (!hasParticipants) {
             store.dispatch.conference.resetConference()
           } else {
-            // If there are still participants, keep the waitingConference view
             eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
           }
         }
-        // if conference owner call the call with the added user inside conference
+
+        const handleUserBusy = () => {
+          if (res?.cause !== 'user_busy') return
+
+          const userExtensionIds = userExtensions.map((ext) => ext.id)
+          const isCallerOwnExtension = userExtensionIds.includes(res.callerNum)
+          const calledNumber = res.calledNum || res.calledExten
+          const isCalledNumberOwnExtension =
+            calledNumber && calledNumber !== '<unknown>' && userExtensionIds.includes(calledNumber)
+          const isIncomingCallToUser = isCallerOwnExtension && res.channelExten === res.callerNum
+
+          if (isIncomingCallToUser || isCalledNumberOwnExtension) return
+
+          // Show operator busy view
+          store.dispatch.island.setOperatorBusyActive({
+            callerNumber: res.callerNum || 'Unknown',
+          })
+
+          setTimeout(() => {
+            store.dispatch.player.stopAudioPlayer()
+          }, 4000)
+
+          setTimeout(() => {
+            store.dispatch.player.updateStartAudioPlayer({
+              src: busyRingtone,
+              loop: true,
+            })
+            store.dispatch.island.setIslandView('operatorBusy')
+          }, 400)
+        }
+
+        const handleSubscriberAbsent = () => {
+          if (res?.cause !== 'subscriber_absent') return
+
+          if (!isActive) return
+
+          // Check if there are still participants in the conference
+          const { usersList } = store.getState().conference
+          const hasParticipants = usersList && Object.keys(usersList).length > 0
+
+          if (hasParticipants) {
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }
+        }
+
+        // Main logic
+        if (shouldResetPhoneIslandVisibility()) {
+          resetPhoneIslandVisibility()
+        }
+
+        if (
+          res?.cause === 'normal_circuit_congestion' &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+        }
+
+        if ((res.cause === 'normal_clearing' || res?.cause === 'call_rejected') && isActive) {
+          handleConferenceParticipantHangup()
+        }
+
         if (
           res?.cause === 'interworking' &&
           isActive &&
@@ -596,43 +644,9 @@ export const Socket: FC<SocketProps> = ({
         ) {
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
-        if (res?.cause === 'user_busy') {
-          // Get current user's extensions
-          const { endpoints } = store.getState().currentUser
-          const userExtensions = endpoints?.extension || []
-          const userExtensionIds = userExtensions.map((ext) => ext.id)
 
-          // Check if the caller (callerNum) is one of the user's own extensions
-          const isCallerOwnExtension = userExtensionIds.includes(res.callerNum)
-
-          // Check if the called number is one of the user's own extensions
-          const calledNumber = res.calledNum || res.calledExten
-          const isCalledNumberOwnExtension =
-            calledNumber && calledNumber !== '<unknown>' && userExtensionIds.includes(calledNumber)
-
-          const isIncomingCallToUser = isCallerOwnExtension && res.channelExten === res.callerNum
-
-          if (!isIncomingCallToUser && !isCalledNumberOwnExtension) {
-            // Set operator busy active with caller information
-            store.dispatch.island.setOperatorBusyActive({
-              callerNumber: res.callerNum || 'Unknown',
-            })
-
-            // Stop busy tone after 4 seconds
-            setTimeout(() => {
-              store.dispatch.player.stopAudioPlayer()
-            }, 4000)
-
-            setTimeout(() => {
-              // Play busy tone
-              store.dispatch.player.updateStartAudioPlayer({
-                src: busyRingtone,
-                loop: true,
-              })
-              store.dispatch.island.setIslandView('operatorBusy')
-            }, 400)
-          }
-        }
+        handleUserBusy()
+        handleSubscriberAbsent()
       })
 
       // Avoid to show phone island if call is connected with other extension

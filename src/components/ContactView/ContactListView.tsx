@@ -90,15 +90,15 @@ export const ContactListView: FC<ContactListViewProps> = () => {
     textQuery = textQuery.trim().toLowerCase()
 
     if (endpoints) {
-      const operators = Object.values(endpoints).filter(
+      const operators = Object?.values(endpoints).filter(
         (userEndpoints: UserEndpointsTypes) =>
           // Remove the currentUser from the list
-          userEndpoints.username !== username &&
-          (userEndpoints.endpoints.extension.find((extension) =>
-            extension.id.toLowerCase().startsWith(textQuery),
+          userEndpoints?.username !== username &&
+          (userEndpoints?.endpoints?.extension.find((extension) =>
+            extension?.id?.toLowerCase()?.startsWith(textQuery),
           ) ||
-            userEndpoints.username.toLowerCase().includes(textQuery) ||
-            userEndpoints.name.toLowerCase().includes(textQuery)),
+            userEndpoints?.username?.toLowerCase()?.includes(textQuery) ||
+            userEndpoints?.name?.toLowerCase()?.includes(textQuery)),
       )
       setFilteredOperators(operators)
     }
