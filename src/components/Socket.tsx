@@ -597,24 +597,41 @@ export const Socket: FC<SocketProps> = ({
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
         if (res?.cause === 'user_busy') {
-          // Set operator busy active with caller information
-          store.dispatch.island.setOperatorBusyActive({
-            callerNumber: res.callerNum || 'Unknown',
-          })
+          // Get current user's extensions
+          const { endpoints } = store.getState().currentUser
+          const userExtensions = endpoints?.extension || []
+          const userExtensionIds = userExtensions.map((ext) => ext.id)
 
-          // Stop busy tone after 4 seconds
-          setTimeout(() => {
-            store.dispatch.player.stopAudioPlayer()
-          }, 4000)
+          // Check if the caller (callerNum) is one of the user's own extensions
+          const isCallerOwnExtension = userExtensionIds.includes(res.callerNum)
 
-          setTimeout(() => {
-            // Play busy tone
-            store.dispatch.player.updateStartAudioPlayer({
-              src: busyRingtone,
-              loop: true,
+          // Check if the called number is one of the user's own extensions
+          const calledNumber = res.calledNum || res.calledExten
+          const isCalledNumberOwnExtension =
+            calledNumber && calledNumber !== '<unknown>' && userExtensionIds.includes(calledNumber)
+
+          const isIncomingCallToUser = isCallerOwnExtension && res.channelExten === res.callerNum
+
+          if (!isIncomingCallToUser && !isCalledNumberOwnExtension) {
+            // Set operator busy active with caller information
+            store.dispatch.island.setOperatorBusyActive({
+              callerNumber: res.callerNum || 'Unknown',
             })
-            store.dispatch.island.setIslandView('operatorBusy')
-          }, 400)
+
+            // Stop busy tone after 4 seconds
+            setTimeout(() => {
+              store.dispatch.player.stopAudioPlayer()
+            }, 4000)
+
+            setTimeout(() => {
+              // Play busy tone
+              store.dispatch.player.updateStartAudioPlayer({
+                src: busyRingtone,
+                loop: true,
+              })
+              store.dispatch.island.setIslandView('operatorBusy')
+            }, 400)
+          }
         }
       })
 
