@@ -558,17 +558,46 @@ export const Socket: FC<SocketProps> = ({
         const handleConferenceParticipantHangup = () => {
           if (!isActive) return
 
-          // If user is not the conference owner
-          if (conferenceStartedFrom !== username) {
+          // Get current conference state
+          const { conferenceStartedFrom: currentConferenceStartedFrom } =
+            store.getState().conference
+
+          // If user is not the conference owner, check if we should reset
+          // Only reset if conferenceStartedFrom is set AND different from username
+          if (currentConferenceStartedFrom && currentConferenceStartedFrom !== username) {
             store.dispatch.conference.resetConference()
             return
           }
 
-          // If user is the conference owner, check if there are still participants
-          const { usersList } = store.getState().conference
-          const hasParticipants = usersList && Object.keys(usersList).length > 0
+          // If user is the conference owner or conferenceStartedFrom not yet set, check if there are still OTHER participants
+          const { usersList, pendingUsers } = store.getState().conference
+          const { endpoints } = store.getState().currentUser
 
-          if (!hasParticipants) {
+          // Get my extension IDs
+          const myExtensionIds = endpoints?.extension?.map((ext) => ext.id) || []
+
+          // Count confirmed participants that are NOT my extensions
+          const otherConfirmedParticipants =
+            usersList &&
+            Object.entries(usersList).filter(([extId]) => !myExtensionIds.includes(extId))
+          const hasOtherConfirmedParticipants =
+            otherConfirmedParticipants && otherConfirmedParticipants.length > 0
+
+          // Count pending participants that are NOT my extensions
+          const otherPendingParticipants =
+            pendingUsers &&
+            Object.entries(pendingUsers).filter(([extId]) => !myExtensionIds.includes(extId))
+          const hasOtherPendingParticipants =
+            otherPendingParticipants && otherPendingParticipants.length > 0
+
+          const hasOtherParticipants = hasOtherConfirmedParticipants || hasOtherPendingParticipants
+
+          // Remove from pending if exists
+          if (pendingUsers && pendingUsers[res.callerNum]) {
+            store.dispatch.conference.removePendingUser(res.callerNum)
+          }
+
+          if (!hasOtherParticipants) {
             store.dispatch.conference.resetConference()
           } else {
             eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
@@ -610,12 +639,18 @@ export const Socket: FC<SocketProps> = ({
 
           if (!isActive) return
 
-          // Check if there are still participants in the conference
-          const { usersList } = store.getState().conference
-          const hasParticipants = usersList && Object.keys(usersList).length > 0
+          // Check if there are still participants in the conference (both confirmed and pending)
+          const { usersList, pendingUsers } = store.getState().conference
+          const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
+          const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
+          const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
 
           if (hasParticipants) {
             eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+            // Remove from pending users if exists
+            if (pendingUsers && pendingUsers[res.callerNum]) {
+              store.dispatch.conference.removePendingUser(res.callerNum)
+            }
           }
         }
 

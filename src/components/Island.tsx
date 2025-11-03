@@ -75,15 +75,19 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Handle and apply view switch logic
   // ...set callview as the current view
   useEffect(() => {
-    const { isActive, conferenceStartedFrom, isOwnerInside } = store.getState().conference
+    const { isActive, conferenceStartedFrom } = store.getState().conference
     const { username } = store.getState().currentUser
+    
+    const isConferenceOwner = conferenceStartedFrom === username
+    const shouldShowWaitingConference = (incoming || outgoing) && isActive && isConferenceOwner
+    
     // Check and switch the view
-    if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
+    if (shouldShowWaitingConference) {
       dispatch.island.setIslandView('waitingConference')
     } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
-  }, [incoming, outgoing])
+  }, [incoming, outgoing, isActive, dispatch, avoidToShow])
 
   useEffect(() => {
     if (recording) {

@@ -43,12 +43,12 @@ import { unsubscribe } from '../../services/user'
  */
 export function callNumber(number: string, sipHost: string) {
   const sipURI = `sip:${number}@${sipHost}`
-  
+
   // Reset any previous operator busy state when starting a new call
   store.dispatch.island.resetOperatorBusy()
   // Save the called number for potential operator busy scenarios
   store.dispatch.island.setOperatorBusyCalledNumber(number)
-  
+
   if (isWebRTC()) {
     callSipURI(sipURI)
   } else {
@@ -111,7 +111,7 @@ export function forceHangupConversation() {
 export function hangupCurrentCall() {
   const { outgoing, accepted, streamingSourceNumber } = store.getState().currentCall
   const { isFromStreaming } = store.getState().island
-  
+
   if (outgoing || accepted) {
     if (isWebRTC()) {
       hangup()
@@ -121,7 +121,7 @@ export function hangupCurrentCall() {
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
-    
+
     // If call was from a streaming source, unsubscribe and clear images
     if (isFromStreaming && streamingSourceNumber) {
       const sourceId = getStreamingSourceId(streamingSourceNumber)
@@ -129,13 +129,13 @@ export function hangupCurrentCall() {
         // Unsubscribe from streaming updates
         unsubscribe({ id: sourceId })
           .then(() => console.debug(`Unsubscribed from streaming source: ${sourceId}`))
-          .catch(error => console.error('Error unsubscribing from streaming source:', error))
-        
+          .catch((error) => console.error('Error unsubscribing from streaming source:', error))
+
         // Clear source images to free up memory
         store.dispatch.streaming.clearSourceImages()
       }
     }
-    
+
     // Reset isFromStreaming flag
     store.dispatch.island.setIsFromStreaming(false)
   }
@@ -604,14 +604,31 @@ export const isInsideConferenceList = () => {
 }
 
 export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
-  const { username }: any = store.getState().currentUser
-  const { isActive, isOwnerInside } = store.getState().conference
+  const { username }: any = store.getState()?.currentUser
+  const { isActive, isOwnerInside, conferenceId } = store.getState().conference
+  const { extensions } = store.getState().users
 
   // show current waiting user in back view ( only on first)
   if (!isActive) {
     dispatch.conference.setConferenceActive(true)
     dispatch.conference.setConferenceStartedFrom(username)
   }
+
+  // Add pending user to track the participant being added (before socket confirms)
+  const extension = extensions
+    ? Object.values(extensions).find((ext: any) => ext.exten === numberToCall)
+    : null
+  const extensionName = extension?.name || numberToCall
+
+  dispatch.conference.addPendingUser({
+    id: `${conferenceId}-${numberToCall}`,
+    name: extensionName,
+    owner: false,
+    muted: false,
+    extenId: numberToCall,
+    joinTime: Date.now(),
+  })
+
   // start new call with selected user from conference list
   if (isOwnerInside) {
     // if owner has already started the conference hangup before make a new call
