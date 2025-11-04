@@ -46,7 +46,7 @@ export const WebRTC: FC<WebRTCProps> = ({
   const janusCheckInterval = useRef<any>(null)
 
   // Initialize Janus from Janus library
-  const janus = useRef<JanusTypes>(JanusLib)
+  const janus = useRef<any>(JanusLib)
 
   let localTracks = {}
   let localVideos = 0
@@ -533,7 +533,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                       janus.current.attachMediaStream(remoteAudioElement.current, stream)
 
                       // Apply saved audio output device if available
-                      const defaultAudioOutputDevice: any = getJSONItem('phone-island-audio-output-device')
+                      const defaultAudioOutputDevice: any = getJSONItem(
+                        'phone-island-audio-output-device',
+                      )
 
                       if (defaultAudioOutputDevice?.deviceId) {
                         const applySavedDevice = async () => {
@@ -543,32 +545,48 @@ export const WebRTC: FC<WebRTCProps> = ({
                           if (targetDeviceId && targetDeviceId !== 'default') {
                             try {
                               const devices = await navigator.mediaDevices.enumerateDevices()
-                              const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput')
-                              const deviceExists = audioOutputDevices.some(device => device.deviceId === targetDeviceId)
+                              const audioOutputDevices = devices.filter(
+                                (device) => device.kind === 'audiooutput',
+                              )
+                              const deviceExists = audioOutputDevices.some(
+                                (device) => device.deviceId === targetDeviceId,
+                              )
 
                               if (!deviceExists) {
-                                console.warn(`Saved audio device ${targetDeviceId} no longer available, using default device`)
+                                console.warn(
+                                  `Saved audio device ${targetDeviceId} no longer available, using default device`,
+                                )
                                 targetDeviceId = 'default'
                                 // Update localStorage with the fallback
-                                setJSONItem('phone-island-audio-output-device', { deviceId: 'default' })
+                                setJSONItem('phone-island-audio-output-device', {
+                                  deviceId: 'default',
+                                })
                               }
                             } catch (err) {
-                              console.warn('Error checking device availability, using default:', err)
+                              console.warn(
+                                'Error checking device availability, using default:',
+                                err,
+                              )
                               targetDeviceId = 'default'
                             }
                           }
 
                           // Apply the device
                           try {
-                            await remoteAudioElement.current.setSinkId(targetDeviceId)
-                            console.info('Audio output device applied successfully to new stream:', targetDeviceId)
+                            await remoteAudioElement.current?.setSinkId(targetDeviceId)
+                            console.info(
+                              'Audio output device applied successfully to new stream:',
+                              targetDeviceId,
+                            )
                           } catch (err) {
                             console.warn('Failed to apply audio output device to new stream:', err)
                             // Final fallback to default if not already using it
                             if (targetDeviceId !== 'default') {
                               try {
-                                await remoteAudioElement.current.setSinkId('default')
-                                setJSONItem('phone-island-audio-output-device', { deviceId: 'default' })
+                                await remoteAudioElement.current?.setSinkId('default')
+                                setJSONItem('phone-island-audio-output-device', {
+                                  deviceId: 'default',
+                                })
                                 console.info('Fallback to default device successful')
                               } catch (defaultErr) {
                                 console.error('Even default device failed:', defaultErr)

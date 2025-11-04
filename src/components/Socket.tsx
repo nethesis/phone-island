@@ -469,7 +469,7 @@ export const Socket: FC<SocketProps> = ({
         console.debug(`Socket reconnect_failed`)
       })
 
-      // Checks if socket is reachable every 5 seconds
+      // Checks if socket is reachable every 7 seconds
       connectionCheckInterval.current = setInterval(() => {
         const start = Date.now()
         socket.current.volatile.emit(
@@ -867,8 +867,7 @@ export const Socket: FC<SocketProps> = ({
 
     initSocketConnection()
 
-    // Stop the check socket interval
-    // Close the socket connection
+    // Stop the check socket interval and close the socket connection on cleanup
     return () => {
       clearInterval(connectionCheckInterval.current)
       socket.current.close()
