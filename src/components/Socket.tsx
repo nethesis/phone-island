@@ -439,6 +439,12 @@ export const Socket: FC<SocketProps> = ({
       // Handle socket errors
       socket.current.on('connect', () => {
         console.debug(`Socket connected sid: ${socket.current.id}`)
+        // Remove socket_down alert on successful connection
+        dispatch.alerts.removeAlert('socket_down')
+        eventDispatch('phone-island-alert-removed', {
+          type: 'socket_down',
+        })
+        eventDispatch('phone-island-socket-disconnected-popup-close', {})        
         eventDispatch('phone-island-socket-connected', {})
       })
       socket.current.on('disconnect', (reason) => {
@@ -470,12 +476,15 @@ export const Socket: FC<SocketProps> = ({
       })
 
       // Checks if socket is reachable every 7 seconds
+      let consecutiveFailures = 0
       connectionCheckInterval.current = setInterval(() => {
         const start = Date.now()
         socket.current.volatile.emit(
           'ping',
           withTimeout(
             () => {
+              // Reset failure counter on success
+              consecutiveFailures = 0
               // Remove socket_down alert
               dispatch.alerts.removeAlert('socket_down')
               eventDispatch('phone-island-alert-removed', {
@@ -484,10 +493,19 @@ export const Socket: FC<SocketProps> = ({
               eventDispatch('phone-island-socket-disconnected-popup-close', {})
             },
             () => {
+              // Increment failure counter
+              consecutiveFailures++
+              
               // Set socket_down alert
               dispatch.alerts.setAlert('socket_down')
               eventDispatch('phone-island-socket-disconnected-popup-open', {})
-              console.error('Socket is unreachable!')
+              
+              // After 2 consecutive failures, force reconnection
+              if (consecutiveFailures >= 2) {
+                consecutiveFailures = 0
+                socket.current.disconnect()
+                socket.current.connect()
+              }
             },
             7 * 1000, // Waits for the response 7 seconds
           ),
