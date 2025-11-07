@@ -471,6 +471,13 @@ const CallTemplate = (args: any) => {
               >
                 Play announcement
               </Button>
+              <Button
+                variant='red'
+                onClick={() => eventDispatch('phone-island-init-audio', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Test ghost call
+              </Button>
             </div>
           </div>
 
