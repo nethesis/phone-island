@@ -696,6 +696,46 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-transcription-closed', {})
   })
 
+  useEventListener('phone-island-init-audio', () => {
+    store.dispatch.island.setIslandView(null)
+    store.dispatch.island.toggleAvoidToShow(true)
+    
+    // Mute both local and remote audio streams immediately
+    const muteAllAudio = () => {
+      const { localAudioStream, remoteAudioStream } = store.getState().webrtc
+      
+      if (localAudioStream) {
+        const stream = localAudioStream as any
+        stream?.getAudioTracks?.()?.forEach((track: MediaStreamTrack) => {
+          track.enabled = false
+        })
+      }
+      
+      if (remoteAudioStream) {
+        const stream = remoteAudioStream as any
+        stream?.getAudioTracks?.()?.forEach((track: MediaStreamTrack) => {
+          track.enabled = false
+        })
+      }
+    }
+    
+    // Mute immediately and also monitor for audio streams being added
+    muteAllAudio()
+    
+    eventDispatch('phone-island-call-start', { number: '*43' })
+    
+    // Keep checking and muting any audio for the duration of the call
+    const muteInterval = setInterval(() => {
+      muteAllAudio()
+    }, 200)
+    
+    setTimeout(() => {
+      clearInterval(muteInterval)
+      eventDispatch('phone-island-call-end', {})
+      store.dispatch.island.toggleAvoidToShow(false)
+    }, 1500)
+  })
+
   useEventListener('phone-island-transcription-toggle', () => {
     const { transcriptionViewIsVisible } = store.getState().island
     const newState = !transcriptionViewIsVisible
