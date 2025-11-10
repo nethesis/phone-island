@@ -36,9 +36,8 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } = useSelector(
-    (state: RootState) => state.island,
-  )
+  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } =
+    useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -51,7 +50,9 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   const { isActive } = useSelector((state: RootState) => state.conference)
 
   // Get user information for device logic
-  const { default_device, endpoints, username } = useSelector((state: RootState) => state.currentUser)
+  const { default_device, endpoints, username } = useSelector(
+    (state: RootState) => state.currentUser,
+  )
   const { extensions } = useSelector((state: RootState) => state.users)
 
   // The Container reference
@@ -75,19 +76,15 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Handle and apply view switch logic
   // ...set callview as the current view
   useEffect(() => {
-    const { isActive, conferenceStartedFrom } = store.getState().conference
+    const { isActive, conferenceStartedFrom, isOwnerInside } = store.getState().conference
     const { username } = store.getState().currentUser
-    
-    const isConferenceOwner = conferenceStartedFrom === username
-    const shouldShowWaitingConference = (incoming || outgoing) && isActive && isConferenceOwner
-    
     // Check and switch the view
-    if (shouldShowWaitingConference) {
+    if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
       dispatch.island.setIslandView('waitingConference')
     } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
-  }, [incoming, outgoing, isActive, dispatch, avoidToShow])
+  }, [incoming, outgoing, avoidToShow])
 
   useEffect(() => {
     if (recording) {
@@ -115,9 +112,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
 
     // Check if any extension is nethlink type and online
     return userExtensions?.some((ext) => {
-      const endpointExtension = endpoints?.extension.find(
-        (endpoint) => endpoint.id === ext?.exten,
-      )
+      const endpointExtension = endpoints?.extension.find((endpoint) => endpoint.id === ext?.exten)
       return endpointExtension?.type === 'nethlink' && ext?.status !== 'offline'
     })
   }
