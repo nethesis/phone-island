@@ -885,7 +885,7 @@ export const Socket: FC<SocketProps> = ({
           const conferenceUsers = res?.users
 
           // Get current users list to preserve mute status
-          const { usersList } = store.getState().conference
+          const { usersList, conferenceStartedFrom } = store.getState().conference
 
           // Create a copy of the new conference users while preserving mute status
           const updatedConferenceUsers = { ...conferenceUsers }
@@ -905,6 +905,18 @@ export const Socket: FC<SocketProps> = ({
 
           store.dispatch.conference.updateConferenceUsersList(updatedConferenceUsers)
           store.dispatch.conference.updateConferenceId(conferenceId)
+
+          // If conferenceStartedFrom is not set, try to find the owner from the conference users
+          if (!conferenceStartedFrom) {
+            // Look for a user with owner: true
+            const ownerUser = Object.values(updatedConferenceUsers).find(
+              (user: any) => user.owner === true,
+            )
+            if (ownerUser) {
+              const ownerUsername = (ownerUser as any).name
+              store.dispatch.conference.setConferenceStartedFrom(ownerUsername)
+            }
+          }
         }
       })
 
@@ -912,6 +924,13 @@ export const Socket: FC<SocketProps> = ({
         if (res && res?.id) {
           // Reset the conference store when conference ends
           store.dispatch.conference.resetConference()
+
+          // Close the waitingConference view when the conference ends
+          const { view } = store.getState().island
+          if (view === 'waitingConference') {
+            store.dispatch.island.setIslandView(null)
+          }
+
           eventDispatch('phone-island-conference-finished', {})
         }
       })
