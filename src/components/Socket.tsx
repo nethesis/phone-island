@@ -524,153 +524,70 @@ export const Socket: FC<SocketProps> = ({
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
+
+        // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
         const extensionType: any = connectedExtension?.type
 
-        // Helper functions
-        const resetPhoneIslandVisibility = () => {
+        // If cause is normal_clearing and extension is physical or mobile
+        // Clean phone-island visibility also after user_busy ( useful for physical devices )
+        if (
+          (res.cause === 'normal_clearing' &&
+            (extensionType === 'physical' || extensionType === 'mobile')) ||
+          (res.cause === 'normal_clearing' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink') &&
+            previewCallFromMobileOrNethlink) ||
+          res?.cause === 'user_busy' ||
+          res?.cause === 'not_defined' ||
+          res?.cause === 'call_rejected' ||
+          res?.cause === 'interworking'
+        ) {
+          // Reset phone island visibility after 2 seconds to avoid glitches
           setTimeout(() => {
             store.dispatch.island.toggleAvoidToShow(false)
             store.dispatch.island.setPreviewCallFromMobileOrNethlink(false)
           }, 500)
-        }
-
-        const shouldResetPhoneIslandVisibility = () => {
-          const isPhysicalOrMobileWithNormalClearing =
-            res.cause === 'normal_clearing' &&
-            (extensionType === 'physical' || extensionType === 'mobile')
-
-          const isWebRtcOrNethLinkWithPreview =
-            res.cause === 'normal_clearing' &&
-            (extensionType === 'webrtc' || extensionType === 'nethlink') &&
-            previewCallFromMobileOrNethlink
-
-          return (
-            isPhysicalOrMobileWithNormalClearing ||
-            isWebRtcOrNethLinkWithPreview ||
-            res?.cause === 'user_busy' ||
-            res?.cause === 'not_defined' ||
-            res?.cause === 'call_rejected' ||
-            res?.cause === 'interworking'
-          )
-        }
-
-        const handleConferenceParticipantHangup = () => {
-          if (!isActive) return
-
-          // Get current conference state
-          const { conferenceStartedFrom: currentConferenceStartedFrom } =
-            store.getState().conference
-
-          // If user is not the conference owner, check if we should reset
-          // Only reset if conferenceStartedFrom is set AND different from username
-          if (currentConferenceStartedFrom && currentConferenceStartedFrom !== username) {
+          // Only reset conference if there are no more participants or if user is not in a conference
+          if (isActive && conferenceStartedFrom !== username) {
             store.dispatch.conference.resetConference()
-            return
           }
-
-          // If user is the conference owner or conferenceStartedFrom not yet set, check if there are still OTHER participants
-          const { usersList, pendingUsers } = store.getState().conference
-          const { endpoints } = store.getState().currentUser
-
-          // Get my extension IDs
-          const myExtensionIds = endpoints?.extension?.map((ext) => ext.id) || []
-
-          // Count confirmed participants that are NOT my extensions
-          const otherConfirmedParticipants =
-            usersList &&
-            Object.entries(usersList).filter(([extId]) => !myExtensionIds.includes(extId))
-          const hasOtherConfirmedParticipants =
-            otherConfirmedParticipants && otherConfirmedParticipants.length > 0
-
-          // Count pending participants that are NOT my extensions
-          const otherPendingParticipants =
-            pendingUsers &&
-            Object.entries(pendingUsers).filter(([extId]) => !myExtensionIds.includes(extId))
-          const hasOtherPendingParticipants =
-            otherPendingParticipants && otherPendingParticipants.length > 0
-
-          const hasOtherParticipants = hasOtherConfirmedParticipants || hasOtherPendingParticipants
-
-          // Remove from pending if exists
-          if (pendingUsers && pendingUsers[res.callerNum]) {
-            store.dispatch.conference.removePendingUser(res.callerNum)
-          }
-
-          if (!hasOtherParticipants) {
-            store.dispatch.conference.resetConference()
-          } else {
-            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
-          }
-        }
-
-        const handleUserBusy = () => {
-          if (res?.cause !== 'user_busy') return
-
-          const userExtensionIds = userExtensions.map((ext) => ext.id)
-          const isCallerOwnExtension = userExtensionIds.includes(res.callerNum)
-          const calledNumber = res.calledNum || res.calledExten
-          const isCalledNumberOwnExtension =
-            calledNumber && calledNumber !== '<unknown>' && userExtensionIds.includes(calledNumber)
-          const isIncomingCallToUser = isCallerOwnExtension && res.channelExten === res.callerNum
-
-          if (isIncomingCallToUser || isCalledNumberOwnExtension) return
-
-          // Show operator busy view
-          store.dispatch.island.setOperatorBusyActive({
-            callerNumber: res.callerNum || 'Unknown',
-          })
-
-          setTimeout(() => {
-            store.dispatch.player.stopAudioPlayer()
-          }, 4000)
-
-          setTimeout(() => {
-            store.dispatch.player.updateStartAudioPlayer({
-              src: busyRingtone,
-              loop: true,
-            })
-            store.dispatch.island.setIslandView('operatorBusy')
-          }, 400)
-        }
-
-        const handleSubscriberAbsent = () => {
-          if (res?.cause !== 'subscriber_absent') return
-
-          if (!isActive) return
-
-          // Check if there are still participants in the conference (both confirmed and pending)
-          const { usersList, pendingUsers } = store.getState().conference
-          const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
-          const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
-          const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
-
-          if (hasParticipants) {
-            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
-            // Remove from pending users if exists
-            if (pendingUsers && pendingUsers[res.callerNum]) {
-              store.dispatch.conference.removePendingUser(res.callerNum)
-            }
-          }
-        }
-
-        // Main logic
-        if (shouldResetPhoneIslandVisibility()) {
-          resetPhoneIslandVisibility()
-        }
-
-        if (
+        } else if (
           res?.cause === 'normal_circuit_congestion' &&
           isActive &&
           conferenceStartedFrom === username
         ) {
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+        } else if (
+          (res.cause === 'normal_clearing' ||
+            res?.cause === 'user_busy' ||
+            res?.cause === 'not_defined' ||
+            res?.cause === 'call_rejected') &&
+          (extensionType === 'webrtc' || extensionType === 'nethlink') &&
+          isActive &&
+          conferenceStartedFrom !== username
+        ) {
+          store.dispatch.conference.resetConference()
         }
+        // if conference owner and added participant refuses or hangs up with normal_clearing
+        if (
+          ((res.cause === 'normal_clearing' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink')) ||
+            res?.cause === 'call_rejected') &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          const { usersList } = store.getState().conference
+          // Check if there are still participants in the conference
+          const hasParticipants = usersList && Object.keys(usersList).length > 0
 
-        if ((res.cause === 'normal_clearing' || res?.cause === 'call_rejected') && isActive) {
-          handleConferenceParticipantHangup()
+          if (!hasParticipants) {
+            store.dispatch.conference.resetConference()
+          } else {
+            // If there are still participants, keep the waitingConference view
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }
         }
-
+        // if conference owner call the call with the added user inside conference
         if (
           res?.cause === 'interworking' &&
           isActive &&
@@ -679,9 +596,42 @@ export const Socket: FC<SocketProps> = ({
         ) {
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
+        if (res?.cause === 'user_busy') {
+          // Get current user's extensions
+          const { endpoints } = store.getState().currentUser
+          const userExtensions = endpoints?.extension || []
+          const userExtensionIds = userExtensions.map((ext) => ext.id)
 
-        handleUserBusy()
-        handleSubscriberAbsent()
+          // Get the current call state to understand if we're the caller or receiver
+          const { incoming, outgoing } = store.getState().currentCall
+
+          // When we RECEIVE a call on our extension, callerNum is the busy extension (our own)
+          // When we CALL someone, channelExten is one of our extensions (the one we're calling from)
+          const isReceivingCall = incoming && userExtensionIds.includes(res.callerNum)
+
+          // Only show operator busy view if:
+          // 1. We are NOT receiving an incoming call to our own extension
+          if (!isReceivingCall) {
+            // Set operator busy active with caller information
+            store.dispatch.island.setOperatorBusyActive({
+              callerNumber: res.callerNum || 'Unknown',
+            })
+
+            // Stop busy tone after 4 seconds
+            setTimeout(() => {
+              store.dispatch.player.stopAudioPlayer()
+            }, 4000)
+
+            setTimeout(() => {
+              // Play busy tone
+              store.dispatch.player.updateStartAudioPlayer({
+                src: busyRingtone,
+                loop: true,
+              })
+              store.dispatch.island.setIslandView('operatorBusy')
+            }, 400)
+          }
+        }
       })
 
       // Avoid to show phone island if call is connected with other extension
@@ -885,7 +835,7 @@ export const Socket: FC<SocketProps> = ({
           const conferenceUsers = res?.users
 
           // Get current users list to preserve mute status
-          const { usersList, conferenceStartedFrom } = store.getState().conference
+          const { usersList } = store.getState().conference
 
           // Create a copy of the new conference users while preserving mute status
           const updatedConferenceUsers = { ...conferenceUsers }
@@ -905,18 +855,6 @@ export const Socket: FC<SocketProps> = ({
 
           store.dispatch.conference.updateConferenceUsersList(updatedConferenceUsers)
           store.dispatch.conference.updateConferenceId(conferenceId)
-
-          // If conferenceStartedFrom is not set, try to find the owner from the conference users
-          if (!conferenceStartedFrom) {
-            // Look for a user with owner: true
-            const ownerUser = Object.values(updatedConferenceUsers).find(
-              (user: any) => user.owner === true,
-            )
-            if (ownerUser) {
-              const ownerUsername = (ownerUser as any).name
-              store.dispatch.conference.setConferenceStartedFrom(ownerUsername)
-            }
-          }
         }
       })
 
@@ -924,13 +862,6 @@ export const Socket: FC<SocketProps> = ({
         if (res && res?.id) {
           // Reset the conference store when conference ends
           store.dispatch.conference.resetConference()
-
-          // Close the waitingConference view when the conference ends
-          const { view } = store.getState().island
-          if (view === 'waitingConference') {
-            store.dispatch.island.setIslandView(null)
-          }
-
           eventDispatch('phone-island-conference-finished', {})
         }
       })
