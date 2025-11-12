@@ -17,15 +17,24 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
   const { extensions } = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
+  const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
+  const { username } = useSelector((state: RootState) => state.currentUser)
 
   const handleClose = useCallback(() => {
     // Stop any playing busy tone
     dispatch.player.stopAudioPlayer()
     // Reset operator busy state completely when user closes manually
     dispatch.island.resetOperatorBusyCompletely()
-    // Reset island view
-    dispatch.island.setIslandView(null)
-  }, [dispatch])
+
+    // Check if conference is active and user is the owner
+    if (isActive && conferenceStartedFrom === username) {
+      // Go back to waiting conference instead of closing
+      dispatch.island.setIslandView('waitingConference')
+    } else {
+      // Reset island view if no active conference
+      dispatch.island.setIslandView(null)
+    }
+  }, [dispatch, isActive, conferenceStartedFrom, username])
 
   // Get the username of the operator based on called extension number
   const operatorUsername = useMemo(() => {

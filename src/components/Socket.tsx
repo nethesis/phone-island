@@ -598,12 +598,15 @@ export const Socket: FC<SocketProps> = ({
         }
         if (res?.cause === 'user_busy') {
           // Get current user's extensions
-          const { endpoints } = store.getState().currentUser
+          const { endpoints, username } = store.getState().currentUser
           const userExtensions = endpoints?.extension || []
           const userExtensionIds = userExtensions.map((ext) => ext.id)
 
           // Get the current call state to understand if we're the caller or receiver
           const { incoming, outgoing } = store.getState().currentCall
+
+          // Check if there's an active conference
+          const { isActive, conferenceStartedFrom } = store.getState().conference
 
           // When we RECEIVE a call on our extension, callerNum is the busy extension (our own)
           // When we CALL someone, channelExten is one of our extensions (the one we're calling from)
@@ -612,24 +615,29 @@ export const Socket: FC<SocketProps> = ({
           // Only show operator busy view if:
           // 1. We are NOT receiving an incoming call to our own extension
           if (!isReceivingCall) {
-            // Set operator busy active with caller information
-            store.dispatch.island.setOperatorBusyActive({
-              callerNumber: res.callerNum || 'Unknown',
-            })
-
-            // Stop busy tone after 4 seconds
-            setTimeout(() => {
-              store.dispatch.player.stopAudioPlayer()
-            }, 4000)
-
-            setTimeout(() => {
-              // Play busy tone
-              store.dispatch.player.updateStartAudioPlayer({
-                src: busyRingtone,
-                loop: true,
+            // If conference is active and we're the owner, return to conference view instead of showing operator busy
+            if (isActive && conferenceStartedFrom === username) {
+              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+            } else {
+              // Set operator busy active with caller information
+              store.dispatch.island.setOperatorBusyActive({
+                callerNumber: res.callerNum || 'Unknown',
               })
-              store.dispatch.island.setIslandView('operatorBusy')
-            }, 400)
+
+              // Stop busy tone after 4 seconds
+              setTimeout(() => {
+                store.dispatch.player.stopAudioPlayer()
+              }, 4000)
+
+              setTimeout(() => {
+                // Play busy tone
+                store.dispatch.player.updateStartAudioPlayer({
+                  src: busyRingtone,
+                  loop: true,
+                })
+                store.dispatch.island.setIslandView('operatorBusy')
+              }, 400)
+            }
           }
         }
       })
