@@ -183,6 +183,10 @@ export const ContactListView: FC<ContactListViewProps> = () => {
     return obj && typeof obj === 'object' && 'source' in obj && 'name' in obj
   }
 
+  function isContactAvailable(mainPresence: string): boolean {
+    return ['online', 'voicemail', 'cellphone', 'callforward']?.includes(mainPresence)
+  }
+
   function goToSelectNumberView(phonebookContact: PhonebookContact): void {
     setCurrentContact(phonebookContact)
     dispatch.island.setContactListView('selectContactNumber')
@@ -318,7 +322,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                           <>
                             <ListAvatar
                               placeHolderIcon={
-                                filteredContact.kind === 'person' ? faUser : faBuilding
+                                filteredContact?.kind === 'person' ? faUser : faBuilding
                               }
                             />
                             <div>
@@ -326,7 +330,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                                 data-stop-propagation={true}
                                 className='pi-h-fit pi-max-w-48 pi-truncate pi-text-sm pi-font-medium'
                               >
-                                {filteredContact.displayName || '-'}
+                                {filteredContact?.displayName || '-'}
                               </div>
                               <div className='pi-text-sm pi-max-w-48 pi-text-gray-700 dark:pi-text-gray-300'>
                                 <span>{getMainPhoneNumber(filteredContact) || '-'}</span>
@@ -350,16 +354,16 @@ export const ContactListView: FC<ContactListViewProps> = () => {
                         return (
                           <Button
                             onClick={() =>
-                              filteredContact.mainPresence === 'online' &&
+                              isContactAvailable(filteredContact?.mainPresence) &&
                               clickTransferOrConference(
                                 filteredContact?.endpoints?.mainextension[0]?.id,
                                 dispatch,
                               )
                             }
                             variant='green'
-                            disabled={filteredContact.mainPresence !== 'online'}
+                            disabled={!isContactAvailable(filteredContact?.mainPresence)}
                             data-tooltip-id={
-                              filteredContact.mainPresence === 'online'
+                              isContactAvailable(filteredContact?.mainPresence)
                                 ? 'contact-list-tooltip-left'
                                 : ''
                             }

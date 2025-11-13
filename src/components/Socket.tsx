@@ -615,28 +615,30 @@ export const Socket: FC<SocketProps> = ({
           // Only show operator busy view if:
           // 1. We are NOT receiving an incoming call to our own extension
           if (!isReceivingCall) {
-            // If conference is active and we're the owner, return to conference view instead of showing operator busy
-            if (isActive && conferenceStartedFrom === username) {
-              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
-            } else {
-              // Set operator busy active with caller information
-              store.dispatch.island.setOperatorBusyActive({
-                callerNumber: res.callerNum || 'Unknown',
+            // Set operator busy active with caller information
+            store.dispatch.island.setOperatorBusyActive({
+              callerNumber: res.callerNum || 'Unknown',
+            })
+
+            // Stop busy tone after 4 seconds
+            setTimeout(() => {
+              store.dispatch.player.stopAudioPlayer()
+            }, 4000)
+
+            setTimeout(() => {
+              // Play busy tone
+              store.dispatch.player.updateStartAudioPlayer({
+                src: busyRingtone,
+                loop: true,
               })
+              store.dispatch.island.setIslandView('operatorBusy')
+            }, 400)
 
-              // Stop busy tone after 4 seconds
+            // If conference is active and we're the owner, return to conference after timeout
+            if (isActive && conferenceStartedFrom === username) {
               setTimeout(() => {
-                store.dispatch.player.stopAudioPlayer()
+                eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
               }, 4000)
-
-              setTimeout(() => {
-                // Play busy tone
-                store.dispatch.player.updateStartAudioPlayer({
-                  src: busyRingtone,
-                  loop: true,
-                })
-                store.dispatch.island.setIslandView('operatorBusy')
-              }, 400)
             }
           }
         }
