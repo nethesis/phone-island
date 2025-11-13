@@ -581,15 +581,18 @@ export async function removeUserConference(conferenceId, extensionId) {
 export const clickTransferOrConference = async (number: string, dispatch: Dispatch) => {
   if (isInsideConferenceList()) {
     const { isActive } = store.getState().conference
+
     // Put current call user inside conference mode (only for first user to add not for the second one)
+    // If conference is not active, start it first, otherwise proceed directly
     if (!isActive) {
       const conferenceStarted = await startConference()
-      if (conferenceStarted) {
-        waitingConferenceView(number, dispatch)
+      if (!conferenceStarted) {
+        return // Early return if conference failed to start
       }
-    } else {
-      waitingConferenceView(number, dispatch)
     }
+
+    // Proceed to waiting conference view (common path for both cases)
+    waitingConferenceView(number, dispatch)
   } else {
     handleAttendedTransfer(number, dispatch)
   }
@@ -604,12 +607,14 @@ export const isInsideConferenceList = () => {
 }
 
 export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
-  const { username }: any = store.getState()?.currentUser
-  const { isActive, isOwnerInside, conferenceId } = store.getState().conference
-  const { extensions } = store.getState().users
+  // Get all required state in one call to minimize store access
+  const state = store.getState()
+  const { username } = state.currentUser
+  const { isActive, isOwnerInside, conferenceId } = state.conference
+  const { extensions } = state.users
 
-  // show current waiting user in back view ( only on first)
-  if (!isActive) {
+  // Show current waiting user in back view (only on first)
+  if (!isActive && username) {
     dispatch.conference.setConferenceActive(true)
     dispatch.conference.setConferenceStartedFrom(username)
   }
@@ -629,26 +634,19 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
     joinTime: Date.now(),
   })
 
-  // start new call with selected user from conference list
+  // If owner has already started the conference, hangup before making a new call
   if (isOwnerInside) {
-    // if owner has already started the conference hangup before make a new call
     hangupCurrentCall()
     dispatch.conference.toggleIsOwnerInside(false)
-
-    // Use requestAnimationFrame to ensure state updates are complete before dispatching event
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        eventDispatch('phone-island-call-start', { number: numberToCall })
-      }, 800)
-    })
-  } else {
-    // Use requestAnimationFrame to ensure state updates are complete before dispatching event
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        eventDispatch('phone-island-call-start', { number: numberToCall })
-      }, 800)
-    })
   }
+
+  // Start new call with selected user from conference list
+  // Use requestAnimationFrame to ensure state updates are complete before dispatching event
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      eventDispatch('phone-island-call-start', { number: numberToCall })
+    }, 800)
+  })
 }
 
 export async function handleAttendedTransfer(number: string, dispatch: Dispatch) {

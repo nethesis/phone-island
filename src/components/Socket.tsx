@@ -642,6 +642,33 @@ export const Socket: FC<SocketProps> = ({
             }
           }
         }
+
+        // Handle subscriber_absent - when added participant rejects the call
+        if (res?.cause === 'subscriber_absent') {
+          const { isActive, conferenceStartedFrom } = store.getState().conference
+          const { username } = store.getState().currentUser
+
+          // Only handle if conference is active and current user is the owner
+          if (isActive && conferenceStartedFrom === username) {
+            // Check if there are still participants in the conference (both confirmed and pending)
+            const { usersList, pendingUsers } = store.getState().conference
+            const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
+            const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
+            const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
+
+            if (hasParticipants) {
+              // Return to waiting conference view to manage other participants
+              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+              // Remove from pending users if exists
+              if (pendingUsers && pendingUsers[res.callerNum]) {
+                store.dispatch.conference.removePendingUser(res.callerNum)
+              }
+            } else {
+              // No participants left, reset conference
+              store.dispatch.conference.resetConference()
+            }
+          }
+        }
       })
 
       // Avoid to show phone island if call is connected with other extension
