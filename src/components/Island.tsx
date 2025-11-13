@@ -84,7 +84,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
     } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
-  }, [incoming, outgoing, avoidToShow])
+  }, [incoming, outgoing, avoidToShow, isActive])
 
   useEffect(() => {
     if (recording) {

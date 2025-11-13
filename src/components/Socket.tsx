@@ -489,10 +489,10 @@ export const Socket: FC<SocketProps> = ({
               eventDispatch('phone-island-socket-disconnected-popup-open', {})
               console.error('Socket is unreachable!')
             },
-            7 * 1000, // Waits for the response 7 seconds
+            5 * 1000, // Waits for the response 7 seconds
           ),
         )
-      }, 7 * 1000) // Executes a new check every 7 seconds
+      }, 5 * 1000) // Executes a new check every 7 seconds
 
       // Handle connection message
       socket.current.on('connect', () => {
