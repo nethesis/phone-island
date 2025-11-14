@@ -645,7 +645,7 @@ export const waitingConferenceView = (numberToCall, dispatch: Dispatch) => {
   requestAnimationFrame(() => {
     setTimeout(() => {
       eventDispatch('phone-island-call-start', { number: numberToCall })
-    }, 800)
+    }, 1000)
   })
 }
 

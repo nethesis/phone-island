@@ -576,9 +576,11 @@ export const Socket: FC<SocketProps> = ({
           isActive &&
           conferenceStartedFrom === username
         ) {
-          const { usersList } = store.getState().conference
-          // Check if there are still participants in the conference
-          const hasParticipants = usersList && Object.keys(usersList).length > 0
+          const { usersList, pendingUsers } = store.getState().conference
+          // Check if there are still participants in the conference (both confirmed and pending)
+          const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
+          const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
+          const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
 
           if (!hasParticipants) {
             store.dispatch.conference.resetConference()
