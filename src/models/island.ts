@@ -21,6 +21,7 @@ const defaultState: IslandTypes = {
   isConferenceList: false,
   previousView: null,
   avoidToShow: false,
+  isInitializingAudio: false,
   isFullScreen: false,
   isFromStreaming: false,
   isExtraLarge: false,
@@ -79,6 +80,9 @@ export const island = createModel<RootModel>()({
     },
     toggleAvoidToShow: (state, payload: boolean) => {
       state.avoidToShow = payload
+    },
+    setIsInitializingAudio: (state, payload: boolean) => {
+      state.isInitializingAudio = payload
     },
     setUrlOpened: (state, payload: boolean) => {
       state.urlOpened = payload
@@ -238,6 +242,7 @@ interface IslandTypes {
   isConferenceList: boolean
   previousView?: IslandViewType | null
   avoidToShow?: boolean
+  isInitializingAudio?: boolean
   isFullScreen: boolean
   isFromStreaming: boolean
   isExtraLarge: boolean

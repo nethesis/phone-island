@@ -36,7 +36,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } = useSelector(
+  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, isInitializingAudio, previousView } = useSelector(
     (state: RootState) => state.island,
   )
   const { recording } = useSelector((state: RootState) => ({
@@ -80,7 +80,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
     // Check and switch the view
     if ((incoming || outgoing) && isActive && conferenceStartedFrom === username && isOwnerInside) {
       dispatch.island.setIslandView('waitingConference')
-    } else if ((incoming || outgoing) && !avoidToShow) {
+    } else if ((incoming || outgoing) && !avoidToShow && !isInitializingAudio) {
       dispatch.island.setIslandView('call')
     }
   }, [incoming, outgoing])
@@ -141,7 +141,8 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
                 (default_device?.type === undefined && !hasOnlineNethlink()) ||
                 (!hasOnlineNethlink() && default_device?.type === 'physical'))))) ||
         (view === 'settings' && (previousView === 'recorder' || previousView === 'player'))) &&
-        !avoidToShow && (
+        !avoidToShow &&
+        !isInitializingAudio && (
           <>
             <IslandDrag islandContainerRef={islandContainerRef}>
               {/* Add background call visibility logic */}

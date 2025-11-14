@@ -698,6 +698,8 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-init-audio', () => {
+    // Set initialization flag FIRST to prevent any UI from showing
+    store.dispatch.island.setIsInitializingAudio(true)
     store.dispatch.island.setIslandView(null)
     store.dispatch.island.toggleAvoidToShow(true)
 
@@ -725,10 +727,6 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
     callNumber('*43', SIP_HOST)
 
-    // In case of phone-island is visible during init audio, hide it again
-    store.dispatch.island.setIslandView(null)
-    store.dispatch.island.toggleAvoidToShow(true)
-
     // Keep checking and muting any audio for the duration of the call
     const muteInterval = setInterval(() => {
       muteAllAudio()
@@ -738,6 +736,7 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       clearInterval(muteInterval)
       eventDispatch('phone-island-call-end', {})
       store.dispatch.island.toggleAvoidToShow(false)
+      store.dispatch.island.setIsInitializingAudio(false)
     }, 1500)
   })
 
