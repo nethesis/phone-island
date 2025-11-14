@@ -485,21 +485,27 @@ var Janus = (function (factory) {
       Janus.listDevices = function (callback, config) {
         callback = typeof callback == 'function' ? callback : Janus.noop
         if (!config) {
-          // Audio config added by Nethesis
-          config = {
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              googEchoCancellation: true,
-              googAutoGainControl: true,
-              googNoiseSuppression: true,
-              googHighpassFilter: true,
-              googTypingNoiseDetection: true,
-              googNoiseReduction: true,
-              volume: 1.0,
-            },
-            video: true,
+          // Use stored audio config if available, otherwise use high-quality default
+          if (Janus.defaultAudioConfig) {
+            config = Janus.defaultAudioConfig
+          } else {
+            // Audio config added by Nethesis - Optimized for better audio quality
+            // Minimal processing to preserve audio fidelity and depth
+            config = {
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: false, // Disabled: causes audio compression and muffled sound
+                autoGainControl: false, // Disabled: preserves dynamic range
+                googEchoCancellation: true,
+                googAutoGainControl: false, // Disabled: maintains natural levels
+                googNoiseSuppression: false, // Disabled: causes muffled/compressed audio
+                googHighpassFilter: false, // Disabled: not needed
+                googTypingNoiseDetection: false, // Disabled: not necessary
+                googNoiseReduction: false, // Disabled: causes compression
+                volume: 1.0,
+              },
+              video: true,
+            }
           }
         }
         if (Janus.isGetUserMediaAvailable()) {
