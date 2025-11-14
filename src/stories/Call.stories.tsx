@@ -61,6 +61,9 @@ const CallTemplate = (args: any) => {
   const [audioOutputs, setAudioOutputs] = useState<any[]>([])
   const [videoInputs, setVideoInputs] = useState<any[]>([])
 
+  // Audio profile state
+  const [audioProfile, setAudioProfile] = useState<'high-quality' | 'balanced' | 'noisy-environment'>('high-quality')
+
   useEffect(() => {
     localStorage.setItem('phoneIslandToken', token)
     const config = Base64.atob(token || '').split(':')
@@ -225,6 +228,13 @@ const CallTemplate = (args: any) => {
 
   const handleDtmfButtonClick = (key: string) => {
     eventDispatch('phone-island-call-keypad-send', { key })
+  }
+
+  const handleAudioProfileChange = (profile: 'high-quality' | 'balanced' | 'noisy-environment') => {
+    setAudioProfile(profile)
+    eventDispatch('phone-island-audio-profile-change', { profile })
+    setShowToast(true)
+    setToastMessage(`Audio Profile Changed to: ${profile.replace('-', ' ').toUpperCase()}`)
   }
 
   const openOrReducePhoneIsland = () => {
@@ -832,6 +842,82 @@ const CallTemplate = (args: any) => {
                     </option>
                   ))}
                 </select>
+              </div>
+            </div>
+
+            {/* Audio Profile Testing Section */}
+            <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+              <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800 pi-flex pi-items-center pi-gap-2'>
+                <FontAwesomeIcon icon={faHeadset} className='pi-text-emerald-600' />
+                Audio Quality Profiles
+              </h3>
+              <p className='pi-text-sm pi-text-gray-600 pi-mb-4'>
+                Test different audio processing profiles. Changes apply to new connections.
+              </p>
+
+              <div className='pi-grid pi-grid-cols-3 pi-gap-3'>
+                {/* High-Quality Profile */}
+                <button
+                  onClick={() => handleAudioProfileChange('high-quality')}
+                  className={`pi-px-4 pi-py-3 pi-rounded-lg pi-font-medium pi-text-sm pi-transition-all ${
+                    audioProfile === 'high-quality'
+                      ? 'pi-bg-emerald-600 pi-text-white pi-shadow-md'
+                      : 'pi-bg-gray-200 pi-text-gray-800 hover:pi-bg-gray-300'
+                  }`}
+                >
+                  <div className='pi-font-semibold'>High-Quality</div>
+                  <div className='pi-text-xs pi-opacity-90 pi-mt-1'>
+                    Crystal clear, minimal processing
+                  </div>
+                </button>
+
+                {/* Balanced Profile */}
+                <button
+                  onClick={() => handleAudioProfileChange('balanced')}
+                  className={`pi-px-4 pi-py-3 pi-rounded-lg pi-font-medium pi-text-sm pi-transition-all ${
+                    audioProfile === 'balanced'
+                      ? 'pi-bg-blue-600 pi-text-white pi-shadow-md'
+                      : 'pi-bg-gray-200 pi-text-gray-800 hover:pi-bg-gray-300'
+                  }`}
+                >
+                  <div className='pi-font-semibold'>Balanced</div>
+                  <div className='pi-text-xs pi-opacity-90 pi-mt-1'>
+                    Good quality, light noise reduction
+                  </div>
+                </button>
+
+                {/* Noisy Environment Profile */}
+                <button
+                  onClick={() => handleAudioProfileChange('noisy-environment')}
+                  className={`pi-px-4 pi-py-3 pi-rounded-lg pi-font-medium pi-text-sm pi-transition-all ${
+                    audioProfile === 'noisy-environment'
+                      ? 'pi-bg-amber-600 pi-text-white pi-shadow-md'
+                      : 'pi-bg-gray-200 pi-text-gray-800 hover:pi-bg-gray-300'
+                  }`}
+                >
+                  <div className='pi-font-semibold'>Noisy Environment</div>
+                  <div className='pi-text-xs pi-opacity-90 pi-mt-1'>
+                    Aggressive noise reduction
+                  </div>
+                </button>
+              </div>
+
+              {/* Profile Description */}
+              <div className='pi-mt-4 pi-p-3 pi-bg-gray-50 pi-rounded-lg pi-border pi-border-gray-200'>
+                <p className='pi-text-xs pi-text-gray-700'>
+                  <strong>Current Profile:</strong>{' '}
+                  <span className='pi-font-semibold pi-text-gray-900'>
+                    {audioProfile.replace('-', ' ').toUpperCase()}
+                  </span>
+                </p>
+                <p className='pi-text-xs pi-text-gray-600 pi-mt-2'>
+                  {audioProfile === 'high-quality' &&
+                    'Minimal processing to preserve audio fidelity and depth. Best for clear environments and professional calls.'}
+                  {audioProfile === 'balanced' &&
+                    'Light processing with moderate noise reduction. Good balance between quality and noise filtering.'}
+                  {audioProfile === 'noisy-environment' &&
+                    'Aggressive processing for challenging audio environments. Prioritizes intelligibility over audio quality.'}
+                </p>
               </div>
             </div>
           </div>

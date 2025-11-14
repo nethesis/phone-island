@@ -102,6 +102,14 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     eventDispatch('phone-island-detached', {})
   })
 
+  useEventListener('phone-island-audio-profile-change', (data: any) => {
+    const profile = data?.profile
+    if (profile && ['high-quality', 'balanced', 'noisy-environment'].includes(profile)) {
+      store.dispatch.island.setAudioProfile(profile)
+      eventDispatch('phone-island-audio-profile-changed', { profile })
+    }
+  })
+
   useEventListener('phone-island-audio-input-change', async (data: DeviceInputOutputTypes) => {
     let targetDeviceId = data.deviceId
 

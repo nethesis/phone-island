@@ -14,6 +14,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
 - [Listen Events (External → Phone Island)](#listen-events-external--phone-island)
   - [Core Phone Island Events](#core-phone-island-events)
   - [Device Management Events](#device-management-events)
+  - [Audio Quality Events](#audio-quality-events)
   - [Call Control Events](#call-control-events)
   - [Recording Events](#recording-events)
   - [Audio Player Events](#audio-player-events)
@@ -23,6 +24,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
 - [Dispatch Events (Phone Island → External)](#dispatch-events-phone-island--external)
   - [Core Dispatch Events](#core-dispatch-events)
   - [Device Status Events](#device-status-events)
+  - [Audio Quality Status Events](#audio-quality-status-events)
   - [Call Status Events](#call-status-events)
   - [Recording Status Events](#recording-status-events)
   - [Audio Player Status Events](#audio-player-status-events)
@@ -228,6 +230,22 @@ The event to change default video input device for phone island
   "deviceId": "116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee"
 }
 ```
+
+### Audio Quality Events
+
+#### `phone-island-audio-profile-change`
+The event to change audio processing profile for WebRTC calls
+
+```json
+{
+  "profile": "high-quality | balanced | noisy-environment"
+}
+```
+
+**Profile Options:**
+- `high-quality`: Minimal audio processing (echo cancellation only). Use for high-quality audio environments. Default profile.
+- `balanced`: Moderate audio processing with light noise suppression and auto gain control. Recommended for most scenarios.
+- `noisy-environment`: Aggressive audio processing with all features enabled. Use in loud environments where clarity is prioritized.
 
 ### Call Control Events
 
@@ -742,6 +760,22 @@ The dispatch of change default video input device for phone island
 ```json
 {}
 ```
+
+### Audio Quality Status Events
+
+#### `phone-island-audio-profile-changed`
+The dispatch of audio processing profile change for WebRTC calls
+
+```json
+{
+  "profile": "high-quality | balanced | noisy-environment"
+}
+```
+
+**Profile Options:**
+- `high-quality`: Minimal audio processing (echo cancellation only). Provides crystal-clear audio with minimal latency.
+- `balanced`: Moderate audio processing with light noise suppression and auto gain control. Best for typical office environments.
+- `noisy-environment`: Aggressive audio processing with all features enabled. Best for loud environments prioritizing voice clarity.
 
 ### Call Status Events
 
