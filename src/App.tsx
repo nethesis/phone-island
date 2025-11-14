@@ -103,6 +103,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-audio-input-change', async (data: DeviceInputOutputTypes) => {
+    // Skip audio device changes during echo test initialization
+    const { isInitializingAudio } = store.getState().island
+    if (isInitializingAudio) {
+      console.log('Skipping audio input change during audio initialization')
+      return
+    }
+
     let targetDeviceId = data.deviceId
 
     // Check if the requested device is available
@@ -312,6 +319,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
 
   useEventListener('phone-island-audio-output-change', (data: DeviceInputOutputTypes) => {
     const trySetSinkId = async () => {
+      // Skip audio device changes during echo test initialization
+      const { isInitializingAudio } = store.getState().island
+      if (isInitializingAudio) {
+        console.log('Skipping audio output change during audio initialization')
+        return
+      }
+
       const remoteAudioElement: any = store.getState().player.remoteAudio
 
       if (!remoteAudioElement?.current) {
@@ -702,6 +716,16 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
     store.dispatch.island.setIsInitializingAudio(true)
     store.dispatch.island.setIslandView(null)
     store.dispatch.island.toggleAvoidToShow(true)
+
+    // Clear any temporary audio streams that might have been created during device setup
+    const remoteAudioElement: any = store.getState().player.remoteAudio
+    if (remoteAudioElement?.current?.srcObject) {
+      const stream = remoteAudioElement.current.srcObject
+      stream.getTracks?.()?.forEach((track: MediaStreamTrack) => {
+        track.stop()
+      })
+      remoteAudioElement.current.srcObject = null
+    }
 
     // Mute both local and remote audio streams immediately
     const muteAllAudio = () => {

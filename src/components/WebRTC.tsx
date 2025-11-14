@@ -164,7 +164,7 @@ export const WebRTC: FC<WebRTCProps> = ({
 
                     // Get the recording state
                     const { recording } = store.getState().recorder
-                    const { view } = store.getState().island
+                    const { view, isInitializingAudio } = store.getState().island
 
                     // Manage different types of events
                     switch (event) {
