@@ -489,10 +489,10 @@ export const Socket: FC<SocketProps> = ({
               eventDispatch('phone-island-socket-disconnected-popup-open', {})
               console.error('Socket is unreachable!')
             },
-            7 * 1000, // Waits for the response 7 seconds
+            5 * 1000, // Waits for the response 7 seconds
           ),
         )
-      }, 7 * 1000) // Executes a new check every 7 seconds
+      }, 5 * 1000) // Executes a new check every 7 seconds
 
       // Handle connection message
       socket.current.on('connect', () => {
@@ -547,6 +547,7 @@ export const Socket: FC<SocketProps> = ({
             store.dispatch.island.toggleAvoidToShow(false)
             store.dispatch.island.setPreviewCallFromMobileOrNethlink(false)
           }, 500)
+          // Only reset conference if there are no more participants or if user is not in a conference
           if (isActive && conferenceStartedFrom !== username) {
             store.dispatch.conference.resetConference()
           }
@@ -567,6 +568,27 @@ export const Socket: FC<SocketProps> = ({
         ) {
           store.dispatch.conference.resetConference()
         }
+        // if conference owner and added participant refuses or hangs up with normal_clearing
+        if (
+          ((res.cause === 'normal_clearing' &&
+            (extensionType === 'webrtc' || extensionType === 'nethlink')) ||
+            res?.cause === 'call_rejected') &&
+          isActive &&
+          conferenceStartedFrom === username
+        ) {
+          const { usersList, pendingUsers } = store.getState().conference
+          // Check if there are still participants in the conference (both confirmed and pending)
+          const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
+          const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
+          const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
+
+          if (!hasParticipants) {
+            store.dispatch.conference.resetConference()
+          } else {
+            // If there are still participants, keep the waitingConference view
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }
+        }
         // if conference owner call the call with the added user inside conference
         if (
           res?.cause === 'interworking' &&
@@ -577,24 +599,77 @@ export const Socket: FC<SocketProps> = ({
           eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
         }
         if (res?.cause === 'user_busy') {
-          // Set operator busy active with caller information
-          store.dispatch.island.setOperatorBusyActive({
-            callerNumber: res.callerNum || 'Unknown',
-          })
+          // Get current user's extensions
+          const { endpoints, username } = store.getState().currentUser
+          const userExtensions = endpoints?.extension || []
+          const userExtensionIds = userExtensions.map((ext) => ext.id)
 
-          // Stop busy tone after 4 seconds
-          setTimeout(() => {
-            store.dispatch.player.stopAudioPlayer()
-          }, 4000)
+          // Get the current call state to understand if we're the caller or receiver
+          const { incoming, outgoing } = store.getState().currentCall
 
-          setTimeout(() => {
-            // Play busy tone
-            store.dispatch.player.updateStartAudioPlayer({
-              src: busyRingtone,
-              loop: true,
+          // Check if there's an active conference
+          const { isActive, conferenceStartedFrom } = store.getState().conference
+
+          // When we RECEIVE a call on our extension, callerNum is the busy extension (our own)
+          // When we CALL someone, channelExten is one of our extensions (the one we're calling from)
+          const isReceivingCall = incoming && userExtensionIds.includes(res.callerNum)
+
+          // Only show operator busy view if:
+          // 1. We are NOT receiving an incoming call to our own extension
+          if (!isReceivingCall) {
+            // Set operator busy active with caller information
+            store.dispatch.island.setOperatorBusyActive({
+              callerNumber: res.callerNum || 'Unknown',
             })
-            store.dispatch.island.setIslandView('operatorBusy')
-          }, 400)
+
+            // Stop busy tone after 4 seconds
+            setTimeout(() => {
+              store.dispatch.player.stopAudioPlayer()
+            }, 4000)
+
+            setTimeout(() => {
+              // Play busy tone
+              store.dispatch.player.updateStartAudioPlayer({
+                src: busyRingtone,
+                loop: true,
+              })
+              store.dispatch.island.setIslandView('operatorBusy')
+            }, 400)
+
+            // If conference is active and we're the owner, return to conference after timeout
+            if (isActive && conferenceStartedFrom === username) {
+              setTimeout(() => {
+                eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+              }, 4000)
+            }
+          }
+        }
+
+        // Handle subscriber_absent - when added participant rejects the call
+        if (res?.cause === 'subscriber_absent') {
+          const { isActive, conferenceStartedFrom } = store.getState().conference
+          const { username } = store.getState().currentUser
+
+          // Only handle if conference is active and current user is the owner
+          if (isActive && conferenceStartedFrom === username) {
+            // Check if there are still participants in the conference (both confirmed and pending)
+            const { usersList, pendingUsers } = store.getState().conference
+            const hasConfirmedParticipants = usersList && Object.keys(usersList).length > 0
+            const hasPendingParticipants = pendingUsers && Object.keys(pendingUsers).length > 0
+            const hasParticipants = hasConfirmedParticipants || hasPendingParticipants
+
+            if (hasParticipants) {
+              // Return to waiting conference view to manage other participants
+              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+              // Remove from pending users if exists
+              if (pendingUsers && pendingUsers[res.callerNum]) {
+                store.dispatch.conference.removePendingUser(res.callerNum)
+              }
+            } else {
+              // No participants left, reset conference
+              store.dispatch.conference.resetConference()
+            }
+          }
         }
       })
 

@@ -18,6 +18,7 @@ const defaultState = {
   lastActivity: null,
   registered: false,
   destroyed: false,
+  isAnswering: false,
 }
 
 export const webrtc = createModel<RootModel>()({
@@ -67,4 +68,5 @@ export interface WebRTCTypes {
   lastActivity?: any
   registered?: boolean
   destroyed?: boolean
+  isAnswering?: boolean
 }

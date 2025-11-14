@@ -36,9 +36,8 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
-  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } = useSelector(
-    (state: RootState) => state.island,
-  )
+  const { view, sideViewIsVisible, transcriptionViewIsVisible, avoidToShow, previousView } =
+    useSelector((state: RootState) => state.island)
   const { recording } = useSelector((state: RootState) => ({
     recording: state.physicalRecorder.recording,
   }))
@@ -51,7 +50,9 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
   const { isActive } = useSelector((state: RootState) => state.conference)
 
   // Get user information for device logic
-  const { default_device, endpoints, username } = useSelector((state: RootState) => state.currentUser)
+  const { default_device, endpoints, username } = useSelector(
+    (state: RootState) => state.currentUser,
+  )
   const { extensions } = useSelector((state: RootState) => state.users)
 
   // The Container reference
@@ -83,7 +84,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
     } else if ((incoming || outgoing) && !avoidToShow) {
       dispatch.island.setIslandView('call')
     }
-  }, [incoming, outgoing])
+  }, [incoming, outgoing, avoidToShow, isActive])
 
   useEffect(() => {
     if (recording) {
@@ -111,9 +112,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
 
     // Check if any extension is nethlink type and online
     return userExtensions?.some((ext) => {
-      const endpointExtension = endpoints?.extension.find(
-        (endpoint) => endpoint.id === ext?.exten,
-      )
+      const endpointExtension = endpoints?.extension.find((endpoint) => endpoint.id === ext?.exten)
       return endpointExtension?.type === 'nethlink' && ext?.status !== 'offline'
     })
   }

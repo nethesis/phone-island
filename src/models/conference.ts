@@ -15,6 +15,7 @@ export interface ConferenceUser {
 
 export interface ConferenceStoreTypes {
   usersList: Record<string, ConferenceUser> | null
+  pendingUsers: Record<string, ConferenceUser> | null
   ownerInformations: ConferenceUser | null
   isActive: boolean
   conferenceStartedFrom: string
@@ -26,6 +27,7 @@ export interface ConferenceStoreTypes {
 
 const defaultState: ConferenceStoreTypes = {
   usersList: null,
+  pendingUsers: null,
   ownerInformations: null,
   isActive: false,
   conferenceStartedFrom: '',
@@ -164,6 +166,30 @@ export const conference = createModel<RootModel>()({
       return {
         ...state,
         conferenceId,
+      }
+    },
+    addPendingUser: (state, payload: ConferenceUser) => {
+      return {
+        ...state,
+        pendingUsers: {
+          ...state.pendingUsers,
+          [payload.extenId]: payload,
+        },
+      }
+    },
+    removePendingUser: (state, extenId: string) => {
+      if (!state.pendingUsers) return state
+      const updatedPendingUsers = { ...state.pendingUsers }
+      delete updatedPendingUsers[extenId]
+      return {
+        ...state,
+        pendingUsers: Object.keys(updatedPendingUsers).length > 0 ? updatedPendingUsers : null,
+      }
+    },
+    clearPendingUsers: (state) => {
+      return {
+        ...state,
+        pendingUsers: null,
       }
     },
     resetConference: () => defaultState,
