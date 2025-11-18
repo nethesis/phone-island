@@ -245,3 +245,22 @@ export async function setIncomingCallsPreference(settingsStatus: any) {
     throw error
   }
 }
+
+/**
+ * Get feature codes
+ */
+export async function getFeatureCodes(): Promise<any> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/astproxy/feature_codes`, {
+      headers: { ...headers },
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const data = await response.json()
+    return data
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}

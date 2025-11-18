@@ -698,47 +698,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   })
 
   useEventListener('phone-island-init-audio', () => {
-    store.dispatch.island.setIslandView(null)
-    store.dispatch.island.toggleAvoidToShow(true)
-
-    // Mute both local and remote audio streams immediately
-    const muteAllAudio = () => {
-      const { localAudioStream, remoteAudioStream } = store.getState().webrtc
-
-      if (localAudioStream) {
-        const stream = localAudioStream as any
-        stream?.getAudioTracks?.()?.forEach((track: MediaStreamTrack) => {
-          track.enabled = false
-        })
-      }
-
-      if (remoteAudioStream) {
-        const stream = remoteAudioStream as any
-        stream?.getAudioTracks?.()?.forEach((track: MediaStreamTrack) => {
-          track.enabled = false
-        })
-      }
-    }
-
-    // Mute immediately and also monitor for audio streams being added
-    muteAllAudio()
-
-    callNumber('*43', SIP_HOST)
-
-    // In case of phone-island is visible during init audio, hide it again
-    store.dispatch.island.setIslandView(null)
-    store.dispatch.island.toggleAvoidToShow(true)
-
-    // Keep checking and muting any audio for the duration of the call
-    const muteInterval = setInterval(() => {
-      muteAllAudio()
-    }, 200)
-
-    setTimeout(() => {
-      clearInterval(muteInterval)
-      eventDispatch('phone-island-call-end', {})
-      store.dispatch.island.toggleAvoidToShow(false)
-    }, 1500)
+    const { featureCodes } = store.getState().currentUser
+    const audioTestCode = featureCodes?.audio_test
+    callNumber(audioTestCode, SIP_HOST)
   })
 
   useEventListener('phone-island-transcription-toggle', () => {
