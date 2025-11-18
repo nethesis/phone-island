@@ -8,6 +8,7 @@ import type { UserInfoTypes, ExtensionTypes, ConversationsTypes } from '../types
 const defaultState: CurrentUserTypes = {
   currentUserReady: false,
   conversations: {},
+  featureCodes: null,
 }
 
 export const currentUser = createModel<RootModel>()({
@@ -36,12 +37,16 @@ export const currentUser = createModel<RootModel>()({
       state.conversations[payload.exten] = payload.conversations
       return state
     },
+    updateFeatureCodes: (state, payload: any) => {
+      state.featureCodes = payload
+    },
   },
 })
 
 interface CurrentUserTypes extends UserInfoTypes {
   currentUserReady: boolean
   conversations: UserConversationTypes
+  featureCodes: any
 }
 
 interface UserConversationTypes {

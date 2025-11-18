@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, type FC, useEffect, useLayoutEffect } from 'react'
-import { getCurrentUserInfo, getVideoSources } from '../services/user'
+import { getCurrentUserInfo, getVideoSources, getFeatureCodes } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
@@ -63,7 +63,7 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
           try {
             const response = await fetch(`https://${hostName}/api/user/me`, {
               headers: {
-                'Authorization': `Bearer ${authToken}`
+                Authorization: `Bearer ${authToken}`,
               },
             })
 
@@ -152,11 +152,23 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
         dispatch.streaming.updateVideoSources(videoSources)
       }
     }
+    // Get feature codes and save to store
+    async function initFeatureCodes() {
+      try {
+        const codes = await getFeatureCodes()
+        if (codes) {
+          dispatch.currentUser.updateFeatureCodes(codes)
+        }
+      } catch (error) {
+        console.warn('Failed to fetch feature codes:', error)
+      }
+    }
     // Call the needed APIs on startup
     if (fetchReady) {
       initCurrentUser()
       initUsersEndpoints()
       initVideoSources()
+      initFeatureCodes()
     }
   }, [fetchReady])
 
