@@ -722,19 +722,29 @@ export const WebRTC: FC<WebRTCProps> = ({
   // Manage reload events
   useEffect(() => {
     if (reload || connectionReturned) {
-      // Unregister the WebRTC extension
-      unregister()
-      // Detach sipcall
-      const { sipcall }: { sipcall: any } = store.getState().webrtc
-      if (sipcall) sipcall.detach()
-      // Destroy Janus session
-      if (janus.current.destroy) janus.current.destroy()
-      // Initialize a new Janus session
-      setTimeout(() => {
-        initWebRTC()
-        // Execute the reloaded callback
+      // Check if WebRTC is actually disconnected before doing heavy reload
+      const { sipcall, registered }: { sipcall: any; registered: boolean } = store.getState().webrtc
+      
+      // Only do full reload if not registered or sipcall is invalid
+      if (!registered || !sipcall) {
+        console.info('WebRTC not properly connected, performing full reload')
+        // Unregister the WebRTC extension
+        unregister()
+        // Detach sipcall
+        if (sipcall) sipcall.detach()
+        // Destroy Janus session
+        if (janus.current.destroy) janus.current.destroy()
+        // Initialize a new Janus session
+        setTimeout(() => {
+          initWebRTC()
+          // Execute the reloaded callback
+          if (reloadedCallback) reloadedCallback()
+        }, 10000)
+      } else {
+        console.info('WebRTC already connected, skipping heavy reload')
+        // Execute callback without reload
         if (reloadedCallback) reloadedCallback()
-      }, 10000)
+      }
     }
   }, [reload, connectionReturned])
 

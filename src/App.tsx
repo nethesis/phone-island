@@ -49,17 +49,41 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   const [reloadedWebRTC, setReloadedWebRTC] = useState<boolean>(false)
   const [reloadedSocket, setReloadedSocket] = useState<boolean>(false)
 
+  // Keepalive system to maintain tab active without heavy reload
   useEffect(() => {
-    const worker = new Worker(wakeUpWorker, { type: 'module' })
-    worker.onmessage = (event: MessageEvent<string>) => {
-      // Handle wakeup message
-      if (event.data === 'wakeup') {
-        setReload(true)
+    let lastActiveTime = Date.now()
+    const INACTIVITY_THRESHOLD = 5 * 60 * 1000 // 5 minutes
+
+    // Handle visibility change (tab becomes visible/hidden)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const now = Date.now()
+        const timeSinceLastActive = now - lastActiveTime
+
+        // Only reload if tab was hidden for more than threshold
+        if (timeSinceLastActive > INACTIVITY_THRESHOLD) {
+          console.info('Tab inactive for long period, performing soft reconnection')
+          setReload(true)
+        }
+        lastActiveTime = now
       }
     }
 
+    // Lightweight worker for keepalive ping
+    const worker = new Worker(wakeUpWorker, { type: 'module' })
+    worker.onmessage = (event: MessageEvent<string>) => {
+      if (event.data === 'ping') {
+        // Simple ping to keep tab active - no action needed
+        lastActiveTime = Date.now()
+      }
+    }
+
+    // Listen for visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       worker.terminate()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 

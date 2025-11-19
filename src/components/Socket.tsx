@@ -953,10 +953,16 @@ export const Socket: FC<SocketProps> = ({
   // Manage reload events
   useEffect(() => {
     if (reload) {
-      console.info('websocket reconnection')
-      socket.current.disconnect()
-      socket.current.connect()
-      reloadedCallback()
+      // Check if socket is actually disconnected before reconnecting
+      if (socket.current && socket.current.connected) {
+        console.info('Socket already connected, skipping reconnection')
+        reloadedCallback()
+      } else {
+        console.info('Socket disconnected, performing reconnection')
+        socket.current.disconnect()
+        socket.current.connect()
+        reloadedCallback()
+      }
     }
   }, [reload])
 

@@ -6,19 +6,15 @@
 import exposeWorker from '../utils/genericFunctions/exposeWorker'
 
 /**
- * Performs a check about the tab inactivity
- * ...probably a standby of the computer
+ * Lightweight worker for keepalive ping
+ * Sends periodic ping messages to keep the tab active
  */
 const wakeUpWorker = exposeWorker(() => {
-  let lastTime = new Date().getTime()
-  const CHECK_INTERVAL = 2000
+  const PING_INTERVAL = 30000
+  
   setInterval(() => {
-    const currentTime = new Date().getTime()
-    if (currentTime > lastTime + CHECK_INTERVAL * 2) {
-      postMessage('wakeup')
-    }
-    lastTime = currentTime
-  }, CHECK_INTERVAL)
+    postMessage('ping')
+  }, PING_INTERVAL)
 })
 
 export default wakeUpWorker
