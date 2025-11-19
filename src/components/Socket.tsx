@@ -556,7 +556,9 @@ export const Socket: FC<SocketProps> = ({
           isActive &&
           conferenceStartedFrom === username
         ) {
-          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          setTimeout(() => {
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }, 800)
         } else if (
           (res.cause === 'normal_clearing' ||
             res?.cause === 'user_busy' ||
@@ -586,7 +588,9 @@ export const Socket: FC<SocketProps> = ({
             store.dispatch.conference.resetConference()
           } else {
             // If there are still participants, keep the waitingConference view
-            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+            setTimeout(() => {
+              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+            }, 800)
           }
         }
         // if conference owner call the call with the added user inside conference
@@ -596,7 +600,9 @@ export const Socket: FC<SocketProps> = ({
           conferenceStartedFrom === username &&
           view !== 'waitingConference'
         ) {
-          eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          setTimeout(() => {
+            eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+          }, 800)
         }
         if (res?.cause === 'user_busy') {
           // Get current user's extensions
@@ -660,7 +666,9 @@ export const Socket: FC<SocketProps> = ({
 
             if (hasParticipants) {
               // Return to waiting conference view to manage other participants
-              eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+              setTimeout(() => {
+                eventDispatch('phone-island-view-changed', { viewType: 'waitingConference' })
+              }, 800)
               // Remove from pending users if exists
               if (pendingUsers && pendingUsers[res.callerNum]) {
                 store.dispatch.conference.removePendingUser(res.callerNum)
