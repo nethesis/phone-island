@@ -954,14 +954,23 @@ export const Socket: FC<SocketProps> = ({
   useEffect(() => {
     if (reload) {
       // Check if socket is actually disconnected before reconnecting
-      if (socket.current && socket.current.connected) {
+      const { forceReload } = store.getState().island
+      
+      if (socket.current && socket.current.connected && !forceReload) {
         console.info('Socket already connected, skipping reconnection')
         reloadedCallback()
       } else {
-        console.info('Socket disconnected, performing reconnection')
-        socket.current.disconnect()
-        socket.current.connect()
-        reloadedCallback()
+        console.info(
+          forceReload
+            ? 'Force reload requested, performing full Socket reconnection'
+            : 'Socket disconnected, performing reconnection'
+        )
+        // Disconnect and reconnect immediately
+        setTimeout(() => {
+          socket.current.disconnect()
+          socket.current.connect()
+          reloadedCallback()
+        }, 800)
       }
     }
   }, [reload])

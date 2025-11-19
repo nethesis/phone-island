@@ -26,6 +26,7 @@ const defaultState: IslandTypes = {
   isExtraLarge: false,
   urlOpened: false,
   previewCallFromMobileOrNethlink: false,
+  forceReload: false,
   operatorBusy: {
     isActive: false,
     calledNumber: null,
@@ -86,6 +87,10 @@ export const island = createModel<RootModel>()({
     },
     setPreviewCallFromMobileOrNethlink: (state, payload: boolean) => {
       state.previewCallFromMobileOrNethlink = payload
+      return state
+    },
+    setForceReload: (state, payload: boolean) => {
+      state.forceReload = payload
       return state
     },
     resetSettingsView: (state) => {
@@ -193,6 +198,7 @@ function getResetState(state: IslandTypes, includeRecorder: boolean): IslandType
     avoidToShow: avoidToShow,
     isFromStreaming: false,
     previewCallFromMobileOrNethlink: false,
+    forceReload: false,
     // Keep previousView if waitingConference
     previousView:
       state.view === 'waitingConference' ? state.previousView : defaultState.previousView,
@@ -243,6 +249,7 @@ interface IslandTypes {
   isExtraLarge: boolean
   urlOpened: boolean
   previewCallFromMobileOrNethlink: boolean
+  forceReload: boolean
   operatorBusy: {
     isActive: boolean
     calledNumber: string | null
