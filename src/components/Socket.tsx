@@ -640,7 +640,7 @@ export const Socket: FC<SocketProps> = ({
                 loop: true,
               })
               store.dispatch.island.setIslandView('operatorBusy')
-            }, 400)
+            }, 600)
 
             // If conference is active and we're the owner, return to conference after timeout
             if (isActive && conferenceStartedFrom === username) {
