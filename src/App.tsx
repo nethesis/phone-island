@@ -700,7 +700,9 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-init-audio', () => {
     const { featureCodes } = store.getState().currentUser
     const audioTestCode = featureCodes?.audio_test
-    callNumber(audioTestCode, SIP_HOST)
+    if (audioTestCode) {
+      callNumber(audioTestCode, SIP_HOST)
+    }
   })
 
   useEventListener('phone-island-transcription-toggle', () => {
