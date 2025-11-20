@@ -68,13 +68,7 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
 
           <div className='ml-3'>
             <h3 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50 pi-dark:text-rose-100 margin-block-property'>
-              {t(
-                `Errors.${
-                  default_device?.type === 'nethlink' && latestAlert?.type === 'webrtc_down'
-                    ? latestAlert?.nethlink_message
-                    : latestAlert?.type
-                }`,
-              )}
+              {t(`Errors.${latestAlert?.type}`)}
             </h3>
             <div className='pi-text-sm pi-font-normal pi-text-gray-700 dark:pi-text-gray-200 pi-dark:text-rose-200 pi-leading-5'>
               {t(`Errors.${latestAlert?.message}`)}
