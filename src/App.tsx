@@ -115,6 +115,23 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     }
   }, [reloadedSocket, reloadedWebRTC])
 
+  // Monitor alerts and trigger automatic reload when webrtc_down or socket_down become active
+  useEffect(() => {
+    const checkInterval = setInterval(() => {
+      const { data } = store.getState().alerts
+      const isWebRTCDown = data.webrtc_down?.active || false
+      const isSocketDown = data.socket_down?.active || false
+      
+      // If either alert is active and we're not already reloading, trigger reload
+      if ((isWebRTCDown || isSocketDown) && !reload) {
+        console.info('Alert detected (webrtc_down or socket_down), triggering automatic reload')
+        setReload(true)
+      }
+    }, 1000) // Check every second
+
+    return () => clearInterval(checkInterval)
+  }, [reload])
+
   useEventListener('phone-island-expand', () => {
     store.dispatch.island.toggleIsOpen(true)
     eventDispatch('phone-island-expanded', {})

@@ -722,16 +722,19 @@ export const WebRTC: FC<WebRTCProps> = ({
   // Manage reload events
   useEffect(() => {
     if (reload || connectionReturned) {
-      // Check if WebRTC is actually disconnected before doing heavy reload
-      const { sipcall, registered }: { sipcall: any; registered: boolean } = store.getState().webrtc
+      // Check if WebRTC is actually disconnected using alerts (more reliable than registered/sipcall)
+      const { data } = store.getState().alerts
       const { forceReload } = store.getState().island
+      const { sipcall }: { sipcall: any } = store.getState().webrtc
       
-      // Only do full reload if not registered, sipcall is invalid, OR force reload is requested
-      if (!registered || !sipcall || forceReload) {
+      // Only do full reload if webrtc_down alert is active OR force reload is requested
+      const isWebRTCDown = data.webrtc_down?.active || false
+      
+      if (isWebRTCDown || forceReload) {
         console.info(
           forceReload
             ? 'Force reload requested, performing full WebRTC reconnection'
-            : 'WebRTC not properly connected, performing full reload'
+            : 'WebRTC down detected (alert active), performing full reload'
         )
         // Reset force reload flag
         if (forceReload) {
@@ -748,9 +751,9 @@ export const WebRTC: FC<WebRTCProps> = ({
           initWebRTC()
           // Execute the reloaded callback
           if (reloadedCallback) reloadedCallback()
-        }, 800)
+        }, 100)
       } else {
-        console.info('WebRTC already connected, skipping heavy reload')
+        console.info('WebRTC already connected (no alert active), skipping heavy reload')
         // Execute callback without reload
         if (reloadedCallback) reloadedCallback()
       }

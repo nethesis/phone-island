@@ -953,24 +953,35 @@ export const Socket: FC<SocketProps> = ({
   // Manage reload events
   useEffect(() => {
     if (reload) {
-      // Check if socket is actually disconnected before reconnecting
+      console.info('Socket reload requested')
+      const { data } = store.getState().alerts
       const { forceReload } = store.getState().island
-      
-      if (socket.current && socket.current.connected && !forceReload) {
-        console.info('Socket already connected, skipping reconnection')
-        reloadedCallback()
-      } else {
+
+      // Check if socket is actually down using alerts (more reliable than socket.connected)
+      const isSocketDown = data.socket_down?.active || false
+
+      // Only reconnect if socket_down alert is active OR force reload is requested
+      if (isSocketDown || forceReload) {
         console.info(
           forceReload
-            ? 'Force reload requested, performing full Socket reconnection'
-            : 'Socket disconnected, performing reconnection'
+            ? 'Force reload requested, performing Socket reconnection'
+            : 'Socket down detected (alert active), performing reconnection'
         )
-        // Disconnect and reconnect immediately
+        // Reset force reload flag
+        if (forceReload) {
+          store.dispatch.island.setForceReload(false)
+        }
+        // Disconnect and reconnect socket
         setTimeout(() => {
           socket.current.disconnect()
           socket.current.connect()
+          // Execute the reloaded callback
           reloadedCallback()
-        }, 800)
+        }, 100)
+      } else {
+        console.info('Socket already connected (no alert active), skipping reconnection')
+        // Execute callback without reload
+        reloadedCallback()
       }
     }
   }, [reload])
