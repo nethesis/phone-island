@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useEffect, useRef, useCallback, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { Dispatch } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState } from '../store'
 import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
 import type { JanusTypes } from '../types'
@@ -15,6 +15,7 @@ import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { eventDispatch, useEventListener, getJSONItem, setJSONItem } from '../utils'
 import { isPhysical } from '../lib/user/default_device'
+import { initializeJanusAudioConfig } from '../lib/webrtc/audioInitialization'
 
 interface WebRTCProps {
   children: ReactNode
@@ -41,6 +42,9 @@ export const WebRTC: FC<WebRTCProps> = ({
 }) => {
   // Initialize store dispatch
   const dispatch = useDispatch<Dispatch>()
+
+  // Get audio profile from store
+  const audioProfile = useSelector((state: RootState) => state.island.audioProfile)
 
   // Initialize janus check interval id
   const janusCheckInterval = useRef<any>(null)
@@ -690,6 +694,9 @@ export const WebRTC: FC<WebRTCProps> = ({
 
   // Manage webrtc connections and events
   useEffect(() => {
+    // Initialize Janus audio configuration with profile from store
+    initializeJanusAudioConfig(audioProfile)
+
     // Initializes the webrtc registration check interval
     function startWebrtcCheck() {
       const { CHECK_INTERVAL_TIME } = store.getState().webrtc
@@ -717,7 +724,7 @@ export const WebRTC: FC<WebRTCProps> = ({
       // Stop Janus check interval
       clearInterval(janusCheckInterval.current)
     }
-  }, [])
+  }, [audioProfile])
 
   // Manage reload events
   useEffect(() => {

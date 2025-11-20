@@ -4,6 +4,7 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import { eventDispatch } from '../utils'
+import type { AudioProfile } from '../lib/webrtc/audioConfig'
 
 const defaultState: IslandTypes = {
   view: null,
@@ -26,6 +27,7 @@ const defaultState: IslandTypes = {
   isExtraLarge: false,
   urlOpened: false,
   previewCallFromMobileOrNethlink: false,
+  audioProfile: 'high-quality' as AudioProfile,
   operatorBusy: {
     isActive: false,
     calledNumber: null,
@@ -142,6 +144,10 @@ export const island = createModel<RootModel>()({
       state.operatorBusy.callerNumber = null
       return state
     },
+    setAudioProfile: (state, payload: AudioProfile) => {
+      state.audioProfile = payload
+      return state
+    },
   },
   effects: (dispatch) => ({
     handleToggleIsOpen: (_: void, rootState) => {
@@ -243,6 +249,7 @@ interface IslandTypes {
   isExtraLarge: boolean
   urlOpened: boolean
   previewCallFromMobileOrNethlink: boolean
+  audioProfile: AudioProfile
   operatorBusy: {
     isActive: boolean
     calledNumber: string | null
