@@ -28,13 +28,13 @@ const defaultState: AlertsTypes = {
     webrtc_down: {
       active: false,
       break: true,
-      message: 'Click to reconnect',
+      message: 'Click icon to reconnect',
       type: 'webrtc_down',
     },
     socket_down: {
       active: false,
       break: false,
-      message: 'Click to reconnect',
+      message: 'Click icon to reconnect',
       type: 'socket_down',
     },
     // Warning alerts

@@ -87,7 +87,7 @@
     "The browser doesn't have permission to access camera or microphone.": "Il browser non ha il permesso di accedere alla fotocamera o al microfono.",
     "You must accept audio and video permissions.": "Devi accettare i permessi audio e video.",
     "Web Phone can't access audio or camera on this device.": "Il Web Phone non può accedere all'audio o alla fotocamera su questo dispositivo.",
-    "Click to reconnect": "Clicca per riconnetterti",
+    "Click icon to reconnect": "Clicca l'icona per riconnetterti",
     "Camera is used by another application.": "La fotocamera è utilizzata da un'altra applicazione.",
     "Unknown audio or camera permissions.": "Microfono o fotocamera non disponibili.",
     "No microphone or camera permissions.": "Devi accettare i permessi del browser.",
