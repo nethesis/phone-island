@@ -1,4 +1,4 @@
-import React, { type FC, useState, useEffect } from 'react'
+import React, { type FC, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
@@ -29,37 +29,81 @@ interface DeviceInputOutputTypes {
   deviceId: string
 }
 
-export const PhoneIsland: FC<PhoneIslandProps> = ({
-  dataConfig,
-  showAlways = false,
-  uaType,
-  urlParamWithEvent = false,
-}: PhoneIslandProps) => {
-  const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
-  const HOST_NAME: string = CONFIG[0]
-  const USERNAME: string = CONFIG[1]
-  const AUTH_TOKEN: string = CONFIG[2]
-  const SIP_EXTEN: string = CONFIG[3]
-  const SIP_SECRET: string = CONFIG[4]
-  const SIP_HOST: string = CONFIG[5]
-  const SIP_PORT: string = CONFIG[6]
+export interface PhoneIslandRef {
+  reset: () => void
+}
 
-  // Initialize the state to manage the reload events
-  const [reload, setReload] = useState<boolean>(false)
-  const [reloadedWebRTC, setReloadedWebRTC] = useState<boolean>(false)
-  const [reloadedSocket, setReloadedSocket] = useState<boolean>(false)
+const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
+  (
+    {
+      dataConfig,
+      showAlways = false,
+      uaType,
+      urlParamWithEvent = false,
+    }: PhoneIslandProps,
+    ref,
+  ) => {
+    const CONFIG: string[] = Base64.atob(dataConfig || '').split(':')
+    const HOST_NAME: string = CONFIG[0]
+    const USERNAME: string = CONFIG[1]
+    const AUTH_TOKEN: string = CONFIG[2]
+    const SIP_EXTEN: string = CONFIG[3]
+    const SIP_SECRET: string = CONFIG[4]
+    const SIP_HOST: string = CONFIG[5]
+    const SIP_PORT: string = CONFIG[6]
 
+    // Initialize the state to manage the reload events
+    const [reload, setReload] = useState<boolean>(false)
+    const [reloadedWebRTC, setReloadedWebRTC] = useState<boolean>(false)
+    const [reloadedSocket, setReloadedSocket] = useState<boolean>(false)
+
+    // Expose reset method via imperativeHandle
+    useImperativeHandle(
+      ref,
+      () => ({
+        reset: () => {
+          console.info('PhoneIsland: Performing full component reset')
+          setReload(true)
+        },
+      }),
+      [],
+    )
+
+    // Keepalive system to maintain tab active without heavy reload
   useEffect(() => {
-    const worker = new Worker(wakeUpWorker, { type: 'module' })
-    worker.onmessage = (event: MessageEvent<string>) => {
-      // Handle wakeup message
-      if (event.data === 'wakeup') {
-        setReload(true)
+    let lastActiveTime = Date.now()
+    const INACTIVITY_THRESHOLD = 5 * 60 * 1000 // 5 minutes
+
+    // Handle visibility change (tab becomes visible/hidden)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const now = Date.now()
+        const timeSinceLastActive = now - lastActiveTime
+
+        // Only reload if tab was hidden for more than threshold
+        if (timeSinceLastActive > INACTIVITY_THRESHOLD) {
+          console.info('Tab inactive for long period, performing soft reconnection')
+          setReload(true)
+        }
+        lastActiveTime = now
       }
     }
 
+    // Lightweight worker for keepalive ping
+    const worker = new Worker(wakeUpWorker, { type: 'module' })
+    worker.onmessage = (event: MessageEvent<string>) => {
+      if (event.data === 'ping') {
+        // Simple ping to keep tab active - no action needed
+        lastActiveTime = Date.now()
+      }
+    }
+
+    // Listen for visibility changes
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       worker.terminate()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
@@ -70,6 +114,23 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       setReloadedSocket(false)
     }
   }, [reloadedSocket, reloadedWebRTC])
+
+  // Monitor alerts and trigger automatic reload when webrtc_down or socket_down become active
+  useEffect(() => {
+    const checkInterval = setInterval(() => {
+      const { data } = store.getState().alerts
+      const isWebRTCDown = data.webrtc_down?.active || false
+      const isSocketDown = data.socket_down?.active || false
+      
+      // If either alert is active and we're not already reloading, trigger reload
+      if ((isWebRTCDown || isSocketDown) && !reload) {
+        console.info('Alert detected (webrtc_down or socket_down), triggering automatic reload')
+        setReload(true)
+      }
+    }, 1000) // Check every second
+
+    return () => clearInterval(checkInterval)
+  }, [reload])
 
   useEventListener('phone-island-expand', () => {
     store.dispatch.island.toggleIsOpen(true)
@@ -100,6 +161,13 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
   useEventListener('phone-island-detach', (data) => {
     detach()
     eventDispatch('phone-island-detached', {})
+  })
+
+  useEventListener('phone-island-reload-component', (data: any) => {
+    if (data?.force) {
+      store.dispatch.island.setForceReload(true)
+    }
+    setReload(true)
   })
 
   useEventListener('phone-island-audio-input-change', async (data: DeviceInputOutputTypes) => {
@@ -906,6 +974,12 @@ export const PhoneIsland: FC<PhoneIslandProps> = ({
       </Provider>
     </>
   )
-}
+})
+
+PhoneIslandComponent.displayName = 'PhoneIslandComponent'
+
+export const PhoneIsland = forwardRef<PhoneIslandRef, PhoneIslandProps>(
+  (props, ref) => <PhoneIslandComponent {...props} ref={ref} />,
+)
 
 PhoneIsland.displayName = 'PhoneIsland'

@@ -28,14 +28,13 @@ const defaultState: AlertsTypes = {
     webrtc_down: {
       active: false,
       break: true,
-      message: 'Web Phone connection is down.',
-      nethlink_message: 'NethLink connection is down.',
+      message: 'Click icon to reconnect',
       type: 'webrtc_down',
     },
     socket_down: {
       active: false,
       break: false,
-      message: 'Server connection is down.',
+      message: 'Click icon to reconnect',
       type: 'socket_down',
     },
     // Warning alerts
@@ -144,5 +143,4 @@ export interface AlertTypes {
   break?: boolean // This means that it brokes WebRTC audio calls or Socket connection
   success?: boolean
   type: string
-  nethlink_message?: string
 }

@@ -39,6 +39,10 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
     window.location.reload()
   }
 
+  const handleReloadComponent = () => {
+    eventDispatch('phone-island-reload-component', { force: true })
+  }
+
   return (
     latestAlert && (
       <div className='pi-relative pi-rounded-md pi-w-full pi-flex'>
@@ -64,13 +68,7 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
 
           <div className='ml-3'>
             <h3 className='pi-text-lg pi-font-medium pi-text-gray-900 dark:pi-text-gray-50 pi-dark:text-rose-100 margin-block-property'>
-              {t(
-                `Errors.${
-                  default_device?.type === 'nethlink' && latestAlert?.type === 'webrtc_down'
-                    ? latestAlert?.nethlink_message
-                    : latestAlert?.type
-                }`,
-              )}
+              {t(`Errors.${latestAlert?.type}`)}
             </h3>
             <div className='pi-text-sm pi-font-normal pi-text-gray-700 dark:pi-text-gray-200 pi-dark:text-rose-200 pi-leading-5'>
               {t(`Errors.${latestAlert?.message}`)}
@@ -81,26 +79,28 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
         {/* Close button */}
         <Button
           variant='transparent'
-          onClick={() =>
-            default_device?.type === 'nethlink' &&
-            uaType === 'mobile' &&
-            latestAlert?.type !== 'call_transfered'
-              ? reloadPhoneIsland()
-              : handleClearAllAlerts()
-          }
+          onClick={() => {
+            if (default_device?.type === 'nethlink' && uaType === 'mobile' && latestAlert?.type !== 'call_transfered') {
+              reloadPhoneIsland()
+            } else if (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered') {
+              handleReloadComponent()
+            } else {
+              handleClearAllAlerts()
+            }
+          }}
           className='pi-absolute pi--right-6 pi-transform pi--translate-y-1/2'
           data-tooltip-id='tooltip-close-alert'
           data-tooltip-content={
-            default_device?.type === 'nethlink' &&
-            uaType === 'mobile' &&
-            latestAlert?.type !== 'call_transfered'
+            (default_device?.type === 'nethlink' && uaType === 'mobile' && latestAlert?.type !== 'call_transfered') ||
+            (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered')
               ? `${t('Tooltip.Reload')}`
               : `${t('Tooltip.Close alert')}`
           }
         >
           <FontAwesomeIcon
             icon={
-              default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered'
+              (default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered') ||
+              (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered')
                 ? faArrowRotateRight
                 : faTimes
             }
