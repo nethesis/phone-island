@@ -251,10 +251,10 @@ Select a ringtone to use for incoming calls
 
 Available ringtone names:
 - `default` - Default incoming call ringtone
-- `tone1` - Example tone 1
-- `tone2` - Example tone 2
-- `tone3` - Example tone 3
-- `tone4` - Example tone 4
+- `classic` - Classic tone
+- `modern` - Modern tone
+- `soft` - Soft tone
+- `gentle` - Gentle tone
 
 #### `phone-island-ringing-tone-output`
 Set the audio output device for ringtone playback
@@ -792,20 +792,20 @@ Response containing the list of available ringtones
       "displayName": "Default"
     },
     {
-      "name": "tone1",
-      "displayName": "Tone 1"
+      "name": "classic",
+      "displayName": "Classic"
     },
     {
-      "name": "tone2",
-      "displayName": "Tone 2"
+      "name": "modern",
+      "displayName": "Modern"
     },
     {
-      "name": "tone3",
-      "displayName": "Tone 3"
+      "name": "soft",
+      "displayName": "Soft"
     }
      {
-      "name": "tone4",
-      "displayName": "Tone 4"
+      "name": "gentle",
+      "displayName": "Gentle"
     }
   ]
 }
