@@ -28,23 +28,23 @@ const AVAILABLE_RINGTONES: RingtoneOption[] = [
     base64Audio: incomingRingtone,
   },
   {
-    name: 'tone1',
-    displayName: 'Tone 1',
+    name: 'classic',
+    displayName: 'Classic',
     base64Audio: exampleTone1,
   },
   {
-    name: 'tone2',
-    displayName: 'Tone 2',
+    name: 'modern',
+    displayName: 'Modern',
     base64Audio: exampleTone2,
   },
   {
-    name: 'tone3',
-    displayName: 'Tone 3',
+    name: 'soft',
+    displayName: 'Soft',
     base64Audio: exampleTone3,
   },
   {
-    name: 'tone4',
-    displayName: 'Tone 4',
+    name: 'gentle',
+    displayName: 'Gentle',
     base64Audio: exampleTone4,
   },
 ]

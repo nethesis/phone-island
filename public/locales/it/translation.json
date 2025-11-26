@@ -151,10 +151,10 @@
   },
   "Ringtones": {
     "Default": "Predefinita",
-    "Tone 1": "Suoneria 1",
-    "Tone 2": "Suoneria 2",
-    "Tone 3": "Suoneria 3",
-    "Tone 4": "Suoneria 4",
+    "Classic": "Classica",
+    "Modern": "Moderna",
+    "Soft": "Delicata",
+    "Gentle": "Gentile",
     "Play preview": "Riproduci anteprima",
     "Stop preview": "Ferma anteprima"
   }
