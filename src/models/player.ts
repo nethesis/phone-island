@@ -134,8 +134,36 @@ export const player = createModel<RootModel>()({
       }
     },
     // This function is recommended for playing audio with base64 sources
-    updateStartAudioPlayer: async ({ src, loop = false }: { src: string; loop?: boolean }) => {
+    updateStartAudioPlayer: async (
+      { src, loop = false }: { src: string; loop?: boolean },
+      rootState,
+    ) => {
       dispatch.player.setAudioPlayerLoop(loop)
+
+      // Apply ringtone output device if set
+      const ringtoneOutputDeviceId = rootState.ringtones?.outputDeviceId
+      if (
+        ringtoneOutputDeviceId &&
+        rootState.player.audioPlayer?.current &&
+        typeof (rootState.player.audioPlayer.current as any).setSinkId === 'function'
+      ) {
+        try {
+          await (rootState.player.audioPlayer.current as any).setSinkId(ringtoneOutputDeviceId)
+          console.info('Ringtone output device applied:', ringtoneOutputDeviceId)
+        } catch (err) {
+          console.warn('Failed to set ringtone output device, trying fallback to default:', err)
+          // Fallback to default device if the saved device is not available
+          try {
+            await (rootState.player.audioPlayer.current as any).setSinkId('default')
+            console.info('Ringtone output fallback to default successful')
+            // Update store to reflect the fallback
+            dispatch.ringtones.setOutputDeviceId('default')
+          } catch (fallbackErr) {
+            console.error('Even default device failed for ringtone:', fallbackErr)
+          }
+        }
+      }
+
       // Update the audio source
       await updateAudioPlayerSource(`data:audio/ogg;base64, ${src}`)
       // Play the outgoing ringtone when ready

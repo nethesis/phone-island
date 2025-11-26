@@ -14,6 +14,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
 - [Listen Events (External → Phone Island)](#listen-events-external--phone-island)
   - [Core Phone Island Events](#core-phone-island-events)
   - [Device Management Events](#device-management-events)
+  - [Ringtone Management Events](#ringtone-management-events)
   - [Call Control Events](#call-control-events)
   - [Recording Events](#recording-events)
   - [Audio Player Events](#audio-player-events)
@@ -23,6 +24,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
 - [Dispatch Events (Phone Island → External)](#dispatch-events-phone-island--external)
   - [Core Dispatch Events](#core-dispatch-events)
   - [Device Status Events](#device-status-events)
+  - [Ringtone Status Events](#ringtone-status-events)
   - [Call Status Events](#call-status-events)
   - [Recording Status Events](#recording-status-events)
   - [Audio Player Status Events](#audio-player-status-events)
@@ -226,6 +228,40 @@ The event to change default video input device for phone island
 ```json
 {
   "deviceId": "116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee"
+}
+```
+
+### Ringtone Management Events
+
+#### `phone-island-ringing-tone-list`
+Request the list of available ringtones
+
+```json
+{}
+```
+
+#### `phone-island-ringing-tone-select`
+Select a ringtone to use for incoming calls
+
+```json
+{
+  "name": "default"
+}
+```
+
+Available ringtone names:
+- `default` - Default incoming call ringtone
+- `tone1` - Example tone 1
+- `tone2` - Example tone 2
+- `tone3` - Example tone 3
+- `tone4` - Example tone 4
+
+#### `phone-island-ringing-tone-output`
+Set the audio output device for ringtone playback
+
+```json
+{
+  "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f"
 }
 ```
 
@@ -741,6 +777,56 @@ The dispatch of change default video input device for phone island
 
 ```json
 {}
+```
+
+### Ringtone Status Events
+
+#### `phone-island-ringing-tone-list-response`
+Response containing the list of available ringtones
+
+```json
+{
+  "ringtones": [
+    {
+      "name": "default",
+      "displayName": "Default"
+    },
+    {
+      "name": "tone1",
+      "displayName": "Tone 1"
+    },
+    {
+      "name": "tone2",
+      "displayName": "Tone 2"
+    },
+    {
+      "name": "tone3",
+      "displayName": "Tone 3"
+    }
+     {
+      "name": "tone4",
+      "displayName": "Tone 4"
+    }
+  ]
+}
+```
+
+#### `phone-island-ringing-tone-selected`
+Notification that a ringtone has been selected
+
+```json
+{
+  "name": "default"
+}
+```
+
+#### `phone-island-ringing-tone-output-changed`
+Notification that the ringtone output device has been changed
+
+```json
+{
+  "deviceId": "2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f"
+}
 ```
 
 ### Call Status Events

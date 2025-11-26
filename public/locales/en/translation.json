@@ -148,5 +148,14 @@
     "Transcribing": "transcribing...",
     "Showing messages": "Showing last {{visible}} of {{total}} messages",
     "Is speaking": "is speaking"
+  },
+  "Ringtones": {
+    "Default": "Default",
+    "Tone 1": "Tone 1",
+    "Tone 2": "Tone 2",
+    "Tone 3": "Tone 3",
+    "Tone 4": "Tone 4",
+    "Play preview": "Play preview",
+    "Stop preview": "Stop preview"
   }
 }

@@ -8,4 +8,4 @@ export interface PlayerStartTypes {
   description: string
 }
 
-export type TypeTypes = 'announcement' | 'call_recording' | 'voicemail'
+export type TypeTypes = 'announcement' | 'call_recording' | 'voicemail' | 'ringtone_preview'

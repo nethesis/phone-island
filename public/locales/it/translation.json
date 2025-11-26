@@ -148,5 +148,14 @@
     "Transcribing": "trascrizione in corso...",
     "Showing messages": "Mostrati gli ultimi {{visible}} di {{total}} messaggi",
     "Is speaking": "sta parlando"
+  },
+  "Ringtones": {
+    "Default": "Predefinita",
+    "Tone 1": "Suoneria 1",
+    "Tone 2": "Suoneria 2",
+    "Tone 3": "Suoneria 3",
+    "Tone 4": "Suoneria 4",
+    "Play preview": "Riproduci anteprima",
+    "Stop preview": "Ferma anteprima"
   }
 }

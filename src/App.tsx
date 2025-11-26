@@ -546,6 +546,50 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     store.dispatch.alerts.setAlert(alertType.toString())
   })
 
+  // Ringtone management events
+  useEventListener('phone-island-ringing-tone-list', () => {
+    const ringtones = store.getState().ringtones.availableRingtones
+    const ringtoneList = ringtones.map((r) => ({
+      name: r.name,
+      displayName: r.displayName,
+      base64Audio: r.base64Audio,
+    }))
+    eventDispatch('phone-island-ringing-tone-list-response', { ringtones: ringtoneList })
+  })
+
+  useEventListener('phone-island-ringing-tone-select', (data: { name: string }) => {
+    if (data?.name) {
+      // Save to localStorage
+      setJSONItem('phone-island-selected-ringtone', { value: data.name })
+      // Update store
+      store.dispatch.ringtones.setSelectedRingtone(data.name)
+      eventDispatch('phone-island-ringing-tone-selected', { name: data.name })
+    }
+  })
+
+  useEventListener('phone-island-ringing-tone-output', (data: { deviceId: string }) => {
+    if (data?.deviceId) {
+      // Save to localStorage
+      setJSONItem('phone-island-ringtone-output-device', { value: data.deviceId })
+      // Update store
+      store.dispatch.ringtones.setOutputDeviceId(data.deviceId)
+      eventDispatch('phone-island-ringing-tone-output-changed', { deviceId: data.deviceId })
+    }
+  })
+
+  // Load ringtone preferences from localStorage on mount
+  useEffect(() => {
+    const savedRingtone = getJSONItem('phone-island-selected-ringtone')
+    const savedOutputDevice = getJSONItem('phone-island-ringtone-output-device')
+
+    if (savedRingtone?.value) {
+      store.dispatch.ringtones.setSelectedRingtone(savedRingtone.value)
+    }
+    if (savedOutputDevice?.value) {
+      store.dispatch.ringtones.setOutputDeviceId(savedOutputDevice.value)
+    }
+  }, [])
+
   // Manually check if internet connection is enabled or not
   useEventListener('phone-island-check-connection', () => {
     checkInternetConnection().then((internetIsActive) => {

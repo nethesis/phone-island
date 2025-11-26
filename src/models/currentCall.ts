@@ -3,7 +3,6 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import incomingRingtone from '../static/incoming_ringtone'
 import { dispatchOutgoingCallStarted } from '../events/index'
 import { eventDispatch } from '../utils'
 import { PhonebookContact } from '../types/phonebook'
@@ -138,8 +137,16 @@ export const currentCall = createModel<RootModel>()({
       ) {
         payload.incoming = true
 
-        // Update local player and play the audio
-        dispatch.player.updateStartAudioPlayer({ src: incomingRingtone, loop: true })
+        // Get selected ringtone from store and play the audio
+        const selectedRingtoneAudio = rootState.ringtones
+          ? (rootState.ringtones.availableRingtones as any[]).find(
+              (r: any) => r.name === rootState.ringtones.selectedRingtone,
+            )?.base64Audio || rootState.ringtones.availableRingtones[0]?.base64Audio
+          : undefined
+        
+        if (selectedRingtoneAudio) {
+          dispatch.player.updateStartAudioPlayer({ src: selectedRingtoneAudio, loop: true })
+        }
       }
       // Update the current call values and set incoming
       dispatch.currentCall.updateCurrentCall({
