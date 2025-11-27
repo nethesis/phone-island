@@ -24,7 +24,22 @@ export const PlayerEvents: FC = () => {
    */
   useEventListener('phone-island-audio-player-start', (data: PlayerStartTypes) => {
     if (data.type) {
-      // Check the id required when a type is provided
+      // Handle ringtone preview separately (doesn't require id)
+      if (data.type === 'ringtone_preview') {
+        if (data.base64_audio_file) {
+          dispatch.island.setIslandView('player')
+          dispatch.player.setAudioPlayerType('ringtone_preview')
+          dispatch.player.updateStartAudioPlayer({
+            src: data.base64_audio_file,
+          })
+          if (data.description) {
+            dispatch.player.setAudioPlayerTrackName(data.description)
+          }
+        }
+        return
+      }
+      
+      // Check the id required when a type is provided (for other types)
       if (!data.id) {
         console.error(
           'phone-island-audio-player-start: when a type is provided, the id is required',

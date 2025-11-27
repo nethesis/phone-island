@@ -148,5 +148,14 @@
     "Transcribing": "trascrizione in corso...",
     "Showing messages": "Mostrati gli ultimi {{visible}} di {{total}} messaggi",
     "Is speaking": "sta parlando"
+  },
+  "Ringtones": {
+    "Default": "Predefinita",
+    "Classic": "Classica",
+    "Modern": "Moderna",
+    "Soft": "Delicata",
+    "Gentle": "Gentile",
+    "Play preview": "Riproduci anteprima",
+    "Stop preview": "Ferma anteprima"
   }
 }

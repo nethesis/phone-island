@@ -4,7 +4,7 @@
 import React, { type FC, useMemo } from 'react'
 import { type TypeTypes } from '../../types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBullhorn, faVoicemail, faMusic, type IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import { faBullhorn, faVoicemail, faMusic, faBell, type IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
@@ -21,6 +21,7 @@ export const Avatar: FC<AvatarProps> = ({ type }) => {
     switch(type) {
       case 'announcement': return faBullhorn
       case 'call_recording': return faVoicemail
+      case 'ringtone_preview': return faBell
       default: return faMusic
     }
   }, [type])

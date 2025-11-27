@@ -38,97 +38,74 @@ export function register({
 }
 
 export function answerWebRTC() {
-  const {
-    sipcall,
-    jsepGlobal,
-    isAnswering,
-  }: { sipcall: any; jsepGlobal: any; isAnswering: boolean } = store.getState().webrtc
+  const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
+  if (sipcall && jsepGlobal) {
+    let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
+    const tracks: any[] = []
 
-  // Prevent multiple simultaneous answer attempts
-  if (isAnswering) {
-    console.warn('Answer already in progress, ignoring duplicate request')
-    return
-  }
+    if (currentAudioInputDeviceId) {
+      tracks.push({
+        type: 'audio',
+        capture: { deviceId: { exact: currentAudioInputDeviceId } },
+        recv: true,
+      })
+    } else {
+      tracks.push({ type: 'audio', capture: true, recv: true })
+    }
 
-  if (!sipcall || !jsepGlobal) {
-    console.warn('Cannot answer call: sipcall or jsepGlobal not available')
-    return
-  }
-
-  // Mark that we're processing an answer
-  store.dispatch.webrtc.updateWebRTC({ isAnswering: true })
-
-  let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
-  const tracks: any[] = []
-
-  if (currentAudioInputDeviceId) {
-    tracks.push({
-      type: 'audio',
-      capture: { deviceId: { exact: currentAudioInputDeviceId } },
-      recv: true,
-    })
-  } else {
-    tracks.push({ type: 'audio', capture: true, recv: true })
-  }
-
-  // For incoming calls, directly create an answer without first calling handleRemoteJsep
-  // because Janus has already provided us with an offer
-  try {
-    sipcall.createAnswer({
-      jsep: jsepGlobal,
-      tracks: tracks,
-      success: (jsep) => {
-        sipcall.send({
-          message: {
-            request: 'accept',
-          },
-          jsep: jsep,
-        })
-        // Clear the answering flag and jsepGlobal after successful answer
-        store.dispatch.webrtc.updateWebRTC({ isAnswering: false, jsepGlobal: null })
-      },
-      error: (error) => {
-        // If there's an error during createAnswer, check if it's error 469 (Unexpected ANSWER)
-        // @ts-ignore
-        Janus.error('WebRTC error:', error)
-
-        // Check if the error contains code 469 or the message "Unexpected ANSWER"
-        if (
-          error &&
-          ((typeof error === 'object' && error.code === 469) ||
-            (typeof error === 'string' && error.includes('Unexpected ANSWER')))
-        ) {
-          console.warn('Got "Unexpected ANSWER" error, forcing the answer anyway')
-          // Force sending the accept message even without JSEP
+    // For incoming calls, directly create an answer without first calling handleRemoteJsep
+    // because Janus has already provided us with an offer
+    try {
+      sipcall.createAnswer({
+        jsep: jsepGlobal,
+        tracks: tracks,
+        success: (jsep) => {
           sipcall.send({
             message: {
               request: 'accept',
             },
+            jsep: jsep,
           })
-        } else {
-          // For other types of errors, decline the call
-          sipcall.send({
-            message: {
-              request: 'decline',
-              code: 480,
-            },
-          })
-        }
-        // Reset the answering flag after error
-        store.dispatch.webrtc.updateWebRTC({ isAnswering: false, jsepGlobal: null })
-      },
-    })
-  } catch (error) {
-    console.error('Exception in createAnswer:', error)
+        },
+        error: (error) => {
+          // If there's an error during createAnswer, check if it's error 469 (Unexpected ANSWER)
+          // @ts-ignore
+          Janus.error('WebRTC error:', error)
 
-    // Even in case of an exception, try to accept the call
-    sipcall.send({
-      message: {
-        request: 'accept',
-      },
-    })
-    // Reset the answering flag after exception
-    store.dispatch.webrtc.updateWebRTC({ isAnswering: false, jsepGlobal: null })
+          // Check if the error contains code 469 or the message "Unexpected ANSWER"
+          if (
+            error &&
+            ((typeof error === 'object' && error.code === 469) ||
+              (typeof error === 'string' && error.includes('Unexpected ANSWER')))
+          ) {
+            console.warn('Got "Unexpected ANSWER" error, forcing the answer anyway')
+            // Force sending the accept message even without JSEP
+            sipcall.send({
+              message: {
+                request: 'accept',
+              },
+            })
+          } else {
+            // For other types of errors, decline the call
+            sipcall.send({
+              message: {
+                request: 'decline',
+                code: 480,
+              },
+            })
+          }
+        },
+      })
+    } catch (error) {
+      console.error('Exception in createAnswer:', error)
+
+      // Even in case of an exception, try to accept the call
+      sipcall.send({
+        message: {
+          request: 'accept',
+        },
+      })
+    }
   }
 }
 

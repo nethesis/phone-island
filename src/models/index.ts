@@ -23,6 +23,7 @@ import { websocket } from './websocket'
 import { mediaDevices } from './mediaDevices'
 import { conference } from './conference'
 import { streaming } from './streaming'
+import { ringtones } from './ringtones'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -46,6 +47,7 @@ export interface RootModel extends Models<RootModel> {
   physicalRecorder: typeof physicalRecorder
   mediaDevices: typeof mediaDevices
   streaming: typeof streaming
+  ringtones: typeof ringtones
 }
 
 export const models: RootModel = {
@@ -70,4 +72,5 @@ export const models: RootModel = {
   physicalRecorder,
   mediaDevices,
   streaming,
+  ringtones,
 }
