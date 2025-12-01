@@ -476,18 +476,22 @@ export const Socket: FC<SocketProps> = ({
           'ping',
           withTimeout(
             () => {
-              // Remove socket_down alert
-              dispatch.alerts.removeAlert('socket_down')
-              eventDispatch('phone-island-alert-removed', {
-                type: 'socket_down',
-              })
-              eventDispatch('phone-island-socket-disconnected-popup-close', {})
+              // Remove socket_down alert (async to avoid React error #300 with framer-motion)
+              setTimeout(() => {
+                dispatch.alerts.removeAlert('socket_down')
+                eventDispatch('phone-island-alert-removed', {
+                  type: 'socket_down',
+                })
+                eventDispatch('phone-island-socket-disconnected-popup-close', {})
+              }, 0)
             },
             () => {
-              // Set socket_down alert
-              dispatch.alerts.setAlert('socket_down')
-              eventDispatch('phone-island-socket-disconnected-popup-open', {})
-              console.error('Socket is unreachable!')
+              // Set socket_down alert (async to avoid React error #300 with framer-motion)
+              setTimeout(() => {
+                dispatch.alerts.setAlert('socket_down')
+                eventDispatch('phone-island-socket-disconnected-popup-open', {})
+                console.error('Socket is unreachable!')
+              }, 0)
             },
             5 * 1000, // Waits for the response 7 seconds
           ),
