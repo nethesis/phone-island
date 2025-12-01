@@ -1,4 +1,4 @@
-import React, { type FC, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import React, { type FC, useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
@@ -56,6 +56,10 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     const [reload, setReload] = useState<boolean>(false)
     const [reloadedWebRTC, setReloadedWebRTC] = useState<boolean>(false)
     const [reloadedSocket, setReloadedSocket] = useState<boolean>(false)
+
+    // Cooldown to prevent reload loop when network is down
+    const lastReloadTime = useRef<number>(0)
+    const RELOAD_COOLDOWN = 10 * 1000 // 10 seconds between reload attempts
 
     // Expose reset method via imperativeHandle
     useImperativeHandle(
@@ -121,10 +125,19 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       const { data } = store.getState().alerts
       const isWebRTCDown = data.webrtc_down?.active || false
       const isSocketDown = data.socket_down?.active || false
-      
-      // If either alert is active and we're not already reloading, trigger reload
-      if ((isWebRTCDown || isSocketDown) && !reload) {
-        console.info('Alert detected (webrtc_down or socket_down), triggering automatic reload')
+      const now = Date.now()
+      const timeSinceLastReload = now - lastReloadTime.current
+
+      // If either alert is active and we're not already reloading and cooldown has passed
+      // Don't trigger reload if we're completely offline - wait for network to come back
+      const isOnline = navigator.onLine
+      if ((isWebRTCDown || isSocketDown) && !reload && timeSinceLastReload > RELOAD_COOLDOWN && isOnline) {
+        console.info('Alert detected (webrtc_down or socket_down), triggering automatic reload', {
+          timeSinceLastReload: Math.round(timeSinceLastReload / 1000) + 's',
+          isWebRTCDown,
+          isSocketDown
+        })
+        lastReloadTime.current = now
         setReload(true)
       }
     }, 1000) // Check every second
@@ -810,9 +823,29 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   })
 
   useEventListener('phone-island-init-audio', () => {
+    // Check if there's an active call - don't interrupt it with audio warm-up
+    const { accepted, incoming, outgoing, incomingWebRTC, incomingSocket } = store.getState().currentCall
+    const hasActiveCall = accepted || incoming || outgoing || incomingWebRTC || incomingSocket
+
+    if (hasActiveCall) {
+      console.log('[AUDIO-WARMUP] Skipping audio warm-up: active call in progress', {
+        accepted,
+        incoming,
+        outgoing,
+        incomingWebRTC,
+        incomingSocket,
+        timestamp: new Date().toISOString()
+      })
+      return
+    }
+
     const { featureCodes } = store.getState().currentUser
     const audioTestCode = featureCodes?.audio_test
     if (audioTestCode) {
+      console.log('[AUDIO-WARMUP] Starting audio warm-up test call', {
+        audioTestCode,
+        timestamp: new Date().toISOString()
+      })
       callNumber(audioTestCode, SIP_HOST)
     }
   })
