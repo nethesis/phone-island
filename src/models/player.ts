@@ -51,6 +51,14 @@ export const player = createModel<RootModel>()({
         // Pause audio
         state.audioPlayer.current.pause()
         state.audioPlayer.current.currentTime = 0
+        
+        // Reset audio output device to default to avoid affecting other sounds
+        if (typeof (state.audioPlayer.current as any).setSinkId === 'function') {
+          (state.audioPlayer.current as any).setSinkId('default').catch((err: any) => {
+            console.warn('Failed to reset audio output device to default:', err)
+          })
+        }
+        
         return {
           ...state,
           audioPlayerPlaying: false,
@@ -134,14 +142,15 @@ export const player = createModel<RootModel>()({
       }
     },
     // This function is recommended for playing audio with base64 sources
+    // Set useRingtoneOutput=true only for incoming call ringtones and previews
     updateStartAudioPlayer: async (
-      { src, loop = false }: { src: string; loop?: boolean },
+      { src, loop = false, useRingtoneOutput = false }: { src: string; loop?: boolean; useRingtoneOutput?: boolean },
       rootState,
     ) => {
       dispatch.player.setAudioPlayerLoop(loop)
 
-      // Apply ringtone output device if set
-      const ringtoneOutputDeviceId = rootState.ringtones?.outputDeviceId
+      // Apply ringtone output device ONLY when explicitly requested (incoming calls & previews)
+      const ringtoneOutputDeviceId = useRingtoneOutput ? rootState.ringtones?.outputDeviceId : null
       if (
         ringtoneOutputDeviceId &&
         rootState.player.audioPlayer?.current &&
