@@ -145,7 +145,7 @@ export const currentCall = createModel<RootModel>()({
           : undefined
         
         if (selectedRingtoneAudio) {
-          dispatch.player.updateStartAudioPlayer({ src: selectedRingtoneAudio, loop: true })
+          dispatch.player.updateStartAudioPlayer({ src: selectedRingtoneAudio, loop: true, useRingtoneOutput: true })
         }
       }
       // Update the current call values and set incoming

@@ -31,6 +31,7 @@ export const PlayerEvents: FC = () => {
           dispatch.player.setAudioPlayerType('ringtone_preview')
           dispatch.player.updateStartAudioPlayer({
             src: data.base64_audio_file,
+            useRingtoneOutput: true,
           })
           if (data.description) {
             dispatch.player.setAudioPlayerTrackName(data.description)
