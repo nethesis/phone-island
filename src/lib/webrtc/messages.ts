@@ -19,9 +19,23 @@ export function register({
   sipHost: string
   sipPort: string
 }) {
-  const { sipcall }: { sipcall: any } = store.getState().webrtc
+  const { sipcall, registered }: { sipcall: any; registered: boolean } = store.getState().webrtc
   const { name } = store.getState().currentUser
+
+  // Prevent multiple registrations if already registered
+  if (registered) {
+    console.log('[REGISTER] Already registered, skipping registration request', {
+      sipExten,
+      timestamp: new Date().toISOString()
+    })
+    return
+  }
+
   if (sipcall) {
+    console.log('[REGISTER] Sending registration request', {
+      sipExten,
+      timestamp: new Date().toISOString()
+    })
     sipcall.send({
       message: {
         request: 'register',
@@ -39,6 +53,14 @@ export function register({
 
 export function answerWebRTC() {
   const { sipcall, jsepGlobal }: { sipcall: any; jsepGlobal: any } = store.getState().webrtc
+
+  console.log('[JSEP] answerWebRTC called', {
+    hasSipcall: !!sipcall,
+    hasJsepGlobal: !!jsepGlobal,
+    sipcallId: sipcall?.getId?.(),
+    timestamp: new Date().toISOString()
+  })
+
   if (sipcall && jsepGlobal) {
     let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
     const tracks: any[] = []
