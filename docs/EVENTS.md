@@ -551,6 +551,13 @@ The event to close the audio player
 {}
 ```
 
+#### `phone-island-emergency-stop-ringtone`
+The event to force an immediate emergency stop of any playing ringtone. This is useful when the ringtone continues to play incorrectly (e.g., when the tab was frozen and a call ended).
+
+```json
+{}
+```
+
 ### Video & Screen Share Events
 
 #### `phone-island-fullscreen-enter`
@@ -1153,6 +1160,13 @@ The dispatch of pause the audio player
 
 #### `phone-island-audio-player-closed`
 The dispatch of close the audio player
+
+```json
+{}
+```
+
+#### `phone-island-emergency-stop-ringtone-completed`
+Notification that an emergency stop of the ringtone has been completed successfully
 
 ```json
 {}
