@@ -65,6 +65,34 @@ export const player = createModel<RootModel>()({
         }
       }
     },
+    emergencyStopAudioPlayer: (state) => {
+      // Emergency stop: force reset everything audio-related
+      if (state.audioPlayer && state.audioPlayer.current) {
+        try {
+          state.audioPlayer.current.pause()
+          state.audioPlayer.current.currentTime = 0
+          state.audioPlayer.current.src = ''
+          
+          // Reset audio output device to default
+          if (typeof (state.audioPlayer.current as any).setSinkId === 'function') {
+            (state.audioPlayer.current as any).setSinkId('default').catch((err: any) => {
+              console.warn('Failed to reset audio output device to default:', err)
+            })
+          }
+        } catch (err) {
+          console.error('Error in emergency stop audio player:', err)
+        }
+      }
+      
+      return {
+        ...state,
+        audioPlayerPlaying: false,
+        audioPlayerPaused: false,
+        audioPlayerLoop: false,
+        audioPlayerTrackType: null,
+        audioPlayerTrackName: null,
+      }
+    },
     pauseAudioPlayer: (state) => {
       if (state.audioPlayer && state.audioPlayer.current) {
         state.audioPlayer.current.pause()
