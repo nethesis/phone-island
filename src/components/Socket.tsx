@@ -516,6 +516,23 @@ export const Socket: FC<SocketProps> = ({
                 // Only set alert if socket is actually disconnected (avoid race condition during reconnection)
                 setTimeout(() => {
                   if (!socket.current.connected) {
+                    // Check if there's an active call with ICE still connected
+                    // If so, skip showing alert - let ICE grace period mechanism handle it
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
+                    const { accepted, outgoing } = store.getState().currentCall
+                    const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
+                    const hasActiveCallWithIce = (accepted || outgoing) && (iceState === 'connected' || iceState === 'completed')
+
+                    if (hasActiveCallWithIce) {
+                      console.debug('Socket unreachable but active call with ICE connected - skipping socket_down alert', {
+                        iceState,
+                        accepted,
+                        outgoing,
+                        timestamp: new Date().toISOString()
+                      })
+                      return
+                    }
+
                     dispatch.alerts.setAlert('socket_down')
                     eventDispatch('phone-island-socket-disconnected-popup-open', {})
                     console.error('Socket is unreachable!')
