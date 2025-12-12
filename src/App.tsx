@@ -128,10 +128,30 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       const now = Date.now()
       const timeSinceLastReload = now - lastReloadTime.current
 
+      // Check if there's an active call - if so, don't reload automatically
+      // WebRTC/ICE is designed to recover from brief network interruptions
+      const { sipcall }: { sipcall: any } = store.getState().webrtc
+      const { accepted, outgoing } = store.getState().currentCall
+      const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
+      const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
+
       // If either alert is active and we're not already reloading and cooldown has passed
       // Don't trigger reload if we're completely offline - wait for network to come back
+      // Don't trigger reload if there's an active call - let ICE try to recover
       const isOnline = navigator.onLine
       if ((isWebRTCDown || isSocketDown) && !reload && timeSinceLastReload > RELOAD_COOLDOWN && isOnline) {
+        if (hasActiveCall) {
+          console.info('Alert detected but active call in progress - skipping automatic reload to let ICE recover', {
+            timeSinceLastReload: Math.round(timeSinceLastReload / 1000) + 's',
+            isWebRTCDown,
+            isSocketDown,
+            iceState,
+            accepted,
+            outgoing
+          })
+          // Don't reload - let ICE try to recover the call
+          return
+        }
         console.info('Alert detected (webrtc_down or socket_down), triggering automatic reload', {
           timeSinceLastReload: Math.round(timeSinceLastReload / 1000) + 's',
           isWebRTCDown,
