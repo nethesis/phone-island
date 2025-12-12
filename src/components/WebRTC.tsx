@@ -1251,12 +1251,13 @@ export const WebRTC: FC<WebRTCProps> = ({
         })
 
         const { registered, jsepGlobal, sipcall }: { registered: boolean; jsepGlobal: any; sipcall: any } = store.getState().webrtc
+        const { outgoing: hasOutgoingCall } = store.getState().currentCall
 
-        // Check if there's an active call (either incoming or in progress)
+        // Check if there's an active call (either incoming, outgoing, or in progress)
         const hasIncomingCall = !!jsepGlobal
         const hasActiveCall = sipcall?.webrtcStuff?.pc?.iceConnectionState === 'connected' ||
                                sipcall?.webrtcStuff?.pc?.iceConnectionState === 'completed'
-        const hasAnyCall = hasIncomingCall || hasActiveCall
+        const hasAnyCall = hasIncomingCall || hasActiveCall || hasOutgoingCall
 
         // Check if we need to reload:
         // 1. Page was frozen (freeze event) - standby or browser froze tab, OR
@@ -1279,16 +1280,17 @@ export const WebRTC: FC<WebRTCProps> = ({
                 : 'throttled >3min'
 
           if (hasAnyCall) {
-            const callType = hasActiveCall ? 'active call' : 'incoming call'
+            const callType = hasActiveCall ? 'active call' : hasOutgoingCall ? 'outgoing call' : 'incoming call'
             console.warn(
               `[STANDBY-GUARD] Reload needed (${reloadReason}) but ${callType} in progress. ` +
-              'Call will be lost but reload is necessary to restore connectivity.',
+              'Skipping reload to preserve call.',
               {
                 wasFrozen: wasFrozen.current,
                 connectionStale: connectionStale.current,
                 wasThrottledShort,
                 wasThrottledVeryLong,
                 hasIncomingCall,
+                hasOutgoingCall,
                 hasActiveCall,
                 timestamp: new Date().toISOString()
               }
@@ -1307,12 +1309,13 @@ export const WebRTC: FC<WebRTCProps> = ({
           }
         } else if (hasAnyCall) {
           // No freeze/throttling detected and there's a call - preserve it
-          const callType = hasActiveCall ? 'active call' : 'incoming call'
+          const callType = hasActiveCall ? 'active call' : hasOutgoingCall ? 'outgoing call' : 'incoming call'
           console.log(
             `[STANDBY-GUARD] Tab change without issues, ${callType} preserved`,
             {
               timeHiddenMinutes: Math.round(timeHidden / 60000),
               hasIncomingCall,
+              hasOutgoingCall,
               hasActiveCall,
               timestamp: new Date().toISOString()
             }
@@ -1320,9 +1323,9 @@ export const WebRTC: FC<WebRTCProps> = ({
         }
 
         // Reload if page was frozen, connection is stale, or throttled too long
-        // BUT NOT if there's an incoming call (preserve jsepGlobal to allow answering)
+        // BUT NOT if there's an incoming or outgoing call (preserve call state)
         // Also don't reload if another init is already in progress
-        const shouldReload = registered && !isReloading.current && !isInitializing.current && needsReload && !hasIncomingCall
+        const shouldReload = registered && !isReloading.current && !isInitializing.current && needsReload && !hasIncomingCall && !hasOutgoingCall
 
         if (shouldReload) {
           console.warn(
@@ -1342,11 +1345,11 @@ export const WebRTC: FC<WebRTCProps> = ({
           }
 
           // Clear existing session
-          const { janusInstance, sipcall } = store.getState().webrtc
+          const { janusInstance, sipcall: sipcallToDestroy }: { janusInstance: any; sipcall: any } = store.getState().webrtc
           // Unregister the WebRTC extension
           unregister()
           // Detach sipcall handle
-          if (sipcall) sipcall.detach()
+          if (sipcallToDestroy) sipcallToDestroy.detach()
           // Destroy Janus session
           if (janusInstance && janusInstance.destroy) {
             janusInstance.destroy({
