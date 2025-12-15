@@ -483,7 +483,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
       // Phone-island is not active (view is null), force stop ringtone
       store.dispatch.player.emergencyStopAudioPlayer()
-      eventDispatch('phone-island-emergency-stop-ringtone-completed', {})
+      store.dispatch.island.toggleAvoidToShow(true)
+      setTimeout(() => {
+        store.dispatch.island.toggleAvoidToShow(false)
+        eventDispatch('phone-island-emergency-stop-ringtone-completed', {})
+      }, 100)
     })
 
     useEventListener('phone-island-detach', (data) => {

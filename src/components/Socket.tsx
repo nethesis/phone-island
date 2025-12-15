@@ -566,7 +566,7 @@ export const Socket: FC<SocketProps> = ({
 
       socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
         // Update endpoints store
-        store.dispatch.users.updateEndpointMainPresence({ ...res.mainPresence })
+        store.dispatch.users.updateEndpointMainPresence({ ...res?.mainPresence })
         // Dispatch dispatchMainPresence Event
         dispatchMainPresence(res)
       })
