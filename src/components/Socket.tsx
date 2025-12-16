@@ -64,6 +64,8 @@ export const Socket: FC<SocketProps> = ({
   const connectionCheckInterval = useRef<any>()
   const socket = useRef<any>()
   const isUpdatingUserInfo = useRef(false)
+  const consecutivePingTimeouts = useRef(0)
+  const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
   // get user information
   const userInformation = useSelector((state: RootState) => state.currentUser)
@@ -461,6 +463,8 @@ export const Socket: FC<SocketProps> = ({
         console.debug(`Socket connect_error: `, err)
       })
       socket.current.io.on('reconnect', (attempt) => {
+        // Reset consecutive ping timeout counter on successful reconnection
+        consecutivePingTimeouts.current = 0
         eventDispatch('phone-island-socket-reconnected', {})
         console.debug(`Socket reconnect attemp ${attempt} (sid: ${socket.current.id})`)
       })
@@ -502,6 +506,8 @@ export const Socket: FC<SocketProps> = ({
             'ping',
             withTimeout(
               () => {
+                // Ping success - reset consecutive timeout counter
+                consecutivePingTimeouts.current = 0
                 // Remove socket_down alert (async to avoid React error #300 with framer-motion)
                 setTimeout(() => {
                   dispatch.alerts.removeAlert('socket_down')
@@ -512,10 +518,16 @@ export const Socket: FC<SocketProps> = ({
                 }, 0)
               },
               () => {
+                // Ping timeout - increment counter
+                consecutivePingTimeouts.current++
+                console.debug(`Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`)
+
                 // Set socket_down alert (async to avoid React error #300 with framer-motion)
-                // Only set alert if socket is actually disconnected (avoid race condition during reconnection)
                 setTimeout(() => {
-                  if (!socket.current.connected) {
+                  // Check for stale connection: socket reports connected but pings keep timing out
+                  const isStaleConnection = socket.current.connected && consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
+
+                  if (!socket.current.connected || isStaleConnection) {
                     // Check if there's an active call with ICE still connected
                     // If so, skip showing alert - let ICE grace period mechanism handle it
                     const { sipcall }: { sipcall: any } = store.getState().webrtc
@@ -528,16 +540,21 @@ export const Socket: FC<SocketProps> = ({
                         iceState,
                         accepted,
                         outgoing,
+                        isStaleConnection,
                         timestamp: new Date().toISOString()
                       })
                       return
                     }
 
+                    if (isStaleConnection) {
+                      console.warn('Stale socket connection detected - forcing reconnection')
+                      // Force disconnect to trigger reconnection
+                      socket.current.disconnect()
+                    }
+
                     dispatch.alerts.setAlert('socket_down')
                     eventDispatch('phone-island-socket-disconnected-popup-open', {})
                     console.error('Socket is unreachable!')
-                  } else {
-                    console.debug('Socket ping timeout but socket is connected, skipping alert')
                   }
                 }, 0)
               },
