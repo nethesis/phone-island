@@ -83,6 +83,10 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       if (!document.hidden) {
         const now = Date.now()
         const timeSinceLastActive = now - lastActiveTime
+        // Trigger emergency stop ringtone after 2 seconds when tab becomes active again
+        setTimeout(() => {
+            eventDispatch('phone-island-emergency-stop-ringtone', {})
+          }, 2000)
 
         // Only reload if tab was hidden for more than threshold
         if (timeSinceLastActive > INACTIVITY_THRESHOLD) {
@@ -189,6 +193,21 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   useEventListener('phone-island-audio-player-close', () => {
     store.dispatch.island.setIslandView(null)
     eventDispatch('phone-island-audio-player-closed', {})
+  })
+
+  useEventListener('phone-island-emergency-stop-ringtone', () => {
+    const { view } = store.getState().island
+    
+    // If phone-island is active (view is not null), don't stop the ringtone
+    if (view !== null) {
+      console.log('Phone island is active, ringtone stop ignored')
+      return
+    }
+    
+    // Phone-island is not active (view is null), force stop ringtone
+    console.warn('Emergency stop ringtone triggered - phone island inactive')
+    store.dispatch.player.emergencyStopAudioPlayer()
+    eventDispatch('phone-island-emergency-stop-ringtone-completed', {})
   })
 
   useEventListener('phone-island-detach', (data) => {

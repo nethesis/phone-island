@@ -58,8 +58,8 @@ const CallTemplate = (args: any) => {
   const filterUsableAudioOutputs = (devices: MediaDeviceInfo[]) => {
     return devices.filter((device) => {
       const label = device.label.toLowerCase()
-      const isVirtualOutput = 
-        label.includes('hdmi') || 
+      const isVirtualOutput =
+        label.includes('hdmi') ||
         label.includes('displayport') ||
         (label.includes('display') && !label.includes('speaker'))
       return !isVirtualOutput
@@ -306,11 +306,11 @@ const CallTemplate = (args: any) => {
   useEffect(() => {
     if (ringtoneOutputDevice && audioOutputs.length > 0) {
       const deviceStillExists = audioOutputs.some(
-        (device) => device.deviceId === ringtoneOutputDevice
+        (device) => device.deviceId === ringtoneOutputDevice,
       )
       if (!deviceStillExists) {
         console.warn(
-          `Ringtone output device ${ringtoneOutputDevice} no longer available, falling back to default`
+          `Ringtone output device ${ringtoneOutputDevice} no longer available, falling back to default`,
         )
         const defaultDevice = audioOutputs.find((d) => d.deviceId === 'default') || audioOutputs[0]
         if (defaultDevice) {
@@ -318,7 +318,7 @@ const CallTemplate = (args: any) => {
           setRingtoneOutputDevice(newDeviceId)
           localStorage.setItem(
             'phone-island-ringtone-output-device',
-            JSON.stringify({ value: newDeviceId })
+            JSON.stringify({ value: newDeviceId }),
           )
           eventDispatch('phone-island-ringing-tone-output', { deviceId: newDeviceId })
           setShowToast(true)
@@ -363,7 +363,11 @@ const CallTemplate = (args: any) => {
     setRingtoneOutputDevice(deviceId)
     eventDispatch('phone-island-ringing-tone-output', { deviceId })
     setShowToast(true)
-    setToastMessage(`Ringtone output changed to: ${audioOutputs.find(d => d.deviceId === deviceId)?.label || deviceId}`)
+    setToastMessage(
+      `Ringtone output changed to: ${
+        audioOutputs.find((d) => d.deviceId === deviceId)?.label || deviceId
+      }`,
+    )
   }
 
   // Play ringtone preview
@@ -615,103 +619,6 @@ const CallTemplate = (args: any) => {
             </div>
           </div>
 
-          {/* Ringtone Management Section */}
-          <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
-            <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>
-              Ringtone Management
-            </h3>
-            <div className='pi-mb-3 pi-p-3 pi-bg-blue-50 pi-rounded-lg pi-border pi-border-blue-200'>
-              <p className='pi-text-sm pi-font-medium pi-text-blue-900'>
-                Current Ringtone:{' '}
-                <span className='pi-font-bold'>
-                  {availableRingtones.find((r) => r.name === selectedRingtone)?.displayName ||
-                    selectedRingtone}
-                </span>
-              </p>
-            </div>
-            <div className='pi-space-y-2'>
-              {availableRingtones.length > 0 ? (
-                availableRingtones.map((ringtone) => (
-                  <div key={ringtone.name} className='pi-flex pi-gap-2 pi-items-center'>
-                    <button
-                      onClick={() => handleRingtoneSelect(ringtone.name)}
-                      className={`pi-flex-1 pi-px-4 pi-py-3 pi-rounded-lg pi-border-2 pi-transition-all pi-text-left pi-flex pi-items-center pi-justify-between ${
-                        selectedRingtone === ringtone.name
-                          ? 'pi-border-emerald-500 pi-bg-emerald-50 pi-text-emerald-900'
-                          : 'pi-border-gray-200 pi-bg-white pi-text-gray-700 hover:pi-border-emerald-300 hover:pi-bg-emerald-50'
-                      }`}
-                    >
-                      <span className='pi-font-medium'>{ringtone.displayName}</span>
-                      {selectedRingtone === ringtone.name && (
-                        <svg
-                          className='pi-w-5 pi-h-5 pi-text-emerald-600'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M5 13l4 4L19 7'
-                          />
-                        </svg>
-                      )}
-                    </button>
-                    <button
-                      onClick={() =>
-                        playingRingtone === ringtone.name
-                          ? stopRingtonePreview()
-                          : playRingtonePreview(ringtone)
-                      }
-                      className={`pi-px-4 pi-py-3 pi-rounded-lg pi-border-2 pi-transition-all pi-flex pi-items-center pi-gap-2 ${
-                        playingRingtone === ringtone.name
-                          ? 'pi-border-red-500 pi-bg-red-500 pi-text-white hover:pi-bg-red-600'
-                          : 'pi-border-blue-500 pi-bg-blue-500 pi-text-white hover:pi-bg-blue-600'
-                      }`}
-                      title={playingRingtone === ringtone.name ? 'Stop preview' : 'Play preview'}
-                    >
-                      <FontAwesomeIcon
-                        icon={playingRingtone === ringtone.name ? faStop : faPlay}
-                        className='pi-w-4 pi-h-4'
-                      />
-                      <span className='pi-font-medium'>
-                        {playingRingtone === ringtone.name ? 'Stop' : 'Play'}
-                      </span>
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className='pi-text-sm pi-text-gray-500 pi-text-center pi-py-4'>
-                  Loading ringtones...
-                </p>
-              )}
-            </div>
-            
-            {/* Ringtone Output Device Selection */}
-            <div className='pi-mt-4'>
-              <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700 pi-mb-2'>
-                Ringtone Output Device
-              </label>
-              <select
-                value={ringtoneOutputDevice}
-                className='pi-w-full pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white'
-                onChange={(e) => handleRingtoneOutputChange(e.target.value)}
-              >
-                <option value=''>Default Audio Output</option>
-                {audioOutputs.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className='pi-mt-3 pi-text-xs pi-text-gray-500'>
-              <p>💡 Select a ringtone to use for incoming calls</p>
-            </div>
-          </div>
-
           {/* Call Controls */}
           <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
             <h3 className='pi-text-lg pi-font-semibold pi-mb-4 pi-text-gray-800'>Call check</h3>
@@ -750,6 +657,118 @@ const CallTemplate = (args: any) => {
                   className='pi-w-5 pi-h-5'
                 />
               </Button>
+            </div>
+
+            {/* Emergency Stop Ringtone Button */}
+            <div className='pi-mt-4'>
+              <Button
+                variant='red'
+                onClick={() => {
+                  eventDispatch('phone-island-emergency-stop-ringtone', {})
+                  setShowToast(true)
+                  setToastMessage('Emergency stop ringtone triggered!')
+                }}
+                className='pi-w-full pi-text-sm'
+              >
+                🚨 Emergency Stop Ringtone
+              </Button>
+            </div>
+
+            {/* Ringtone Management Section */}
+            <div className='pi-bg-white pi-rounded-lg pi-shadow pi-p-4'>
+              <h3 className='pi-text-lg pi-font-semibold pi-mb-3 pi-text-gray-800'>
+                Ringtone Management
+              </h3>
+              <div className='pi-mb-3 pi-p-3 pi-bg-blue-50 pi-rounded-lg pi-border pi-border-blue-200'>
+                <p className='pi-text-sm pi-font-medium pi-text-blue-900'>
+                  Current Ringtone:{' '}
+                  <span className='pi-font-bold'>
+                    {availableRingtones.find((r) => r.name === selectedRingtone)?.displayName ||
+                      selectedRingtone}
+                  </span>
+                </p>
+              </div>
+              <div className='pi-space-y-2'>
+                {availableRingtones.length > 0 ? (
+                  availableRingtones.map((ringtone) => (
+                    <div key={ringtone.name} className='pi-flex pi-gap-2 pi-items-center'>
+                      <button
+                        onClick={() => handleRingtoneSelect(ringtone.name)}
+                        className={`pi-flex-1 pi-px-4 pi-py-3 pi-rounded-lg pi-border-2 pi-transition-all pi-text-left pi-flex pi-items-center pi-justify-between ${
+                          selectedRingtone === ringtone.name
+                            ? 'pi-border-emerald-500 pi-bg-emerald-50 pi-text-emerald-900'
+                            : 'pi-border-gray-200 pi-bg-white pi-text-gray-700 hover:pi-border-emerald-300 hover:pi-bg-emerald-50'
+                        }`}
+                      >
+                        <span className='pi-font-medium'>{ringtone.displayName}</span>
+                        {selectedRingtone === ringtone.name && (
+                          <svg
+                            className='pi-w-5 pi-h-5 pi-text-emerald-600'
+                            fill='none'
+                            stroke='currentColor'
+                            viewBox='0 0 24 24'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={2}
+                              d='M5 13l4 4L19 7'
+                            />
+                          </svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={() =>
+                          playingRingtone === ringtone.name
+                            ? stopRingtonePreview()
+                            : playRingtonePreview(ringtone)
+                        }
+                        className={`pi-px-4 pi-py-3 pi-rounded-lg pi-border-2 pi-transition-all pi-flex pi-items-center pi-gap-2 ${
+                          playingRingtone === ringtone.name
+                            ? 'pi-border-red-500 pi-bg-red-500 pi-text-white hover:pi-bg-red-600'
+                            : 'pi-border-blue-500 pi-bg-blue-500 pi-text-white hover:pi-bg-blue-600'
+                        }`}
+                        title={playingRingtone === ringtone.name ? 'Stop preview' : 'Play preview'}
+                      >
+                        <FontAwesomeIcon
+                          icon={playingRingtone === ringtone.name ? faStop : faPlay}
+                          className='pi-w-4 pi-h-4'
+                        />
+                        <span className='pi-font-medium'>
+                          {playingRingtone === ringtone.name ? 'Stop' : 'Play'}
+                        </span>
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className='pi-text-sm pi-text-gray-500 pi-text-center pi-py-4'>
+                    Loading ringtones...
+                  </p>
+                )}
+              </div>
+
+              {/* Ringtone Output Device Selection */}
+              <div className='pi-mt-4'>
+                <label className='pi-block pi-text-sm pi-font-medium pi-text-gray-700 pi-mb-2'>
+                  Ringtone Output Device
+                </label>
+                <select
+                  value={ringtoneOutputDevice}
+                  className='pi-w-full pi-px-4 pi-py-2 pi-border pi-border-gray-300 pi-rounded-lg focus:pi-ring-2 focus:pi-ring-emerald-500 pi-bg-white'
+                  onChange={(e) => handleRingtoneOutputChange(e.target.value)}
+                >
+                  <option value=''>Default Audio Output</option>
+                  {audioOutputs.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Speaker ${device.deviceId.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className='pi-mt-3 pi-text-xs pi-text-gray-500'>
+                <p>💡 Select a ringtone to use for incoming calls</p>
+              </div>
             </div>
 
             {/* DTMF Keypad */}
