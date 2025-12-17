@@ -64,6 +64,8 @@ export const Socket: FC<SocketProps> = ({
   const connectionCheckInterval = useRef<any>()
   const socket = useRef<any>()
   const isUpdatingUserInfo = useRef(false)
+  const consecutivePingTimeouts = useRef(0)
+  const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
   // get user information
   const userInformation = useSelector((state: RootState) => state.currentUser)
@@ -443,6 +445,11 @@ export const Socket: FC<SocketProps> = ({
       })
       socket.current.on('disconnect', (reason) => {
         console.debug(`Socket disconnect - reason: ${reason}`)
+        // Clear the connection check interval on disconnect to avoid stale pings
+        if (connectionCheckInterval.current) {
+          clearInterval(connectionCheckInterval.current)
+          connectionCheckInterval.current = null
+        }
         if (reason.includes('server disconnect')) {
           eventDispatch('phone-island-server-disconnected', {})
         } else {
@@ -456,6 +463,8 @@ export const Socket: FC<SocketProps> = ({
         console.debug(`Socket connect_error: `, err)
       })
       socket.current.io.on('reconnect', (attempt) => {
+        // Reset consecutive ping timeout counter on successful reconnection
+        consecutivePingTimeouts.current = 0
         eventDispatch('phone-island-socket-reconnected', {})
         console.debug(`Socket reconnect attemp ${attempt} (sid: ${socket.current.id})`)
       })
@@ -469,30 +478,8 @@ export const Socket: FC<SocketProps> = ({
         console.debug(`Socket reconnect_failed`)
       })
 
-      // Checks if socket is reachable every 5 seconds
-      connectionCheckInterval.current = setInterval(() => {
-        const start = Date.now()
-        socket.current.volatile.emit(
-          'ping',
-          withTimeout(
-            () => {
-              // Remove socket_down alert
-              dispatch.alerts.removeAlert('socket_down')
-              eventDispatch('phone-island-alert-removed', {
-                type: 'socket_down',
-              })
-              eventDispatch('phone-island-socket-disconnected-popup-close', {})
-            },
-            () => {
-              // Set socket_down alert
-              dispatch.alerts.setAlert('socket_down')
-              eventDispatch('phone-island-socket-disconnected-popup-open', {})
-              console.error('Socket is unreachable!')
-            },
-            5 * 1000, // Waits for the response 7 seconds
-          ),
-        )
-      }, 5 * 1000) // Executes a new check every 7 seconds
+      // Connection check interval is now started in the authe_ok handler
+      // to ensure it only runs after successful authentication
 
       // Handle connection message
       socket.current.on('connect', () => {
@@ -508,6 +495,73 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('authe_ok', () => {
         console.debug('Socket authentication success!')
         eventDispatch('phone-island-socket-authorized', {})
+
+        // Start connection check interval after successful authentication
+        // Clear any existing interval first to avoid duplicates
+        if (connectionCheckInterval.current) {
+          clearInterval(connectionCheckInterval.current)
+        }
+        connectionCheckInterval.current = setInterval(() => {
+          socket.current.volatile.emit(
+            'ping',
+            withTimeout(
+              () => {
+                // Ping success - reset consecutive timeout counter
+                consecutivePingTimeouts.current = 0
+                // Remove socket_down alert (async to avoid React error #300 with framer-motion)
+                setTimeout(() => {
+                  dispatch.alerts.removeAlert('socket_down')
+                  eventDispatch('phone-island-alert-removed', {
+                    type: 'socket_down',
+                  })
+                  eventDispatch('phone-island-socket-disconnected-popup-close', {})
+                }, 0)
+              },
+              () => {
+                // Ping timeout - increment counter
+                consecutivePingTimeouts.current++
+                console.debug(`Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`)
+
+                // Set socket_down alert (async to avoid React error #300 with framer-motion)
+                setTimeout(() => {
+                  // Check for stale connection: socket reports connected but pings keep timing out
+                  const isStaleConnection = socket.current.connected && consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
+
+                  if (!socket.current.connected || isStaleConnection) {
+                    // Check if there's an active call with ICE still connected
+                    // If so, skip showing alert - let ICE grace period mechanism handle it
+                    const { sipcall }: { sipcall: any } = store.getState().webrtc
+                    const { accepted, outgoing } = store.getState().currentCall
+                    const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
+                    const hasActiveCallWithIce = (accepted || outgoing) && (iceState === 'connected' || iceState === 'completed')
+
+                    if (hasActiveCallWithIce) {
+                      console.debug('Socket unreachable but active call with ICE connected - skipping socket_down alert', {
+                        iceState,
+                        accepted,
+                        outgoing,
+                        isStaleConnection,
+                        timestamp: new Date().toISOString()
+                      })
+                      return
+                    }
+
+                    if (isStaleConnection) {
+                      console.warn('Stale socket connection detected - forcing reconnection')
+                      // Force disconnect to trigger reconnection
+                      socket.current.disconnect()
+                    }
+
+                    dispatch.alerts.setAlert('socket_down')
+                    eventDispatch('phone-island-socket-disconnected-popup-open', {})
+                    console.error('Socket is unreachable!')
+                  }
+                }, 0)
+              },
+              5 * 1000,
+            ),
+          )
+        }, 5 * 1000)
       })
 
       socket.current.on('userMainPresenceUpdate', (res: MainPresenceTypes) => {
@@ -978,6 +1032,11 @@ export const Socket: FC<SocketProps> = ({
         // Reset force reload flag
         if (forceReload) {
           store.dispatch.island.setForceReload(false)
+        }
+        // Clear the connection check interval to avoid stale ping timeouts during reconnection
+        if (connectionCheckInterval.current) {
+          clearInterval(connectionCheckInterval.current)
+          connectionCheckInterval.current = null
         }
         // Disconnect and reconnect socket
         setTimeout(() => {

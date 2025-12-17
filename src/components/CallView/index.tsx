@@ -46,6 +46,7 @@ Details.displayName = 'Details'
  */
 const CallView: FC<CallViewProps> = () => {
   const { t } = useTranslation()
+  const dispatch = useDispatch<Dispatch>()
 
   const currentCall = useSelector((state: RootState) => state.currentCall)
   const {
@@ -311,21 +312,6 @@ const CallView: FC<CallViewProps> = () => {
     return null
   }, [accepted, isRecording, remoteAudioStream, isOpen, paused, renderPulseIcon])
 
-  if (latestAlert !== null) {
-    return null
-  }
-
-  // Initialize useDispatch
-  const dispatch = useDispatch<Dispatch>()
-
-  const setVideoStreamingAnswer = () => {
-    answerIncomingCall()
-    // Set view as video streaming answer with a small delay
-    setTimeout(() => {
-      dispatch.island.setIslandView('streamingAnswer')
-    }, 200)
-  }
-
   const renderStreamingContent = useCallback(() => {
     // Show skeleton while videoSources are loading or if streaming source number is not set yet
     if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
@@ -353,6 +339,19 @@ const CallView: FC<CallViewProps> = () => {
     // If we have an image, show StreamingImage component
     return <StreamingImage />
   }, [streamingSourceNumber, videoSources, sourceImages])
+
+  // Early return AFTER all hooks have been called
+  if (latestAlert !== null) {
+    return null
+  }
+
+  const setVideoStreamingAnswer = () => {
+    answerIncomingCall()
+    // Set view as video streaming answer with a small delay
+    setTimeout(() => {
+      dispatch.island.setIslandView('streamingAnswer')
+    }, 200)
+  }
 
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
