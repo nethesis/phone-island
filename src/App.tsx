@@ -878,15 +878,58 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       return
     }
 
-    const { featureCodes } = store.getState().currentUser
-    const audioTestCode = featureCodes?.audio_test
-    if (audioTestCode) {
-      console.log('[AUDIO-WARMUP] Starting audio warm-up test call', {
-        audioTestCode,
-        timestamp: new Date().toISOString()
-      })
-      callNumber(audioTestCode, SIP_HOST)
+    // Function to attempt the warmup call with retry mechanism
+    const attemptWarmupCall = (attempt: number, maxAttempts: number) => {
+      // Re-check for active call before each attempt (call might have started during retry)
+      const currentCallState = store.getState().currentCall
+      const hasActiveCallNow = currentCallState.accepted || currentCallState.incoming ||
+                               currentCallState.outgoing || currentCallState.incomingWebRTC ||
+                               currentCallState.incomingSocket
+
+      if (hasActiveCallNow) {
+        console.log('[AUDIO-WARMUP] Aborting warmup retry: active call detected', {
+          attempt,
+          timestamp: new Date().toISOString()
+        })
+        return
+      }
+
+      const { featureCodes } = store.getState().currentUser
+      const audioTestCode = featureCodes?.audio_test
+
+      // Validate that audioTestCode exists and is a valid string
+      if (audioTestCode && typeof audioTestCode === 'string' && audioTestCode.length > 0) {
+        console.log('[AUDIO-WARMUP] Starting audio warm-up test call', {
+          audioTestCode,
+          attempt,
+          timestamp: new Date().toISOString()
+        })
+        callNumber(audioTestCode, SIP_HOST)
+        return
+      }
+
+      // If featureCodes not ready, retry after a delay
+      if (attempt < maxAttempts) {
+        console.log('[AUDIO-WARMUP] Feature codes not ready, retrying...', {
+          attempt,
+          maxAttempts,
+          featureCodesLoaded: !!featureCodes,
+          audioTestCode,
+          timestamp: new Date().toISOString()
+        })
+        setTimeout(() => attemptWarmupCall(attempt + 1, maxAttempts), 500)
+      } else {
+        console.warn('[AUDIO-WARMUP] Failed to start audio warm-up: feature codes not available after max attempts', {
+          maxAttempts,
+          featureCodesLoaded: !!featureCodes,
+          audioTestCode,
+          timestamp: new Date().toISOString()
+        })
+      }
     }
+
+    // Start first attempt - max 10 attempts, 500ms each = 5 seconds total wait time
+    attemptWarmupCall(1, 10)
   })
 
   useEventListener('phone-island-transcription-toggle', () => {
