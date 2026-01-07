@@ -250,6 +250,19 @@ export const WebRTC: FC<WebRTCProps> = ({
                     janus.current.log(
                       'Janus says our WebRTC PeerConnection is ' + (on ? 'up' : 'down') + ' now',
                     )
+
+                  // Fix: Ensure view is set to 'call' when WebRTC is up but view is null
+                  // This can happen after standby when socket events are missed
+                  if (on) {
+                    const { view } = store.getState().island
+                    const { accepted, outgoing, incoming } = store.getState().currentCall
+                    const hasActiveCall = accepted || outgoing || incoming
+
+                    if (hasActiveCall && !view) {
+                      console.warn('[WEBRTC] WebRTC up but view is null with active call - forcing view to "call"')
+                      store.dispatch.island.setIslandView('call')
+                    }
+                  }
                 },
                 iceState: function (newState) {
                   const { sipcall }: { sipcall: any } = store.getState().webrtc
@@ -259,6 +272,19 @@ export const WebRTC: FC<WebRTCProps> = ({
                       janus.current.log(
                         `ICE state of PeerConnection of handle has changed to "${newState}"`,
                       )
+                  }
+
+                  // Fix: Ensure view is set to 'call' when ICE is connected but view is null
+                  // This can happen after standby when socket events are missed
+                  if (newState === 'connected' || newState === 'completed') {
+                    const { view } = store.getState().island
+                    const { accepted, outgoing, incoming } = store.getState().currentCall
+                    const hasActiveCall = accepted || outgoing || incoming
+
+                    if (hasActiveCall && !view) {
+                      console.warn('[WEBRTC] ICE connected but view is null with active call - forcing view to "call"')
+                      store.dispatch.island.setIslandView('call')
+                    }
                   }
                 },
                 mediaState: function (medium, on) {
