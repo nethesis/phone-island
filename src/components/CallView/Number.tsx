@@ -12,9 +12,12 @@ const Number: FC = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { t } = useTranslation()
 
+  const displayNumber =
+    number === 'unknown' ? t('TextScroll.unknown') : number || t('Call.In progress...') || '-'
+
   return (
     <StyledNumber isOpen={isOpen} className='dark:pi-text-gray-50 pi-text-gray-600'>
-      {number && number !== '<unknown>' ? number : t('Call.In progress...') || '-'}
+      {displayNumber}
     </StyledNumber>
   )
 }
