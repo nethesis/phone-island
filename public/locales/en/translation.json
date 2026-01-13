@@ -157,5 +157,8 @@
     "Gentle": "Gentle",
     "Play preview": "Play preview",
     "Stop preview": "Stop preview"
+  },
+  "TextScroll": {
+    "unknown": "Unknown"
   }
 }
