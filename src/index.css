@@ -4,28 +4,82 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import url('https://rsms.me/inter/inter.css');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+:root {
+  --color-primary-neutral: #111827;
+  --color-primary-neutral-dark: #f9fafb;
+  --color-primary-invert: #f9fafb;
+  --color-primary-invert-dark: #111827;
+  --color-secondary-neutral: #374151;
+  --color-secondary-neutral-dark: #e5e7eb;
+  --color-tertiary-neutral: #4b5563;
+  --color-tertiary-neutral-dark: #d1d5db;
+  --color-surface-background: #f9fafb;
+  --color-surface-background-dark: #030712;
+  --color-surface-sidebar: #374151;
+  --color-surface-sidebar-dark: #374151;
+  --color-surface-sidebar-hover: #4b5563;
+  --color-surface-sidebar-hover-dark: #4b5563;
+  --color-elevation-l2: #f3f4f6;
+  --color-elevation-l2-dark: #1f2937;
+  --color-phone-island-active: #374151;
+  --color-phone-island-active-dark: #d1d5db;
+  --color-phone-island-hover: #1f2937;
+  --color-phone-island-hover-dark: #f9fafb;
+  --color-phone-island-call: #15803d;
+  --color-phone-island-call-dark: #22c55e;
+  --color-phone-island-call-hover: #166534;
+  --color-phone-island-call-hover-dark: #86efac;
+  --color-phone-island-close: #b91c1c;
+  --color-phone-island-close-dark: #ef4444;
+  --color-phone-island-close-hover: #991b1b;
+  --color-phone-island-close-hover-dark: #fca5a5;
+  --color-icon-white: #ffffff;
+  --color-icon-white-dark: #ffffff;
+  --color-icon-primary-neutral: #111827;
+  --color-icon-primary-neutral-dark: #f9fafb;
+  --color-icon-primary-invert: #f9fafb;
+  --color-icon-primary-invert-dark: #111827;
+  --font-sans: 'Inter', 'system-ui', 'sans-serif';
+}
 
 @layer base {
   html {
     font-family: 'Poppins', system-ui, sans-serif;
   }
   button {
-    @apply pi-cursor-pointer;
+    cursor: pointer;
     touch-action: manipulation;
   }
-  button[data-stop-propagation="true"] {
+  button[data-stop-propagation='true'] {
     touch-action: auto;
   }
   .pi-phone-island-container *,
   .pi-phone-island-container ::before,
   .pi-phone-island-container ::after {
-    @apply pi-box-border pi-border-0 pi-border-solid pi-border-gray-800;
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: rgb(31 41 55);
   }
   .pi-custom-scrollbar {
-    @apply pi-scrollbar-thin pi-scrollbar-thumb-gray-500 pi-scrollbar-track-black pi-scrollbar-thumb-rounded-full pi-scrollbar-track-rounded-full hover:pi-scrollbar-thumb-gray-400;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(107 114 128) rgb(0 0 0);
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar-track {
+    background: rgb(0 0 0);
+    border-radius: 9999px;
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(107 114 128);
+    border-radius: 9999px;
+  }
+  .pi-custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175);
   }
 }
 
