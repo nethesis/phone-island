@@ -49,7 +49,7 @@
     font-family: 'Poppins', system-ui, sans-serif;
   }
   button {
-    @apply pi-cursor-pointer;
+    cursor: pointer;
     touch-action: manipulation;
   }
   button[data-stop-propagation='true'] {
@@ -58,10 +58,28 @@
   .pi-phone-island-container *,
   .pi-phone-island-container ::before,
   .pi-phone-island-container ::after {
-    @apply pi-box-border pi-border-0 pi-border-solid pi-border-gray-800;
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: rgb(31 41 55);
   }
   .pi-custom-scrollbar {
-    @apply pi-scrollbar-thin pi-scrollbar-thumb-gray-500 pi-scrollbar-track-black pi-scrollbar-thumb-rounded-full pi-scrollbar-track-rounded-full hover:pi-scrollbar-thumb-gray-400;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(107 114 128) rgb(0 0 0);
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar-track {
+    background: rgb(0 0 0);
+    border-radius: 9999px;
+  }
+  .pi-custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgb(107 114 128);
+    border-radius: 9999px;
+  }
+  .pi-custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175);
   }
 }
 
