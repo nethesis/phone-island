@@ -4,45 +4,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import url('https://rsms.me/inter/inter.css');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 :root {
   --color-primary-neutral: #111827;
-  --color-primary-neutral-dark: #F9FAFB;
-  --color-primary-invert: #F9FAFB;
+  --color-primary-neutral-dark: #f9fafb;
+  --color-primary-invert: #f9fafb;
   --color-primary-invert-dark: #111827;
   --color-secondary-neutral: #374151;
-  --color-secondary-neutral-dark: #E5E7EB;
+  --color-secondary-neutral-dark: #e5e7eb;
   --color-tertiary-neutral: #4b5563;
-  --color-tertiary-neutral-dark: #D1D5DB;
-  --color-surface-background: #F9FAFB;
+  --color-tertiary-neutral-dark: #d1d5db;
+  --color-surface-background: #f9fafb;
   --color-surface-background-dark: #030712;
   --color-surface-sidebar: #374151;
   --color-surface-sidebar-dark: #374151;
-  --color-surface-sidebar-hover: #4B5563;
-  --color-surface-sidebar-hover-dark: #4B5563;
-  --color-elevation-l2: #F3F4F6;
-  --color-elevation-l2-dark: #1F2937;
+  --color-surface-sidebar-hover: #4b5563;
+  --color-surface-sidebar-hover-dark: #4b5563;
+  --color-elevation-l2: #f3f4f6;
+  --color-elevation-l2-dark: #1f2937;
   --color-phone-island-active: #374151;
-  --color-phone-island-active-dark: #D1D5DB;
-  --color-phone-island-hover: #1F2937;
-  --color-phone-island-hover-dark: #F9FAFB;
-  --color-phone-island-call: #15803D;
-  --color-phone-island-call-dark: #22C55E;
+  --color-phone-island-active-dark: #d1d5db;
+  --color-phone-island-hover: #1f2937;
+  --color-phone-island-hover-dark: #f9fafb;
+  --color-phone-island-call: #15803d;
+  --color-phone-island-call-dark: #22c55e;
   --color-phone-island-call-hover: #166534;
-  --color-phone-island-call-hover-dark: #86EFAC;
-  --color-phone-island-close: #B91C1C;
-  --color-phone-island-close-dark: #EF4444;
-  --color-phone-island-close-hover: #991B1B;
-  --color-phone-island-close-hover-dark: #FCA5A5;
-  --color-icon-white: #FFFFFF;
-  --color-icon-white-dark: #FFFFFF;
+  --color-phone-island-call-hover-dark: #86efac;
+  --color-phone-island-close: #b91c1c;
+  --color-phone-island-close-dark: #ef4444;
+  --color-phone-island-close-hover: #991b1b;
+  --color-phone-island-close-hover-dark: #fca5a5;
+  --color-icon-white: #ffffff;
+  --color-icon-white-dark: #ffffff;
   --color-icon-primary-neutral: #111827;
-  --color-icon-primary-neutral-dark: #F9FAFB;
-  --color-icon-primary-invert: #F9FAFB;
+  --color-icon-primary-neutral-dark: #f9fafb;
+  --color-icon-primary-invert: #f9fafb;
   --color-icon-primary-invert-dark: #111827;
+  --font-sans: 'Inter', 'system-ui', 'sans-serif';
 }
 
 @layer base {
@@ -53,7 +52,7 @@
     @apply pi-cursor-pointer;
     touch-action: manipulation;
   }
-  button[data-stop-propagation="true"] {
+  button[data-stop-propagation='true'] {
     touch-action: auto;
   }
   .pi-phone-island-container *,
