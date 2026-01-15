@@ -40,77 +40,50 @@ module.exports = {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
-        //text
-        primaryNeutral: '#111827', // gray-900
-        primaryNeutralDark: '#F9FAFB', // gray-50
-
-        primaryInvert: '#F9FAFB', // gray-50
-        primaryInvertDark: '#111827', // gray-900
-
-        //secondary
-        secondaryNeutral: '#374151', // gray-700
-        secondaryNeutralDark: '#E5E7EB', // gray-200
-
-        //tertiary
-        tertiaryNeutral: '#4b5563', // gray-600
-        tertiaryNeutralDark: '#D1D5DB', // gray-300
-
-        //surface
-
-        //surfaceBackground
-        surfaceBackground: '#F9FAFB', // gray-50
-        surfaceBackgroundDark: '#030712', // gray-950
-
-        //surfaceSidebar
-        surfaceSidebar: '#374151', // gray-700
-        surfaceSidebarDark: '#374151', // gray-700
-
-        //surfaceSidebarHover
-        surfaceSidebarHover: '#4B5563', // gray-600
-        surfaceSidebarHoverDark: '#4B5563', // gray-600
-
-        //elavation
-        elevationL2: '#F3F4F6', //gray-100
-        elevationL2Dark: '#1F2937', // gray-800
-        //button
-
-        // Active state
-        phoneIslandActive: '#374151', // Gray/700
-        phoneIslandActiveDark: '#D1D5DB', // Gray/300
-
-        // Hover state
-        phoneIslandHover: '#1F2937', // Gray/800
-        phoneIslandHoverDark: '#F9FAFB', // Gray/50
-
-        // Call state
-        phoneIslandCall: '#15803D', // Green/700
-        phoneIslandCallDark: '#22C55E', // Green/500
-
-        // Call hover state
-        phoneIslandCallHover: '#166534', // Green/800
-        phoneIslandCallHoverDark: '#86EFAC', // Green/300
-
-        // Close state
-        phoneIslandClose: '#B91C1C', // Red/700
-        phoneIslandCloseDark: '#EF4444', // Red/500
-
-        // Close hover state
-        phoneIslandCloseHover: '#991B1B', // Red/800
-        phoneIslandCloseHoverDark: '#FCA5A5', // Red/300
-
-        //icon
-
-        //iconWhite
-        iconWhite: '#FFFFFF', // white
-        iconWhiteDark: '#FFFFFF', // white
-
-        //iconPrimaryNeutral
-        iconPrimaryNeutral: '#111827', // gray-900
-        iconPrimaryNeutralDark: '#F9FAFB', // gray-50
-
-        //iconPrimaryInvert
-        iconPrimaryInvert: '#F9FAFB', // gray-50
-        iconPrimaryInvertDark: '#111827', // gray-900
+        // text
+        primaryNeutral: 'var(--color-primary-neutral)',
+        primaryNeutralDark: 'var(--color-primary-neutral-dark)',
+        primaryInvert: 'var(--color-primary-invert)',
+        primaryInvertDark: 'var(--color-primary-invert-dark)',
+        // secondary
+        secondaryNeutral: 'var(--color-secondary-neutral)',
+        secondaryNeutralDark: 'var(--color-secondary-neutral-dark)',
+        // tertiary
+        tertiaryNeutral: 'var(--color-tertiary-neutral)',
+        tertiaryNeutralDark: 'var(--color-tertiary-neutral-dark)',
+        // surface
+        surfaceBackground: 'var(--color-surface-background)',
+        surfaceBackgroundDark: 'var(--color-surface-background-dark)',
+        surfaceSidebar: 'var(--color-surface-sidebar)',
+        surfaceSidebarDark: 'var(--color-surface-sidebar-dark)',
+        surfaceSidebarHover: 'var(--color-surface-sidebar-hover)',
+        surfaceSidebarHoverDark: 'var(--color-surface-sidebar-hover-dark)',
+        // elevation
+        elevationL2: 'var(--color-elevation-l2)',
+        elevationL2Dark: 'var(--color-elevation-l2-dark)',
+        // phone island - active state
+        phoneIslandActive: 'var(--color-phone-island-active)',
+        phoneIslandActiveDark: 'var(--color-phone-island-active-dark)',
+        // phone island - hover state
+        phoneIslandHover: 'var(--color-phone-island-hover)',
+        phoneIslandHoverDark: 'var(--color-phone-island-hover-dark)',
+        // phone island - call state
+        phoneIslandCall: 'var(--color-phone-island-call)',
+        phoneIslandCallDark: 'var(--color-phone-island-call-dark)',
+        phoneIslandCallHover: 'var(--color-phone-island-call-hover)',
+        phoneIslandCallHoverDark: 'var(--color-phone-island-call-hover-dark)',
+        // phone island - close state
+        phoneIslandClose: 'var(--color-phone-island-close)',
+        phoneIslandCloseDark: 'var(--color-phone-island-close-dark)',
+        phoneIslandCloseHover: 'var(--color-phone-island-close-hover)',
+        phoneIslandCloseHoverDark: 'var(--color-phone-island-close-hover-dark)',
+        // icons
+        iconWhite: 'var(--color-icon-white)',
+        iconWhiteDark: 'var(--color-icon-white-dark)',
+        iconPrimaryNeutral: 'var(--color-icon-primary-neutral)',
+        iconPrimaryNeutralDark: 'var(--color-icon-primary-neutral-dark)',
+        iconPrimaryInvert: 'var(--color-icon-primary-invert)',
+        iconPrimaryInvertDark: 'var(--color-icon-primary-invert-dark)',
       },
     },
   },
@@ -123,20 +96,4 @@ module.exports = {
     preflight: false,
   },
   prefix: 'pi-',
-  safelist: [
-    'pi-border-4',
-    'pi-rounded-2xl',
-    'pi-p-4',
-    'pi-flex',
-    'pi-gap-5',
-    'pi-items-center',
-    'pi-border-red-600',
-    'pi-border-orange-600',
-    'pi-border-green-600',
-    'pi-text-green-500',
-    'pi-bg-green-400',
-    'pi-h-[624px]',
-    'pi-w-[780px]',
-    'pi-h-[524px]',
-  ],
 }
