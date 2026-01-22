@@ -33,6 +33,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
   - [System Events](#system-events)
   - [WebSocket & Server Events](#websocket--server-events)
   - [UI State Events](#ui-state-events)
+  - [Summary/Transcription Check Events](#summarytranscription-check-events)
 
 ## Usage
 
@@ -462,6 +463,17 @@ The event to close the recording view
 
 #### `phone-island-recording-start`
 The event to start the recording
+
+### Summary/Transcription Check Events
+
+#### `phone-island-summary-call-check`
+The event to check if a call summary/transcription exists for a given extension ID. This event triggers an API call to verify the presence of the transcription.
+
+```json
+{
+  "extensionId": "228"
+}
+```
 
 ```json
 {}
@@ -1606,3 +1618,23 @@ Indicates that a real-time transcription message has been received for an active
 - Final results (`is_final: true`) represent the completed, stable transcription
 - Only users who are participants in the conversation (matching speaker or counterpart) will receive these events
 - This event requires the phone-island to be connected to a middleware that supports transcription services
+
+### Summary/Transcription Check Events
+
+#### `phone-island-summary-call-checked`
+Indicates that a call summary/transcription exists for the specified extension ID. This event is dispatched only when the transcription is available (API returns 200).
+
+```json
+{
+  "extensionId": "228"
+}
+```
+
+**Parameters:**
+- `extensionId`: The extension/phone number ID for which the transcription was checked
+
+**Usage Notes:**
+- This event is triggered in response to `phone-island-summary-call-check`
+- Only dispatched when the API confirms the transcription exists (HTTP 200 response)
+- If the transcription doesn't exist or there's an error, no event is dispatched
+- Can be used to show UI elements indicating transcription availability

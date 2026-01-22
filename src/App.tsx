@@ -898,6 +898,22 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     )
   })
 
+  // Check if call summary/transcription exists
+  useEventListener('phone-island-summary-call-check', async (data: { extensionId: string }) => {
+    if (!data?.extensionId) return
+    
+    try {
+      const { checkSummaryCall } = await import('./services/user')
+      const summaryExists = await checkSummaryCall(data.extensionId)
+      
+      if (summaryExists) {
+        eventDispatch('phone-island-summary-call-checked', { extensionId: data.extensionId })
+      }
+    } catch (error) {
+      console.error('Error checking summary call:', error)
+    }
+  })
+
   useEventListener('phone-island-size-change', (args: any) => {
     const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =
       store.getState().island

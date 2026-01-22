@@ -520,12 +520,16 @@ export const Socket: FC<SocketProps> = ({
               () => {
                 // Ping timeout - increment counter
                 consecutivePingTimeouts.current++
-                console.debug(`Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`)
+                console.debug(
+                  `Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`,
+                )
 
                 // Set socket_down alert (async to avoid React error #300 with framer-motion)
                 setTimeout(() => {
                   // Check for stale connection: socket reports connected but pings keep timing out
-                  const isStaleConnection = socket.current.connected && consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
+                  const isStaleConnection =
+                    socket.current.connected &&
+                    consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
 
                   if (!socket.current.connected || isStaleConnection) {
                     // Check if there's an active call with ICE still connected
@@ -533,16 +537,21 @@ export const Socket: FC<SocketProps> = ({
                     const { sipcall }: { sipcall: any } = store.getState().webrtc
                     const { accepted, outgoing } = store.getState().currentCall
                     const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-                    const hasActiveCallWithIce = (accepted || outgoing) && (iceState === 'connected' || iceState === 'completed')
+                    const hasActiveCallWithIce =
+                      (accepted || outgoing) &&
+                      (iceState === 'connected' || iceState === 'completed')
 
                     if (hasActiveCallWithIce) {
-                      console.debug('Socket unreachable but active call with ICE connected - skipping socket_down alert', {
-                        iceState,
-                        accepted,
-                        outgoing,
-                        isStaleConnection,
-                        timestamp: new Date().toISOString()
-                      })
+                      console.debug(
+                        'Socket unreachable but active call with ICE connected - skipping socket_down alert',
+                        {
+                          iceState,
+                          accepted,
+                          outgoing,
+                          isStaleConnection,
+                          timestamp: new Date().toISOString(),
+                        },
+                      )
                       return
                     }
 
@@ -581,6 +590,8 @@ export const Socket: FC<SocketProps> = ({
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
+
+        eventDispatch('phone-island-summary-call-check', { extensionId: connectedExtension?.id })
         const extensionType: any = connectedExtension?.type
 
         // If cause is normal_clearing and extension is physical or mobile
@@ -1027,7 +1038,7 @@ export const Socket: FC<SocketProps> = ({
         console.info(
           forceReload
             ? 'Force reload requested, performing Socket reconnection'
-            : 'Socket down detected (alert active), performing reconnection'
+            : 'Socket down detected (alert active), performing reconnection',
         )
         // Reset force reload flag
         if (forceReload) {

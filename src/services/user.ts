@@ -264,3 +264,19 @@ export async function getFeatureCodes(): Promise<any> {
     throw new Error(error)
   }
 }
+
+/**
+ * Check if a call summary/transcription exists for a given extension ID
+ */
+export async function checkSummaryCall(extensionId: string): Promise<boolean> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/api/summary_check/${extensionId}`, {
+      headers: { ...headers },
+    })
+    return response.ok
+  } catch (error: any) {
+    console.error('Error checking summary call:', error)
+    return false
+  }
+}
