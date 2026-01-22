@@ -581,6 +581,8 @@ export const Socket: FC<SocketProps> = ({
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
+
+        eventDispatch('phone-island-summary-call-check', { extensionId: connectedExtension?.id })
         const extensionType: any = connectedExtension?.type
 
         // If cause is normal_clearing and extension is physical or mobile
