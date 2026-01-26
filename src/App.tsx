@@ -898,6 +898,37 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     )
   })
 
+  // Check if call summary/transcription exists
+  useEventListener('phone-island-summary-call-check', async (data: { uniqueId?: string }) => {
+    if (data?.uniqueId) {
+      try {
+        const { checkSummaryCall } = await import('./services/user')
+        const summaryExists = await checkSummaryCall(data?.uniqueId)
+        
+        if (summaryExists) {
+          eventDispatch('phone-island-summary-call-checked', { uniqueId: data?.uniqueId })
+        }
+      } catch (error) {
+        console.error('Error checking summary call:', error)
+      }
+    }
+  })
+
+  // Watch for call summary/transcription notifications
+  useEventListener('phone-island-call-summary-notify', async (data: { uniqueId: string }) => {
+    if (data?.uniqueId) {
+      try {
+        const { watchSummaryCall } = await import('./services/user')
+        await watchSummaryCall(data.uniqueId)
+        
+        // Dispatch event to confirm the watch request was sent
+        eventDispatch('phone-island-summary-call-notified', { uniqueId: data.uniqueId })
+      } catch (error) {
+        console.error('Error watching summary call:', error)
+      }
+    }
+  })
+
   useEventListener('phone-island-size-change', (args: any) => {
     const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =
       store.getState().island
