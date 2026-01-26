@@ -266,17 +266,37 @@ export async function getFeatureCodes(): Promise<any> {
 }
 
 /**
- * Check if a call summary/transcription exists for a given extension ID
+ * Check if a call summary/transcription exists for a given uniqueId
  */
-export async function checkSummaryCall(extensionId: string): Promise<boolean> {
+export async function checkSummaryCall(uniqueId: string): Promise<boolean> {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/api/summary_check/${extensionId}`, {
+    const response = await fetch(`${baseURL}/api/summary/check/${uniqueId}`, {
       headers: { ...headers },
     })
     return response.ok
   } catch (error: any) {
     console.error('Error checking summary call:', error)
     return false
+  }
+}
+
+/**
+ * Watch for call summary/transcription for a given linkedId (uniqueid)
+ */
+export async function watchSummaryCall(uniqueid: string): Promise<void> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/transcripts/summary/watch`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify({ uniqueid }),
+    })
+    if (!response.ok) {
+      console.error('Error watching summary call:', response.statusText)
+    }
+  } catch (error: any) {
+    console.error('Error watching summary call:', error)
+    throw error
   }
 }

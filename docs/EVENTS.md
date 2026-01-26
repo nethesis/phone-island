@@ -467,13 +467,31 @@ The event to start the recording
 ### Summary/Transcription Check Events
 
 #### `phone-island-summary-call-check`
-The event to check if a call summary/transcription exists for a given extension ID. This event triggers an API call to verify the presence of the transcription.
+The event to check if a call summary/transcription exists for a given unique ID. This event triggers an API call to verify the presence of the transcription.
 
 ```json
 {
-  "extensionId": "228"
+  "uniqueId": "1769179547.799"
 }
 ```
+
+#### `phone-island-call-summary-notify`
+The event to watch and register for call summary/transcription notifications for a given unique ID. This event triggers a POST request to subscribe to summary updates.
+
+```json
+{
+  "uniqueId": "1769179547.799"
+}
+```
+
+**Parameters:**
+- `uniqueId`: The unique ID of the call to watch for summary/transcription
+
+**Usage Notes:**
+- This event sends a POST request to `/transcripts/summary/watch` with the uniqueId
+- Used to register interest in receiving notifications when a summary becomes available
+- Dispatches `phone-island-summary-call-notified` with uniqueId when the watch request is sent
+- Different from `phone-island-summary-call-check` which only checks if a summary already exists
 
 ```json
 {}
@@ -1622,19 +1640,54 @@ Indicates that a real-time transcription message has been received for an active
 ### Summary/Transcription Check Events
 
 #### `phone-island-summary-call-checked`
-Indicates that a call summary/transcription exists for the specified extension ID. This event is dispatched only when the transcription is available (API returns 200).
+Indicates that a call summary/transcription exists for the specified uniqueId. This event is dispatched only when the transcription is available (API returns 200).
 
 ```json
 {
-  "extensionId": "228"
+  "uniqueId": "1769179547.799"
 }
 ```
 
 **Parameters:**
-- `extensionId`: The extension/phone number ID for which the transcription was checked
+- `uniqueId`: The unique ID for which the transcription was checked
 
 **Usage Notes:**
 - This event is triggered in response to `phone-island-summary-call-check`
 - Only dispatched when the API confirms the transcription exists (HTTP 200 response)
 - If the transcription doesn't exist or there's an error, no event is dispatched
 - Can be used to show UI elements indicating transcription availability
+
+#### `phone-island-summary-call-notified`
+Indicates that a watch request was sent for call summary/transcription notifications. This event is dispatched after successfully sending a watch request.
+
+```json
+{
+  "uniqueId": "1769179547.799"
+}
+```
+
+**Parameters:**
+- `uniqueId`: The unique ID for which a watch request was sent
+
+**Usage Notes:**
+- This event is triggered in response to `phone-island-call-summary-notify`
+- Always dispatched after the watch request is sent to the backend
+- Used to confirm that the system is now watching for summary/transcription availability
+- Can be used to show UI elements indicating watch registration
+
+#### `phone-island-summary-ready`
+Indicates that a call summary/transcription is ready and available. This event is dispatched when the backend notifies that the summary has been generated.
+
+```json
+{
+  "uniqueId": "1769185498.1004",
+}
+```
+
+**Parameters:**
+- `uniqueId`: The unique ID of the call for which the summary is ready
+
+**Usage Notes:**
+- This event is automatically dispatched when receiving the `satellite/summary` socket event
+- Triggered by the backend when summary generation is complete
+- Can be used to notify users that their call summary is available

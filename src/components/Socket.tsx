@@ -591,8 +591,26 @@ export const Socket: FC<SocketProps> = ({
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
 
-        eventDispatch('phone-island-summary-call-check', { extensionId: connectedExtension?.id })
         const extensionType: any = connectedExtension?.type
+
+        // Get linkedId from conversations
+        const { conversations } = store.getState().currentUser
+        let uniqueId: string | undefined = undefined
+
+        if (res.callerNum && conversations[res.callerNum]) {
+          const extensionConversations = conversations[res.callerNum]
+          // Get the first (and usually only) conversation for this extension
+          const conversationKeys = Object.keys(extensionConversations)
+          if (conversationKeys.length > 0) {
+            const firstConvKey = conversationKeys[0]
+            uniqueId = extensionConversations?.[firstConvKey]?.uniqueId
+          }
+        }
+
+        // Dispatch event to check for call summary/transcription with uniqueId
+        if (uniqueId) {
+          eventDispatch('phone-island-summary-call-check', { uniqueId })
+        }
 
         // If cause is normal_clearing and extension is physical or mobile
         // Clean phone-island visibility also after user_busy ( useful for physical devices )
@@ -885,6 +903,15 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
+      })
+
+      // `satellite/summary` is the socket event when summary is ready
+      socket.current.on('satellite/summary', (data: any) => {
+        if (data?.uniqueid) {
+          eventDispatch('phone-island-summary-ready', {
+            uniqueId: data?.uniqueid,
+          })
+        }
       })
 
       socket.current.on('message', (data: any) => {
