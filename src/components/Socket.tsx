@@ -586,7 +586,7 @@ export const Socket: FC<SocketProps> = ({
 
         // Get linkedId from conversations
         const { conversations } = store.getState().currentUser
-        let uniqueId: string | undefined = undefined
+        let linkedid: any = undefined
 
         if (res.callerNum && conversations[res.callerNum]) {
           const extensionConversations = conversations[res.callerNum]
@@ -594,13 +594,12 @@ export const Socket: FC<SocketProps> = ({
           const conversationKeys = Object.keys(extensionConversations)
           if (conversationKeys.length > 0) {
             const firstConvKey = conversationKeys[0]
-            uniqueId = extensionConversations?.[firstConvKey]?.uniqueId
+            linkedid = extensionConversations?.[firstConvKey]?.linkedId
           }
         }
-
-        // Dispatch event to check for call summary/transcription with uniqueId
-        if (uniqueId) {
-          eventDispatch('phone-island-summary-call-check', { uniqueId })
+        // Dispatch event to check for call summary/transcription with linkedid
+        if (linkedid) {
+          eventDispatch('phone-island-summary-call-check', { linkedid })
         }
 
         // If cause is normal_clearing and extension is physical or mobile
