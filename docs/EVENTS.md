@@ -471,7 +471,7 @@ The event to check if a call summary/transcription exists for a given unique ID.
 
 ```json
 {
-  "uniqueId": "1769179547.799"
+  "linedid": "1769179547.799"
 }
 ```
 
@@ -480,17 +480,17 @@ The event to watch and register for call summary/transcription notifications for
 
 ```json
 {
-  "uniqueId": "1769179547.799"
+  "linkedid": "1769179547.799"
 }
 ```
 
 **Parameters:**
-- `uniqueId`: The unique ID of the call to watch for summary/transcription
+- `linkedid`: The linked ID of the call to watch for summary/transcription
 
 **Usage Notes:**
-- This event sends a POST request to `/transcripts/summary/watch` with the uniqueId
+- This event sends a POST request to `/transcripts/summary/watch` with the linkedid
 - Used to register interest in receiving notifications when a summary becomes available
-- Dispatches `phone-island-summary-call-notified` with uniqueId when the watch request is sent
+- Dispatches `phone-island-summary-call-notified` with linkedid when the watch request is sent
 - Different from `phone-island-summary-call-check` which only checks if a summary already exists
 
 ```json
@@ -1640,16 +1640,16 @@ Indicates that a real-time transcription message has been received for an active
 ### Summary/Transcription Check Events
 
 #### `phone-island-summary-call-checked`
-Indicates that a call summary/transcription exists for the specified uniqueId. This event is dispatched only when the transcription is available (API returns 200).
+Indicates that a call summary/transcription exists for the specified linkedid. This event is dispatched only when the transcription is available (API returns 200).
 
 ```json
 {
-  "uniqueId": "1769179547.799"
+  "linkedid": "1769179547.799"
 }
 ```
 
 **Parameters:**
-- `uniqueId`: The unique ID for which the transcription was checked
+- `linkedid`: The unique ID for which the transcription was checked
 
 **Usage Notes:**
 - This event is triggered in response to `phone-island-summary-call-check`
@@ -1662,12 +1662,12 @@ Indicates that a watch request was sent for call summary/transcription notificat
 
 ```json
 {
-  "uniqueId": "1769179547.799"
+  "linkedid": "1769179547.799"
 }
 ```
 
 **Parameters:**
-- `uniqueId`: The unique ID for which a watch request was sent
+- `linkedid`: The unique ID for which a watch request was sent
 
 **Usage Notes:**
 - This event is triggered in response to `phone-island-call-summary-notify`
@@ -1680,12 +1680,12 @@ Indicates that a call summary/transcription is ready and available. This event i
 
 ```json
 {
-  "uniqueId": "1769185498.1004",
+  "linkedid": "1769185498.1004",
 }
 ```
 
 **Parameters:**
-- `uniqueId`: The unique ID of the call for which the summary is ready
+- `linkedid`: The unique ID of the call for which the summary is ready
 
 **Usage Notes:**
 - This event is automatically dispatched when receiving the `satellite/summary` socket event

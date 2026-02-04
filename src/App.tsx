@@ -899,17 +899,29 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   })
 
   // Check if call summary/transcription exists
-  useEventListener('phone-island-summary-call-check', async (data: { uniqueId?: string }) => {
-    if (data?.uniqueId) {
-      try {
-        const { checkSummaryCall } = await import('./services/user')
-        const summaryExists = await checkSummaryCall(data?.uniqueId)
-        
-        if (summaryExists) {
-          eventDispatch('phone-island-summary-call-checked', { uniqueId: data?.uniqueId })
-        }
-      } catch (error) {
-        console.error('Error checking summary call:', error)
+  useEventListener('phone-island-summary-call-check', async (data: { linkedid?: string }) => {
+    if (!data?.linkedid) {
+      console.warn('[Summary Check] No uniqueId provided')
+      return
+    }
+
+    try {
+      const { checkSummaryCall } = await import('./services/user')
+      const result = await checkSummaryCall(data.linkedid)
+      
+      
+      if (result.has_summary) {
+        eventDispatch('phone-island-summary-call-checked', { 
+          uniqueId: result.uniqueid,
+          hasSummary: true 
+        })
+      }
+    } catch (error: any) {
+      // 404 means summary not present yet - not an error, just not ready
+      if (error?.status === 404) {
+        console.log(`[Summary Check] Summary not ready for ${data.linkedid}`)
+      } else {
+        console.error('[Summary Check] Error checking summary:', error)
       }
     }
   })
@@ -919,10 +931,10 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     if (data?.uniqueId) {
       try {
         const { watchSummaryCall } = await import('./services/user')
-        await watchSummaryCall(data.uniqueId)
+        await watchSummaryCall(data?.uniqueId)
         
         // Dispatch event to confirm the watch request was sent
-        eventDispatch('phone-island-summary-call-notified', { uniqueId: data.uniqueId })
+        eventDispatch('phone-island-summary-call-notified', { uniqueId: data?.uniqueId })
       } catch (error) {
         console.error('Error watching summary call:', error)
       }
