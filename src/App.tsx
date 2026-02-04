@@ -904,18 +904,14 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       console.warn('[Summary Check] No uniqueId provided')
       return
     }
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     try {
       const { checkSummaryCall } = await import('./services/user')
       const result = await checkSummaryCall(data.linkedid)
-      
-      
-      if (result.has_summary) {
-        eventDispatch('phone-island-summary-call-checked', { 
-          uniqueId: result.uniqueid,
-          hasSummary: true 
-        })
-      }
+      eventDispatch('phone-island-summary-call-checked', { 
+        uniqueId: data.linkedid,
+      })
     } catch (error: any) {
       // 404 means summary not present yet - not an error, just not ready
       if (error?.status === 404) {
