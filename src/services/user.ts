@@ -301,7 +301,7 @@ export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: st
 export async function watchSummaryCall(uniqueid: string): Promise<void> {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/transcripts/summary/watch`, {
+    const response = await fetch(`${baseURL}/summary/watch`, {
       method: 'POST',
       headers: { ...headers },
       body: JSON.stringify({ uniqueid }),
