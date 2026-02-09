@@ -67,9 +67,6 @@ export const Socket: FC<SocketProps> = ({
   const consecutivePingTimeouts = useRef(0)
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
-  // get user information
-  const userInformation = useSelector((state: RootState) => state.currentUser)
-
   // Event listener for starting transcription
   useEventListener('phone-island-start-transcription', () => {
     if (socket.current) {
@@ -95,12 +92,6 @@ export const Socket: FC<SocketProps> = ({
     // Stop the local audio element ringing
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.player.setAudioPlayerLoop(false)
-  }
-
-  const checkDefaultDeviceConversationClosed = (conv: any) => {
-    // store.dispatch.player.stopAudioPlayer()
-    store.dispatch.currentCall.reset()
-    // store.dispatch.listen.reset()
   }
 
   useEffect(() => {

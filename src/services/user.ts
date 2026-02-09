@@ -272,14 +272,14 @@ export async function getFeatureCodes(): Promise<any> {
  */
 export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: string; has_summary: boolean }> {
   const { baseURL, headers } = store.getState().fetchDefaults
-  const response = await fetch(`${baseURL}/summary/check/${uniqueId}`, {
+  const response = await fetch(`${baseURL}/summary/${uniqueId}`, {
+    method: 'HEAD',
     headers: { ...headers },
   })
 
   // 200 - Summary exists
   if (response.ok) {
-    const data = await response.json()
-    return data
+    return { uniqueid: uniqueId, has_summary: true }
   }
 
   // 404 - Summary not present yet (not an error, just not ready)
