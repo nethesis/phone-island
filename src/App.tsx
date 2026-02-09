@@ -1061,23 +1061,45 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   return (
     <>
       <Provider store={store}>
-        <WebRTC
-          hostName={HOST_NAME}
-          sipExten={SIP_EXTEN}
-          sipSecret={SIP_SECRET}
-          sipHost={SIP_HOST}
-          sipPort={SIP_PORT}
-          reload={reload}
-          reloadedCallback={() => setReloadedWebRTC(true)}
-          uaType={uaType}
-        >
+        {SIP_EXTEN && SIP_EXTEN.trim() !== '' ? (
+          // Full stack with WebRTC when SIP extension is provided
+          <WebRTC
+            hostName={HOST_NAME}
+            sipExten={SIP_EXTEN}
+            sipSecret={SIP_SECRET}
+            sipHost={SIP_HOST}
+            sipPort={SIP_PORT}
+            reload={reload}
+            reloadedCallback={() => setReloadedWebRTC(true)}
+            uaType={uaType}
+          >
+            <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
+              <Socket
+                hostName={HOST_NAME}
+                username={USERNAME}
+                authToken={AUTH_TOKEN}
+                reload={reload}
+                reloadedCallback={() => setReloadedSocket(true)}
+                uaType={uaType}
+              >
+                <Events sipHost={SIP_HOST}>
+                  <Island showAlways={showAlways} uaType={uaType} />
+                </Events>
+              </Socket>
+            </RestAPI>
+          </WebRTC>
+        ) : (
+          // Minimal stack without WebRTC when no SIP extension
           <RestAPI hostName={HOST_NAME} username={USERNAME} authToken={AUTH_TOKEN}>
             <Socket
               hostName={HOST_NAME}
               username={USERNAME}
               authToken={AUTH_TOKEN}
               reload={reload}
-              reloadedCallback={() => setReloadedSocket(true)}
+              reloadedCallback={() => {
+                setReloadedSocket(true)
+                setReloadedWebRTC(true)
+              }}
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
@@ -1085,7 +1107,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
               </Events>
             </Socket>
           </RestAPI>
-        </WebRTC>
+        )}
       </Provider>
     </>
   )
