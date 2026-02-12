@@ -264,3 +264,53 @@ export async function getFeatureCodes(): Promise<any> {
     throw new Error(error)
   }
 }
+
+/**
+ * Check if a call summary/transcription exists for a given uniqueId
+ * Returns: { uniqueid: string, has_summary: boolean }
+ * Throws: Error with status code for 401, 403, 404, 503
+ */
+export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: string; has_summary: boolean }> {
+  const { baseURL, headers } = store.getState().fetchDefaults
+  const response = await fetch(`${baseURL}/summary/${uniqueId}`, {
+    method: 'HEAD',
+    headers: { ...headers },
+  })
+
+  // 200 - Summary exists
+  if (response.ok) {
+    return { uniqueid: uniqueId, has_summary: true }
+  }
+
+  // 404 - Summary not present yet (not an error, just not ready)
+  if (response.status === 404) {
+    const error: any = new Error('Summary not found')
+    error.status = 404
+    throw error
+  }
+
+  // 401, 403, 503 - Real errors
+  const error: any = new Error(`Failed to check summary: ${response.statusText}`)
+  error.status = response.status
+  throw error
+}
+
+/**
+ * Watch for call summary/transcription for a given linkedId (uniqueid)
+ */
+export async function watchSummaryCall(uniqueid: string): Promise<void> {
+  try {
+    const { baseURL, headers } = store.getState().fetchDefaults
+    const response = await fetch(`${baseURL}/summary/watch`, {
+      method: 'POST',
+      headers: { ...headers },
+      body: JSON.stringify({ uniqueid }),
+    })
+    if (!response.ok) {
+      console.error('Error watching summary call:', response.statusText)
+    }
+  } catch (error: any) {
+    console.error('Error watching summary call:', error)
+    throw error
+  }
+}
