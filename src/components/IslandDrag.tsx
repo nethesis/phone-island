@@ -4,8 +4,8 @@
 import React, { type ReactNode, FC, useState, useRef, MutableRefObject } from 'react'
 import { RootState, Dispatch, store } from '../store'
 import { useSelector, useDispatch } from 'react-redux'
-import { motion, useDragControls } from 'framer-motion'
-import { useLongPress, useLocalStorage, styleTransformValues } from '../utils'
+import { motion, useDragControls, useAnimation } from 'framer-motion'
+import { useLongPress, useLocalStorage, styleTransformValues, useEventListener } from '../utils'
 import { xPosition, yPosition } from '../lib/island/island'
 
 export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }) => {
@@ -20,6 +20,9 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   // Initialize Island drag controls
   const controls = useDragControls()
 
+  // Initialize animation controls for reset functionality
+  const animationControls = useAnimation()
+
   // Initialize Island storage
   const [phoneIslandStorage, setPhoneIslandStorage] =
     useLocalStorage<PhoneIslandStorageTypes | null>('phone-island', null)
@@ -31,6 +34,28 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
   const [position, setPosition] = useState<PositionTypes | null>(
     phoneIslandStorage && phoneIslandStorage.position ? phoneIslandStorage.position : null,
   )
+
+  // Handles reset position to default
+  const handleResetPosition = async () => {
+    // Clear localStorage
+    localStorage.removeItem('phone-island')
+    
+    // Reset position state
+    setPosition(null)
+    
+    // Animate back to default position
+    await animationControls.start({
+      x: startPosition.x,
+      y: startPosition.y,
+      transition: {
+        duration: 0.3,
+        ease: 'easeOut',
+      },
+    })
+  }
+
+  // Listen for reset position event
+  useEventListener('phone-island-reset-position', handleResetPosition)
 
   // Handles the drag started event
   function handleStartDrag(event: React.PointerEvent<Element>) {
@@ -115,6 +140,7 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
         x: position?.x || startPosition.x,
         y: position?.y || startPosition.y,
       }}
+      animate={animationControls}
       dragControls={controls}
       dragListener={false}
       dragConstraints={islandContainerRef}
