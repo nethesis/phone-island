@@ -202,6 +202,13 @@ The event to manually close phone island right menu
 {}
 ```
 
+#### `phone-island-reset-position`
+The event to reset the Phone Island position to its default location. This is useful when the Phone Island has been moved to an inconvenient position (e.g., outside the visible area or on a disconnected monitor in multi-monitor setups). When this event is triggered, the saved position is cleared from localStorage and the Phone Island smoothly animates back to its default centered position.
+
+```json
+{}
+```
+
 ### Device Management Events
 
 #### `phone-island-audio-input-change`
