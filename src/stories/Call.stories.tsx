@@ -659,6 +659,21 @@ const CallTemplate = (args: any) => {
               </Button>
             </div>
 
+            {/* Reset Phone Island Position Button */}
+            <div className='pi-mt-4'>
+              <Button
+                variant='default'
+                onClick={() => {
+                  eventDispatch('phone-island-reset-position', {})
+                  setShowToast(true)
+                  setToastMessage('Phone Island position has been reset to default!')
+                }}
+                className='pi-w-full pi-text-sm'
+              >
+                📍 Reset Phone Island Position
+              </Button>
+            </div>
+
             {/* Emergency Stop Ringtone Button */}
             <div className='pi-mt-4'>
               <Button
