@@ -387,6 +387,99 @@
             background: #007bff;
             color: white;
         }
+
+        /* Event Filter Panel Styles */
+        .event-filter-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .event-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .event-filter-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .event-filter-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .event-filter-content.expanded {
+            max-height: 500px;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filter-checkbox:hover {
+            background-color: #e9ecef;
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .filter-checkbox label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .filter-actions button {
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            background: white;
+            color: #007bff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-actions button:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .filter-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .filter-toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body>
@@ -445,6 +538,95 @@
             <button id="detachDevice" class="danger">🔌 Detach WebRTC</button>
         </div>
 
+        <!-- Audio/Video Device Selectors -->
+        <div class="integration-panel" style="margin-top: 20px;">
+            <h3 style="margin-top: 0;">🎧 Audio and Video Settings</h3>
+            
+            <div class="device-selector">
+                <strong>🎤 Microphone (Audio Input):</strong>
+                <select id="audioInputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
+                    <option value="">Select audio input device...</option>
+                </select>
+            </div>
+
+            <div class="device-selector">
+                <strong>🔊 Speaker (Audio Output):</strong>
+                <select id="audioOutputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
+                    <option value="">Select audio output device...</option>
+                </select>
+            </div>
+
+            <div class="device-selector">
+                <strong>📹 Camera (Video Input):</strong>
+                <select id="videoInputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
+                    <option value="">Select video input device...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Event Filter Panel -->
+        <div class="event-filter-panel">
+            <div class="event-filter-header" id="filterHeader">
+                <h3>🎛️ Event Filters</h3>
+                <span class="filter-toggle-icon" id="filterToggleIcon">▼</span>
+            </div>
+            <div class="event-filter-content" id="filterContent">
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_core" checked>
+                    <label for="filter_core">📦 Core Events</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_call" checked>
+                    <label for="filter_call">📞 Call Events</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_connection" checked>
+                    <label for="filter_connection">🌐 Connection</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_ui">
+                    <label for="filter_ui">🎨 UI Events</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_recording">
+                    <label for="filter_recording">🎙️ Recording</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_video">
+                    <label for="filter_video">📹 Video</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_screen_share">
+                    <label for="filter_screen_share">🖥️ Screen Share</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_audio_player">
+                    <label for="filter_audio_player">🎵 Audio Player</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_transcription" checked>
+                    <label for="filter_transcription">💬 Transcription</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_system">
+                    <label for="filter_system">⚙️ System</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_errors" checked>
+                    <label for="filter_errors">⚠️ Errors/Alerts</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="filter_debug">
+                    <label for="filter_debug">🐛 Debug/Status</label>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button id="selectAllFilters">✅ Select All</button>
+                <button id="selectNoneFilters">❌ Deselect All</button>
+                <button id="selectDefaultFilters">🔧 Default</button>
+            </div>
+        </div>
+
         <!-- Control Buttons -->
         <div class="controls">
             <button id="expandBtn">📏 Expand</button>
@@ -461,8 +643,23 @@
         </div>
 
         <!-- Event Log -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong>📡 Event Log:</strong>
+            <button id="clearLogBtn" style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🗑️ Clear Log</button>
+        </div>
         <div class="event-log" id="eventLog">
             <div>📡 Event Log (real-time events will appear here)...</div>
+        </div>
+
+        <!-- User Information Table -->
+        <div class="integration-panel" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">👤 Current User Information (/me)</h3>
+                <button id="refreshUserInfoBtn" style="padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🔄 Refresh</button>
+            </div>
+            <div id="userInfoTableContainer">
+                <p style="color: #6c757d; text-align: center; padding: 20px;">Click "Refresh" to load user information...</p>
+            </div>
         </div>
     </div>
 

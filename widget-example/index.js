@@ -4,6 +4,658 @@
 'use strict';
 
 // ===========================================
+// EVENT FILTERING SYSTEM
+// ===========================================
+
+// Default filter configuration - only essential events enabled
+const defaultFilters = {
+    core: true,
+    call: true,
+    connection: true,
+    ui: false,
+    recording: false,
+    video: false,
+    screen_share: false,
+    audio_player: false,
+    transcription: true,
+    system: false,
+    errors: true,
+    debug: false
+};
+
+// Event category mapping - maps event messages to their category
+const eventCategories = {
+    // Core events
+    'expanded': 'core',
+    'compressed': 'core',
+    'attached': 'core',
+    'detached': 'core',
+    'initialized': 'core',
+    'ATTACH': 'core',
+    'DETACH': 'core',
+
+    // Call events
+    'Call started': 'call',
+    'Call ringing': 'call',
+    'Call answered': 'call',
+    'Call ended': 'call',
+    'Call muted': 'call',
+    'Call unmuted': 'call',
+    'Call held': 'call',
+    'Call unheld': 'call',
+    'CALL': 'call',
+
+    // Connection events
+    'Socket connected': 'connection',
+    'Socket disconnected': 'connection',
+    'Socket reconnected': 'connection',
+    'Internet connection': 'connection',
+    'Internet disconnected': 'connection',
+    'Server reloaded': 'connection',
+    'Server disconnected': 'connection',
+    'Connected to Janus': 'connection',
+    'registered': 'connection',
+
+    // UI events
+    'Theme changed': 'ui',
+    'Side menu': 'ui',
+    'Entered fullscreen': 'ui',
+    'Exited fullscreen': 'ui',
+
+    // Recording events
+    'Recording started': 'recording',
+    'Recording stopped': 'recording',
+    'Recording saved': 'recording',
+
+    // Video events
+    'Video enabled': 'video',
+    'Video disabled': 'video',
+
+    // Screen share events
+    'Screen sharing': 'screen_share',
+    'screen share': 'screen_share',
+    'Joined screen share': 'screen_share',
+    'Left screen share': 'screen_share',
+
+    // Audio player events
+    'Audio player': 'audio_player',
+
+    // Transcription events
+    'Transcription': 'transcription',
+
+    // System events
+    'Presence': 'system',
+    'Conversations': 'system',
+    'Queue update': 'system',
+
+    // Error/Alert events
+    'Alert removed': 'errors',
+    'Error': 'errors',
+    'disconnected': 'errors',
+    'connection lost': 'errors',
+
+    // Debug events
+    'Debug': 'debug',
+    'STATUS': 'debug',
+    'Status:': 'debug'
+};
+
+// Active filters - loaded from localStorage or defaults
+let activeFilters = { ...defaultFilters };
+
+// Load filter preferences from localStorage
+function loadFilterPreferences() {
+    try {
+        const stored = localStorage.getItem('phoneIslandEventFilters');
+        if (stored) {
+            activeFilters = JSON.parse(stored);
+            console.log('🎛️ Loaded event filters from localStorage:', activeFilters);
+        }
+    } catch (error) {
+        console.error('Error loading filter preferences:', error);
+        activeFilters = { ...defaultFilters };
+    }
+}
+
+// Save filter preferences to localStorage
+function saveFilterPreferences() {
+    try {
+        localStorage.setItem('phoneIslandEventFilters', JSON.stringify(activeFilters));
+    } catch (error) {
+        console.error('Error saving filter preferences:', error);
+    }
+}
+
+// Check if an event should be logged based on active filters
+function shouldLogEvent(message) {
+    // Always log DISPATCHED events (user actions)
+    if (message.includes('DISPATCHED')) {
+        return true;
+    }
+
+    // Check each category
+    for (const [keyword, category] of Object.entries(eventCategories)) {
+        if (message.includes(keyword)) {
+            return activeFilters[category] === true;
+        }
+    }
+
+    // Default: log if no specific category found (backwards compatibility)
+    return true;
+}
+
+// Initialize filter UI checkboxes
+function initializeFilterUI() {
+    // Set checkbox states from active filters
+    Object.keys(activeFilters).forEach(filterKey => {
+        const checkbox = document.getElementById(`filter_${filterKey}`);
+        if (checkbox) {
+            checkbox.checked = activeFilters[filterKey];
+        }
+    });
+
+    // Add change listeners to all filter checkboxes
+    Object.keys(activeFilters).forEach(filterKey => {
+        const checkbox = document.getElementById(`filter_${filterKey}`);
+        if (checkbox) {
+            checkbox.addEventListener('change', (e) => {
+                activeFilters[filterKey] = e.target.checked;
+                saveFilterPreferences();
+                console.log(`🎛️ Filter "${filterKey}" ${e.target.checked ? 'enabled' : 'disabled'}`);
+            });
+        }
+    });
+
+    // Toggle filter panel
+    const filterHeader = document.getElementById('filterHeader');
+    const filterContent = document.getElementById('filterContent');
+    const filterToggleIcon = document.getElementById('filterToggleIcon');
+
+    if (filterHeader && filterContent && filterToggleIcon) {
+        filterHeader.addEventListener('click', () => {
+            filterContent.classList.toggle('expanded');
+            filterToggleIcon.classList.toggle('expanded');
+        });
+    }
+
+    // Select All button
+    const selectAllBtn = document.getElementById('selectAllFilters');
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', () => {
+            Object.keys(activeFilters).forEach(key => {
+                activeFilters[key] = true;
+                const checkbox = document.getElementById(`filter_${key}`);
+                if (checkbox) checkbox.checked = true;
+            });
+            saveFilterPreferences();
+            console.log('✅ All event filters enabled');
+        });
+    }
+
+    // Select None button
+    const selectNoneBtn = document.getElementById('selectNoneFilters');
+    if (selectNoneBtn) {
+        selectNoneBtn.addEventListener('click', () => {
+            Object.keys(activeFilters).forEach(key => {
+                activeFilters[key] = false;
+                const checkbox = document.getElementById(`filter_${key}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            saveFilterPreferences();
+            console.log('❌ All event filters disabled');
+        });
+    }
+
+    // Default filters button
+    const selectDefaultBtn = document.getElementById('selectDefaultFilters');
+    if (selectDefaultBtn) {
+        selectDefaultBtn.addEventListener('click', () => {
+            activeFilters = { ...defaultFilters };
+            Object.keys(activeFilters).forEach(key => {
+                const checkbox = document.getElementById(`filter_${key}`);
+                if (checkbox) checkbox.checked = activeFilters[key];
+            });
+            saveFilterPreferences();
+            console.log('🔧 Event filters reset to defaults');
+        });
+    }
+}
+
+// Load filters on script load
+loadFilterPreferences();
+
+// ===========================================
+// DEVICE MANAGEMENT
+// ===========================================
+
+let selectedAudioInput = '';
+let selectedAudioOutput = '';
+let selectedVideoInput = '';
+let audioInputDevices = [];
+let audioOutputDevices = [];
+let videoInputDevices = [];
+
+// Filter out virtual/HDMI audio outputs that cannot be used
+function filterUsableAudioOutputs(devices) {
+    return devices.filter((device) => {
+        const label = device.label.toLowerCase();
+        const isVirtualOutput =
+            label.includes('hdmi') ||
+            label.includes('displayport') ||
+            (label.includes('display') && !label.includes('speaker'));
+        return !isVirtualOutput;
+    });
+}
+
+// Get stored device values from localStorage
+function getStoredDeviceValues() {
+    try {
+        const audioInputStored = localStorage.getItem('phone-island-audio-input-device');
+        const audioOutputStored = localStorage.getItem('phone-island-audio-output-device');
+        const videoInputStored = localStorage.getItem('phone-island-video-input-device');
+
+        return {
+            audioInput: audioInputStored ? JSON.parse(audioInputStored) : null,
+            audioOutput: audioOutputStored ? JSON.parse(audioOutputStored) : null,
+            videoInput: videoInputStored ? JSON.parse(videoInputStored) : null,
+        };
+    } catch (error) {
+        console.error('Error parsing stored device values:', error);
+        return { audioInput: null, audioOutput: null, videoInput: null };
+    }
+}
+
+// Save device to localStorage
+function saveDeviceToStorage(key, deviceId) {
+    try {
+        localStorage.setItem(key, JSON.stringify({ deviceId }));
+    } catch (error) {
+        console.error('Error saving device to localStorage:', error);
+    }
+}
+
+// Enumerate and populate device selectors
+function enumerateDevices() {
+    navigator.mediaDevices
+        .enumerateDevices()
+        .then((deviceInfos) => {
+            // Categorize devices
+            audioInputDevices = deviceInfos.filter((device) => device.kind === 'audioinput');
+            const allAudioOutputs = deviceInfos.filter((device) => device.kind === 'audiooutput');
+            audioOutputDevices = filterUsableAudioOutputs(allAudioOutputs);
+            videoInputDevices = deviceInfos.filter((device) => device.kind === 'videoinput');
+
+            // Populate select elements
+            populateDeviceSelect('audioInputSelect', audioInputDevices, 'audioinput');
+            populateDeviceSelect('audioOutputSelect', audioOutputDevices, 'audiooutput');
+            populateDeviceSelect('videoInputSelect', videoInputDevices, 'videoinput');
+
+            // Restore stored values
+            restoreStoredDevices();
+        })
+        .catch((error) => {
+            console.error('Error enumerating devices:', error);
+        });
+}
+
+// Populate device select element
+function populateDeviceSelect(selectId, devices, kind) {
+    const selectElement = document.getElementById(selectId);
+    if (!selectElement) return;
+
+    // Clear existing options except first one
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
+
+    // Add device options
+    devices.forEach((device) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        const deviceType = kind === 'audioinput' ? 'Microphone' : 
+                          kind === 'audiooutput' ? 'Speaker' : 'Camera';
+        option.textContent = device.label || `${deviceType} ${device.deviceId.slice(0, 8)}`;
+        selectElement.appendChild(option);
+    });
+}
+
+// Restore stored device selections
+function restoreStoredDevices() {
+    const storedValues = getStoredDeviceValues();
+
+    if (storedValues.audioInput && audioInputDevices.length > 0) {
+        const device = audioInputDevices.find(
+            (d) => d.deviceId === storedValues.audioInput.deviceId
+        );
+        if (device) {
+            selectedAudioInput = device.deviceId;
+            const select = document.getElementById('audioInputSelect');
+            if (select) select.value = device.deviceId;
+        }
+    }
+
+    if (storedValues.audioOutput && audioOutputDevices.length > 0) {
+        const device = audioOutputDevices.find(
+            (d) => d.deviceId === storedValues.audioOutput.deviceId
+        );
+        if (device) {
+            selectedAudioOutput = device.deviceId;
+            const select = document.getElementById('audioOutputSelect');
+            if (select) select.value = device.deviceId;
+        }
+    }
+
+    if (storedValues.videoInput && videoInputDevices.length > 0) {
+        const device = videoInputDevices.find(
+            (d) => d.deviceId === storedValues.videoInput.deviceId
+        );
+        if (device) {
+            selectedVideoInput = device.deviceId;
+            const select = document.getElementById('videoInputSelect');
+            if (select) select.value = device.deviceId;
+        }
+    }
+}
+
+// Initialize device monitoring
+function initializeDeviceManagement() {
+    // Initial enumeration
+    enumerateDevices();
+
+    // Listen for device changes
+    navigator.mediaDevices.addEventListener('devicechange', enumerateDevices);
+
+    // Setup change handlers
+    const audioInputSelect = document.getElementById('audioInputSelect');
+    if (audioInputSelect) {
+        audioInputSelect.addEventListener('change', (e) => {
+            const deviceId = e.target.value;
+            selectedAudioInput = deviceId;
+            saveDeviceToStorage('phone-island-audio-input-device', deviceId);
+            dispatchPhoneIslandEvent('phone-island-audio-input-change', { deviceId });
+            logEvent('🎤 Audio input changed');
+        });
+    }
+
+    const audioOutputSelect = document.getElementById('audioOutputSelect');
+    if (audioOutputSelect) {
+        audioOutputSelect.addEventListener('change', (e) => {
+            const deviceId = e.target.value;
+            selectedAudioOutput = deviceId;
+            saveDeviceToStorage('phone-island-audio-output-device', deviceId);
+            dispatchPhoneIslandEvent('phone-island-audio-output-change', { deviceId });
+            logEvent('🔊 Audio output changed');
+        });
+    }
+
+    const videoInputSelect = document.getElementById('videoInputSelect');
+    if (videoInputSelect) {
+        videoInputSelect.addEventListener('change', (e) => {
+            const deviceId = e.target.value;
+            selectedVideoInput = deviceId;
+            saveDeviceToStorage('phone-island-video-input-device', deviceId);
+            dispatchPhoneIslandEvent('phone-island-video-input-change', { deviceId });
+            logEvent('📹 Video input changed');
+        });
+    }
+}
+
+// ===========================================
+// USER INFORMATION (/me)
+// ===========================================
+
+let currentUserInfo = null;
+
+// Storage key for API mode
+const API_MODE_STORAGE_KEY = 'phone_island_api_mode';
+
+// Function to get saved API mode from localStorage
+const getSavedApiMode = (username) => {
+    try {
+        const saved = localStorage.getItem(`${API_MODE_STORAGE_KEY}_${username}`);
+        if (saved === 'new' || saved === 'legacy') {
+            return saved;
+        }
+    } catch (error) {
+        console.warn('Failed to read API mode from localStorage:', error);
+    }
+    return 'unknown';
+};
+
+// Function to save API mode to localStorage
+const saveApiMode = (username, mode) => {
+    try {
+        localStorage.setItem(`${API_MODE_STORAGE_KEY}_${username}`, mode);
+    } catch (error) {
+        console.warn('Failed to save API mode to localStorage:', error);
+    }
+};
+
+// Fetch user information from /user/me endpoint
+async function fetchCurrentUserInfo() {
+    try {
+        // Get token from session storage
+        const storedToken = sessionStorage.getItem('phoneIslandToken');
+        if (!storedToken) {
+            throw new Error('No token available');
+        }
+
+        // Decode token to get server information
+        const tokenData = decodeToken(storedToken);
+        const hostName = tokenData.server;
+        const username = tokenData.username;
+        const authToken = tokenData.secret;
+
+        let currentApiMode = getSavedApiMode(username);
+        let response;
+        let data;
+
+        // If mode is unknown, probe the API
+        if (currentApiMode === 'unknown') {
+            // First time or after reset: test new API format
+            try {
+                response = await fetch(`https://${hostName}/api/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                });
+
+                if (response.ok) {
+                    // New API format works
+                    currentApiMode = 'new';
+                    saveApiMode(username, 'new');
+                    data = await response.json();
+                } else if (response.status === 404 || response.status === 401) {
+                    // Fallback to legacy API format
+                    currentApiMode = 'legacy';
+                    saveApiMode(username, 'legacy');
+                    
+                    // Make request with legacy format
+                    response = await fetch(`https://${hostName}/webrest/user/me`, {
+                        headers: {
+                            Authorization: `${username}:${authToken}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    data = await response.json();
+                } else {
+                    throw new Error(`API test failed with status: ${response.status}`);
+                }
+            } catch (error) {
+                // Network error or other issues, try legacy API
+                currentApiMode = 'legacy';
+                saveApiMode(username, 'legacy');
+                
+                response = await fetch(`https://${hostName}/webrest/user/me`, {
+                    headers: {
+                        Authorization: `${username}:${authToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                data = await response.json();
+            }
+        } else {
+            // Use saved API mode
+            if (currentApiMode === 'new') {
+                response = await fetch(`https://${hostName}/api/user/me`, {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                });
+            } else {
+                response = await fetch(`https://${hostName}/webrest/user/me`, {
+                    headers: {
+                        Authorization: `${username}:${authToken}`,
+                    },
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            data = await response.json();
+        }
+
+        currentUserInfo = data;
+        renderUserInfoTable(data);
+        logEvent(`✅ User information loaded successfully (API mode: ${currentApiMode})`);
+        return data;
+    } catch (error) {
+        console.error('Error fetching user information:', error);
+        renderUserInfoError(error.message);
+        logEvent(`❌ Error loading user information: ${error.message}`);
+        throw error;
+    }
+}
+
+// Render user information as a table
+function renderUserInfoTable(userInfo) {
+    const container = document.getElementById('userInfoTableContainer');
+    if (!container) return;
+
+    // Create table HTML
+    const tableHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tbody>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa; width: 30%;">Username</td>
+                    <td style="padding: 10px;">${userInfo.username || 'N/A'}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Name</td>
+                    <td style="padding: 10px;">${userInfo.name || 'N/A'}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Main Presence</td>
+                    <td style="padding: 10px;">
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; background-color: ${getPresenceColor(userInfo.mainPresence)}; color: white; font-size: 12px; font-weight: bold;">
+                            ${userInfo.mainPresence || 'N/A'}
+                        </span>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence</td>
+                    <td style="padding: 10px;">
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; background-color: ${getPresenceColor(userInfo.presence)}; color: white; font-size: 12px; font-weight: bold;">
+                            ${userInfo.presence || 'N/A'}
+                        </span>
+                    </td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Default Device</td>
+                    <td style="padding: 10px;">${userInfo.default_device?.id || 'Not set'} <span style="color: #6c757d;">(${userInfo.default_device?.type || 'N/A'})</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Endpoints</td>
+                    <td style="padding: 10px;">${formatEndpoints(userInfo.endpoints)}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence on Busy</td>
+                    <td style="padding: 10px;">${userInfo.presenceOnBusy || 'N/A'}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence on Unavailable</td>
+                    <td style="padding: 10px;">${userInfo.presenceOnUnavailable || 'N/A'}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Recall on Busy</td>
+                    <td style="padding: 10px;">${userInfo.recallOnBusy || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Profile</td>
+                    <td style="padding: 10px;">${userInfo.profile?.macro_permissions?.length || 0} macro permission(s)</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = tableHTML;
+}
+
+// Get color for presence status
+function getPresenceColor(presence) {
+    const colors = {
+        'online': '#28a745',
+        'busy': '#dc3545',
+        'dnd': '#dc3545',
+        'cellphone': '#17a2b8',
+        'callforward': '#ffc107',
+        'voicemail': '#6c757d',
+        'offline': '#6c757d',
+        'ringing': '#007bff',
+        'incoming': '#007bff',
+        'outgoing': '#007bff'
+    };
+    return colors[presence?.toLowerCase()] || '#6c757d';
+}
+
+// Format endpoints for display
+function formatEndpoints(endpoints) {
+    if (!endpoints || !endpoints.extension || endpoints.extension.length === 0) {
+        return 'No endpoints';
+    }
+
+    const endpointsList = endpoints.extension
+        .map(endpoint => `<span style="display: inline-block; margin: 2px 5px 2px 0; padding: 4px 8px; background-color: #e9ecef; border-radius: 4px; font-size: 12px;">${endpoint.id} (${endpoint.type})</span>`)
+        .join('');
+
+    return `<div>${endpointsList}</div>`;
+}
+
+// Render error message
+function renderUserInfoError(errorMessage) {
+    const container = document.getElementById('userInfoTableContainer');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;">
+            <strong>⚠️ Error loading user information</strong><br>
+            <span style="font-size: 14px;">${errorMessage}</span>
+        </div>
+    `;
+}
+
+// Initialize user information management
+function initializeUserInformation() {
+    const refreshBtn = document.getElementById('refreshUserInfoBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            const container = document.getElementById('userInfoTableContainer');
+            if (container) {
+                container.innerHTML = '<p style="color: #6c757d; text-align: center; padding: 20px;">🔄 Loading...</p>';
+            }
+            fetchCurrentUserInfo();
+        });
+    }
+}
+
+// ===========================================
 // TRANSCRIPTION EVENT HANDLING
 // ===========================================
 
@@ -225,8 +877,13 @@ function updateStatus(message, force = false) {
     lastStatusTime = now;
 }
 
-// Helper function to log events
+// Helper function to log events (with filtering)
 function logEvent(message, data = null) {
+    // Check if event should be logged based on active filters
+    if (!shouldLogEvent(message)) {
+        return; // Skip logging this event
+    }
+
     const logElement = document.getElementById('eventLog');
     if (logElement) {
         const timestamp = new Date().toLocaleTimeString();
@@ -432,6 +1089,12 @@ window.addEventListener('phone-island-screen-share-left', (event) => {
     updateStatus('🖥️ Left screen share');
 });
 
+// User information events
+window.addEventListener('phone-island-user-informations-update', (event) => {
+    const data = event.detail;
+    logEvent('👤 User information updated', data);
+});
+
 // ===========================================
 // LOGIN AND INITIALIZATION
 // ===========================================
@@ -476,7 +1139,33 @@ function initializeWidget(base64Token) {
 // UI EVENT HANDLERS
 // ===========================================
 
+// Clear event log
+function clearEventLog() {
+    const logElement = document.getElementById('eventLog');
+    if (logElement) {
+        logElement.innerHTML = '<div>📡 Event Log cleared - waiting for new events...</div>';
+        logEvent('🗑️ Event log cleared by user');
+    }
+}
+
 function init() {
+    // Initialize event filter UI
+    initializeFilterUI();
+
+    // Initialize device management
+    initializeDeviceManagement();
+
+    // Initialize user information
+    initializeUserInformation();
+
+    // Clear log button
+    const clearLogBtn = document.getElementById('clearLogBtn');
+    if (clearLogBtn) {
+        clearLogBtn.addEventListener('click', () => {
+            clearEventLog();
+        });
+    }
+
     // Check if we have a stored token from a previous session
     const storedToken = sessionStorage.getItem('phoneIslandToken');
     const storedUserData = sessionStorage.getItem('phoneIslandUserData');
