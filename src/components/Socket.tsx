@@ -215,52 +215,29 @@ export const Socket: FC<SocketProps> = ({
                     }` || '',
                   ownerExtension: conv.owner,
                 })
-                let callInformations = {
-                  conversationId: conv.id,
-                  displayName: getDisplayName(conv),
-                  counterpartNum: `${conv.counterpartNum}`,
-                  ownerExtension: conv.owner,
-                  username:
-                    `${
-                      extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
-                    }` || '',
-                  chDest: conv?.chDest || {},
-                  chSource: conv?.chSource || {},
-                  direction: conv.direction,
-                  inConference: conv.inConference,
-                  linkedId: conv.linkedId,
-                  uniqueId: conv.uniqueId,
-                  throughQueue: conv.throughQueue,
-                  throughTrunk: conv.throughTrunk,
-                  recording: conv.recording,
-                }
                 store.dispatch.island.setIslandView('call')
+              } 
+              const { openParamUrlType } = store.getState().paramUrl
+              const { urlOpened } = store.getState().island
+              if (openParamUrlType === 'ringing' && !urlOpened) {
+                // Calculate throughTrunk based on counterpartNum
+                const calculatedThroughTrunk = isFromTrunk(conv.counterpartNum)
 
-                eventDispatch('phone-island-call-ringing', {})
-                const { openParamUrlType } = store.getState().paramUrl
-                const { urlOpened } = store.getState().island
+                // Update throughTrunk in paramUrl store
+                store.dispatch.paramUrl.setThroughTrunk(calculatedThroughTrunk)
 
-                if (openParamUrlType === 'ringing' && !urlOpened) {
-                  // Calculate throughTrunk based on counterpartNum
-                  const calculatedThroughTrunk = isFromTrunk(conv.counterpartNum)
-
-                  // Update throughTrunk in paramUrl store
-                  store.dispatch.paramUrl.setThroughTrunk(calculatedThroughTrunk)
-
-                  store.dispatch.island.setUrlOpened(false)
-                  eventDispatch('phone-island-url-parameter-opened', {
-                    counterpartNum: conv.counterpartNum,
-                    counterpartName: getDisplayName(conv),
-                    owner: conv.owner,
-                    uniqueId: conv.uniqueId,
-                    throughQueue: conv.throughQueue,
-                    throughTrunk: calculatedThroughTrunk,
-                    direction: conv.direction,
-                    connected: conv.connected,
-                  })
-                }
+                store.dispatch.island.setUrlOpened(false)
+                eventDispatch('phone-island-url-parameter-opened', {
+                  counterpartNum: conv.counterpartNum,
+                  counterpartName: getDisplayName(conv),
+                  owner: conv.owner,
+                  uniqueId: conv.uniqueId,
+                  linkedId: conv.linkedId,
+                  throughQueue: conv.throughQueue,
+                  throughTrunk: calculatedThroughTrunk,
+                  direction: conv.direction,
+                  connected: conv.connected,
+                })
               }
               break
             // @ts-ignore
@@ -520,12 +497,16 @@ export const Socket: FC<SocketProps> = ({
               () => {
                 // Ping timeout - increment counter
                 consecutivePingTimeouts.current++
-                console.debug(`Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`)
+                console.debug(
+                  `Socket ping timeout (${consecutivePingTimeouts.current}/${STALE_CONNECTION_THRESHOLD}), connected: ${socket.current.connected}`,
+                )
 
                 // Set socket_down alert (async to avoid React error #300 with framer-motion)
                 setTimeout(() => {
                   // Check for stale connection: socket reports connected but pings keep timing out
-                  const isStaleConnection = socket.current.connected && consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
+                  const isStaleConnection =
+                    socket.current.connected &&
+                    consecutivePingTimeouts.current >= STALE_CONNECTION_THRESHOLD
 
                   if (!socket.current.connected || isStaleConnection) {
                     // Check if there's an active call with ICE still connected
@@ -533,16 +514,21 @@ export const Socket: FC<SocketProps> = ({
                     const { sipcall }: { sipcall: any } = store.getState().webrtc
                     const { accepted, outgoing } = store.getState().currentCall
                     const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-                    const hasActiveCallWithIce = (accepted || outgoing) && (iceState === 'connected' || iceState === 'completed')
+                    const hasActiveCallWithIce =
+                      (accepted || outgoing) &&
+                      (iceState === 'connected' || iceState === 'completed')
 
                     if (hasActiveCallWithIce) {
-                      console.debug('Socket unreachable but active call with ICE connected - skipping socket_down alert', {
-                        iceState,
-                        accepted,
-                        outgoing,
-                        isStaleConnection,
-                        timestamp: new Date().toISOString()
-                      })
+                      console.debug(
+                        'Socket unreachable but active call with ICE connected - skipping socket_down alert',
+                        {
+                          iceState,
+                          accepted,
+                          outgoing,
+                          isStaleConnection,
+                          timestamp: new Date().toISOString(),
+                        },
+                      )
                       return
                     }
 
@@ -1027,7 +1013,7 @@ export const Socket: FC<SocketProps> = ({
         console.info(
           forceReload
             ? 'Force reload requested, performing Socket reconnection'
-            : 'Socket down detected (alert active), performing reconnection'
+            : 'Socket down detected (alert active), performing reconnection',
         )
         // Reset force reload flag
         if (forceReload) {
