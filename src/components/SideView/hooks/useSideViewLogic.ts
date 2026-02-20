@@ -34,6 +34,7 @@ export const useSideViewLogic = (uaType?: string) => {
             counterpartName: conversationData.counterpartName,
             owner: conversationData.owner,
             uniqueId: conversationData.uniqueId,
+            linkedId: conversationData.linkedId,
             throughQueue: conversationData.throughQueue,
             throughTrunk: conversationData.throughTrunk,
             direction: conversationData.direction,

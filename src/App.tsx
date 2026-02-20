@@ -692,7 +692,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     console.log('Call status debug informations: ', callInformation)
   })
 
-  const openParameterizedUrl = (callerNum: any, callerName: any, called: any, uniqueId: any) => {
+  const openParameterizedUrl = (callerNum: any, callerName: any, called: any, uniqueId: any, automatic?: any) => {
     const paramUrlInfo = store.getState().paramUrl
 
     if (!paramUrlInfo?.hasValidUrl) {
@@ -732,7 +732,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
     const formattedUrl = processedUrl.startsWith('http') ? processedUrl : `https://${processedUrl}`
 
-    if (uaType !== 'mobile' && !urlParamWithEvent) {
+    if (uaType !== 'mobile' && !urlParamWithEvent && automatic) {
       const newWindow = window.open('about:blank', '_blank')
       if (newWindow) {
         newWindow.location.href = formattedUrl
@@ -763,20 +763,26 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     const throughTrunk = isFromTrunk(data?.counterpartNum)
     store.dispatch.paramUrl.setThroughTrunk(throughTrunk)
 
+    // Calculate automatic flag: false when desktop with nethlink device, true otherwise
+    const { default_device } = store.getState().currentUser
+    const automatic = !(uaType === 'desktop' && default_device?.type === 'nethlink')
+
     if (data?.direction === 'in') {
       if (onlyQueues === true && data?.throughQueue === true) {
         openParameterizedUrl(
           data?.counterpartNum,
           data?.counterpartName,
           data?.owner,
-          data?.uniqueId,
+          data?.linkedId,
+          automatic,
         )
       } else if (onlyQueues === false && (throughTrunk === true || data?.throughQueue === true)) {
         openParameterizedUrl(
           data?.counterpartNum,
           data?.counterpartName,
           data?.owner,
-          data?.uniqueId,
+          data?.linkedId,
+          automatic,
         )
       }
     }
