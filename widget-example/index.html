@@ -480,6 +480,46 @@
         .filter-toggle-icon.expanded {
             transform: rotate(180deg);
         }
+
+        .log-search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .log-search-input {
+            flex: 1;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .log-search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .log-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+        }
+
+        .log-search-counter {
+            font-size: 12px;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .event-log div.hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -646,6 +686,13 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <strong>📡 Event Log:</strong>
             <button id="clearLogBtn" style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🗑️ Clear Log</button>
+        </div>
+        <div class="log-search-container">
+            <div class="log-search-wrapper">
+                <span class="log-search-icon">🔍</span>
+                <input type="text" id="logSearchInput" class="log-search-input" placeholder="Search in logs...">
+            </div>
+            <span class="log-search-counter" id="logSearchCounter">0 / 0</span>
         </div>
         <div class="event-log" id="eventLog">
             <div>📡 Event Log (real-time events will appear here)...</div>

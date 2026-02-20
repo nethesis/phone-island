@@ -177,30 +177,6 @@ export const Socket: FC<SocketProps> = ({
                     (default_device?.type === undefined && !hasOnlineNethlink()) ||
                     (!hasOnlineNethlink() && default_device?.type === 'physical')))
               ) {
-                // Get updated user info
-                if (!isUpdatingUserInfo.current) {
-                  isUpdatingUserInfo.current = true
-                  getCurrentUserInfo()
-                    .then((userInfo) => {
-                      if (userInfo) {
-                        dispatch.currentUser.updateCurrentUser(userInfo)
-                        eventDispatch('phone-island-user-informations-update', { ...userInfo })
-                        if (userInfo.settings && userInfo.settings.open_param_url) {
-                          dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url)
-                        } else {
-                          dispatch.paramUrl.setOpenParamUrlType('never')
-                        }
-                      }
-                    })
-                    .catch((error) => {
-                      console.error('Error getting current user info:', error)
-                    })
-                    .finally(() => {
-                      setTimeout(() => {
-                        isUpdatingUserInfo.current = false
-                      }, 100)
-                    })
-                }
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
                   displayName: getDisplayName(conv),
@@ -216,7 +192,31 @@ export const Socket: FC<SocketProps> = ({
                   ownerExtension: conv.owner,
                 })
                 store.dispatch.island.setIslandView('call')
-              } 
+              }
+              // Get updated user info to refresh open url param type
+              if (!isUpdatingUserInfo.current) {
+                isUpdatingUserInfo.current = true
+                getCurrentUserInfo()
+                  .then((userInfo) => {
+                    if (userInfo) {
+                      dispatch.currentUser.updateCurrentUser(userInfo)
+                      eventDispatch('phone-island-user-informations-update', { ...userInfo })
+                      if (userInfo.settings && userInfo.settings.open_param_url) {
+                        dispatch.paramUrl.setOpenParamUrlType(userInfo.settings.open_param_url)
+                      } else {
+                        dispatch.paramUrl.setOpenParamUrlType('never')
+                      }
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Error getting current user info:', error)
+                  })
+                  .finally(() => {
+                    setTimeout(() => {
+                      isUpdatingUserInfo.current = false
+                    }, 100)
+                  })
+              }
               const { openParamUrlType } = store.getState().paramUrl
               const { urlOpened } = store.getState().island
               if (openParamUrlType === 'ringing' && !urlOpened) {

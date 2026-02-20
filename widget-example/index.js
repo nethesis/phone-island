@@ -892,6 +892,10 @@ function logEvent(message, data = null) {
         logEntry.innerHTML = `[${timestamp}] ${message}${dataStr}`;
         logElement.appendChild(logEntry);
         logElement.scrollTop = logElement.scrollHeight;
+        
+        // Update counter and apply current search filter
+        updateLogSearchCounter();
+        filterEventLog();
     }
     console.log(message, data);
 }
@@ -1145,7 +1149,47 @@ function clearEventLog() {
     if (logElement) {
         logElement.innerHTML = '<div>📡 Event Log cleared - waiting for new events...</div>';
         logEvent('🗑️ Event log cleared by user');
+        updateLogSearchCounter();
     }
+}
+
+// Search/filter event log
+function filterEventLog() {
+    const searchInput = document.getElementById('logSearchInput');
+    const logElement = document.getElementById('eventLog');
+    
+    if (!searchInput || !logElement) return;
+    
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const logEntries = Array.from(logElement.children);
+    
+    let visibleCount = 0;
+    
+    logEntries.forEach(entry => {
+        const text = entry.textContent.toLowerCase();
+        
+        if (searchTerm === '' || text.includes(searchTerm)) {
+            entry.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            entry.classList.add('hidden');
+        }
+    });
+    
+    updateLogSearchCounter();
+}
+
+// Update search counter
+function updateLogSearchCounter() {
+    const logElement = document.getElementById('eventLog');
+    const counter = document.getElementById('logSearchCounter');
+    
+    if (!logElement || !counter) return;
+    
+    const allEntries = Array.from(logElement.children);
+    const visibleEntries = allEntries.filter(entry => !entry.classList.contains('hidden'));
+    
+    counter.textContent = `${visibleEntries.length} / ${allEntries.length}`;
 }
 
 function init() {
@@ -1163,6 +1207,21 @@ function init() {
     if (clearLogBtn) {
         clearLogBtn.addEventListener('click', () => {
             clearEventLog();
+        });
+    }
+
+    // Search log input
+    const logSearchInput = document.getElementById('logSearchInput');
+    if (logSearchInput) {
+        logSearchInput.addEventListener('input', () => {
+            filterEventLog();
+        });
+        
+        // Also filter on Enter key
+        logSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                filterEventLog();
+            }
         });
     }
 
