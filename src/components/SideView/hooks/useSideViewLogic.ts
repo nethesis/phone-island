@@ -87,7 +87,7 @@ export const useSideViewLogic = (uaType?: string) => {
     () => ({
       canRecord: permissions?.settings?.permissions?.recording?.value || false,
       canShareScreen:
-        janus.current.webRTCAdapter.browserDetails.browser !== 'safari' &&
+        janus?.current?.webRTCAdapter?.browserDetails?.browser !== 'safari' &&
         (permissions?.nethvoice_cti?.permissions?.screen_sharing?.value || false),
       canSwitchDevice: availableDevices?.length > 0,
     }),
