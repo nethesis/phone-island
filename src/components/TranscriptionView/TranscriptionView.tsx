@@ -80,6 +80,7 @@ const TypewriterText: FC<{ text: string; isFinal: boolean; speed?: number }> = (
 const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const { actionsExpanded, view } = useSelector((state: RootState) => state.island)
   const currentUser = useSelector((state: RootState) => state.currentUser)
+  const currentCallStartTime = useSelector((state: RootState) => state.currentCall.startTime)
   const { t } = useTranslation()
 
   const [allMessages, setAllMessages] = useState<TranscriptionMessage[]>([])
@@ -89,11 +90,21 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const [lastSeenMessageIndex, setLastSeenMessageIndex] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const timestampCorrectionRef = useRef<number | null>(null)
   const [autoScroll, setAutoScroll] = useState(true)
 
   const MAX_VISIBLE_MESSAGES = 100
   const BUFFER_MESSAGES = 10
   const SCROLL_DEBOUNCE_MS = 100
+
+  const getLocalCallElapsedSeconds = () => {
+    const start = Number(currentCallStartTime)
+    if (!Number.isFinite(start) || start <= 0) {
+      return null
+    }
+    return Math.max(0, Math.floor(Date.now() / 1000) - start)
+  }
+
 
   // Function to check if a speaker number belongs to current user
   const isMyNumber = (speakerNumber: string): boolean => {
@@ -121,11 +132,29 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
 
   // Handle incoming transcription messages
   const addTranscriptionMessage = (data: any) => {
+    const rawTimestamp = Number(data.timestamp) || 0
     const uniqueId = `${data.uniqueid}_${data.timestamp}`
+    const localElapsed = getLocalCallElapsedSeconds()
+    let correctedTimestamp = rawTimestamp
+
+    // Keep transcription timestamps aligned to local call timer, avoiding progressive drift.
+    if (localElapsed !== null) {
+      if (timestampCorrectionRef.current === null) {
+        timestampCorrectionRef.current = localElapsed - rawTimestamp
+      } else {
+        const predicted = rawTimestamp + timestampCorrectionRef.current
+        const error = localElapsed - predicted
+        const boundedError = Math.max(-2, Math.min(2, error))
+        timestampCorrectionRef.current += boundedError * 0.2
+      }
+
+      correctedTimestamp = rawTimestamp + (timestampCorrectionRef.current || 0)
+      correctedTimestamp = Math.max(0, Math.min(localElapsed, correctedTimestamp))
+    }
 
     const message: TranscriptionMessage = {
       id: uniqueId,
-      timestamp: data.timestamp || 0,
+      timestamp: correctedTimestamp,
       speaker: data.speaker_name || 'Unknown',
       speakerNumber: data.speaker_number || '',
       counterpart: data.speaker_counterpart_name || '',
@@ -221,6 +250,15 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   useEventListener('phone-island-conversation-transcription', (transcriptionData: any) => {
     addTranscriptionMessage(transcriptionData)
   })
+
+  useEventListener('phone-island-transcription-opened', () => {
+    timestampCorrectionRef.current = null
+  })
+
+  useEventListener('phone-island-transcription-closed', () => {
+    timestampCorrectionRef.current = null
+  })
+
 
   // Format timestamp - converts seconds from call start to MM:SS format
   const formatTimestamp = (timestamp: number) => {
