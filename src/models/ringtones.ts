@@ -8,6 +8,7 @@ import exampleTone1 from '../static/example_tone1'
 import exampleTone2 from '../static/example_tone2'
 import exampleTone3 from '../static/example_tone3'
 import exampleTone4 from '../static/example_tone4'
+import silentRingtone from '../static/silent_ringtone'
 
 export interface RingtoneOption {
   name: string
@@ -46,6 +47,11 @@ const AVAILABLE_RINGTONES: RingtoneOption[] = [
     name: 'gentle',
     displayName: 'Gentle',
     base64Audio: exampleTone4,
+  },
+  {
+    name: 'silent',
+    displayName: 'Silent',
+    base64Audio: silentRingtone,
   },
 ]
 

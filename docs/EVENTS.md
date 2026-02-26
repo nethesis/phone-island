@@ -262,6 +262,7 @@ Available ringtone names:
 - `modern` - Modern tone
 - `soft` - Soft tone
 - `gentle` - Gentle tone
+- `silent` - Silent tone
 
 #### `phone-island-ringing-tone-output`
 Set the audio output device for ringtone playback
@@ -817,9 +818,13 @@ Response containing the list of available ringtones
       "name": "soft",
       "displayName": "Soft"
     }
-     {
+    {
       "name": "gentle",
       "displayName": "Gentle"
+    },
+    {
+      "name": "silent",
+      "displayName":"Silent"
     }
   ]
 }
