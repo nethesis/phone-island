@@ -71,16 +71,24 @@ export const Socket: FC<SocketProps> = ({
   const userInformation = useSelector((state: RootState) => state.currentUser)
 
   // Event listener for starting transcription
-  useEventListener('phone-island-start-transcription', () => {
+  useEventListener('phone-island-start-transcription', (args: any) => {
     if (socket.current) {
-      socket.current.emit('start_transcription', {})
+      const linkedid = args?.linkedid || args?.uniqueid || null
+      socket.current.emit('start_transcription', {
+        linkedid,
+        uniqueid: args?.uniqueid || linkedid,
+      })
     }
   })
 
   // Event listener for stopping transcription
-  useEventListener('phone-island-stop-transcription', () => {
+  useEventListener('phone-island-stop-transcription', (args: any) => {
     if (socket.current) {
-      socket.current.emit('stop_transcription', {})
+      const linkedid = args?.linkedid || args?.uniqueid || null
+      socket.current.emit('stop_transcription', {
+        linkedid,
+        uniqueid: args?.uniqueid || linkedid,
+      })
     }
   })
 
