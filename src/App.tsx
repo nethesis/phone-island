@@ -1029,6 +1029,8 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
           // Get the first conversation (usually there's only one active call)
           const convId = Object.keys(conversations)[0]
           const conv = conversations[convId]
+          const { default_device } = store.getState().currentUser
+          const automatic = !(uaType === 'desktop' && default_device?.type === 'nethlink')
 
           // Check conditions: must be connected and incoming
           if (conv?.connected && conv?.direction === 'in') {
@@ -1045,6 +1047,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
                 conv.counterpartName,
                 conv.owner,
                 conv.uniqueId,
+                automatic
               )
             } else if (
               onlyQueues === false &&
@@ -1056,6 +1059,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
                 conv.counterpartName,
                 conv.owner,
                 conv.uniqueId,
+                automatic
               )
             }
           }

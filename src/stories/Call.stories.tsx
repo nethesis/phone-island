@@ -1108,7 +1108,6 @@ const CallTemplate = (args: any) => {
         showAlways={false}
         {...args}
         uaType={'desktop'}
-        urlParamWithEvent
       />
 
       {/* Toast Notification */}
