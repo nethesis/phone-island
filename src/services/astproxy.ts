@@ -252,6 +252,7 @@ export async function pausePhysical(togglePause: boolean) {
 
   // compose body
   let body: any = {
+    convid: conversationId,
     endpointId: ownerExtension,
   }
 

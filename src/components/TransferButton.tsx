@@ -37,6 +37,8 @@ export const TransferButton: FC<TransferButtonProps> = ({ tooltipPlace = 'bottom
     if (transcriptionViewIsVisible) {
       eventDispatch('phone-island-transcription-close', {})
     }
+    // Hold current call during transfer selection
+    eventDispatch('phone-island-call-hold', {})
     eventDispatch('phone-island-call-transfer-opened', {})
   }
 
