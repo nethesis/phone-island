@@ -22,7 +22,6 @@ import {
   isInsideConferenceList,
 } from '../../lib/phone/call'
 import { Dispatch } from '../../store'
-import { unpauseCurrentCall } from '../../lib/phone/call'
 import { useTranslation } from 'react-i18next'
 import { useEventListener, eventDispatch } from '../../utils'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
@@ -50,6 +49,7 @@ export const ContactListView: FC<ContactListViewProps> = () => {
   const [showGradient, setShowGradient] = useState<boolean>(false)
   const [showingUsers, setShowingUsers] = useState<number>(USERS_NUMBER_PER_PAGE)
   const dispatch = useDispatch<Dispatch>()
+  const { paused } = useSelector((state: RootState) => state.currentCall)
 
   const filteredContacts = useMemo(() => {
     return [...filteredOperators, ...filteredPhonebookContacts]
@@ -170,6 +170,10 @@ export const ContactListView: FC<ContactListViewProps> = () => {
     if (isInsideConferenceList()) {
       // Close the conference list
       eventDispatch('phone-island-conference-list-close', {})
+    }
+    // Unhold the call if it was paused during transfer selection
+    if (paused) {
+      eventDispatch('phone-island-call-unhold', {})
     }
     // Open the call view
     backToPreviousView()
