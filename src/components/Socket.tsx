@@ -67,9 +67,6 @@ export const Socket: FC<SocketProps> = ({
   const consecutivePingTimeouts = useRef(0)
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
-  // get user information
-  const userInformation = useSelector((state: RootState) => state.currentUser)
-
   // Event listener for starting transcription
   useEventListener('phone-island-start-transcription', () => {
     if (socket.current) {
@@ -95,12 +92,6 @@ export const Socket: FC<SocketProps> = ({
     // Stop the local audio element ringing
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.player.setAudioPlayerLoop(false)
-  }
-
-  const checkDefaultDeviceConversationClosed = (conv: any) => {
-    // store.dispatch.player.stopAudioPlayer()
-    store.dispatch.currentCall.reset()
-    // store.dispatch.listen.reset()
   }
 
   useEffect(() => {
@@ -567,7 +558,26 @@ export const Socket: FC<SocketProps> = ({
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
+
         const extensionType: any = connectedExtension?.type
+
+        // Get linkedId from conversations
+        const { conversations } = store.getState().currentUser
+        let linkedid: any = undefined
+
+        if (res.callerNum && conversations[res.callerNum]) {
+          const extensionConversations = conversations[res.callerNum]
+          // Get the first (and usually only) conversation for this extension
+          const conversationKeys = Object.keys(extensionConversations)
+          if (conversationKeys.length > 0) {
+            const firstConvKey = conversationKeys[0]
+            linkedid = extensionConversations?.[firstConvKey]?.linkedId
+          }
+        }
+        // Dispatch event to check for call summary/transcription with linkedid
+        if (linkedid) {
+          eventDispatch('phone-island-summary-call-check', { linkedid })
+        }
 
         // If cause is normal_clearing and extension is physical or mobile
         // Clean phone-island visibility also after user_busy ( useful for physical devices )
@@ -860,6 +870,15 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
+      })
+
+      // `satellite/summary` is the socket event when summary is ready
+      socket.current.on('satellite/summary', (data: any) => {
+        if (data?.uniqueid) {
+          eventDispatch('phone-island-summary-ready', {
+            uniqueId: data?.uniqueid,
+          })
+        }
       })
 
       socket.current.on('message', (data: any) => {

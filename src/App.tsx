@@ -904,6 +904,45 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     )
   })
 
+  // Check if call summary/transcription exists
+  useEventListener('phone-island-summary-call-check', async (data: { linkedid?: string }) => {
+    if (!data?.linkedid) {
+      console.warn('[Summary Check] No uniqueId provided')
+      return
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    try {
+      const { checkSummaryCall } = await import('./services/user')
+      const result = await checkSummaryCall(data.linkedid)
+      eventDispatch('phone-island-summary-call-checked', { 
+        uniqueId: data.linkedid,
+      })
+    } catch (error: any) {
+      // 404 means summary not present yet - not an error, just not ready
+      if (error?.status === 404) {
+        console.log(`[Summary Check] Summary not ready for ${data.linkedid}`)
+      } else {
+        console.error('[Summary Check] Error checking summary:', error)
+      }
+    }
+  })
+
+  // Watch for call summary/transcription notifications
+  useEventListener('phone-island-call-summary-notify', async (data: { uniqueId: string }) => {
+    if (data?.uniqueId) {
+      try {
+        const { watchSummaryCall } = await import('./services/user')
+        await watchSummaryCall(data?.uniqueId)
+        
+        // Dispatch event to confirm the watch request was sent
+        eventDispatch('phone-island-summary-call-notified', { uniqueId: data?.uniqueId })
+      } catch (error) {
+        console.error('Error watching summary call:', error)
+      }
+    }
+  })
+
   useEventListener('phone-island-size-change', (args: any) => {
     const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =
       store.getState().island
