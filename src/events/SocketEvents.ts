@@ -14,6 +14,21 @@ import type {
   ParkingUpdateEventTypes,
 } from '../types'
 
+const PARKING_UPDATE_DISPATCH_DELAY_MS = 200
+let parkingUpdateBuffer: ParkingUpdateEventTypes = {}
+let parkingUpdateDispatchTimer: ReturnType<typeof setTimeout> | null = null
+
+function flushParkingUpdates() {
+  if (Object.keys(parkingUpdateBuffer).length === 0) {
+    parkingUpdateDispatchTimer = null
+    return
+  }
+
+  eventDispatch('phone-island-parking-update', parkingUpdateBuffer)
+  parkingUpdateBuffer = {}
+  parkingUpdateDispatchTimer = null
+}
+
 /**
  * The dispatch function for the userMainPresenceUpdate event
  *
@@ -130,11 +145,20 @@ export function dispatchServerReload() {
  * @param event The parking update event from socket
  */
 export function dispatchParkingUpdate(event: ParkingUpdateTypes) {
-  const data: ParkingUpdateEventTypes = {
-    [event.parking]: event,
+  // Batch rapid socket bursts into one browser event to avoid redundant refreshes
+  if (!event?.parking) {
+    eventDispatch('phone-island-parking-update', {})
+    return
   }
-  // Dispatch the event on window for external handlers
-  eventDispatch('phone-island-parking-update', data)
+
+  parkingUpdateBuffer[event.parking] = event
+
+  if (!parkingUpdateDispatchTimer) {
+    parkingUpdateDispatchTimer = setTimeout(
+      flushParkingUpdates,
+      PARKING_UPDATE_DISPATCH_DELAY_MS,
+    )
+  }
 }
 
 /**
