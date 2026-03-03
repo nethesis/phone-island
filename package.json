@@ -115,7 +115,7 @@
     "@storybook/addon-interactions": "7.6.23",
     "@storybook/addon-links": "7.6.23",
     "@storybook/node-logger": "7.6.23",
-    "@storybook/preset-create-react-app": "7.6.21",
+    "@storybook/preset-create-react-app": "7.6.23",
     "@storybook/react": "7.6.20",
     "@storybook/react-webpack5": "^7.6.20",
     "@storybook/testing-library": "^0.0.13",
