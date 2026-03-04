@@ -19,6 +19,11 @@ export const useSideViewLogic = (uaType?: string) => {
   const [availableDevices, setAvailableDevices] = useState([])
   const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
 
+  const getActiveConversationData = useCallback(() => {
+    const activeConversation = Object.values(conversations).find((conv) => Object.keys(conv).length > 0)
+    return activeConversation ? (Object.values(activeConversation)[0] as any) : null
+  }, [conversations])
+
   const closeSideViewAndLaunchEvent = useCallback(
     (viewType: any) => {
       dispatch.island.toggleSideViewVisible(false)
@@ -101,10 +106,7 @@ export const useSideViewLogic = (uaType?: string) => {
   )
 
   const isUrlButtonEnabled = useMemo(() => {
-    const activeConversation = Object.values(conversations).find(
-      (conv) => Object.keys(conv).length > 0,
-    )
-    const conversationData = activeConversation ? Object.values(activeConversation)[0] : null
+    const conversationData = getActiveConversationData()
 
     // If param url type is 'never', return false
     if (paramUrlData.openParamUrlType === 'never') {
@@ -128,7 +130,7 @@ export const useSideViewLogic = (uaType?: string) => {
     }
 
     return false
-  }, [conversations, paramUrlData.onlyQueues, paramUrlData.openParamUrlType])
+  }, [getActiveConversationData, paramUrlData.onlyQueues, paramUrlData.openParamUrlType])
 
   useEffect(() => {
     if (userInformation && allUsersInformation) {
@@ -138,12 +140,14 @@ export const useSideViewLogic = (uaType?: string) => {
   }, [userInformation, allUsersInformation])
 
   const openTranscriptionView = useCallback(() => {
+    const conversationData = getActiveConversationData()
     // Close SideView, collapse actions, and open TranscriptionView
     dispatch.island.toggleSideViewVisible(false)
-    setTimeout(() => {
-      eventDispatch('phone-island-transcription-open', {})
-    }, 100)
-  }, [dispatch.island])
+    eventDispatch('phone-island-transcription-open', {
+      linkedid: conversationData?.linkedId || null,
+      uniqueid: conversationData?.uniqueId || null,
+    })
+  }, [dispatch.island, getActiveConversationData])
 
   const isTranscriptionEnabled = useMemo(
     () => userInformation?.call_transcription_enabled || false,
