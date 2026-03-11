@@ -1,4 +1,4 @@
-import React, { type FC, useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
@@ -60,6 +60,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     // Cooldown to prevent reload loop when network is down
     const lastReloadTime = useRef<number>(0)
     const RELOAD_COOLDOWN = 10 * 1000 // 10 seconds between reload attempts
+    const activeTranscriptionUniqueIdRef = useRef<string | null>(null)
 
     // Expose reset method via imperativeHandle
     useImperativeHandle(
@@ -852,19 +853,28 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
   useEventListener('phone-island-transcription-close', () => {
     store.dispatch.island.toggleTranscriptionViewVisible(false)
-    eventDispatch('phone-island-stop-transcription', {})
+    if (activeTranscriptionUniqueIdRef.current) {
+      eventDispatch('phone-island-stop-transcription', {
+        uniqueid: activeTranscriptionUniqueIdRef.current,
+        linkedid: activeTranscriptionUniqueIdRef.current,
+      })
+      activeTranscriptionUniqueIdRef.current = null
+    }
     eventDispatch('phone-island-transcription-closed', {})
   })
 
-  useEventListener('phone-island-transcription-open', () => {
-    eventDispatch('phone-island-start-transcription', {})
+  useEventListener('phone-island-transcription-open', (args: any) => {
+    const uniqueid = args?.linkedid || args?.uniqueid || null
+    if (!uniqueid) {
+      return
+    }
+    activeTranscriptionUniqueIdRef.current = uniqueid
+    eventDispatch('phone-island-start-transcription', {
+      linkedid: uniqueid,
+      uniqueid,
+    })
     store.dispatch.island.toggleTranscriptionViewVisible(true)
     eventDispatch('phone-island-transcription-opened', {})
-  })
-
-  useEventListener('phone-island-transcription-close', () => {
-    store.dispatch.island.toggleTranscriptionViewVisible(false)
-    eventDispatch('phone-island-transcription-closed', {})
   })
 
   useEventListener('phone-island-init-audio', () => {
