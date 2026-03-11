@@ -1,4 +1,4 @@
-import React, { type FC, useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
@@ -853,15 +853,21 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
   useEventListener('phone-island-transcription-close', () => {
     store.dispatch.island.toggleTranscriptionViewVisible(false)
-    eventDispatch('phone-island-stop-transcription', {
-      uniqueid: activeTranscriptionUniqueIdRef.current,
-      linkedid: activeTranscriptionUniqueIdRef.current,
-    })
+    if (activeTranscriptionUniqueIdRef.current) {
+      eventDispatch('phone-island-stop-transcription', {
+        uniqueid: activeTranscriptionUniqueIdRef.current,
+        linkedid: activeTranscriptionUniqueIdRef.current,
+      })
+      activeTranscriptionUniqueIdRef.current = null
+    }
     eventDispatch('phone-island-transcription-closed', {})
   })
 
   useEventListener('phone-island-transcription-open', (args: any) => {
     const uniqueid = args?.linkedid || args?.uniqueid || null
+    if (!uniqueid) {
+      return
+    }
     activeTranscriptionUniqueIdRef.current = uniqueid
     eventDispatch('phone-island-start-transcription', {
       linkedid: uniqueid,

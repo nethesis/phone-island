@@ -141,11 +141,17 @@ export const useSideViewLogic = (uaType?: string) => {
 
   const openTranscriptionView = useCallback(() => {
     const conversationData = getActiveConversationData()
+    const transcriptionId = conversationData?.linkedId || conversationData?.uniqueId || null
+
+    if (!transcriptionId) {
+      return
+    }
+
     // Close SideView, collapse actions, and open TranscriptionView
     dispatch.island.toggleSideViewVisible(false)
     eventDispatch('phone-island-transcription-open', {
-      linkedid: conversationData?.linkedId || null,
-      uniqueid: conversationData?.uniqueId || null,
+      linkedid: transcriptionId,
+      uniqueid: transcriptionId,
     })
   }, [dispatch.island, getActiveConversationData])
 

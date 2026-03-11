@@ -74,6 +74,9 @@ export const Socket: FC<SocketProps> = ({
   useEventListener('phone-island-start-transcription', (args: any) => {
     if (socket.current) {
       const linkedid = args?.linkedid || args?.uniqueid || null
+      if (!linkedid) {
+        return
+      }
       socket.current.emit('start_transcription', {
         linkedid,
         uniqueid: args?.uniqueid || linkedid,
@@ -85,6 +88,9 @@ export const Socket: FC<SocketProps> = ({
   useEventListener('phone-island-stop-transcription', (args: any) => {
     if (socket.current) {
       const linkedid = args?.linkedid || args?.uniqueid || null
+      if (!linkedid) {
+        return
+      }
       socket.current.emit('stop_transcription', {
         linkedid,
         uniqueid: args?.uniqueid || linkedid,
