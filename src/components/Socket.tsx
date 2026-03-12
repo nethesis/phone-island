@@ -893,7 +893,7 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('satellite/summary', (data: any) => {
         if (data?.uniqueid) {
           eventDispatch('phone-island-summary-ready', {
-            uniqueId: data?.uniqueid,
+            linkedid: data?.uniqueid,
           })
         }
       })

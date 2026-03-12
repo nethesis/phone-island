@@ -915,46 +915,54 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   })
 
   // Check if call summary/transcription exists
-  useEventListener('phone-island-summary-call-check', async (data: { linkedid?: string }) => {
-    if (!data?.linkedid) {
-      console.warn('[Summary Check] No uniqueId provided')
-      return
-    }
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    try {
-      const { checkSummaryCall } = await import('./services/user')
-      await checkSummaryCall(data.linkedid)
-      eventDispatch('phone-island-summary-ready', {
-        uniqueId: data.linkedid,
-      })
-    } catch (error: any) {
-      // 204 means summary not present yet - not an error, just not ready
-      if (error?.status === 204) {
-        console.log(`[Summary Check] Summary not ready for ${data.linkedid}`)
-        eventDispatch('phone-island-summary-not-ready', {
-          uniqueId: data.linkedid,
-        })
-      } else {
-        console.error('[Summary Check] Error checking summary:', error)
+  useEventListener(
+    'phone-island-summary-call-check',
+    async (data: { linkedid?: string; uniqueid?: string; uniqueId?: string }) => {
+      const callId = data?.linkedid || data?.uniqueid || data?.uniqueId
+      if (!callId) {
+        console.warn('[Summary Check] No call identifier provided')
+        return
       }
-    }
-  })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      try {
+        const { checkSummaryCall } = await import('./services/user')
+        await checkSummaryCall(callId)
+        eventDispatch('phone-island-summary-ready', {
+          linkedid: callId,
+        })
+      } catch (error: any) {
+        // 204 means summary not present yet - not an error, just not ready
+        if (error?.status === 204) {
+          console.log(`[Summary Check] Summary not ready for ${callId}`)
+          eventDispatch('phone-island-summary-not-ready', {
+            linkedid: callId,
+          })
+        } else {
+          console.error('[Summary Check] Error checking summary:', error)
+        }
+      }
+    },
+  )
 
   // Watch for call summary/transcription notifications
-  useEventListener('phone-island-call-summary-notify', async (data: { uniqueId: string }) => {
-    if (data?.uniqueId) {
-      try {
-        const { watchSummaryCall } = await import('./services/user')
-        await watchSummaryCall(data?.uniqueId)
-        
-        // Dispatch event to confirm the watch request was sent
-        eventDispatch('phone-island-summary-call-notified', { uniqueId: data?.uniqueId })
-      } catch (error) {
-        console.error('Error watching summary call:', error)
+  useEventListener(
+    'phone-island-call-summary-notify',
+    async (data: { linkedid?: string; uniqueid?: string; uniqueId?: string }) => {
+      const callId = data?.linkedid || data?.uniqueid || data?.uniqueId
+      if (callId) {
+        try {
+          const { watchSummaryCall } = await import('./services/user')
+          await watchSummaryCall(callId)
+
+          // Dispatch event to confirm the watch request was sent
+          eventDispatch('phone-island-summary-call-notified', { linkedid: callId })
+        } catch (error) {
+          console.error('Error watching summary call:', error)
+        }
       }
-    }
-  })
+    },
+  )
 
   useEventListener('phone-island-size-change', (args: any) => {
     const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =

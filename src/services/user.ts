@@ -308,6 +308,7 @@ export async function watchSummaryCall(uniqueid: string): Promise<void> {
     })
     if (!response.ok) {
       console.error('Error watching summary call:', response.statusText)
+      throw new Error(response.statusText)
     }
   } catch (error: any) {
     console.error('Error watching summary call:', error)

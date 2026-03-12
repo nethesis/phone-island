@@ -472,14 +472,14 @@ The event to close the recording view
 #### `phone-island-recording-start`
 The event to start the recording
 
-### Summary/Transcription Check Events
+### Call Summary/Transcription Check Events
 
 #### `phone-island-summary-call-check`
 The event to check if a call summary/transcription exists for a given unique ID. This event triggers an API call to verify the presence of the transcription.
 
 ```json
 {
-  "linedid": "1769179547.799"
+  "linkedid": "1769179547.799"
 }
 ```
 
@@ -496,7 +496,7 @@ The event to watch and register for call summary/transcription notifications for
 - `linkedid`: The linked ID of the call to watch for summary/transcription
 
 **Usage Notes:**
-- This event sends a POST request to `/transcripts/summary/watch` with the linkedid
+- This event sends a POST request to `/summary/watch` with the linkedid
 - Used to register interest in receiving notifications when a summary becomes available
 - Dispatches `phone-island-summary-call-notified` with linkedid when the watch request is sent
 - Different from `phone-island-summary-call-check` which only checks if a summary already exists
@@ -1694,7 +1694,7 @@ Indicates that a call summary/transcription is ready and available. This event i
 
 ```json
 {
-  "linkedid": "1769185498.1004",
+  "linkedid": "1769185498.1004"
 }
 ```
 
