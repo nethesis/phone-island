@@ -578,6 +578,7 @@ export const Socket: FC<SocketProps> = ({
         // Get linkedId from conversations
         const { conversations } = store.getState().currentUser
         let linkedid: any = undefined
+        let conversationWasConnected = false
 
         if (res.callerNum && conversations[res.callerNum]) {
           const extensionConversations = conversations[res.callerNum]
@@ -585,11 +586,13 @@ export const Socket: FC<SocketProps> = ({
           const conversationKeys = Object.keys(extensionConversations)
           if (conversationKeys.length > 0) {
             const firstConvKey = conversationKeys[0]
-            linkedid = extensionConversations?.[firstConvKey]?.linkedId
+            const activeConversation = extensionConversations?.[firstConvKey]
+            linkedid = activeConversation?.linkedId
+            conversationWasConnected = activeConversation?.connected || false
           }
         }
-        // Dispatch event to check for call summary/transcription with linkedid
-        if (linkedid) {
+        // Check summary/transcription only for calls that were actually answered.
+        if (linkedid && conversationWasConnected) {
           eventDispatch('phone-island-summary-call-check', { linkedid })
         }
 

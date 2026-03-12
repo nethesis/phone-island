@@ -1651,8 +1651,8 @@ Indicates that a real-time transcription message has been received for an active
 
 ### Summary/Transcription Check Events
 
-#### `phone-island-summary-call-checked`
-Indicates that a call summary/transcription exists for the specified linkedid. This event is dispatched only when the transcription is available (API returns 200).
+#### `phone-island-summary-not-ready`
+Indicates that a call summary/transcription is not available yet for the specified linkedid. This event is dispatched when the initial check returns 204, so the host application can ask the user whether it wants to be notified later.
 
 ```json
 {
@@ -1665,9 +1665,11 @@ Indicates that a call summary/transcription exists for the specified linkedid. T
 
 **Usage Notes:**
 - This event is triggered in response to `phone-island-summary-call-check`
-- Only dispatched when the API confirms the transcription exists (HTTP 200 response)
-- If the transcription doesn't exist or there's an error, no event is dispatched
-- Can be used to show UI elements indicating transcription availability
+- Triggered when the initial summary check returns `204 No Content`
+- Intended to show a "notify me when ready" prompt
+- Dispatched only when the summary is not available yet
+- If the summary already exists, `phone-island-summary-ready` is dispatched instead
+- Can be used to show UI elements that offer background notification
 
 #### `phone-island-summary-call-notified`
 Indicates that a watch request was sent for call summary/transcription notifications. This event is dispatched after successfully sending a watch request.

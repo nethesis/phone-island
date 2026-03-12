@@ -268,7 +268,7 @@ export async function getFeatureCodes(): Promise<any> {
 /**
  * Check if a call summary/transcription exists for a given uniqueId
  * Returns: { uniqueid: string, has_summary: boolean }
- * Throws: Error with status code for 401, 403, 404, 503
+ * Throws: Error with status code for 204, 401, 403, 404, 503
  */
 export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: string; has_summary: boolean }> {
   const { baseURL, headers } = store.getState().fetchDefaults
@@ -278,18 +278,18 @@ export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: st
   })
 
   // 200 - Summary exists
-  if (response.ok) {
+  if (response.status === 200) {
     return { uniqueid: uniqueId, has_summary: true }
   }
 
-  // 404 - Summary not present yet (not an error, just not ready)
-  if (response.status === 404) {
-    const error: any = new Error('Summary not found')
-    error.status = 404
+  // 204 - Summary not present yet (not an error, just not ready)
+  if (response.status === 204) {
+    const error: any = new Error('Summary not ready')
+    error.status = 204
     throw error
   }
 
-  // 401, 403, 503 - Real errors
+  // 401, 403, 404, 503 - Real errors
   const error: any = new Error(`Failed to check summary: ${response.statusText}`)
   error.status = response.status
   throw error

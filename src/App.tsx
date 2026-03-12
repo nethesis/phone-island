@@ -924,14 +924,17 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
     try {
       const { checkSummaryCall } = await import('./services/user')
-      const result = await checkSummaryCall(data.linkedid)
-      eventDispatch('phone-island-summary-call-checked', { 
+      await checkSummaryCall(data.linkedid)
+      eventDispatch('phone-island-summary-ready', {
         uniqueId: data.linkedid,
       })
     } catch (error: any) {
-      // 404 means summary not present yet - not an error, just not ready
-      if (error?.status === 404) {
+      // 204 means summary not present yet - not an error, just not ready
+      if (error?.status === 204) {
         console.log(`[Summary Check] Summary not ready for ${data.linkedid}`)
+        eventDispatch('phone-island-summary-not-ready', {
+          uniqueId: data.linkedid,
+        })
       } else {
         console.error('[Summary Check] Error checking summary:', error)
       }
