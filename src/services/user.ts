@@ -268,7 +268,10 @@ export async function getFeatureCodes(): Promise<any> {
 /**
  * Check if a call summary/transcription exists for a given uniqueId
  * Returns: { uniqueid: string, has_summary: boolean }
- * Throws: Error with status code for 204, 401, 403, 404, 503
+ * Throws:
+ *   - Error with status 204 when the summary is not ready yet.
+ *   - Error with the corresponding HTTP status code for any other non-200 response
+ *     (including, but not limited to, 401, 403, 404, 503).
  */
 export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: string; has_summary: boolean }> {
   const { baseURL, headers } = store.getState().fetchDefaults
