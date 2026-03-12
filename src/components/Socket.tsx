@@ -582,13 +582,38 @@ export const Socket: FC<SocketProps> = ({
 
         if (res.callerNum && conversations[res.callerNum]) {
           const extensionConversations = conversations[res.callerNum]
-          // Get the first (and usually only) conversation for this extension
           const conversationKeys = Object.keys(extensionConversations)
           if (conversationKeys.length > 0) {
-            const firstConvKey = conversationKeys[0]
-            const activeConversation = extensionConversations?.[firstConvKey]
-            linkedid = activeConversation?.linkedId
-            conversationWasConnected = activeConversation?.connected || false
+            let selectedConversation: any = null
+            for (const key of conversationKeys) {
+              const currentConversation = extensionConversations?.[key]
+              if (!currentConversation) continue
+
+              if (!selectedConversation) {
+                selectedConversation = currentConversation
+                continue
+              }
+
+              const selectedConnected = !!selectedConversation.connected
+              const currentConnected = !!currentConversation.connected
+
+              // Prefer connected conversations over non-connected ones
+              if (currentConnected && !selectedConnected) {
+                selectedConversation = currentConversation
+                continue
+              }
+
+              const selectedStartTime = selectedConversation.startTime ?? 0
+              const currentStartTime = currentConversation.startTime ?? 0
+
+              // Among conversations with the same connected status, prefer the most recent one
+              if (currentConnected === selectedConnected && currentStartTime > selectedStartTime) {
+                selectedConversation = currentConversation
+              }
+            }
+
+            linkedid = selectedConversation?.linkedId
+            conversationWasConnected = selectedConversation?.connected || false
           }
         }
         // Check summary/transcription only for calls that were actually answered.
