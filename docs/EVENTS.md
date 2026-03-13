@@ -33,6 +33,7 @@ Events dispatch can be done using the [CustomEvent constructor](https://develope
   - [System Events](#system-events)
   - [WebSocket & Server Events](#websocket--server-events)
   - [UI State Events](#ui-state-events)
+  - [Summary/Transcription Check Events](#summarytranscription-check-events)
 
 ## Usage
 
@@ -470,6 +471,35 @@ The event to close the recording view
 
 #### `phone-island-recording-start`
 The event to start the recording
+
+### Call Summary/Transcription Check Events
+
+#### `phone-island-summary-call-check`
+The event to check if a call summary/transcription exists for a given unique ID. This event triggers an API call to verify the presence of the transcription.
+
+```json
+{
+  "linkedid": "1769179547.799"
+}
+```
+
+#### `phone-island-call-summary-notify`
+The event to watch and register for call summary/transcription notifications for a given unique ID. This event triggers a POST request to subscribe to summary updates.
+
+```json
+{
+  "linkedid": "1769179547.799"
+}
+```
+
+**Parameters:**
+- `linkedid`: The linked ID of the call to watch for summary/transcription
+
+**Usage Notes:**
+- This event sends a POST request to `/summary/watch` with the linkedid
+- Used to register interest in receiving notifications when a summary becomes available
+- Dispatches `phone-island-summary-call-notified` with linkedid when the watch request is sent
+- Different from `phone-island-summary-call-check` which only checks if a summary already exists
 
 ```json
 {}
@@ -1618,3 +1648,60 @@ Indicates that a real-time transcription message has been received for an active
 - Final results (`is_final: true`) represent the completed, stable transcription
 - Only users who are participants in the conversation (matching speaker or counterpart) will receive these events
 - This event requires the phone-island to be connected to a middleware that supports transcription services
+
+### Summary/Transcription Check Events
+
+#### `phone-island-summary-not-ready`
+Indicates that a call summary/transcription is not available yet for the specified linkedid. This event is dispatched when the initial check returns 204, so the host application can ask the user whether it wants to be notified later.
+
+```json
+{
+  "linkedid": "1769179547.799"
+}
+```
+
+**Parameters:**
+- `linkedid`: The unique ID for which the transcription was checked
+
+**Usage Notes:**
+- This event is triggered in response to `phone-island-summary-call-check`
+- Triggered when the initial summary check returns `204 No Content`
+- Intended to show a "notify me when ready" prompt
+- Dispatched only when the summary is not available yet
+- If the summary already exists, `phone-island-summary-ready` is dispatched instead
+- Can be used to show UI elements that offer background notification
+
+#### `phone-island-summary-call-notified`
+Indicates that a watch request was sent for call summary/transcription notifications. This event is dispatched after successfully sending a watch request.
+
+```json
+{
+  "linkedid": "1769179547.799"
+}
+```
+
+**Parameters:**
+- `linkedid`: The unique ID for which a watch request was sent
+
+**Usage Notes:**
+- This event is triggered in response to `phone-island-call-summary-notify`
+- Always dispatched after the watch request is sent to the backend
+- Used to confirm that the system is now watching for summary/transcription availability
+- Can be used to show UI elements indicating watch registration
+
+#### `phone-island-summary-ready`
+Indicates that a call summary/transcription is ready and available. This event is dispatched when the backend notifies that the summary has been generated.
+
+```json
+{
+  "linkedid": "1769185498.1004"
+}
+```
+
+**Parameters:**
+- `linkedid`: The unique ID of the call for which the summary is ready
+
+**Usage Notes:**
+- This event is automatically dispatched when receiving the `satellite/summary` socket event
+- Triggered by the backend when summary generation is complete
+- Can be used to notify users that their call summary is available

@@ -67,9 +67,6 @@ export const Socket: FC<SocketProps> = ({
   const consecutivePingTimeouts = useRef(0)
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
-  // get user information
-  const userInformation = useSelector((state: RootState) => state.currentUser)
-
   // Event listener for starting transcription
   useEventListener('phone-island-start-transcription', (args: any) => {
     if (socket.current) {
@@ -109,12 +106,6 @@ export const Socket: FC<SocketProps> = ({
     // Stop the local audio element ringing
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.player.setAudioPlayerLoop(false)
-  }
-
-  const checkDefaultDeviceConversationClosed = (conv: any) => {
-    // store.dispatch.player.stopAudioPlayer()
-    store.dispatch.currentCall.reset()
-    // store.dispatch.listen.reset()
   }
 
   useEffect(() => {
@@ -581,7 +572,54 @@ export const Socket: FC<SocketProps> = ({
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
+
         const extensionType: any = connectedExtension?.type
+
+        // Get linkedId from conversations
+        const { conversations } = store.getState().currentUser
+        let linkedid: any = undefined
+        let conversationWasConnected = false
+
+        if (res.callerNum && conversations[res.callerNum]) {
+          const extensionConversations = conversations[res.callerNum]
+          const conversationKeys = Object.keys(extensionConversations)
+          if (conversationKeys.length > 0) {
+            let selectedConversation: any = null
+            for (const key of conversationKeys) {
+              const currentConversation = extensionConversations?.[key]
+              if (!currentConversation) continue
+
+              if (!selectedConversation) {
+                selectedConversation = currentConversation
+                continue
+              }
+
+              const selectedConnected = !!selectedConversation.connected
+              const currentConnected = !!currentConversation.connected
+
+              // Prefer connected conversations over non-connected ones
+              if (currentConnected && !selectedConnected) {
+                selectedConversation = currentConversation
+                continue
+              }
+
+              const selectedStartTime = selectedConversation.startTime ?? 0
+              const currentStartTime = currentConversation.startTime ?? 0
+
+              // Among conversations with the same connected status, prefer the most recent one
+              if (currentConnected === selectedConnected && currentStartTime > selectedStartTime) {
+                selectedConversation = currentConversation
+              }
+            }
+
+            linkedid = selectedConversation?.linkedId
+            conversationWasConnected = selectedConversation?.connected || false
+          }
+        }
+        // Check summary/transcription only for calls that were actually answered.
+        if (linkedid && conversationWasConnected) {
+          eventDispatch('phone-island-summary-call-check', { linkedid })
+        }
 
         // If cause is normal_clearing and extension is physical or mobile
         // Clean phone-island visibility also after user_busy ( useful for physical devices )
@@ -874,6 +912,15 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('actionNethLink', (link, urlType) => {
         // Dispatch phone island physical call event with the link and the urlType
         dispatchUrlCall(link, urlType)
+      })
+
+      // `satellite/summary` is the socket event when summary is ready
+      socket.current.on('satellite/summary', (data: any) => {
+        if (data?.uniqueid) {
+          eventDispatch('phone-island-summary-ready', {
+            linkedid: data?.uniqueid,
+          })
+        }
       })
 
       socket.current.on('message', (data: any) => {
