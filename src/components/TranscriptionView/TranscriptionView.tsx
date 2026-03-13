@@ -34,6 +34,8 @@ interface TranscriptionViewProps {
 interface TranscriptionMessage {
   id: string
   timestamp: number
+  channelIndex: number
+  segmentStart: number
   speaker: string
   speakerNumber: string
   counterpart: string
@@ -97,6 +99,16 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const BUFFER_MESSAGES = 10
   const SCROLL_DEBOUNCE_MS = 100
 
+  const resetTranscriptionState = () => {
+    timestampCorrectionRef.current = null
+    setAllMessages([])
+    setVisibleMessages([])
+    setHasNewContent(false)
+    setUserScrolled(false)
+    setLastSeenMessageIndex(0)
+    setAutoScroll(true)
+  }
+
   const getLocalCallElapsedSeconds = () => {
     const start = Number(currentCallStartTime)
     if (!Number.isFinite(start) || start <= 0) {
@@ -133,7 +145,14 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   // Handle incoming transcription messages
   const addTranscriptionMessage = (data: any) => {
     const rawTimestamp = Number(data.timestamp) || 0
-    const uniqueId = `${data.uniqueid}_${data.timestamp}`
+    const channelIndex = Number.isFinite(Number(data.channel_index)) ? Number(data.channel_index) : -1
+    const segmentStart = Number.isFinite(Number(data.segment_start))
+      ? Number(data.segment_start)
+      : rawTimestamp
+    const uniqueId =
+      data.uniqueid && channelIndex >= 0
+        ? `${data.uniqueid}_${channelIndex}_${segmentStart.toFixed(3)}`
+        : `${data.uniqueid}_${rawTimestamp}`
     const localElapsed = getLocalCallElapsedSeconds()
     let correctedTimestamp = rawTimestamp
 
@@ -155,6 +174,8 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     const message: TranscriptionMessage = {
       id: uniqueId,
       timestamp: correctedTimestamp,
+      channelIndex,
+      segmentStart,
       speaker: data.speaker_name || 'Unknown',
       speakerNumber: data.speaker_number || '',
       counterpart: data.speaker_counterpart_name || '',
@@ -164,18 +185,68 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     }
 
     setAllMessages((prevMessages) => {
-      // Check if message with same unique ID already exists
+      const findLastIndex = (predicate: (message: TranscriptionMessage) => boolean) => {
+        for (let index = prevMessages.length - 1; index >= 0; index -= 1) {
+          if (predicate(prevMessages[index])) {
+            return index
+          }
+        }
+        return -1
+      }
+
+      const isSameSpeakerStream = (existingMessage: TranscriptionMessage) => {
+        if (message.channelIndex >= 0 && existingMessage.channelIndex >= 0) {
+          return existingMessage.channelIndex === message.channelIndex
+        }
+
+        if (message.speakerNumber && existingMessage.speakerNumber) {
+          return existingMessage.speakerNumber === message.speakerNumber
+        }
+
+        return existingMessage.speaker === message.speaker
+      }
+
+      // Prefer exact match when the backend gives us a stable segment identity.
       const existingMessageIndex = prevMessages.findIndex((msg) => msg.id === uniqueId)
+      const activeInterimIndex = findLastIndex(
+        (existingMessage) => !existingMessage.isFinal && isSameSpeakerStream(existingMessage),
+      )
+      const similarFinalIndex = findLastIndex(
+        (existingMessage) =>
+          existingMessage.isFinal &&
+          isSameSpeakerStream(existingMessage) &&
+          existingMessage.text.trim() === message.text.trim() &&
+          Math.abs(existingMessage.timestamp - message.timestamp) <= 1,
+      )
 
       if (existingMessageIndex !== -1) {
-        // Update existing message (same uniqueid + timestamp)
+        // Update existing message when the segment identity already exists.
         const updatedMessages = [...prevMessages]
         updatedMessages[existingMessageIndex] = message
         return updatedMessages
-      } else {
-        // Add new message - each uniqueid + timestamp combination is a separate message
-        return [...prevMessages, message]
       }
+
+      if (activeInterimIndex !== -1) {
+        // Keep at most one active interim bubble per speaker/channel. This prevents
+        // duplicated "speaking..." rows when Deepgram emits multiple partial updates.
+        const updatedMessages = [...prevMessages]
+        updatedMessages[activeInterimIndex] = {
+          ...message,
+          id: prevMessages[activeInterimIndex].id,
+        }
+        return updatedMessages
+      }
+
+      if (similarFinalIndex !== -1) {
+        const updatedMessages = [...prevMessages]
+        updatedMessages[similarFinalIndex] = {
+          ...message,
+          id: prevMessages[similarFinalIndex].id,
+        }
+        return updatedMessages
+      }
+
+      return [...prevMessages, message]
     })
   }
 
@@ -252,11 +323,11 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   })
 
   useEventListener('phone-island-transcription-opened', () => {
-    timestampCorrectionRef.current = null
+    resetTranscriptionState()
   })
 
   useEventListener('phone-island-transcription-closed', () => {
-    timestampCorrectionRef.current = null
+    resetTranscriptionState()
   })
 
 
