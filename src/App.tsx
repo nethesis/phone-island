@@ -931,6 +931,18 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
         console.warn('[Summary Check] No call identifier provided')
         return
       }
+
+      const { isActive, usersList, conferenceStartedFrom } = store.getState().conference
+      const { name, username } = store.getState().currentUser
+      const isUserInConference =
+        isActive &&
+        (conferenceStartedFrom === username ||
+          (!!usersList && Object.values(usersList).some((user: any) => user.name === name)))
+
+      if (isUserInConference) {
+        return
+      }
+
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       try {
