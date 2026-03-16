@@ -91,6 +91,7 @@ export const IslandDrag: FC<IslandDragProps> = ({ children, islandContainerRef }
 
   // Handles drag end event
   const handleDragEnd = () => {
+    if (!islandRef.current) return
     // Get initial transform values
     let { x, y }: any = styleTransformValues(islandRef.current)
     // Round position
