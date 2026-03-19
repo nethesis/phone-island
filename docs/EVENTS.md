@@ -1694,12 +1694,16 @@ Indicates that a call summary/transcription is ready and available. This event i
 
 ```json
 {
-  "linkedid": "1769185498.1004"
+  "linkedid": "1769185498.1004",
+  "display_name": "Mario Rossi",
+  "display_number": "+39021234567"
 }
 ```
 
 **Parameters:**
 - `linkedid`: The unique ID of the call for which the summary is ready
+- `display_name`: Optional display name for the other call party
+- `display_number`: Optional display number for the other call party
 
 **Usage Notes:**
 - This event is automatically dispatched when receiving the `satellite/summary` socket event

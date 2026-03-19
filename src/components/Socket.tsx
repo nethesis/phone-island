@@ -940,6 +940,8 @@ export const Socket: FC<SocketProps> = ({
         if (data?.uniqueid) {
           eventDispatch('phone-island-summary-ready', {
             linkedid: data?.uniqueid,
+            display_name: data?.display_name,
+            display_number: data?.display_number,
           })
         }
       })
