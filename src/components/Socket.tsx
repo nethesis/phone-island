@@ -108,6 +108,51 @@ export const Socket: FC<SocketProps> = ({
     store.dispatch.player.setAudioPlayerLoop(false)
   }
 
+  const shouldIgnoreConversationUpdate = (conv: ConversationTypes) => {
+    const { currentCall, currentUser } = store.getState()
+    const {
+      accepted,
+      acceptedWebRTC,
+      conferencing,
+      conversationId,
+      incoming,
+      incomingWebRTC,
+      number,
+      outgoing,
+      outgoingWebRTC,
+      ownerExtension,
+      transferSwitching,
+      transferring,
+    } = currentCall
+
+    const hasActiveCall =
+      accepted ||
+      acceptedWebRTC ||
+      incoming ||
+      incomingWebRTC ||
+      outgoing ||
+      outgoingWebRTC ||
+      conversationId !== ''
+
+    if (!hasActiveCall || transferring || transferSwitching || conferencing) {
+      return false
+    }
+
+    if (conversationId && conv.id === conversationId) {
+      return false
+    }
+
+    const activeOwnerExtension = ownerExtension || currentUser.default_device?.exten || ''
+    const sameOwnerExtension = activeOwnerExtension !== '' && conv.owner === activeOwnerExtension
+    const sameCounterpartNumber = number !== '' && `${conv.counterpartNum}` === number
+
+    if (sameOwnerExtension && sameCounterpartNumber) {
+      return false
+    }
+
+    return true
+  }
+
   useEffect(() => {
     /**
      * Helper function to handle streaming source detection and subscription
@@ -147,6 +192,10 @@ export const Socket: FC<SocketProps> = ({
       const view = store.getState().island.view
       // Check conversation isn't empty
       if (Object.keys(conv).length > 0) {
+        if (shouldIgnoreConversationUpdate(conv)) {
+          return
+        }
+
         // With conversation
         if (res.status) {
           const { extensions } = store.getState().users
