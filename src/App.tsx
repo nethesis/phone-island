@@ -6,6 +6,14 @@ import { Base64 } from 'js-base64'
 import wakeUpWorker from './workers/wake_up'
 import { initI18n } from './lib/i18n'
 
+// Enable cookie sending for cross-origin requests when behind the support proxy
+if (typeof window !== 'undefined' && window.location.hostname.includes('.support.my.')) {
+  const originalFetch = window.fetch
+  window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+    return originalFetch(input, { credentials: 'include', ...init })
+  }
+}
+
 import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
