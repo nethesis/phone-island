@@ -11,7 +11,6 @@ import {
   getDisplayText,
   getTextClassName,
   MemoizedTextScroll,
-  DisplayTextResult,
 } from './DisplayNameUtils'
 
 const selectDisplayNameAndIncoming = (state: RootState) => ({
@@ -60,12 +59,14 @@ const DisplayName: React.FC<DisplayNameProps> = () => {
   }
 
   return (
-    <NameMotion ref={nameContainer} className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'>
-      <div className={textClassName} ref={nameText}>
-        {renderDisplayContent()}
-      </div>
-      <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50' />
-    </NameMotion>
+    <div ref={nameContainer} className='pi-whitespace-nowrap pi-relative pi-overflow-hidden'>
+      <NameMotion>
+        <div className={textClassName} ref={nameText}>
+          {renderDisplayContent()}
+        </div>
+        <div className='pi-w-6 pi-absolute pi-right-0 pi-top-0 pi-h-full pi-bg-gradient-to-r pi-from-transparent dark:pi-to-gray-950 pi-to-gray-50' />
+      </NameMotion>
+    </div>
   )
 }
 

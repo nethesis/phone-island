@@ -31,6 +31,7 @@ import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
 import { handleStreamingUnlock } from '../../utils'
 import { useDispatch } from 'react-redux'
+import { resolveUsernameByNumber } from '../../lib/phone/conversation'
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -67,6 +68,7 @@ const CallView: FC<CallViewProps> = () => {
   const { isListen, isIntrude, isListenExtension, isIntrudeExtension } = listenState
   const { data: alertsData } = useSelector((state: RootState) => state.alerts)
   const currentUser = useSelector((state: RootState) => state.currentUser)
+  const { extensions } = useSelector((state: RootState) => state.users)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
 
   const activeAlerts = useMemo(
@@ -98,7 +100,15 @@ const CallView: FC<CallViewProps> = () => {
     return { canUnlock, tooltipText }
   }, [streamingSourceNumber, videoSources, t])
 
-  const hasValidUsername = useMemo(() => username !== '' && username !== 'undefined', [username])
+  const resolvedCallUsername = useMemo(() => {
+    if (username && username !== 'undefined') {
+      return username
+    }
+
+    return resolveUsernameByNumber(number, extensions)
+  }, [username, number, extensions])
+
+  const hasResolvedCallIdentity = useMemo(() => resolvedCallUsername !== '', [resolvedCallUsername])
 
   const renderLandlinePhoneDiv = useCallback(
     () => (
@@ -196,26 +206,26 @@ const CallView: FC<CallViewProps> = () => {
       return <FontAwesomeIcon className={iconSizeClass} icon={faHandPointUp} />
     }
 
-    if (number !== '' && hasValidUsername) {
+    if (number !== '' && hasResolvedCallIdentity) {
       return <Avatar />
     }
 
-    if (incoming && !hasValidUsername) {
+    if (incoming && !hasResolvedCallIdentity) {
       return <FontAwesomeIcon className={`${iconSizeClass} pi--rotate-45`} icon={faArrowLeft} />
     }
 
-    if (accepted && !outgoing && !hasValidUsername) {
+    if (accepted && !outgoing && !hasResolvedCallIdentity) {
       return <FontAwesomeIcon className={`${iconSizeClass} pi--rotate-45`} icon={faArrowLeft} />
     }
 
-    if (outgoing && !hasValidUsername) {
+    if (outgoing && !hasResolvedCallIdentity) {
       return (
         <FontAwesomeIcon className={`${iconSizeClass} pi-rotate-[135deg]`} icon={faArrowLeft} />
       )
     }
 
     return null
-  }, [isOpen, isListen, isIntrude, number, hasValidUsername, incoming, outgoing, accepted])
+  }, [isOpen, isListen, isIntrude, number, hasResolvedCallIdentity, incoming, outgoing, accepted])
 
   const renderDetails = useCallback(() => {
     if (!isOpen) return null

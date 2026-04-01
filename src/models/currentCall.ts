@@ -4,8 +4,33 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import { dispatchOutgoingCallStarted } from '../events/index'
+import { resolveDisplayName, resolveUsernameByNumber } from '../lib/phone/conversation'
 import { eventDispatch } from '../utils'
-import { PhonebookContact } from '../types/phonebook'
+
+function getResolvedOutgoingPayload(payload: CurrentCallTypes, rootState: any): CurrentCallTypes {
+  const fallbackNumber =
+    payload.number ||
+    rootState.currentCall.number ||
+    rootState.island.operatorBusy.calledNumber ||
+    ''
+
+  const displayName = resolveDisplayName({
+    extensions: rootState.users.extensions,
+    fallbackDisplayName: payload.displayName || rootState.currentCall.displayName,
+    fallbackNumber,
+  })
+  const username =
+    payload.username ||
+    rootState.currentCall.username ||
+    resolveUsernameByNumber(fallbackNumber, rootState.users.extensions)
+
+  return {
+    ...payload,
+    displayName,
+    username,
+    number: fallbackNumber,
+  }
+}
 
 const defaultState = {
   displayName: '',
@@ -154,19 +179,21 @@ export const currentCall = createModel<RootModel>()({
       })
     },
     checkOutgoingUpdate: (payload: CurrentCallTypes, rootState) => {
+      const resolvedPayload = getResolvedOutgoingPayload(payload, rootState)
+
       // Check call type and outgoing confirmation source
       if (
-        (rootState.currentUser.default_device?.type === 'webrtc' && payload.outgoingWebRTC) ||
-        (rootState.currentUser.default_device?.type === 'physical' && payload.outgoingSocket) ||
-        (rootState.currentUser.default_device?.type === 'nethlink' && payload.outgoingWebRTC)
+        (rootState.currentUser.default_device?.type === 'webrtc' && resolvedPayload.outgoingWebRTC) ||
+        (rootState.currentUser.default_device?.type === 'physical' && resolvedPayload.outgoingSocket) ||
+        (rootState.currentUser.default_device?.type === 'nethlink' && resolvedPayload.outgoingWebRTC)
       ) {
-        payload.outgoing = true
+        resolvedPayload.outgoing = true
         // Dispatch an event for outgoing call
-        dispatchOutgoingCallStarted(payload.displayName, payload.number)
+        dispatchOutgoingCallStarted(resolvedPayload.displayName, resolvedPayload.number)
       }
       // Update the current call values and set outgoing
       dispatch.currentCall.updateCurrentCall({
-        ...payload,
+        ...resolvedPayload,
       })
     },
     checkAcceptedUpdate: (payload: CurrentCallTypes, rootState) => {

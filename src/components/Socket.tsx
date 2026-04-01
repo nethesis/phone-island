@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import { getApiMode } from './RestAPI'
-import { getDisplayName } from '../lib/phone/conversation'
+import { resolveDisplayName, resolveUsernameByNumber } from '../lib/phone/conversation'
 import { getCurrentUserInfo } from '../services/user'
 import busyRingtone from '../static/busy_ringtone'
 import {
@@ -115,6 +115,7 @@ export const Socket: FC<SocketProps> = ({
       acceptedWebRTC,
       conferencing,
       conversationId,
+      displayName,
       incoming,
       incomingWebRTC,
       number,
@@ -135,6 +136,16 @@ export const Socket: FC<SocketProps> = ({
       conversationId !== ''
 
     if (!hasActiveCall || transferring || transferSwitching || conferencing) {
+      return false
+    }
+
+    // Let socket updates enrich calls that were created first by WebRTC
+    // without number, display name or conversation id yet.
+    const hasIncompleteCallIdentity =
+      conversationId === '' &&
+      (number === '' || displayName === '' || displayName === 'Incoming call' || displayName === 'Outgoing call')
+
+    if (hasIncompleteCallIdentity) {
       return false
     }
 
@@ -188,6 +199,22 @@ export const Socket: FC<SocketProps> = ({
     const handleCurrentUserEvents = (res: ExtensionTypes, conv: ConversationTypes) => {
       // Handle transferring data
       const { transferring, transferSwitching, transferCalls } = store.getState().currentCall
+      const { extensions } = store.getState().users
+
+      const getResolvedConversationDisplayName = () =>
+        resolveDisplayName({
+          conv,
+          extensions,
+          fallbackDisplayName: store.getState().currentCall.displayName,
+          fallbackNumber:
+            `${conv?.counterpartNum || ''}` || store.getState().island.operatorBusy.calledNumber || '',
+        })
+
+      const getResolvedConversationUsername = () =>
+        resolveUsernameByNumber(
+          `${conv?.counterpartNum || ''}` || store.getState().currentCall.number,
+          extensions,
+        )
 
       const view = store.getState().island.view
       // Check conversation isn't empty
@@ -198,7 +225,6 @@ export const Socket: FC<SocketProps> = ({
 
         // With conversation
         if (res.status) {
-          const { extensions } = store.getState().users
           const { default_device } = store.getState().currentUser
           const { endpoints, username } = store.getState().currentUser
           const { incoming, outgoing } = store.getState().currentCall
@@ -233,16 +259,12 @@ export const Socket: FC<SocketProps> = ({
               ) {
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
-                  displayName: getDisplayName(conv),
+                  displayName: getResolvedConversationDisplayName(),
                   number: `${conv.counterpartNum}`,
                   incomingSocket: true,
                   incoming: true,
                   username:
-                    `${
-                      extensions &&
-                      extensions[conv.counterpartNum] &&
-                      extensions[conv.counterpartNum].username
-                    }` || '',
+                    getResolvedConversationUsername(),
                   ownerExtension: conv.owner,
                 })
                 store.dispatch.island.setIslandView('call')
@@ -283,7 +305,7 @@ export const Socket: FC<SocketProps> = ({
                 store.dispatch.island.setUrlOpened(false)
                 eventDispatch('phone-island-url-parameter-opened', {
                   counterpartNum: conv.counterpartNum,
-                  counterpartName: getDisplayName(conv),
+                  counterpartName: getResolvedConversationDisplayName(),
                   owner: conv.owner,
                   uniqueId: conv.uniqueId,
                   linkedId: conv.linkedId,
@@ -310,15 +332,11 @@ export const Socket: FC<SocketProps> = ({
                   // Current call accepted and update connected call
                   dispatch.currentCall.updateCurrentCall({
                     conversationId: conv.id,
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedConversationDisplayName(),
                     number: `${conv.counterpartNum}`,
                     ownerExtension: conv.owner,
                     username:
-                      `${
-                        extensions &&
-                        extensions[conv.counterpartNum] &&
-                        extensions[conv.counterpartNum].username
-                      }` || '',
+                      getResolvedConversationUsername(),
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
                   })
@@ -329,7 +347,7 @@ export const Socket: FC<SocketProps> = ({
                   // Add call to transfer calls
                   dispatch.currentCall.addTransferCalls({
                     type: 'transferred',
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedConversationDisplayName(),
                     number: `${conv.counterpartNum}`,
                     startTime: `${getTimestampInSeconds()}`,
                   })
@@ -385,14 +403,9 @@ export const Socket: FC<SocketProps> = ({
                   dispatch.currentCall.checkOutgoingUpdate({
                     outgoingSocket: true,
                     outgoing: conv?.counterpartName === 'REC' ? false : true,
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedConversationDisplayName(),
                     number: `${conv?.counterpartNum}`,
-                    username:
-                      `${
-                        extensions &&
-                        extensions[conv?.counterpartNum] &&
-                        extensions[conv?.counterpartNum].username
-                      }` || '',
+                    username: getResolvedConversationUsername(),
                   })
                 }
               }
@@ -410,13 +423,13 @@ export const Socket: FC<SocketProps> = ({
                 // Add call to transfer calls
                 dispatch.currentCall.addTransferCalls({
                   type: 'destination',
-                  displayName: getDisplayName(conv),
+                  displayName: getResolvedConversationDisplayName(),
                   number: counterpartNum,
                   startTime: `${getTimestampInSeconds()}`,
                 })
                 // Set the current call informations
                 dispatch.currentCall.updateCurrentCall({
-                  displayName: getDisplayName(conv),
+                  displayName: getResolvedConversationDisplayName(),
                   number: counterpartNum,
                   startTime: `${startTime / 1000}`,
                   conversationId: conv.id,

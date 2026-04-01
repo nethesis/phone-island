@@ -2,27 +2,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type FC, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
-
-const iconVariants = {
-  open: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '26px',
-  },
-  closed: {
-    width: '24px',
-    height: '24px',
-    borderRadius: '26px',
-  },
-}
+import { GenericAvatar } from '../GenericAvatar'
+import { resolveUsernameByNumber } from '../../lib/phone/conversation'
 
 const Avatar: FC = () => {
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { avatars } = useSelector((state: RootState) => state.avatars)
-  const user = useSelector((state: RootState) => state.users)
+  const { extensions } = useSelector((state: RootState) => state.users)
   const {
     username,
     number,
@@ -32,42 +20,32 @@ const Avatar: FC = () => {
     transferring,
   } = useSelector((state: RootState) => state.currentCall)
 
+  const resolvedUsername = useMemo(
+    () => username || resolveUsernameByNumber(number, extensions),
+    [username, number, extensions],
+  )
+
   const avatarUrl = useMemo(() => {
-    if (transferring) {
-      return user?.extensions && user.extensions[number]?.username
-        ? avatars?.[user.extensions[number].username]
-        : undefined
+    if (transferring && number) {
+      const transferringUsername = resolveUsernameByNumber(number, extensions)
+      return transferringUsername ? avatars?.[transferringUsername] : undefined
     }
-    return avatars?.[username]
-  }, [avatars, username, transferring, user, number])
+
+    return resolvedUsername ? avatars?.[resolvedUsername] : undefined
+  }, [avatars, resolvedUsername, transferring, number, extensions])
 
   const showPulseEffect = incoming || (outgoing && !accepted)
 
   return (
-    <motion.div
-      className={`pi-relative ${isOpen ? 'pi--mt-1' : ''}`}
-      animate={isOpen ? 'open' : 'closed'}
-      variants={iconVariants}
-    >
-      {showPulseEffect && (
-        <motion.div
-          style={{ animationDuration: '2s' }}
-          animate={isOpen ? 'open' : 'closed'}
-          variants={iconVariants}
-          className='pi-rounded-xl pi-bg-gray-600 pi-absolute pi-opacity-60 pi-top-0 pi-left-0 pi-animate-ping pi-h-12 pi-w-12'
-        />
-      )}
-      <motion.div
-        className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-bg-secondaryNeutral dark:pi-bg-secondaryNeutralDark pi-rounded-sm pi-bg-cover'
-        style={{
-          backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-        }}
-        animate={isOpen ? 'open' : 'closed'}
-        variants={iconVariants}
-      />
-    </motion.div>
+    <GenericAvatar
+      avatarUrl={avatarUrl}
+      size={isOpen ? 'open' : 'closed'}
+      showPulseEffect={showPulseEffect}
+      pulseColor='pi-bg-gray-600'
+      backgroundColorClass='pi-bg-secondaryNeutral dark:pi-bg-secondaryNeutralDark'
+      borderRadius='pi-rounded-xl'
+      className={isOpen ? 'pi--mt-1' : ''}
+    />
   )
 }
 
