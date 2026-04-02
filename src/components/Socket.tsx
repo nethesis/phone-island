@@ -134,6 +134,17 @@ export const Socket: FC<SocketProps> = ({
       }
     }
 
+    const shouldKeepCurrentAcceptedCall = (ownerExtension?: string) => {
+      const { accepted, ownerExtension: currentOwnerExtension } = store.getState().currentCall
+
+      return (
+        accepted &&
+        !!currentOwnerExtension &&
+        !!ownerExtension &&
+        currentOwnerExtension !== ownerExtension
+      )
+    }
+
     /**
      * Manages event and data for the currentUser
      *
@@ -172,6 +183,10 @@ export const Socket: FC<SocketProps> = ({
           }
           switch (res.status) {
             case 'ringing':
+              if (shouldKeepCurrentAcceptedCall(conv.owner)) {
+                break
+              }
+
               // Handle streaming source for incoming calls
               handleStreamingSource(conv)
 
@@ -703,18 +718,24 @@ export const Socket: FC<SocketProps> = ({
           const userExtensionIds = userExtensions.map((ext) => ext.id)
 
           // Get the current call state to understand if we're the caller or receiver
-          const { incoming, outgoing } = store.getState().currentCall
+          const { incoming, accepted, transferring } = store.getState().currentCall
 
           // Check if there's an active conference
           const { isActive, conferenceStartedFrom } = store.getState().conference
 
           // When we RECEIVE a call on our extension, callerNum is the busy extension (our own)
           // When we CALL someone, channelExten is one of our extensions (the one we're calling from)
-          const isReceivingCall = incoming && userExtensionIds.includes(res.callerNum)
+          const isReceivingCall =
+            incoming && !!res.callerNum && userExtensionIds.includes(res.callerNum)
+
+          // If we are already on an active call, suppress the busy popup unless it belongs
+          // to a conference-owner flow or an attended transfer started by this user.
+          const shouldShowOperatorBusy =
+            !isReceivingCall && (!accepted || isActive || transferring)
 
           // Only show operator busy view if:
           // 1. We are NOT receiving an incoming call to our own extension
-          if (!isReceivingCall) {
+          if (shouldShowOperatorBusy) {
             // Set operator busy active with caller information
             store.dispatch.island.setOperatorBusyActive({
               callerNumber: res.callerNum || 'Unknown',
