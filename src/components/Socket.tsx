@@ -134,6 +134,17 @@ export const Socket: FC<SocketProps> = ({
       }
     }
 
+    const shouldKeepCurrentAcceptedCall = (ownerExtension?: string) => {
+      const { accepted, ownerExtension: currentOwnerExtension } = store.getState().currentCall
+
+      return (
+        accepted &&
+        !!currentOwnerExtension &&
+        !!ownerExtension &&
+        currentOwnerExtension !== ownerExtension
+      )
+    }
+
     /**
      * Manages event and data for the currentUser
      *
@@ -172,6 +183,10 @@ export const Socket: FC<SocketProps> = ({
           }
           switch (res.status) {
             case 'ringing':
+              if (shouldKeepCurrentAcceptedCall(conv.owner)) {
+                break
+              }
+
               // Handle streaming source for incoming calls
               handleStreamingSource(conv)
 
