@@ -12,29 +12,34 @@ import { GenericAvatar } from '../GenericAvatar'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 
 export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
-  const { operatorBusy } = useSelector((state: RootState) => state.island)
+  const { operatorBusy, previousView } = useSelector((state: RootState) => state.island)
   const { avatars } = useSelector((state: RootState) => state.avatars)
   const { extensions } = useSelector((state: RootState) => state.users)
   const { t } = useTranslation()
   const dispatch = useDispatch<Dispatch>()
   const { isActive, conferenceStartedFrom } = useSelector((state: RootState) => state.conference)
   const { username } = useSelector((state: RootState) => state.currentUser)
+  const { accepted, incoming, outgoing } = useSelector((state: RootState) => state.currentCall)
+
+  const getNextViewOnClose = useCallback(() => {
+    if (isActive && conferenceStartedFrom === username) {
+      return 'waitingConference'
+    }
+
+    if (accepted || incoming || outgoing) {
+      return previousView || 'call'
+    }
+
+    return null
+  }, [accepted, conferenceStartedFrom, incoming, isActive, outgoing, previousView, username])
 
   const handleClose = useCallback(() => {
     // Stop any playing busy tone
     dispatch.player.stopAudioPlayer()
     // Reset operator busy state completely when user closes manually
     dispatch.island.resetOperatorBusyCompletely()
-
-    // Check if conference is active and user is the owner
-    if (isActive && conferenceStartedFrom === username) {
-      // Go back to waiting conference instead of closing
-      dispatch.island.setIslandView('waitingConference')
-    } else {
-      // Reset island view if no active conference
-      dispatch.island.setIslandView(null)
-    }
-  }, [dispatch, isActive, conferenceStartedFrom, username])
+    dispatch.island.setIslandView(getNextViewOnClose())
+  }, [dispatch, getNextViewOnClose])
 
   // Get the username of the operator based on called extension number
   const operatorUsername = useMemo(() => {
@@ -98,6 +103,16 @@ export const OperatorBusyView: FC<OperatorBusyViewProps> = () => {
       dispatch.player.stopAudioPlayer()
     }
   }, [dispatch])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      handleClose()
+    }, 4000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [handleClose])
 
   return (
     <>
