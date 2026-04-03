@@ -14,11 +14,17 @@ widgetDivs.forEach((div) => {
   const config: string = div.getAttribute('data-config') || ''
   const showAlways: boolean = div.getAttribute('showAlways') === 'true' ? true : false
   const uaType: string = div.getAttribute('ua-type') || ''
+  const urlParamWithEvent: boolean = div.getAttribute('urlParamWithEvent') === 'true' ? true : false
 
   const root = createRoot(div)
   root.render(
     <React.StrictMode>
-      <PhoneIsland dataConfig={config} showAlways={showAlways} uaType={uaType}/>
+      <PhoneIsland
+        dataConfig={config}
+        showAlways={showAlways}
+        uaType={uaType}
+        urlParamWithEvent={urlParamWithEvent}
+      />
     </React.StrictMode>,
   )
 })
