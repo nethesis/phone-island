@@ -135,11 +135,15 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     return false
   }
 
-  // Update visible messages when all messages change
+  // Update visible messages when all messages change.
+  // Sort all messages (finals + interims) chronologically so that concurrent
+  // speakers always appear in the correct time order.
   useEffect(() => {
     const startIndex = Math.max(0, allMessages.length - MAX_VISIBLE_MESSAGES)
-    const newVisibleMessages = allMessages.slice(startIndex)
-    setVisibleMessages(newVisibleMessages)
+    const recentMessages = allMessages.slice(startIndex)
+    // JS Array.sort is stable: messages with equal timestamps keep insertion order.
+    const sorted = [...recentMessages].sort((a, b) => a.timestamp - b.timestamp)
+    setVisibleMessages(sorted)
   }, [allMessages])
 
   // Handle incoming transcription messages
@@ -206,42 +210,67 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
         return existingMessage.speaker === message.speaker
       }
 
-      // Prefer exact match when the backend gives us a stable segment identity.
+      // 1. Exact match by segment identity – update in place, but never
+      //    overwrite an already-finalized message with a new interim.
       const existingMessageIndex = prevMessages.findIndex((msg) => msg.id === uniqueId)
-      const activeInterimIndex = findLastIndex(
-        (existingMessage) => !existingMessage.isFinal && isSameSpeakerStream(existingMessage),
-      )
-      const similarFinalIndex = findLastIndex(
-        (existingMessage) =>
-          existingMessage.isFinal &&
-          isSameSpeakerStream(existingMessage) &&
-          existingMessage.text.trim() === message.text.trim() &&
-          Math.abs(existingMessage.timestamp - message.timestamp) <= 1,
-      )
-
       if (existingMessageIndex !== -1) {
-        // Update existing message when the segment identity already exists.
+        const existing = prevMessages[existingMessageIndex]
+        if (existing.isFinal && !message.isFinal) {
+          // UniqueId collision: the existing segment was finalized but the
+          // backend started a new interim with a colliding id. Treat it as
+          // a brand-new message so the final bubble is preserved.
+          return [...prevMessages, { ...message, id: `${message.id}_${Date.now()}` }]
+        }
         const updatedMessages = [...prevMessages]
         updatedMessages[existingMessageIndex] = message
         return updatedMessages
       }
 
+      // 2. Final message path
+      if (message.isFinal) {
+        // Check for a duplicate final with identical text and close timestamp
+        const similarFinalIndex = findLastIndex(
+          (existing) =>
+            existing.isFinal &&
+            isSameSpeakerStream(existing) &&
+            existing.text.trim() === message.text.trim() &&
+            Math.abs(existing.timestamp - message.timestamp) <= 1,
+        )
+        if (similarFinalIndex !== -1) {
+          const updatedMessages = [...prevMessages]
+          updatedMessages[similarFinalIndex] = {
+            ...message,
+            id: prevMessages[similarFinalIndex].id,
+          }
+          return updatedMessages
+        }
+
+        // Replace the active interim from the same speaker (the "speaking" bubble)
+        const activeInterimIndex = findLastIndex(
+          (existing) => !existing.isFinal && isSameSpeakerStream(existing),
+        )
+        if (activeInterimIndex !== -1) {
+          const updatedMessages = [...prevMessages]
+          updatedMessages[activeInterimIndex] = {
+            ...message,
+            id: prevMessages[activeInterimIndex].id,
+          }
+          return updatedMessages
+        }
+
+        // No interim to replace – just append.
+        return [...prevMessages, message]
+      }
+
+      // 3. Interim message path – keep at most one active interim per speaker/channel.
+      const activeInterimIndex = findLastIndex(
+        (existing) => !existing.isFinal && isSameSpeakerStream(existing),
+      )
       if (activeInterimIndex !== -1) {
-        // Keep at most one active interim bubble per speaker/channel. This prevents
-        // duplicated "speaking..." rows when Deepgram emits multiple partial updates.
         const updatedMessages = [...prevMessages]
         updatedMessages[activeInterimIndex] = {
           ...message,
           id: prevMessages[activeInterimIndex].id,
-        }
-        return updatedMessages
-      }
-
-      if (similarFinalIndex !== -1) {
-        const updatedMessages = [...prevMessages]
-        updatedMessages[similarFinalIndex] = {
-          ...message,
-          id: prevMessages[similarFinalIndex].id,
         }
         return updatedMessages
       }
@@ -412,9 +441,10 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
                         {visibleMessages.map((message, index) => (
                           <motion.div
                             key={message.id}
+                            layout
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.3, layout: { duration: 0.25 } }}
                             className='pi-mb-4'
                           >
                             {/* Speaker Name */}
