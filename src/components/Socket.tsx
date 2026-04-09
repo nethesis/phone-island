@@ -40,6 +40,7 @@ import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
 import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
+import { getCurrentCallQueueContext } from '../lib/phone/queue'
 
 interface SocketProps {
   children: ReactNode
@@ -134,6 +135,48 @@ export const Socket: FC<SocketProps> = ({
       }
     }
 
+    const getCurrentCallQueuePayload = (conv: ConversationTypes) => {
+      return getCurrentCallQueueContext(conv, store.getState().queue)
+    }
+
+    const getActiveConversationForCurrentCall = (): ConversationTypes | null => {
+      const { conversations } = store.getState().currentUser
+      const { conversationId } = store.getState().currentCall
+      let selectedConversation: ConversationTypes | null = null
+
+      Object.values(conversations || {}).forEach((extensionConversations) => {
+        Object.values(extensionConversations || {}).forEach((conversation) => {
+          if (selectedConversation?.id && selectedConversation.id === conversationId) {
+            return
+          }
+
+          if (conversationId && conversation.id === conversationId) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (!selectedConversation) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (conversation.connected && !selectedConversation.connected) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (
+            conversation.connected === selectedConversation.connected &&
+            conversation.startTime > selectedConversation.startTime
+          ) {
+            selectedConversation = conversation
+          }
+        })
+      })
+
+      return selectedConversation
+    }
+
     const shouldKeepCurrentAcceptedCall = (ownerExtension?: string) => {
       const { accepted, ownerExtension: currentOwnerExtension } = store.getState().currentCall
 
@@ -210,6 +253,7 @@ export const Socket: FC<SocketProps> = ({
                       extensions[conv.counterpartNum].username
                     }` || '',
                   ownerExtension: conv.owner,
+                  ...getCurrentCallQueuePayload(conv),
                 })
                 store.dispatch.island.setIslandView('call')
               }
@@ -287,6 +331,7 @@ export const Socket: FC<SocketProps> = ({
                       }` || '',
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
+                    ...getCurrentCallQueuePayload(conv),
                   })
                   // Update the current call informations for physical devices
                   dispatch.currentCall.checkAcceptedUpdate({
@@ -359,6 +404,7 @@ export const Socket: FC<SocketProps> = ({
                         extensions[conv?.counterpartNum] &&
                         extensions[conv?.counterpartNum].username
                       }` || '',
+                    ...getCurrentCallQueuePayload(conv),
                   })
                 }
               }
@@ -386,6 +432,7 @@ export const Socket: FC<SocketProps> = ({
                   number: counterpartNum,
                   startTime: `${startTime / 1000}`,
                   conversationId: conv.id,
+                  ...getCurrentCallQueuePayload(conv),
                 })
                 // Set the view of the island to call
                 dispatch.island.setIslandView('call')
@@ -901,12 +948,21 @@ export const Socket: FC<SocketProps> = ({
 
       // `queueUpdate` is the socket event when the data of a queue updates
       socket.current.on('queueUpdate', (res: QueuesUpdateTypes) => {
+        dispatch.queue.updateQueue(res)
+
+        const activeConversation = getActiveConversationForCurrentCall()
+
+        if (activeConversation) {
+          dispatch.currentCall.updateCurrentCall(getCurrentCallQueuePayload(activeConversation))
+        }
+
         // Dispatch queueUpdate event
         dispatchQueueUpdate(res)
       })
 
       // `queueMemberUpdate` is the socket event when the data of a queue member changes
       socket.current.on('queueMemberUpdate', (res: QueueUpdateMemberTypes) => {
+        dispatch.queue.updateQueueMember(res)
         // Dispatch queueMemberUpdate event
         dispatchQueueMemberUpdate(res)
       })

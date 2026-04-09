@@ -20,14 +20,18 @@ export interface ConversationTypes {
   chSource: ChTypes | null
   duration: number
   startTime: number
-  connected: false
+  connected: boolean
   recording: 'false' | 'true'
   direction: 'out' | 'in'
-  inConference: false
-  throughQueue: false
-  throughTrunk: false
+  inConference: boolean
+  throughQueue: boolean
+  throughTrunk: boolean
   counterpartNum: string
   counterpartName: string
+  queue?: string
+  queueId?: string
+  queueName?: string
+  queueNumber?: string
 }
 
 interface ChTypes {

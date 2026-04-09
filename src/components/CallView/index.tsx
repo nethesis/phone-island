@@ -12,6 +12,7 @@ import {
   faArrowLeft,
   faCircle,
   faUnlock,
+  faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
 import Timer from './Timer'
@@ -41,6 +42,42 @@ const Details = memo(({ children }: { children: React.ReactNode }) => (
 ))
 Details.displayName = 'Details'
 
+const QueueBadge = memo(
+  ({
+    label,
+    compact = false,
+    tooltipContent,
+  }: {
+    label: string
+    compact?: boolean
+    tooltipContent?: string
+  }) => {
+    if (!label) {
+      return null
+    }
+
+    if (compact) {
+      return (
+        <span
+          className='pi-inline-flex pi-flex-none pi-items-center pi-justify-center pi-text-indigo-400'
+          data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
+          data-tooltip-content={tooltipContent || ''}
+        >
+          <FontAwesomeIcon icon={faUsers} className='pi-h-4 pi-w-4' />
+        </span>
+      )
+    }
+
+    return (
+      <div className='pi-inline-flex pi-max-w-full pi-items-center pi-gap-1 pi-self-start pi-rounded-full pi-bg-indigo-700 pi-px-2.5 pi-py-0.5 pi-text-indigo-100'>
+        <FontAwesomeIcon icon={faUsers} className='pi-h-3.5 pi-w-3.5 pi-flex-none' />
+        <span className='pi-truncate pi-text-xs pi-font-medium'>{label}</span>
+      </div>
+    )
+  },
+)
+QueueBadge.displayName = 'QueueBadge'
+
 /**
  * The main view to manage calls, the starting point for calls actions flows
  */
@@ -59,6 +96,9 @@ const CallView: FC<CallViewProps> = () => {
     isRecording,
     username,
     streamingSourceNumber,
+    queueName,
+    queueNumber,
+    throughQueue,
   } = currentCall
 
   const { isOpen, isFromStreaming } = useSelector((state: RootState) => state.island)
@@ -93,12 +133,23 @@ const CallView: FC<CallViewProps> = () => {
     )
 
     const canUnlock = Boolean(source?.cmdOpen && source?.cmdOpen.trim() !== '')
-    const tooltipText = canUnlock && source ? `${t('VideoStreaming.Open')}: ${source?.description}` : ''
+    const tooltipText =
+      canUnlock && source ? `${t('VideoStreaming.Open')}: ${source?.description}` : ''
 
     return { canUnlock, tooltipText }
   }, [streamingSourceNumber, videoSources, t])
 
   const hasValidUsername = useMemo(() => username !== '' && username !== 'undefined', [username])
+
+  const queueLabel = useMemo(() => queueName || queueNumber || '', [queueName, queueNumber])
+
+  const queueTooltipContent = useMemo(() => {
+    if (!throughQueue || !queueLabel) {
+      return ''
+    }
+
+    return `${t('Common.Queue')}: ${queueLabel}`
+  }, [throughQueue, queueLabel, t])
 
   const renderLandlinePhoneDiv = useCallback(
     () => (
@@ -172,8 +223,9 @@ const CallView: FC<CallViewProps> = () => {
       columns = 'pi-grid-cols-[24px_66px_24px]'
     }
 
-    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${isOpen ? 'start' : 'center'
-      } pi-justify-center pi-w-full`
+    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${
+      isOpen ? 'start' : 'center'
+    } pi-justify-center pi-w-full`
   }, [isOpen, accepted, incoming, outgoing])
 
   const getGridClasses = useMemo(() => {
@@ -266,7 +318,16 @@ const CallView: FC<CallViewProps> = () => {
 
     return (
       <Details>
-        <DisplayName />
+        {accepted && throughQueue && queueLabel ? (
+          <div className='pi-flex pi-min-w-0 pi-items-center pi-gap-2'>
+            <div className='pi-min-w-0 pi-flex-1'>
+              <DisplayName />
+            </div>
+            <QueueBadge compact label={queueLabel} tooltipContent={queueTooltipContent} />
+          </div>
+        ) : (
+          <DisplayName />
+        )}
         {accepted ? (
           !isPhysical() ? (
             <Timer startTime={startTime} isNotAlwaysWhite />
@@ -288,6 +349,10 @@ const CallView: FC<CallViewProps> = () => {
     isListenExtension,
     t,
     renderLandlinePhoneDiv,
+    accepted,
+    throughQueue,
+    queueLabel,
+    queueTooltipContent,
   ])
 
   const renderAudioIndicator = useCallback(() => {
@@ -315,7 +380,7 @@ const CallView: FC<CallViewProps> = () => {
   const renderStreamingContent = useCallback(() => {
     // Show skeleton while videoSources are loading or if streaming source number is not set yet
     if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
-      return <VideoStreamingSkeleton className="pi-w-full pi-h-40 pi-mt-4" />
+      return <VideoStreamingSkeleton className='pi-w-full pi-h-40 pi-mt-4' />
     }
 
     // Find the streaming source
@@ -325,7 +390,7 @@ const CallView: FC<CallViewProps> = () => {
 
     // If source doesn't exist, show empty state
     if (!source) {
-      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
+      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
     }
 
     // Check if image is available
@@ -333,7 +398,7 @@ const CallView: FC<CallViewProps> = () => {
 
     // If no image available, show empty state
     if (!hasImage) {
-      return <VideoStreamingEmptyState className="pi-w-full pi-h-40 pi-mt-4" />
+      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
     }
 
     // If we have an image, show StreamingImage component
@@ -434,10 +499,11 @@ const CallView: FC<CallViewProps> = () => {
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
       <CustomThemedTooltip id='tooltip-answer' place='left' />
       <CustomThemedTooltip id='tooltip-unlock' place='left' />
+      <CustomThemedTooltip id='tooltip-queue' place='top' />
     </div>
   )
 }
 
 export default memo(CallView)
 
-export interface CallViewProps { }
+export interface CallViewProps {}
