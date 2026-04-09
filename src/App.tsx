@@ -837,6 +837,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     console.log('Paramurl status debug informations: ', paramurl)
   })
 
+  useEventListener('phone-island-queue-status', () => {
+    const queueInformation = store.getState().queue
+    console.log('Queue status debug informations: ', queueInformation)
+  })
+
   useEventListener('phone-island-player-force-stop', () => {
     store.dispatch.player.reset()
     console.log('Audio player is interrupted')

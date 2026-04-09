@@ -10,6 +10,7 @@ import type {
   QueuesEventType,
   QueueUpdateMemberTypes,
   QueuesMemberEventType,
+  CurrentUserQueueCallEventTypes,
   ParkingUpdateTypes,
   ParkingUpdateEventTypes,
 } from '../types'
@@ -117,6 +118,24 @@ export function dispatchQueueMemberUpdate(event: QueueUpdateMemberTypes) {
   }
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-queue-member-update', data)
+}
+
+/**
+ * The dispatch function for the current user queue call waiting event
+ *
+ * @param event The current user queue call data
+ */
+export function dispatchCurrentUserQueueCallWaiting(event: CurrentUserQueueCallEventTypes) {
+  eventDispatch('phone-island-current-user-queue-call-waiting', event)
+}
+
+/**
+ * The dispatch function for the current user queue call connected event
+ *
+ * @param event The current user queue call data
+ */
+export function dispatchCurrentUserQueueCallConnected(event: CurrentUserQueueCallEventTypes) {
+  eventDispatch('phone-island-current-user-queue-call-connected', event)
 }
 
 /**

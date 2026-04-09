@@ -1428,6 +1428,42 @@ Indicates that the information of a member of a queue are changed
 }
 ```
 
+#### `phone-island-current-user-queue-call-waiting`
+Indicates that the current user has received a queue call that is still waiting or ringing. This event is also used internally by phone-island to synchronize the queue fields inside the current call store.
+
+```json
+{
+  "conversationId": "1671557974.4928",
+  "linkedId": "1671557974.4928",
+  "uniqueId": "1671557974.4929",
+  "ownerExtension": "211",
+  "number": "123456",
+  "queueId": "410",
+  "queueName": "Customer care",
+  "queueNumber": "410",
+  "queuePosition": "1",
+  "queueWaitingTime": 1775727483671
+}
+```
+
+#### `phone-island-current-user-queue-call-connected`
+Indicates that the current user has answered a queue call and the conversation is connected. This event is also used internally by phone-island to synchronize the queue fields inside the current call store.
+
+```json
+{
+  "conversationId": "1671557974.4928",
+  "linkedId": "1671557974.4928",
+  "uniqueId": "1671557974.4929",
+  "ownerExtension": "211",
+  "number": "123455",
+  "queueId": "410",
+  "queueName": "Customer care",
+  "queueNumber": "410",
+  "queuePosition": "",
+  "queueWaitingTime": 0
+}
+```
+
 #### `phone-island-parking-update`
 Indicates update on parking list status
 
