@@ -9,6 +9,16 @@ import json from '@rollup/plugin-json'
 
 export default {
   input: ['./src/index.ts', ...getFiles('./src/components', ['.js', '.ts', '.jsx', '.tsx'])],
+  onwarn(warning, warn) {
+    if (
+      warning.code === 'MODULE_LEVEL_DIRECTIVE' &&
+      warning.message?.includes(`'use client' was ignored`)
+    ) {
+      return
+    }
+
+    warn(warning)
+  },
   output: [
     {
       format: 'cjs',
@@ -26,19 +36,24 @@ export default {
     }),
     resolve({
       browser: true,
+      preferBuiltins: true,
     }),
     commonjs(),
     typescript({
       tsconfig: './tsconfig.json',
       declaration: true,
       declarationDir: 'dist',
+      compilerOptions: {
+        allowJs: false,
+      },
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: [
         'src/*.widget.{js,jsx,ts,tsx}',
         'src/stories/**',
         'src/tests/**',
         'node_modules',
         'dist',
-        'lib/janus.js',
+        'src/lib/webrtc/janus.js',
       ],
     }),
     babel({

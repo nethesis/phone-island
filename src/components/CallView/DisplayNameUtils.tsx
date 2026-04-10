@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { TFunction } from 'i18next'
 import TextScroll from '../TextScroll'
+import type { TextScrollProps } from '../TextScroll'
 
 interface DisplayTextProps {
   intrudeListenStatus: any
@@ -19,7 +20,7 @@ export interface DisplayTextResult {
   content: string
 }
 
-const MemoizedTextScroll = memo(TextScroll)
+const MemoizedTextScroll: React.NamedExoticComponent<TextScrollProps> = memo(TextScroll)
 
 export const getDisplayText = ({
   intrudeListenStatus,

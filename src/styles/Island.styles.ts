@@ -11,7 +11,7 @@ export const StyledDetails = styled.div<StyledDetailsProps>`
   grid-template-rows: repeat(2, 24px);
 `
 
-export const StyledTimer = styled.div<StyledTimerProps>`
+export const StyledTimer = styled.div<React.PropsWithChildren<StyledTimerProps>>`
   ${({ isOpen, size }) =>
     size === 'large' ? (isOpen ? 'font-size: 1.125rem' : 'font-size: 1.125rem') : 'font-size: 1rem'};
   height: fit-content;
@@ -19,7 +19,7 @@ export const StyledTimer = styled.div<StyledTimerProps>`
   max-width: fit-content;
 `
 
-export const StyledNumber = styled.div<StyledNumberProps>`
+export const StyledNumber = styled.div<React.PropsWithChildren<StyledNumberProps>>`
   ${({ isOpen }) => (isOpen ? 'font-size:1.25rem' : 'font-size:1.2rem')};
   max-height: 24px;
   font-weight: 300;

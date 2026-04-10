@@ -16,8 +16,8 @@ const Number: FC = () => {
     number === 'unknown' ? t('TextScroll.unknown') : number || t('Call.In progress...') || '-'
 
   return (
-    <StyledNumber isOpen={isOpen} className='dark:pi-text-gray-50 pi-text-gray-600'>
-      {displayNumber}
+    <StyledNumber isOpen={isOpen}>
+      <span className='dark:pi-text-gray-50 pi-text-gray-600'>{displayNumber}</span>
     </StyledNumber>
   )
 }
