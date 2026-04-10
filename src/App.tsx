@@ -14,7 +14,6 @@ if (typeof window !== 'undefined' && window.location.hostname.includes('.support
   }
 }
 
-import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
