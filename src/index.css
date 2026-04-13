@@ -68,7 +68,7 @@ input::placeholder {
 .text-wrapper {
   display: inline-block;
   white-space: nowrap;
-  animation: scrolltext 15s linear infinite;
+  animation: scrollText 15s linear infinite;
 }
 
 .margin-block-property {

@@ -38,7 +38,9 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
 }
 
 const Details = memo(({ children }: { children: React.ReactNode }) => (
-  <div className='pi-grid pi-self-center pi-gap-1 pi-grid-cols-1 pi-grid-rows-2'>{children}</div>
+  <div className='pi-grid pi-min-w-0 pi-self-center pi-gap-1 pi-grid-cols-1 pi-grid-rows-2'>
+    {children}
+  </div>
 ))
 Details.displayName = 'Details'
 
@@ -488,6 +490,7 @@ const CallView: FC<CallViewProps> = () => {
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
       <CustomThemedTooltip id='tooltip-answer' place='left' />
       <CustomThemedTooltip id='tooltip-unlock' place='left' />
+      <CustomThemedTooltip id='tooltip-display-name' place='bottom' />
       <CustomThemedTooltip id='tooltip-queue' place='bottom' />
     </div>
   )
