@@ -45,34 +45,23 @@ Details.displayName = 'Details'
 const QueueBadge = memo(
   ({
     label,
-    compact = false,
     tooltipContent,
   }: {
     label: string
-    compact?: boolean
     tooltipContent?: string
   }) => {
     if (!label) {
       return null
     }
 
-    if (compact) {
-      return (
-        <span
-          className='pi-inline-flex pi-flex-none pi-items-center pi-justify-center pi-text-indigo-400'
-          data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
-          data-tooltip-content={tooltipContent || ''}
-        >
-          <FontAwesomeIcon icon={faUsers} className='pi-h-4 pi-w-4' />
-        </span>
-      )
-    }
-
     return (
-      <div className='pi-inline-flex pi-max-w-full pi-items-center pi-gap-1 pi-self-start pi-rounded-full pi-bg-indigo-700 pi-px-2.5 pi-py-0.5 pi-text-indigo-100'>
-        <FontAwesomeIcon icon={faUsers} className='pi-h-3.5 pi-w-3.5 pi-flex-none' />
-        <span className='pi-truncate pi-text-xs pi-font-medium'>{label}</span>
-      </div>
+      <span
+        className='pi-inline-flex pi-flex-none pi-items-center pi-justify-center pi-text-iconSecondary'
+        data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
+        data-tooltip-content={tooltipContent || ''}
+      >
+        <FontAwesomeIcon icon={faUsers} className='pi-h-4 pi-w-4' />
+      </span>
     )
   },
 )
@@ -323,7 +312,7 @@ const CallView: FC<CallViewProps> = () => {
             <div className='pi-min-w-0 pi-flex-1'>
               <DisplayName />
             </div>
-            <QueueBadge compact label={queueLabel} tooltipContent={queueTooltipContent} />
+            <QueueBadge label={queueLabel} tooltipContent={queueTooltipContent} />
           </div>
         ) : (
           <DisplayName />
@@ -499,7 +488,7 @@ const CallView: FC<CallViewProps> = () => {
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
       <CustomThemedTooltip id='tooltip-answer' place='left' />
       <CustomThemedTooltip id='tooltip-unlock' place='left' />
-      <CustomThemedTooltip id='tooltip-queue' place='top' />
+      <CustomThemedTooltip id='tooltip-queue' place='bottom' />
     </div>
   )
 }

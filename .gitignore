@@ -29,3 +29,11 @@ yarn-error.log*
 # cache
 .parcel-cache
 .eslintcache
+
+# agent & documentation
+CODEBASE_MAP.md
+ARCHITECTURE.md
+AGENTS.md
+.instructions.md
+.agent.md
+.prompt.md
