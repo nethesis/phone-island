@@ -13,6 +13,40 @@ Available as widget on `jsDelivr`
 [![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-js&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.js)
 [![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-css&color=blue&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.css)
 
+## Online Demo
+
+The repository root now contains a demo entrypoint for GitHub Pages.
+The page loads the standalone widget bundle from `dist-widget` so users can try Phone Island directly in the browser without integrating it into their own project first.
+
+To publish or update the demo page:
+
+```sh
+npm install
+npm run build:widget
+```
+
+Then publish GitHub Pages from the repository root so that at least these assets are available online:
+
+- `index.html`
+- `dist-widget/index.widget.js`
+- `dist-widget/index.widget.css`
+
+GitHub Pages should be configured to serve the root of the branch, because the demo page references the widget bundle with `/dist-widget/...` paths.
+
+What users need to do on the demo page:
+
+1. Open the GitHub Pages URL.
+2. Paste a valid Base64 token built from `<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>`.
+3. Allow browser permissions for microphone and, if needed, camera.
+4. Wait for the WebRTC registration to complete.
+5. Start a test call from the page.
+
+Notes:
+
+- GitHub Pages is served over HTTPS, which is required for browser media permissions and WebRTC APIs.
+- The demo is meant for testing the standalone widget build, not for production embedding.
+- Every time the widget changes, `dist-widget` should be rebuilt before updating the Pages site.
+
 ## Screenshots
 
 ### Dark Theme
@@ -66,6 +100,7 @@ flowchart LR
 
 - **widget-build** - contains the build of the widget version
 - **widget-example** - contains the usage example of the built widget
+- **index.html** - GitHub Pages demo entrypoint that loads the standalone widget from `dist-widget`
 - **dist** - contains the component lib build
 - **src/index.ts** - is the entry point for the component lib and exports the React component
 - **src/index.widget.tsx** - is the entry point for the widget that is built as a single js and css file
