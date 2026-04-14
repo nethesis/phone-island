@@ -3,7 +3,10 @@
 
 import styled from 'styled-components'
 
-export const StyledCustomRange = styled.input.attrs({ type: 'range' })`
+type StyledCustomRangeProps = React.ComponentPropsWithoutRef<'input'>
+
+export const StyledCustomRange = styled.input
+  .attrs<StyledCustomRangeProps>({ type: 'range' })<StyledCustomRangeProps>`
   font-size: 1.5rem;
   width: 100%;
   --thumb-height: 0.75rem;

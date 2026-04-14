@@ -14,7 +14,6 @@ if (typeof window !== 'undefined' && window.location.hostname.includes('.support
   }
 }
 
-import 'react-tooltip/dist/react-tooltip.css'
 import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
@@ -835,6 +834,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   useEventListener('phone-island-paramurl-status', () => {
     const paramurl = store.getState().paramUrl
     console.log('Paramurl status debug informations: ', paramurl)
+  })
+
+  useEventListener('phone-island-queue-status', () => {
+    const queueInformation = store.getState().queue
+    console.log('Queue status debug informations: ', queueInformation)
   })
 
   useEventListener('phone-island-player-force-stop', () => {

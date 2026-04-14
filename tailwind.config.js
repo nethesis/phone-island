@@ -111,6 +111,10 @@ module.exports = {
         //iconPrimaryInvert
         iconPrimaryInvert: '#F9FAFB', // gray-50
         iconPrimaryInvertDark: '#111827', // gray-900
+
+        //iconSeconary
+        iconSecondary: '#4338CA', // indigo-700
+        iconSecondaryDark: '#6366F1', // indigo-500
       },
     },
   },

@@ -14,6 +14,8 @@ import {
   dispatchConversations,
   dispatchQueueUpdate,
   dispatchQueueMemberUpdate,
+  dispatchCurrentUserQueueCallWaiting,
+  dispatchCurrentUserQueueCallConnected,
   dispatchAlreadyLogin,
   dispatchServerReload,
   dispatchParkingUpdate,
@@ -29,6 +31,7 @@ import type {
   QueuesUpdateTypes,
   QueueUpdateMemberTypes,
   MainPresenceTypes,
+  CurrentUserQueueCallEventTypes,
 } from '../types'
 import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
@@ -40,6 +43,7 @@ import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
 import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
+import { getCurrentCallQueueContext } from '../lib/phone/queue'
 
 interface SocketProps {
   children: ReactNode
@@ -65,6 +69,10 @@ export const Socket: FC<SocketProps> = ({
   const socket = useRef<any>()
   const isUpdatingUserInfo = useRef(false)
   const consecutivePingTimeouts = useRef(0)
+  const currentUserQueueCallPhase = useRef<{
+    conversationId: string
+    phase: 'waiting' | 'connected'
+  } | null>(null)
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
   // Event listener for starting transcription
@@ -94,6 +102,34 @@ export const Socket: FC<SocketProps> = ({
       })
     }
   })
+
+  useEventListener(
+    'phone-island-current-user-queue-call-waiting',
+    (data: CurrentUserQueueCallEventTypes) => {
+      dispatch.currentCall.updateCurrentCall({
+        throughQueue: true,
+        queueId: data?.queueId || '',
+        queueName: data?.queueName || '',
+        queueNumber: data?.queueNumber || '',
+        queuePosition: data?.queuePosition || '',
+        queueWaitingTime: data?.queueWaitingTime || 0,
+      })
+    },
+  )
+
+  useEventListener(
+    'phone-island-current-user-queue-call-connected',
+    (data: CurrentUserQueueCallEventTypes) => {
+      dispatch.currentCall.updateCurrentCall({
+        throughQueue: true,
+        queueId: data?.queueId || '',
+        queueName: data?.queueName || '',
+        queueNumber: data?.queueNumber || '',
+        queuePosition: data?.queuePosition || '',
+        queueWaitingTime: data?.queueWaitingTime || 0,
+      })
+    },
+  )
 
   const checkDefaultDeviceConversationActive = (conv: any) => {
     dispatch.currentCall.updateCurrentCall({
@@ -132,6 +168,112 @@ export const Socket: FC<SocketProps> = ({
           )
         }
       }
+    }
+
+    const getCurrentCallQueuePayload = (conv: ConversationTypes) => {
+      return getCurrentCallQueueContext(conv, store.getState().queue)
+    }
+
+    const getQueuePayloadWithFallback = (
+      conv: ConversationTypes,
+      queueContext: ReturnType<typeof getCurrentCallQueuePayload>,
+    ) => {
+      const currentCall = store.getState().currentCall
+
+      return {
+        conversationId: conv.id,
+        linkedId: conv.linkedId,
+        uniqueId: conv.uniqueId,
+        ownerExtension: conv.owner,
+        number: `${conv.counterpartNum || ''}`,
+        queueId: queueContext?.queueId || currentCall.queueId || '',
+        queueName: queueContext?.queueName || currentCall.queueName || '',
+        queueNumber: queueContext?.queueNumber || currentCall.queueNumber || '',
+        queuePosition: queueContext?.queuePosition || '',
+        queueWaitingTime: queueContext?.queueWaitingTime || 0,
+      }
+    }
+
+    const syncCurrentUserQueueCall = (conv: ConversationTypes | null) => {
+      if (!conv) {
+        currentUserQueueCallPhase.current = null
+        return
+      }
+
+      const queueContext = getCurrentCallQueuePayload(conv)
+      const payload = getQueuePayloadWithFallback(conv, queueContext)
+      const hasQueueContext = Boolean(payload.queueId || payload.queueName || payload.queueNumber)
+
+      if (!hasQueueContext) {
+        currentUserQueueCallPhase.current = null
+        return
+      }
+
+      if (!conv.connected) {
+        const shouldDispatchWaiting =
+          currentUserQueueCallPhase.current?.conversationId !== conv.id ||
+          currentUserQueueCallPhase.current?.phase !== 'waiting'
+
+        if (shouldDispatchWaiting) {
+          dispatchCurrentUserQueueCallWaiting(payload)
+          currentUserQueueCallPhase.current = {
+            conversationId: conv.id,
+            phase: 'waiting',
+          }
+        }
+
+        return
+      }
+
+      const shouldDispatchConnected =
+        currentUserQueueCallPhase.current?.conversationId !== conv.id ||
+        currentUserQueueCallPhase.current?.phase !== 'connected'
+
+      if (shouldDispatchConnected) {
+        dispatchCurrentUserQueueCallConnected(payload)
+        currentUserQueueCallPhase.current = {
+          conversationId: conv.id,
+          phase: 'connected',
+        }
+      }
+    }
+
+    const getActiveConversationForCurrentCall = (): ConversationTypes | null => {
+      const { conversations } = store.getState().currentUser
+      const { conversationId } = store.getState().currentCall
+      let selectedConversation: ConversationTypes | null = null
+
+      Object.values(conversations || {}).forEach((extensionConversations) => {
+        Object.values(extensionConversations || {}).forEach((conversation) => {
+          if (selectedConversation?.id && selectedConversation.id === conversationId) {
+            return
+          }
+
+          if (conversationId && conversation.id === conversationId) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (!selectedConversation) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (conversation.connected && !selectedConversation.connected) {
+            selectedConversation = conversation
+            return
+          }
+
+          if (
+            conversation.connected === selectedConversation.connected &&
+            conversation.startTime > selectedConversation.startTime
+          ) {
+            selectedConversation = conversation
+          }
+        })
+      })
+
+      return selectedConversation
     }
 
     const shouldKeepCurrentAcceptedCall = (ownerExtension?: string) => {
@@ -186,6 +328,8 @@ export const Socket: FC<SocketProps> = ({
               if (shouldKeepCurrentAcceptedCall(conv.owner)) {
                 break
               }
+
+              syncCurrentUserQueueCall(conv)
 
               // Handle streaming source for incoming calls
               handleStreamingSource(conv)
@@ -262,6 +406,8 @@ export const Socket: FC<SocketProps> = ({
               break
             // @ts-ignore
             case 'busy':
+              syncCurrentUserQueueCall(conv)
+
               // Handle streaming source for outgoing calls
               handleStreamingSource(conv)
 
@@ -365,6 +511,8 @@ export const Socket: FC<SocketProps> = ({
               break
 
             case 'onhold':
+              syncCurrentUserQueueCall(conv)
+
               // The new conversation during transferring
               const { counterpartName, counterpartNum, startTime } = conv
               if (
@@ -401,6 +549,8 @@ export const Socket: FC<SocketProps> = ({
       } else {
         // Without conversation for physical phone management
         if (res.status == 'online' && userTotallyFree()) {
+          syncCurrentUserQueueCall(null)
+
           // Stop ringing sounds
           dispatch.player.stopAudioPlayer()
           // Reset current call info
@@ -730,8 +880,7 @@ export const Socket: FC<SocketProps> = ({
 
           // If we are already on an active call, suppress the busy popup unless it belongs
           // to a conference-owner flow or an attended transfer started by this user.
-          const shouldShowOperatorBusy =
-            !isReceivingCall && (!accepted || isActive || transferring)
+          const shouldShowOperatorBusy = !isReceivingCall && (!accepted || isActive || transferring)
 
           // Only show operator busy view if:
           // 1. We are NOT receiving an incoming call to our own extension
@@ -901,12 +1050,21 @@ export const Socket: FC<SocketProps> = ({
 
       // `queueUpdate` is the socket event when the data of a queue updates
       socket.current.on('queueUpdate', (res: QueuesUpdateTypes) => {
+        dispatch.queue.updateQueue(res)
+
+        const activeConversation = getActiveConversationForCurrentCall()
+
+        if (activeConversation) {
+          syncCurrentUserQueueCall(activeConversation)
+        }
+
         // Dispatch queueUpdate event
         dispatchQueueUpdate(res)
       })
 
       // `queueMemberUpdate` is the socket event when the data of a queue member changes
       socket.current.on('queueMemberUpdate', (res: QueueUpdateMemberTypes) => {
+        dispatch.queue.updateQueueMember(res)
         // Dispatch queueMemberUpdate event
         dispatchQueueMemberUpdate(res)
       })

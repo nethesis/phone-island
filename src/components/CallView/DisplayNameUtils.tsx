@@ -1,6 +1,4 @@
-import React, { memo } from 'react'
 import { TFunction } from 'i18next'
-import TextScroll from '../TextScroll'
 
 interface DisplayTextProps {
   intrudeListenStatus: any
@@ -9,17 +7,10 @@ interface DisplayTextProps {
   t: TFunction
 }
 
-interface TextClassNameProps {
-  intrudeListenStatus: any
-  animateText: boolean
-}
-
 export interface DisplayTextResult {
   type: 'text' | 'scroll'
   content: string
 }
-
-const MemoizedTextScroll = memo(TextScroll)
 
 export const getDisplayText = ({
   intrudeListenStatus,
@@ -61,15 +52,5 @@ export const getDisplayText = ({
   }
 }
 
-export const getTextClassName = ({ intrudeListenStatus, animateText }: TextClassNameProps) => {
-  const baseClass =
-    'pi-relative pi-inline-block pi-font-medium pi-text-primaryNeutral dark:pi-text-primaryNeutralDark'
-
-  if (intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) {
-    return `pi-w-fit ${baseClass} ${animateText ? 'animated-text' : ''}`
-  }
-
-  return `${baseClass} ${animateText ? 'pi-animate-scroll-text' : ''}`
-}
-
-export { MemoizedTextScroll }
+export const getTextClassName = () =>
+  'pi-relative pi-block pi-max-w-full pi-font-medium pi-text-primaryNeutral dark:pi-text-primaryNeutralDark'

@@ -24,6 +24,7 @@ import { mediaDevices } from './mediaDevices'
 import { conference } from './conference'
 import { streaming } from './streaming'
 import { ringtones } from './ringtones'
+import { queue } from './queue'
 
 export interface RootModel extends Models<RootModel> {
   player: typeof player
@@ -48,6 +49,7 @@ export interface RootModel extends Models<RootModel> {
   mediaDevices: typeof mediaDevices
   streaming: typeof streaming
   ringtones: typeof ringtones
+  queue: typeof queue
 }
 
 export const models: RootModel = {
@@ -73,4 +75,5 @@ export const models: RootModel = {
   mediaDevices,
   streaming,
   ringtones,
+  queue,
 }

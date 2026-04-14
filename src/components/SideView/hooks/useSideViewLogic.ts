@@ -7,7 +7,24 @@ import { isFromTrunk } from '../../../lib/user/extensions'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
 
-export const useSideViewLogic = (uaType?: string) => {
+export interface UseSideViewLogicResult {
+  userInformation: RootState['currentUser']
+  availableDevices: any[]
+  videoInputDevices: any[]
+  isVideoCallButtonVisible: boolean
+  isUrlButtonEnabled: boolean
+  hasValidUrl: boolean
+  isTranscriptionEnabled: boolean
+  canRecord: boolean
+  canShareScreen: boolean
+  canSwitchDevice: boolean
+  goToVideoCall: () => Promise<void>
+  goToScreenSharing: () => void
+  closeSideViewAndLaunchEvent: (viewType: any) => void
+  openTranscriptionView: () => void
+}
+
+export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
   const dispatch = useDispatch<Dispatch>()
   const userInformation = useSelector((state: RootState) => state.currentUser)
   const allUsersInformation = useSelector((state: RootState) => state.users)
@@ -16,7 +33,7 @@ export const useSideViewLogic = (uaType?: string) => {
   const janus = useRef<any>(JanusLib)
   const conversations = useSelector((state: RootState) => state.currentUser.conversations)
 
-  const [availableDevices, setAvailableDevices] = useState([])
+  const [availableDevices, setAvailableDevices] = useState<any[]>([])
   const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
 
   const getActiveConversationData = useCallback(() => {

@@ -64,6 +64,19 @@ export interface QueueUpdateWaitingCallersTypes {
   waitingTime: number
 }
 
+export interface CurrentUserQueueCallEventTypes {
+  conversationId?: string
+  linkedId?: string
+  uniqueId?: string
+  ownerExtension?: string
+  number?: string
+  queueId: string
+  queueName: string
+  queueNumber: string
+  queuePosition?: string
+  queueWaitingTime?: number
+}
+
 export interface ParkingUpdateEventTypes {
   [parking: string]: ParkingUpdateTypes
 }

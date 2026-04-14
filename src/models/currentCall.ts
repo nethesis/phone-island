@@ -42,6 +42,12 @@ const defaultState = {
   streamingSourceNumber: '',
   chDest: new Array(),
   chSource: new Array(),
+  throughQueue: false,
+  queueId: '',
+  queueName: '',
+  queueNumber: '',
+  queuePosition: '',
+  queueWaitingTime: 0,
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -51,6 +57,14 @@ export const currentCall = createModel<RootModel>()({
       if (Number(payload.startTime) && state.startTime) {
         // avoid updating startTime if it's already set (e.g. while switching to a video call)
         delete payload.startTime
+      }
+
+      if (payload.throughQueue === false) {
+        payload.queueId = ''
+        payload.queueName = ''
+        payload.queueNumber = ''
+        payload.queuePosition = ''
+        payload.queueWaitingTime = 0
       }
 
       return {
@@ -254,4 +268,10 @@ export interface CurrentCallTypes {
   streamingSourceNumber?: string
   chDest?: any
   chSource?: any
+  throughQueue?: boolean
+  queueId?: string
+  queueName?: string
+  queueNumber?: string
+  queuePosition?: string
+  queueWaitingTime?: number
 }

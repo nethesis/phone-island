@@ -27,6 +27,7 @@ import { faGridRound, faOpen } from '@nethesis/nethesis-solid-svg-icons'
 import { Base64 } from 'js-base64'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { setMainDevice, setIncomingCallsPreference } from '../services/user'
+import type { CurrentUserQueueCallEventTypes } from '../types'
 
 const meta: Meta<typeof PhoneIsland> = {
   title: 'Phone Island',
@@ -217,8 +218,29 @@ const CallTemplate = (args: any) => {
   })
 
   useEventListener('phone-island-call-answered', (deviceType: any) => {
+    setShowToast(true)
     setToastMessage(`Call answered from: ${deviceType?.extensionType}`)
   })
+
+  useEventListener(
+    'phone-island-current-user-queue-call-waiting',
+    (data: CurrentUserQueueCallEventTypes) => {
+      setShowToast(true)
+      setToastMessage(
+        `Queue call waiting: ${(data?.queueName || data?.queueNumber || data?.queueId) ?? ''}`,
+      )
+    },
+  )
+
+  useEventListener(
+    'phone-island-current-user-queue-call-connected',
+    (data: CurrentUserQueueCallEventTypes) => {
+      setShowToast(true)
+      setToastMessage(
+        `Queue call connected: ${(data?.queueName || data?.queueNumber || data?.queueId) ?? ''}`,
+      )
+    },
+  )
 
   useEffect(() => {
     if (showToast) {
@@ -593,6 +615,14 @@ const CallTemplate = (args: any) => {
                 className='pi-text-sm pi-w-full'
               >
                 Paramurl status
+              </Button>
+
+              <Button
+                variant='default'
+                onClick={() => eventDispatch('phone-island-queue-status', {})}
+                className='pi-text-sm pi-w-full'
+              >
+                Queue status
               </Button>
 
               <Button

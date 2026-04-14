@@ -8,6 +8,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay, faPause, faTrash, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons'
 import { eventDispatch, useEventListener } from '../../utils'
 
+const StyledCustomRangeInput =
+  StyledCustomRange as unknown as React.ForwardRefExoticComponent<
+    React.ComponentPropsWithoutRef<'input'> & React.RefAttributes<HTMLInputElement>
+  >
+
 export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
   const { audioPlayer, audioPlayerPlaying, audioPlayerTrackDuration } = useSelector(
     (state: RootState) => state.player,
@@ -151,7 +156,7 @@ export const Progress: FC<ProgressTypes> = ({ isPlayer }) => {
           onMouseDown={stopPropagation}
           onTouchStart={stopPropagation}
         >
-          <StyledCustomRange
+          <StyledCustomRangeInput
             data-stop-propagation={true}
             ref={progressBarRef}
             defaultValue={0}
