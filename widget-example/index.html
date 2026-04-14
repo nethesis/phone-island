@@ -14,113 +14,312 @@
     />
 
     <style>
+        :root {
+            color-scheme: light;
+            --demo-bg: #eef3f8;
+            --demo-bg-accent: rgba(58, 123, 213, 0.16);
+            --demo-surface: rgba(255, 255, 255, 0.9);
+            --demo-surface-strong: #ffffff;
+            --demo-surface-soft: #f5f8fb;
+            --demo-border: rgba(148, 163, 184, 0.24);
+            --demo-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+            --demo-text: #16202a;
+            --demo-text-soft: #516071;
+            --demo-primary: #2563eb;
+            --demo-primary-strong: #1d4ed8;
+            --demo-success: #16a34a;
+            --demo-success-strong: #15803d;
+            --demo-danger: #e11d48;
+            --demo-danger-strong: #be123c;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 24px 20px 40px;
+            background:
+                radial-gradient(circle at top left, var(--demo-bg-accent), transparent 34%),
+                linear-gradient(180deg, #f7fafc 0%, var(--demo-bg) 100%);
+            color: var(--demo-text);
+            transition: background-color 0.2s ease, color 0.2s ease;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 85% 15%, rgba(37, 99, 235, 0.1), transparent 20%),
+                radial-gradient(circle at 20% 30%, rgba(22, 163, 74, 0.08), transparent 24%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .demo-toolbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .demo-toolbar-inner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background-color: rgba(255, 255, 255, 0.82);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(8px);
+        }
+
+        .toolbar-button,
+        .theme-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 44px;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--demo-border);
+            border-radius: 999px;
+            background-color: var(--demo-surface-strong);
+            color: var(--demo-text);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .toolbar-button:hover,
+        .theme-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        .theme-button.active {
+            background: linear-gradient(135deg, var(--demo-primary) 0%, var(--demo-primary-strong) 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #d9dee3;
         }
 
         .integration-panel {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: var(--demo-surface);
+            padding: 24px;
+            border-radius: 22px;
+            border: 1px solid var(--demo-border);
+            box-shadow: var(--demo-shadow);
             margin-bottom: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        #mainPanel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #mainPanel::after {
+            content: '';
+            position: absolute;
+            top: -120px;
+            right: -120px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12), transparent 68%);
+            pointer-events: none;
+        }
+
+        #mainPanel > h1,
+        .login-container h1 {
+            font-size: clamp(2rem, 3.2vw, 2.8rem);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            margin: 0 0 24px;
+        }
+
+        h3 {
+            letter-spacing: -0.02em;
         }
 
         .controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 12px;
+            margin: 24px 0;
         }
 
         .controls button {
-            padding: 10px 15px;
-            background-color: #007bff;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--demo-primary) 0%, #4f46e5 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 14px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 14px 30px rgba(37, 99, 235, 0.22);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
         }
 
         .controls button:hover {
-            background-color: #0056b3;
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.28);
         }
 
         .controls button.danger {
-            background-color: #dc3545;
+            background: linear-gradient(135deg, var(--demo-danger) 0%, var(--demo-danger-strong) 100%);
+            box-shadow: 0 14px 30px rgba(225, 29, 72, 0.24);
         }
 
         .controls button.danger:hover {
-            background-color: #c82333;
+            box-shadow: 0 18px 34px rgba(225, 29, 72, 0.3);
         }
 
         .controls button.success {
-            background-color: #28a745;
+            background: linear-gradient(135deg, var(--demo-success) 0%, var(--demo-success-strong) 100%);
+            box-shadow: 0 14px 30px rgba(22, 163, 74, 0.24);
         }
 
         .controls button.success:hover {
-            background-color: #218838;
+            box-shadow: 0 18px 34px rgba(22, 163, 74, 0.3);
         }
 
         #status {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #007bff;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.04) 100%);
+            padding: 16px 18px;
+            border-radius: 16px;
+            margin: 22px 0;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            border-left: 4px solid var(--demo-primary);
+            color: var(--demo-text);
         }
 
         .call-input {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            align-items: center;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            gap: 12px;
+            margin: 24px 0;
+            align-items: end;
+        }
+
+        .call-input label {
+            grid-column: 1 / -1;
+            font-weight: 600;
         }
 
         .call-input input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--demo-border);
+            border-radius: 14px;
             font-size: 16px;
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            box-sizing: border-box;
         }
 
-        .call-input button {
-            padding: 10px 20px;
-            background-color: #28a745;
+        .call-input button,
+        .device-selector button,
+        .filter-actions button,
+        .transcription-controls button,
+        #logoutBtn,
+        #clearLogBtn,
+        #refreshUserInfoBtn {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--demo-primary) 0%, var(--demo-primary-strong) 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.2);
+        }
+
+        .call-input button:hover,
+        .device-selector button:hover,
+        .filter-actions button:hover,
+        .transcription-controls button:hover,
+        #logoutBtn:hover,
+        #clearLogBtn:hover,
+        #refreshUserInfoBtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.04);
+        }
+
+        .call-input button.success,
+        .device-selector button.success,
+        .filter-actions button.success,
+        .transcription-controls button.success,
+        #refreshUserInfoBtn {
+            background: linear-gradient(135deg, var(--demo-success) 0%, var(--demo-success-strong) 100%);
+            box-shadow: 0 12px 26px rgba(22, 163, 74, 0.22);
+        }
+
+        .call-input button.danger,
+        .device-selector button.danger,
+        .filter-actions button.danger,
+        .transcription-controls button.danger,
+        #logoutBtn {
+            background: linear-gradient(135deg, var(--demo-danger) 0%, var(--demo-danger-strong) 100%);
+            box-shadow: 0 12px 26px rgba(225, 29, 72, 0.22);
+        }
+
+        #clearLogBtn {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            box-shadow: 0 12px 26px rgba(71, 85, 105, 0.22);
         }
 
         .device-selector {
-            margin: 10px 0;
+            margin: 16px 0;
         }
 
-        .device-selector select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+        .device-selector strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .device-selector button + button {
             margin-left: 10px;
         }
 
+        .device-selector select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--demo-border);
+            margin-left: 0;
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            box-sizing: border-box;
+        }
+
         .event-log {
-            background-color: #000;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+            color: #b6ffd5;
+            padding: 16px;
+            border-radius: 16px;
             margin: 20px 0;
             max-height: 300px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
             font-size: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         .theme-selector {
@@ -157,45 +356,107 @@
         }
 
         .login-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 600px;
-            margin: 50px auto;
+            background-color: var(--demo-surface);
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid var(--demo-border);
+            box-shadow: var(--demo-shadow);
+            max-width: 660px;
+            margin: 58px auto;
+            backdrop-filter: blur(12px);
         }
 
         .login-container input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 14px 16px;
+            border: 1px solid var(--demo-border);
+            border-radius: 14px;
             font-size: 14px;
             margin: 10px 0;
             box-sizing: border-box;
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
         }
 
         .login-container button {
             width: 100%;
-            padding: 12px;
-            background-color: #28a745;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, var(--demo-success) 0%, var(--demo-success-strong) 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 14px;
             cursor: pointer;
             font-size: 16px;
             margin-top: 10px;
+            font-weight: 700;
+            box-shadow: 0 16px 34px rgba(22, 163, 74, 0.26);
         }
 
         .login-container button:hover {
-            background-color: #218838;
+            filter: brightness(1.04);
+        }
+
+        .login-steps {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(245, 248, 251, 0.92) 100%);
+            border: 1px solid var(--demo-border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        .login-steps p {
+            margin: 0 0 14px;
+            font-weight: 700;
+            color: var(--demo-text);
+        }
+
+        .login-steps ol {
+            list-style: none;
+            counter-reset: login-steps;
+            margin: 0;
+            padding-left: 0;
+            color: var(--demo-text-soft);
+        }
+
+        .login-steps li {
+            position: relative;
+            padding-left: 38px;
+            line-height: 1.55;
+        }
+
+        .login-steps li::before {
+            counter-increment: login-steps;
+            content: counter(login-steps);
+            position: absolute;
+            top: 1px;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--demo-primary) 0%, var(--demo-primary-strong) 100%);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.18);
+        }
+
+        .login-steps li strong {
+            color: var(--demo-text);
+        }
+
+        .login-steps li + li {
+            margin-top: 12px;
         }
 
         .user-info {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(236, 253, 245, 0.95) 0%, rgba(220, 252, 231, 0.92) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.18);
+            padding: 18px;
+            border-radius: 18px;
             margin-bottom: 20px;
         }
 
@@ -209,25 +470,25 @@
         }
 
         .registration-status {
-            background-color: #cce5ff;
-            border: 1px solid #b8daff;
+            background-color: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(37, 99, 235, 0.18);
             padding: 10px 15px;
-            border-radius: 4px;
+            border-radius: 12px;
             margin: 10px 0;
             font-weight: bold;
-            color: #004085;
+            color: #1d4ed8;
         }
 
         .registration-status.success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+            background-color: rgba(22, 163, 74, 0.14);
+            border-color: rgba(22, 163, 74, 0.22);
+            color: #166534;
         }
 
         .registration-status.error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            background-color: rgba(225, 29, 72, 0.14);
+            border-color: rgba(225, 29, 72, 0.2);
+            color: #9f1239;
         }
 
         .hidden {
@@ -281,8 +542,8 @@
 
         .transcription-status {
             padding: 10px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            background: var(--demo-surface-soft);
+            border-bottom: 1px solid var(--demo-border);
             font-size: 14px;
         }
 
@@ -290,15 +551,16 @@
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background: #f8f9fa;
+            background: var(--demo-surface-soft);
         }
 
         .transcription-message {
-            background: white;
+            background: var(--demo-surface-strong);
             margin-bottom: 15px;
             padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 14px;
+            border: 1px solid var(--demo-border);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
         }
 
         .transcription-message.speaker {
@@ -351,9 +613,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(7, 12, 20, 0.58);
             display: none;
             z-index: 999;
+            backdrop-filter: blur(4px);
         }
 
         .transcription-overlay.visible {
@@ -362,38 +625,29 @@
 
         .transcription-controls {
             padding: 15px 20px;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid var(--demo-border);
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: center;
         }
 
         .transcription-controls button {
-            padding: 8px 16px;
-            border: 1px solid #007bff;
-            background: white;
-            color: #007bff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .transcription-controls button:hover {
-            background: #007bff;
-            color: white;
+            min-height: 44px;
         }
 
         .transcription-controls button.active {
-            background: #007bff;
+            background: linear-gradient(135deg, var(--demo-primary) 0%, var(--demo-primary-strong) 100%);
             color: white;
         }
 
         /* Event Filter Panel Styles */
         .event-filter-panel {
-            background-color: white;
+            background-color: var(--demo-surface);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 22px;
+            border: 1px solid var(--demo-border);
+            box-shadow: var(--demo-shadow);
             margin-bottom: 20px;
         }
 
@@ -404,6 +658,7 @@
             margin-bottom: 15px;
             cursor: pointer;
             user-select: none;
+            padding: 4px 2px;
         }
 
         .event-filter-header h3 {
@@ -428,20 +683,23 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
+            padding: 12px 14px;
+            background-color: var(--demo-surface-soft);
+            border-radius: 14px;
+            border: 1px solid transparent;
             cursor: pointer;
         }
 
         .filter-checkbox:hover {
-            background-color: #e9ecef;
+            background-color: #edf3fb;
+            border-color: rgba(37, 99, 235, 0.12);
         }
 
         .filter-checkbox input[type="checkbox"] {
             cursor: pointer;
             width: 18px;
             height: 18px;
+            accent-color: var(--demo-primary);
         }
 
         .filter-checkbox label {
@@ -452,25 +710,11 @@
 
         .filter-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .filter-actions button {
-            padding: 8px 16px;
-            border: 1px solid #007bff;
-            background: white;
-            color: #007bff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .filter-actions button:hover {
-            background: #007bff;
-            color: white;
+            border-top: 1px solid var(--demo-border);
         }
 
         .filter-toggle-icon {
@@ -491,10 +735,12 @@
         .log-search-input {
             flex: 1;
             padding: 8px 12px 8px 36px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid var(--demo-border);
+            border-radius: 14px;
             font-size: 14px;
             position: relative;
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
         }
 
         .log-search-wrapper {
@@ -520,32 +766,973 @@
         .event-log div.hidden {
             display: none !important;
         }
+
+        html,
+        body,
+        .event-log,
+        .transcription-messages {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(100, 116, 139, 0.7) rgba(148, 163, 184, 0.12);
+        }
+
+        body::-webkit-scrollbar,
+        .event-log::-webkit-scrollbar,
+        .transcription-messages::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        body::-webkit-scrollbar-track,
+        .event-log::-webkit-scrollbar-track,
+        .transcription-messages::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.12);
+            border-radius: 999px;
+        }
+
+        body::-webkit-scrollbar-thumb,
+        .event-log::-webkit-scrollbar-thumb,
+        .transcription-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(100, 116, 139, 0.92) 0%, rgba(71, 85, 105, 0.92) 100%);
+            border-radius: 999px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            min-height: 36px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover,
+        .event-log::-webkit-scrollbar-thumb:hover,
+        .transcription-messages::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(71, 85, 105, 0.98) 0%, rgba(51, 65, 85, 0.98) 100%);
+            background-clip: padding-box;
+        }
+
+        body::-webkit-scrollbar-corner,
+        .event-log::-webkit-scrollbar-corner,
+        .transcription-messages::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        body.events-reference-open {
+            overflow: hidden;
+        }
+
+        .event-log-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .events-reference-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 48%, #ea580c 100%);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 16px 30px rgba(249, 115, 22, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .events-reference-cta::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.24) 48%, transparent 100%);
+            transform: translateX(-120%);
+            transition: transform 0.6s ease;
+        }
+
+        .events-reference-cta:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+            box-shadow: 0 20px 38px rgba(249, 115, 22, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+        }
+
+        .events-reference-cta:hover::after {
+            transform: translateX(120%);
+        }
+
+        .events-reference-cta__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.16);
+            font-size: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            position: relative;
+            z-index: 1;
+        }
+
+        .events-reference-cta__text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .events-reference-cta__title {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+        }
+
+        .events-reference-cta__hint {
+            font-size: 12px;
+            line-height: 1.35;
+            color: rgba(255, 247, 237, 0.9);
+        }
+
+        .events-reference-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 12, 20, 0.62);
+            backdrop-filter: blur(6px);
+            display: none;
+            z-index: 1190;
+        }
+
+        .events-reference-overlay.visible {
+            display: block;
+        }
+
+        .events-reference-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(1100px, calc(100vw - 32px));
+            max-height: min(82vh, 920px);
+            display: none;
+            flex-direction: column;
+            z-index: 1200;
+            background: var(--demo-surface);
+            border: 1px solid var(--demo-border);
+            border-radius: 24px;
+            box-shadow: var(--demo-shadow);
+            overflow: hidden;
+            backdrop-filter: blur(14px);
+        }
+
+        .events-reference-modal.visible {
+            display: flex;
+        }
+
+        .events-reference-header {
+            padding: 22px 24px 18px;
+            border-bottom: 1px solid var(--demo-border);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .events-reference-header h3 {
+            margin: 0 0 8px;
+            font-size: 1.45rem;
+        }
+
+        .events-reference-header p {
+            margin: 0;
+            color: var(--demo-text-soft);
+            line-height: 1.5;
+            max-width: 760px;
+        }
+
+        .events-reference-close {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .events-reference-toolbar {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 1px solid var(--demo-border);
+            flex-wrap: wrap;
+        }
+
+        .events-reference-search {
+            flex: 1 1 320px;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .events-reference-search input {
+            width: 100%;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            padding: 12px 16px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .events-reference-search input:focus {
+            border-color: rgba(37, 99, 235, 0.42);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        .events-reference-filters-row {
+            padding: 16px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            border-bottom: 1px solid var(--demo-border);
+        }
+
+        .events-reference-filters-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 160px;
+        }
+
+        .events-reference-filters-meta strong {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--demo-text-soft);
+        }
+
+        .events-reference-results-counter {
+            color: var(--demo-text-soft);
+            font-size: 13px;
+        }
+
+        .events-reference-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1 1 520px;
+            justify-content: flex-end;
+        }
+
+        .events-reference-filter-chip {
+            padding: 9px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--demo-text);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .events-reference-filter-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .events-reference-filter-chip.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.14) 0%, rgba(29, 78, 216, 0.2) 100%);
+            border-color: rgba(37, 99, 235, 0.26);
+            color: var(--demo-primary-strong);
+        }
+
+        .events-reference-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .events-reference-tab {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .events-reference-tab.active {
+            background: linear-gradient(135deg, var(--demo-primary) 0%, var(--demo-primary-strong) 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .events-reference-link {
+            color: var(--demo-primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .events-reference-link:hover {
+            text-decoration: underline;
+        }
+
+        .events-reference-content {
+            padding: 24px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .events-reference-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(245, 248, 251, 0.96) 100%);
+            border: 1px solid var(--demo-border);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        }
+
+        .events-reference-card__top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .events-reference-card__meta {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--demo-primary);
+        }
+
+        .events-reference-copy-button {
+            padding: 8px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.15);
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--demo-primary-strong);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .events-reference-copy-button:hover {
+            transform: translateY(-1px);
+            background: rgba(37, 99, 235, 0.14);
+        }
+
+        .events-reference-copy-button.copied {
+            background: rgba(22, 163, 74, 0.14);
+            border-color: rgba(22, 163, 74, 0.18);
+            color: #15803d;
+        }
+
+        .events-reference-card__title {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .events-reference-card__description {
+            margin: 0 0 14px;
+            color: var(--demo-text-soft);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .events-reference-card__label {
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--demo-text);
+        }
+
+        .events-reference-card__json {
+            margin: 0;
+            padding: 14px;
+            border-radius: 14px;
+            background: #0f172a;
+            color: #c6f6d5;
+            font-size: 12px;
+            line-height: 1.55;
+            overflow: auto;
+        }
+
+        .events-reference-empty {
+            grid-column: 1 / -1;
+            padding: 22px;
+            text-align: center;
+            border: 1px dashed var(--demo-border);
+            border-radius: 18px;
+            color: var(--demo-text-soft);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-info-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+            overflow: hidden;
+            border: 1px solid var(--demo-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.36);
+        }
+
+        .user-info-table tr:not(:last-child) td {
+            border-bottom: 1px solid var(--demo-border);
+        }
+
+        .user-info-table__label,
+        .user-info-table__value {
+            padding: 12px 14px;
+            vertical-align: top;
+        }
+
+        .user-info-table__label {
+            width: 30%;
+            font-weight: 700;
+            color: var(--demo-text);
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .user-info-table__value {
+            color: var(--demo-text);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .user-info-table__muted {
+            color: var(--demo-text-soft);
+        }
+
+        .presence-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 12px;
+            border-radius: 999px;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .endpoint-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .endpoint-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.12);
+            color: var(--demo-text);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-info-feedback {
+            padding: 20px;
+            text-align: center;
+            border-radius: 16px;
+            border: 1px solid var(--demo-border);
+            font-size: 14px;
+        }
+
+        .user-info-feedback--loading {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--demo-text-soft);
+        }
+
+        .user-info-feedback--error {
+            background: rgba(225, 29, 72, 0.1);
+            border-color: rgba(225, 29, 72, 0.18);
+            color: #b91c1c;
+        }
+
+        body[data-theme="dark"] {
+            --demo-bg: #09111b;
+            --demo-bg-accent: rgba(59, 130, 246, 0.22);
+            --demo-surface: rgba(18, 25, 38, 0.88);
+            --demo-surface-strong: #131c2a;
+            --demo-surface-soft: #1a2433;
+            --demo-border: rgba(148, 163, 184, 0.16);
+            --demo-shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+            --demo-text: #e6eef8;
+            --demo-text-soft: #b8c5d6;
+            background:
+                radial-gradient(circle at top left, var(--demo-bg-accent), transparent 34%),
+                linear-gradient(180deg, #0a1019 0%, var(--demo-bg) 100%);
+            color: var(--demo-text);
+        }
+
+        body[data-theme="dark"],
+        body[data-theme="dark"] .event-log,
+        body[data-theme="dark"] .transcription-messages {
+            scrollbar-color: rgba(96, 165, 250, 0.45) rgba(15, 23, 42, 0.55);
+        }
+
+        body[data-theme="dark"] .demo-toolbar-inner {
+            background-color: rgba(22, 28, 36, 0.94);
+            border-color: #344150;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        body[data-theme="dark"]::-webkit-scrollbar-track,
+        body[data-theme="dark"] .event-log::-webkit-scrollbar-track,
+        body[data-theme="dark"] .transcription-messages::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        body[data-theme="dark"]::-webkit-scrollbar-thumb,
+        body[data-theme="dark"] .event-log::-webkit-scrollbar-thumb,
+        body[data-theme="dark"] .transcription-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.74) 0%, rgba(37, 99, 235, 0.74) 100%);
+            background-clip: padding-box;
+            border: 2px solid transparent;
+        }
+
+        body[data-theme="dark"]::-webkit-scrollbar-thumb:hover,
+        body[data-theme="dark"] .event-log::-webkit-scrollbar-thumb:hover,
+        body[data-theme="dark"] .transcription-messages::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.88) 0%, rgba(59, 130, 246, 0.88) 100%);
+            background-clip: padding-box;
+        }
+
+        body[data-theme="dark"] .toolbar-button,
+        body[data-theme="dark"] .theme-button,
+        body[data-theme="dark"] .theme-selector button {
+            background-color: #17202b;
+            border-color: #344150;
+            color: #e5edf5;
+        }
+
+        body[data-theme="dark"] .toolbar-divider {
+            background-color: #344150;
+        }
+
+        body[data-theme="dark"] .login-container,
+        body[data-theme="dark"] .integration-panel,
+        body[data-theme="dark"] .event-filter-panel,
+        body[data-theme="dark"] .transcription-container,
+        body[data-theme="dark"] .transcription-message {
+            background-color: var(--demo-surface);
+            color: #e5edf5;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        body[data-theme="dark"] .login-steps,
+        body[data-theme="dark"] #status,
+        body[data-theme="dark"] .filter-checkbox,
+        body[data-theme="dark"] .transcription-status,
+        body[data-theme="dark"] .transcription-messages,
+        body[data-theme="dark"] .user-info,
+        body[data-theme="dark"] .token-info {
+            background-color: var(--demo-surface-soft);
+            border-color: var(--demo-border);
+            color: var(--demo-text);
+        }
+
+        body[data-theme="dark"] .login-steps {
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(20, 28, 40, 0.98) 100%);
+            border-color: rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        body[data-theme="dark"] .login-steps p,
+        body[data-theme="dark"] .login-steps ol,
+        body[data-theme="dark"] .login-steps li,
+        body[data-theme="dark"] .login-container p,
+        body[data-theme="dark"] .registration-status,
+        body[data-theme="dark"] .user-info p,
+        body[data-theme="dark"] .user-info strong,
+        body[data-theme="dark"] #status strong,
+        body[data-theme="dark"] #status span,
+        body[data-theme="dark"] .user-info h3,
+        body[data-theme="dark"] .transcription-text,
+        body[data-theme="dark"] .transcription-speaker,
+        body[data-theme="dark"] .event-filter-header h3,
+        body[data-theme="dark"] .device-selector strong,
+        body[data-theme="dark"] .call-input label,
+        body[data-theme="dark"] .filter-checkbox label {
+            color: #f8fafc;
+        }
+
+        body[data-theme="dark"] .call-input input,
+        body[data-theme="dark"] .device-selector select,
+        body[data-theme="dark"] .log-search-input,
+        body[data-theme="dark"] .login-container input {
+            background-color: #0b1320;
+            border-color: var(--demo-border);
+            color: #e5edf5;
+        }
+
+        body[data-theme="dark"] .call-input input::placeholder,
+        body[data-theme="dark"] .log-search-input::placeholder,
+        body[data-theme="dark"] .login-container input::placeholder {
+            color: #89a0b9;
+        }
+
+        body[data-theme="dark"] .login-steps li::before {
+            box-shadow: 0 10px 18px rgba(37, 99, 235, 0.24);
+        }
+
+        body[data-theme="dark"] .log-search-counter,
+        body[data-theme="dark"] .transcription-meta,
+        body[data-theme="dark"] .transcription-text.interim,
+        body[data-theme="dark"] #userInfoTableContainer p {
+            color: #a9b8c7;
+        }
+
+        body[data-theme="dark"] .user-info {
+            background: linear-gradient(180deg, rgba(13, 53, 41, 0.86) 0%, rgba(17, 76, 58, 0.7) 100%);
+            border-color: rgba(74, 222, 128, 0.18);
+        }
+
+        body[data-theme="dark"] .registration-status.success {
+            background-color: rgba(74, 222, 128, 0.16);
+            border-color: rgba(74, 222, 128, 0.2);
+            color: #d1fae5;
+        }
+
+        body[data-theme="dark"] .registration-status.error {
+            background-color: rgba(251, 113, 133, 0.16);
+            border-color: rgba(251, 113, 133, 0.22);
+            color: #ffe4e6;
+        }
+
+        body[data-theme="dark"] .registration-status:not(.success):not(.error) {
+            background-color: rgba(96, 165, 250, 0.14);
+            border-color: rgba(96, 165, 250, 0.18);
+            color: #dbeafe;
+        }
+
+        body[data-theme="dark"] .controls button,
+        body[data-theme="dark"] .call-input button,
+        body[data-theme="dark"] .device-selector button,
+        body[data-theme="dark"] .filter-actions button,
+        body[data-theme="dark"] .transcription-controls button,
+        body[data-theme="dark"] #refreshUserInfoBtn {
+            box-shadow: 0 16px 30px rgba(37, 99, 235, 0.22);
+        }
+
+        body[data-theme="dark"] #logoutBtn {
+            background: linear-gradient(135deg, var(--demo-danger) 0%, var(--demo-danger-strong) 100%);
+            box-shadow: 0 14px 28px rgba(225, 29, 72, 0.22);
+        }
+
+        body[data-theme="dark"] #clearLogBtn {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            box-shadow: 0 14px 28px rgba(71, 85, 105, 0.24);
+        }
+
+        body[data-theme="dark"] .transcription-text.interim {
+            background-color: rgba(169, 184, 199, 0.1);
+            border-left-color: #7f93a8;
+        }
+
+        body[data-theme="dark"] .filter-actions {
+            border-top-color: #344150;
+        }
+
+        body[data-theme="dark"] .filter-actions button,
+        body[data-theme="dark"] .transcription-controls button {
+            border-color: transparent;
+            color: white;
+        }
+
+        body[data-theme="dark"] .filter-checkbox:hover {
+            background-color: #223047;
+            border-color: rgba(96, 165, 250, 0.18);
+        }
+
+        body[data-theme="dark"] .events-reference-modal,
+        body[data-theme="dark"] .events-reference-card {
+            background: var(--demo-surface);
+        }
+
+        body[data-theme="dark"] .events-reference-header,
+        body[data-theme="dark"] .events-reference-toolbar {
+            border-color: var(--demo-border);
+        }
+
+        body[data-theme="dark"] .events-reference-close,
+        body[data-theme="dark"] .events-reference-tab,
+        body[data-theme="dark"] .events-reference-search input,
+        body[data-theme="dark"] .events-reference-filter-chip {
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            border-color: var(--demo-border);
+        }
+
+        body[data-theme="dark"] .events-reference-card {
+            background: linear-gradient(180deg, rgba(24, 33, 48, 0.96) 0%, rgba(18, 25, 38, 0.98) 100%);
+            border-color: var(--demo-border);
+        }
+
+        body[data-theme="dark"] .events-reference-card__title,
+        body[data-theme="dark"] .events-reference-card__label,
+        body[data-theme="dark"] .events-reference-header h3 {
+            color: #f8fafc;
+        }
+
+        body[data-theme="dark"] .events-reference-header p,
+        body[data-theme="dark"] .events-reference-card__description,
+        body[data-theme="dark"] .events-reference-results-counter,
+        body[data-theme="dark"] .events-reference-filters-meta strong,
+        body[data-theme="dark"] .events-reference-empty {
+            color: #b8c5d6;
+        }
+
+        body[data-theme="dark"] .events-reference-copy-button {
+            background: rgba(96, 165, 250, 0.1);
+            border-color: rgba(96, 165, 250, 0.16);
+            color: #cfe0ff;
+        }
+
+        body[data-theme="dark"] .events-reference-copy-button.copied {
+            background: rgba(74, 222, 128, 0.14);
+            border-color: rgba(74, 222, 128, 0.18);
+            color: #d1fae5;
+        }
+
+        body[data-theme="dark"] .events-reference-filter-chip.active {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(96, 165, 250, 0.22);
+            color: #e8f1ff;
+        }
+
+        body[data-theme="dark"] .events-reference-empty {
+            background: rgba(9, 16, 25, 0.5);
+        }
+
+        body[data-theme="dark"] .events-reference-card__json {
+            background: rgba(9, 16, 25, 0.92);
+            border: 1px solid rgba(96, 165, 250, 0.12);
+            color: #c7f9cc;
+        }
+
+        body[data-theme="dark"] .events-reference-link {
+            color: #8db5ff;
+        }
+
+        body[data-theme="dark"] .events-reference-cta {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 44%, #dc2626 100%);
+            box-shadow: 0 18px 34px rgba(234, 88, 12, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+        }
+
+        body[data-theme="dark"] .events-reference-cta__icon {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        body[data-theme="dark"] .events-reference-cta__hint {
+            color: rgba(255, 237, 213, 0.88);
+        }
+
+        body[data-theme="dark"] .user-info-table {
+            background: rgba(9, 16, 25, 0.26);
+            border-color: var(--demo-border);
+        }
+
+        body[data-theme="dark"] .user-info-table__label {
+            background: rgba(255, 255, 255, 0.05);
+            color: #f8fafc;
+        }
+
+        body[data-theme="dark"] .user-info-table__value {
+            background: rgba(255, 255, 255, 0.01);
+            color: var(--demo-text);
+        }
+
+        body[data-theme="dark"] .user-info-table__muted,
+        body[data-theme="dark"] .user-info-feedback--loading {
+            color: #a9b8c7;
+        }
+
+        body[data-theme="dark"] .endpoint-badge {
+            background: rgba(96, 165, 250, 0.12);
+            border-color: rgba(96, 165, 250, 0.16);
+            color: #dbeafe;
+        }
+
+        body[data-theme="dark"] .user-info-feedback--error {
+            background: rgba(251, 113, 133, 0.12);
+            border-color: rgba(251, 113, 133, 0.2);
+            color: #ffe4e6;
+        }
+
+        body[data-theme="dark"] .filter-actions button:hover,
+        body[data-theme="dark"] .transcription-controls button:hover,
+        body[data-theme="dark"] .transcription-controls button.active {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 92px;
+            }
+
+            .demo-toolbar {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+            }
+
+            .demo-toolbar-inner {
+                justify-content: space-between;
+            }
+
+            .login-container,
+            .integration-panel,
+            .event-filter-panel {
+                padding: 20px;
+                border-radius: 18px;
+            }
+
+            .call-input {
+                grid-template-columns: 1fr;
+            }
+
+            .call-input button,
+            .device-selector button,
+            .filter-actions button,
+            .transcription-controls button,
+            #logoutBtn,
+            #clearLogBtn,
+            #refreshUserInfoBtn {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .events-reference-cta,
+            #clearLogBtn {
+                width: 100%;
+            }
+
+            .event-log-actions {
+                width: 100%;
+            }
+
+            .event-log-actions {
+                width: 100%;
+                justify-content: stretch;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .events-reference-modal {
+                width: calc(100vw - 20px);
+                max-height: 86vh;
+            }
+
+            .events-reference-header,
+            .events-reference-toolbar,
+            .events-reference-filters-row,
+            .events-reference-content {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .events-reference-filters {
+                justify-content: flex-start;
+            }
+
+            .events-reference-card__top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .user-info-table,
+            .user-info-table tbody,
+            .user-info-table tr,
+            .user-info-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .user-info-table__label {
+                border-bottom: none;
+                padding-bottom: 6px;
+            }
+
+            .user-info-table__value {
+                padding-top: 0;
+            }
+
+            .device-selector button + button {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
+    <div class="demo-toolbar" id="demoToolbar">
+        <div class="demo-toolbar-inner">
+            <button id="languageToggle" class="toolbar-button" type="button" data-i18n-title="toolbar.changeLanguage" aria-label="Change language" title="Change language">
+                <span aria-hidden="true">🌐</span>
+                <span id="languageToggleLabel">EN</span>
+            </button>
+            <div class="toolbar-divider" aria-hidden="true"></div>
+            <button id="lightTheme" class="theme-button active" type="button" data-i18n-title="toolbar.lightTheme" aria-label="Light theme" title="Light theme">☀️</button>
+            <button id="darkTheme" class="theme-button" type="button" data-i18n-title="toolbar.darkTheme" aria-label="Dark theme" title="Dark theme">🌙</button>
+        </div>
+    </div>
+
     <!-- Login Container -->
     <div class="login-container" id="loginContainer">
-        <h1>📱 Phone Island Widget - Login</h1>
-        <p>Enter your Base64 token to initialize the widget:</p>
-        <input type="text" id="tokenInput" placeholder="Base64 Token (e.g. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)">
-        <button id="loginBtn">🔐 Initialize Widget</button>
+        <h1 data-i18n-html="login.title">📱 Phone Island Widget - Login</h1>
+        <div class="login-steps">
+            <p data-i18n="login.stepsTitle">Before pasting the configuration string:</p>
+            <ol>
+                <li data-i18n-html="login.step1">Log in to your CTI with your credentials, for example on <strong>cti.examplesite.it</strong>.</li>
+                <li data-i18n-html="login.step2">Open <strong>Settings &gt; Integrations</strong> and click <strong>Get Phone Island configuration</strong>.</li>
+                <li data-i18n="login.step3">Copy the generated Base64 configuration string and paste it in the field below.</li>
+            </ol>
+        </div>
+        <p data-i18n="login.tokenPrompt">Paste your Base64 token here to initialize the widget:</p>
+        <input type="text" id="tokenInput" data-i18n-placeholder="login.tokenPlaceholder" placeholder="Base64 Token (e.g. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)">
+        <button id="loginBtn" data-i18n-html="login.initialize">🔐 Initialize Widget</button>
         <div class="registration-status hidden" id="registrationStatus"></div>
     </div>
 
     <div class="integration-panel hidden" id="mainPanel">
-        <h1>📱 Phone Island Widget Integration Example</h1>
+        <h1 data-i18n-html="main.title">📱 Phone Island Widget Integration Example</h1>
 
         <!-- User Info Display -->
         <div class="user-info hidden" id="userInfo">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>👤 User Information</h3>
-                <button id="logoutBtn" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">🚪 Logout</button>
+                <h3 data-i18n-html="main.userInfoTitle">👤 User Information</h3>
+                <button id="logoutBtn" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;" data-i18n-html="main.logout">🚪 Logout</button>
             </div>
-            <p><strong>Username:</strong> <span id="userUsername">-</span></p>
-            <p><strong>Extension:</strong> <span id="userExtension">-</span></p>
-            <p><strong>Server:</strong> <span id="userServer">-</span></p>
+            <p><strong data-i18n="main.usernameLabel">Username:</strong> <span id="userUsername">-</span></p>
+            <p><strong data-i18n="main.extensionLabel">Extension:</strong> <span id="userExtension">-</span></p>
+            <p><strong data-i18n="main.serverLabel">Server:</strong> <span id="userServer">-</span></p>
             <div class="registration-status" id="janusStatus">
                 🔄 Waiting for Janus registration...
             </div>
@@ -553,159 +1740,161 @@
 
         <!-- Status Display -->
         <div id="status">
-            <strong>Status:</strong> <span id="statusContent">Initializing...</span>
+            <strong data-i18n="main.statusLabel">Status:</strong> <span id="statusContent">Initializing...</span>
         </div>
 
         <!-- Call Input -->
         <div class="call-input">
-            <label for="phoneNumber"><strong>Phone Number:</strong></label>
-            <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g. 200)" value="200">
-            <button id="callBtn" class="success">📞 Call</button>
-            <button id="endCallBtn" class="danger">📴 End Call</button>
-        </div>
-
-        <!-- Theme Selector -->
-        <div class="theme-selector">
-            <strong>Theme:</strong>
-            <button id="lightTheme" class="active">☀️ Light</button>
-            <button id="darkTheme">🌙 Dark</button>
+            <label for="phoneNumber"><strong data-i18n="main.phoneNumberLabel">Phone Number:</strong></label>
+            <input type="text" id="phoneNumber" data-i18n-placeholder="main.phoneNumberPlaceholder" placeholder="Enter phone number (e.g. 200)" value="200">
+            <button id="callBtn" class="success" data-i18n-html="main.call">📞 Call</button>
+            <button id="endCallBtn" class="danger" data-i18n-html="main.endCall">📴 End Call</button>
         </div>
 
         <!-- Device Management -->
         <div class="device-selector">
-            <strong>WebRTC Device:</strong>
-            <button id="attachDevice" class="success">🔗 Attach WebRTC</button>
-            <button id="detachDevice" class="danger">🔌 Detach WebRTC</button>
+            <strong data-i18n="main.webrtcDeviceLabel">WebRTC Device:</strong>
+            <button id="attachDevice" class="success" data-i18n-html="main.attachWebrtc">🔗 Attach WebRTC</button>
+            <button id="detachDevice" class="danger" data-i18n-html="main.detachWebrtc">🔌 Detach WebRTC</button>
         </div>
 
         <!-- Audio/Video Device Selectors -->
         <div class="integration-panel" style="margin-top: 20px;">
-            <h3 style="margin-top: 0;">🎧 Audio and Video Settings</h3>
+            <h3 style="margin-top: 0;" data-i18n-html="main.audioVideoSettings">🎧 Audio and Video Settings</h3>
             
             <div class="device-selector">
-                <strong>🎤 Microphone (Audio Input):</strong>
+                <strong data-i18n-html="main.audioInputLabel">🎤 Microphone (Audio Input):</strong>
                 <select id="audioInputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
-                    <option value="">Select audio input device...</option>
+                    <option value="" data-i18n="main.audioInputPlaceholder">Select audio input device...</option>
                 </select>
             </div>
 
             <div class="device-selector">
-                <strong>🔊 Speaker (Audio Output):</strong>
+                <strong data-i18n-html="main.audioOutputLabel">🔊 Speaker (Audio Output):</strong>
                 <select id="audioOutputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
-                    <option value="">Select audio output device...</option>
+                    <option value="" data-i18n="main.audioOutputPlaceholder">Select audio output device...</option>
                 </select>
             </div>
 
             <div class="device-selector">
-                <strong>📹 Camera (Video Input):</strong>
+                <strong data-i18n-html="main.videoInputLabel">📹 Camera (Video Input):</strong>
                 <select id="videoInputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
-                    <option value="">Select video input device...</option>
+                    <option value="" data-i18n="main.videoInputPlaceholder">Select video input device...</option>
                 </select>
             </div>
         </div>
 
         <!-- Event Filter Panel -->
         <div class="event-filter-panel">
-            <div class="event-filter-header" id="filterHeader">
-                <h3>🎛️ Event Filters</h3>
-                <span class="filter-toggle-icon" id="filterToggleIcon">▼</span>
+            <div class="event-filter-header" id="filterHeader" aria-expanded="true">
+                <h3 data-i18n-html="main.eventFilters">🎛️ Event Filters</h3>
+                <span class="filter-toggle-icon expanded" id="filterToggleIcon">▼</span>
             </div>
-            <div class="event-filter-content" id="filterContent">
+            <div class="event-filter-content expanded" id="filterContent">
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_core" checked>
-                    <label for="filter_core">📦 Core Events</label>
+                    <label for="filter_core" data-i18n-html="main.filterCore">📦 Core Events</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_call" checked>
-                    <label for="filter_call">📞 Call Events</label>
+                    <label for="filter_call" data-i18n-html="main.filterCall">📞 Call Events</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_connection" checked>
-                    <label for="filter_connection">🌐 Connection</label>
+                    <label for="filter_connection" data-i18n-html="main.filterConnection">🌐 Connection</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_ui">
-                    <label for="filter_ui">🎨 UI Events</label>
+                    <label for="filter_ui" data-i18n-html="main.filterUi">🎨 UI Events</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_recording">
-                    <label for="filter_recording">🎙️ Recording</label>
+                    <label for="filter_recording" data-i18n-html="main.filterRecording">🎙️ Recording</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_video">
-                    <label for="filter_video">📹 Video</label>
+                    <label for="filter_video" data-i18n-html="main.filterVideo">📹 Video</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_screen_share">
-                    <label for="filter_screen_share">🖥️ Screen Share</label>
+                    <label for="filter_screen_share" data-i18n-html="main.filterScreenShare">🖥️ Screen Share</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_audio_player">
-                    <label for="filter_audio_player">🎵 Audio Player</label>
+                    <label for="filter_audio_player" data-i18n-html="main.filterAudioPlayer">🎵 Audio Player</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_transcription" checked>
-                    <label for="filter_transcription">💬 Transcription</label>
+                    <label for="filter_transcription" data-i18n-html="main.filterTranscription">💬 Transcription</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_system">
-                    <label for="filter_system">⚙️ System</label>
+                    <label for="filter_system" data-i18n-html="main.filterSystem">⚙️ System</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_errors" checked>
-                    <label for="filter_errors">⚠️ Errors/Alerts</label>
+                    <label for="filter_errors" data-i18n-html="main.filterErrors">⚠️ Errors/Alerts</label>
                 </div>
                 <div class="filter-checkbox">
                     <input type="checkbox" id="filter_debug">
-                    <label for="filter_debug">🐛 Debug/Status</label>
+                    <label for="filter_debug" data-i18n-html="main.filterDebug">🐛 Debug/Status</label>
                 </div>
             </div>
             <div class="filter-actions">
-                <button id="selectAllFilters">✅ Select All</button>
-                <button id="selectNoneFilters">❌ Deselect All</button>
-                <button id="selectDefaultFilters">🔧 Default</button>
+                <button id="selectAllFilters" data-i18n-html="main.selectAllFilters">✅ Select All</button>
+                <button id="selectNoneFilters" data-i18n-html="main.selectNoneFilters">❌ Deselect All</button>
+                <button id="selectDefaultFilters" data-i18n-html="main.defaultFilters">🔧 Default</button>
             </div>
         </div>
 
         <!-- Control Buttons -->
         <div class="controls">
-            <button id="expandBtn">📏 Expand</button>
-            <button id="compressBtn">📐 Compress</button>
-            <button id="muteBtn">🔇 Mute</button>
-            <button id="unmuteBtn">🔊 Unmute</button>
-            <button id="holdBtn">⏸️ Hold</button>
-            <button id="unholdBtn">▶️ Unhold</button>
-            <button id="openSideview">📋 Open Menu</button>
-            <button id="closeSideview">❌ Close Menu</button>
-            <button id="checkConnection">🌐 Check Connection</button>
-            <button id="debugStatus">🐛 Debug Status</button>
-            <button id="openTranscription" class="success">💬 Open Transcriptions</button>
+            <button id="expandBtn" data-i18n-html="main.expand">📏 Expand</button>
+            <button id="compressBtn" data-i18n-html="main.compress">📐 Compress</button>
+            <button id="muteBtn" data-i18n-html="main.mute">🔇 Mute</button>
+            <button id="unmuteBtn" data-i18n-html="main.unmute">🔊 Unmute</button>
+            <button id="holdBtn" data-i18n-html="main.hold">⏸️ Hold</button>
+            <button id="unholdBtn" data-i18n-html="main.unhold">▶️ Unhold</button>
+            <button id="openSideview" data-i18n-html="main.openMenu">📋 Open Menu</button>
+            <button id="closeSideview" data-i18n-html="main.closeMenu">❌ Close Menu</button>
+            <button id="checkConnection" data-i18n-html="main.checkConnection">🌐 Check Connection</button>
+            <button id="debugStatus" data-i18n-html="main.debugStatus">🐛 Debug Status</button>
+            <button id="openTranscription" class="success" data-i18n-html="main.openTranscriptions">💬 Open Transcriptions</button>
         </div>
 
         <!-- Event Log -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <strong>📡 Event Log:</strong>
-            <button id="clearLogBtn" style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🗑️ Clear Log</button>
+            <strong data-i18n-html="main.eventLogTitle">📡 Event Log:</strong>
+            <div class="event-log-actions">
+                <button id="openEventsReference" class="events-reference-cta" type="button">
+                    <span class="events-reference-cta__icon" aria-hidden="true">🧭</span>
+                    <span class="events-reference-cta__text">
+                        <span class="events-reference-cta__title" data-i18n="main.openEventsReference">Explore Events Reference</span>
+                        <span class="events-reference-cta__hint" data-i18n="main.openEventsReferenceHint">Browse all available events and ready-to-use JSON payloads.</span>
+                    </span>
+                </button>
+                <button id="clearLogBtn" style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;" data-i18n-html="main.clearLog">🗑️ Clear Log</button>
+            </div>
         </div>
         <div class="log-search-container">
             <div class="log-search-wrapper">
                 <span class="log-search-icon">🔍</span>
-                <input type="text" id="logSearchInput" class="log-search-input" placeholder="Search in logs...">
+                <input type="text" id="logSearchInput" class="log-search-input" data-i18n-placeholder="main.searchLogsPlaceholder" placeholder="Search in logs...">
             </div>
             <span class="log-search-counter" id="logSearchCounter">0 / 0</span>
         </div>
         <div class="event-log" id="eventLog">
-            <div>📡 Event Log (real-time events will appear here)...</div>
+            <div data-i18n-html="main.eventLogEmpty">📡 Event Log (real-time events will appear here)...</div>
         </div>
 
         <!-- User Information Table -->
         <div class="integration-panel" style="margin-top: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0;">👤 Current User Information (/me)</h3>
-                <button id="refreshUserInfoBtn" style="padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🔄 Refresh</button>
+                <h3 style="margin: 0;" data-i18n-html="main.currentUserInfo">👤 Current User Information (/me)</h3>
+                <button id="refreshUserInfoBtn" style="padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;" data-i18n-html="main.refresh">🔄 Refresh</button>
             </div>
             <div id="userInfoTableContainer">
-                <p style="color: #6c757d; text-align: center; padding: 20px;">Click "Refresh" to load user information...</p>
+                <p style="color: #6c757d; text-align: center; padding: 20px;" data-i18n="main.refreshPrompt">Click "Refresh" to load user information...</p>
             </div>
         </div>
     </div>
@@ -713,10 +1902,43 @@
     <!-- Transcription Window Overlay -->
     <div class="transcription-overlay" id="transcriptionOverlay"></div>
 
+    <div class="events-reference-overlay" id="eventsReferenceOverlay"></div>
+
+    <div class="events-reference-modal" id="eventsReferenceModal">
+        <div class="events-reference-header">
+            <div>
+                <h3 data-i18n-html="eventsReference.title">🧭 Phone Island Events Reference</h3>
+                <p data-i18n="eventsReference.subtitle">Quick guide for the most useful integration events, with payload examples ready to dispatch or listen for.</p>
+            </div>
+            <button class="events-reference-close" id="closeEventsReference" type="button" data-i18n-title="eventsReference.close" aria-label="Close" title="Close">✕</button>
+        </div>
+
+        <div class="events-reference-toolbar">
+            <div class="events-reference-tabs">
+                <button id="eventsReferenceIncomingTab" class="events-reference-tab active" type="button" data-i18n="eventsReference.dispatchTab">External → Phone Island</button>
+                <button id="eventsReferenceOutgoingTab" class="events-reference-tab" type="button" data-i18n="eventsReference.listenTab">Phone Island → External</button>
+            </div>
+            <label class="events-reference-search">
+                <input id="eventsReferenceSearchInput" type="search" data-i18n-placeholder="eventsReference.searchPlaceholder" placeholder="Search event name, category or description...">
+            </label>
+            <a class="events-reference-link" href="https://github.com/nethesis/phone-island/blob/main/docs/EVENTS.md" target="_blank" rel="noreferrer" data-i18n="eventsReference.fullDocs">Open full EVENTS.md</a>
+        </div>
+
+        <div class="events-reference-filters-row">
+            <div class="events-reference-filters-meta">
+                <strong data-i18n="eventsReference.filtersLabel">Quick filters</strong>
+                <span class="events-reference-results-counter" id="eventsReferenceResultsCounter">0 / 0</span>
+            </div>
+            <div class="events-reference-filters" id="eventsReferenceFilters"></div>
+        </div>
+
+        <div class="events-reference-content" id="eventsReferenceContent"></div>
+    </div>
+
     <!-- Transcription Window -->
     <div class="transcription-container" id="transcriptionContainer">
         <div class="transcription-header">
-            <h3>💬 Live Transcriptions</h3>
+            <h3 data-i18n-html="transcription.title">💬 Live Transcriptions</h3>
             <button class="transcription-close" id="transcriptionClose">✕</button>
         </div>
 
@@ -725,16 +1947,16 @@
         </div>
 
         <div class="transcription-messages" id="transcriptionMessages">
-            <div style="text-align: center; color: #6c757d; padding: 20px;">
+            <div id="transcriptionEmptyState" style="text-align: center; color: #6c757d; padding: 20px;">
                 🎙️ Waiting for transcription messages...
             </div>
         </div>
 
         <div class="transcription-controls">
-            <button id="clearTranscriptions">🗑️ Clear</button>
+            <button id="clearTranscriptions" data-i18n-html="transcription.clear">🗑️ Clear</button>
             <button id="autoScrollToggle" class="active">📜 Auto-scroll</button>
             <span style="margin-left: auto; font-size: 12px; color: #6c757d;">
-                Messages: <span id="messageCount">0</span>
+                <span data-i18n="transcription.messagesLabel">Messages:</span> <span id="messageCount">0</span>
             </span>
         </div>
     </div>

@@ -3,6 +3,662 @@
 
 'use strict';
 
+const DEMO_STORAGE_KEYS = {
+    language: 'phoneIslandDemoLanguage',
+    theme: 'phoneIslandDemoTheme'
+};
+
+const translations = {
+    en: {
+        meta: {
+            title: 'Phone Island Widget Integration Example'
+        },
+        toolbar: {
+            changeLanguage: 'Change language',
+            lightTheme: 'Light theme',
+            darkTheme: 'Dark theme'
+        },
+        login: {
+            title: '📱 Phone Island Widget - Login',
+            stepsTitle: 'Before pasting the configuration string:',
+            step1: 'Log in to your CTI with your credentials, for example on <strong>cti.examplesite.it</strong>.',
+            step2: 'Open <strong>Settings &gt; Integrations</strong> and click <strong>Get Phone Island configuration</strong>.',
+            step3: 'Copy the generated Base64 configuration string and paste it in the field below.',
+            tokenPrompt: 'Paste your Base64 token here to initialize the widget:',
+            tokenPlaceholder: 'Base64 Token (e.g. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)',
+            initialize: '🔐 Initialize Widget'
+        },
+        main: {
+            title: '📱 Phone Island Widget Integration Example',
+            userInfoTitle: '👤 User Information',
+            logout: '🚪 Logout',
+            usernameLabel: 'Username:',
+            extensionLabel: 'Extension:',
+            serverLabel: 'Server:',
+            statusLabel: 'Status:',
+            phoneNumberLabel: 'Phone Number:',
+            phoneNumberPlaceholder: 'Enter phone number (e.g. 200)',
+            call: '📞 Call',
+            endCall: '📴 End Call',
+            webrtcDeviceLabel: 'WebRTC Device:',
+            attachWebrtc: '🔗 Attach WebRTC',
+            detachWebrtc: '🔌 Detach WebRTC',
+            audioVideoSettings: '🎧 Audio and Video Settings',
+            audioInputLabel: '🎤 Microphone (Audio Input):',
+            audioInputPlaceholder: 'Select audio input device...',
+            audioOutputLabel: '🔊 Speaker (Audio Output):',
+            audioOutputPlaceholder: 'Select audio output device...',
+            videoInputLabel: '📹 Camera (Video Input):',
+            videoInputPlaceholder: 'Select video input device...',
+            eventFilters: '🎛️ Event Filters',
+            filterCore: '📦 Core Events',
+            filterCall: '📞 Call Events',
+            filterConnection: '🌐 Connection',
+            filterUi: '🎨 UI Events',
+            filterRecording: '🎙️ Recording',
+            filterVideo: '📹 Video',
+            filterScreenShare: '🖥️ Screen Share',
+            filterAudioPlayer: '🎵 Audio Player',
+            filterTranscription: '💬 Transcription',
+            filterSystem: '⚙️ System',
+            filterErrors: '⚠️ Errors/Alerts',
+            filterDebug: '🐛 Debug/Status',
+            selectAllFilters: '✅ Select All',
+            selectNoneFilters: '❌ Deselect All',
+            defaultFilters: '🔧 Default',
+            expand: '📏 Expand',
+            compress: '📐 Compress',
+            mute: '🔇 Mute',
+            unmute: '🔊 Unmute',
+            hold: '⏸️ Hold',
+            unhold: '▶️ Unhold',
+            openMenu: '📋 Open Menu',
+            closeMenu: '❌ Close Menu',
+            checkConnection: '🌐 Check Connection',
+            debugStatus: '🐛 Debug Status',
+            openTranscriptions: '💬 Open Transcriptions',
+            openEventsReference: 'Explore Events Reference',
+            openEventsReferenceHint: 'Browse all available events and ready-to-use JSON payloads.',
+            eventLogTitle: '📡 Event Log:',
+            clearLog: '🗑️ Clear Log',
+            eventLogCleared: '📡 Event Log cleared - waiting for new events...',
+            searchLogsPlaceholder: 'Search in logs...',
+            eventLogEmpty: '📡 Event Log (real-time events will appear here)...',
+            currentUserInfo: '👤 Current User Information (/me)',
+            refresh: '🔄 Refresh',
+            refreshPrompt: 'Click "Refresh" to load user information...'
+        },
+        transcription: {
+            title: '💬 Live Transcriptions',
+            clear: '🗑️ Clear',
+            autoScroll: '📜 Auto-scroll',
+            manualScroll: '📜 Manual',
+            messagesLabel: 'Messages:',
+            connecting: 'Connecting to transcription service...',
+            waitingMessages: '🎙️ Waiting for transcription messages...',
+            ready: '🟢 Ready to receive transcriptions',
+            statusPrefix: 'Status: {{status}}',
+            unknownSpeaker: 'Unknown'
+        },
+        eventsReference: {
+            title: '🧭 Phone Island Events Reference',
+            subtitle: 'Quick guide for the most useful integration events, with payload examples ready to dispatch or listen for.',
+            listenTab: 'Phone Island → External',
+            dispatchTab: 'External → Phone Island',
+            fullDocs: 'Open full EVENTS.md',
+            searchPlaceholder: 'Search event name, category or description...',
+            exampleLabel: 'Example payload',
+            noPayload: 'No payload',
+            close: 'Close',
+            filtersLabel: 'Quick filters',
+            allCategories: 'All categories',
+            resultsCount: '{{visible}} events shown out of {{total}}',
+            noResults: 'No events match the current search or filters.',
+            copied: 'Copied',
+            copyPayload: 'Copy payload',
+            copyPayloadEmpty: 'Copy empty payload',
+            categories: {
+                all: 'All categories',
+                core: 'Core',
+                device: 'Devices',
+                ringtone: 'Ringtones',
+                call: 'Calls',
+                recording: 'Recording',
+                summary: 'Summary & Transcription',
+                player: 'Audio Player',
+                video: 'Video & Screen Share',
+                conference: 'Conference',
+                debug: 'Debug',
+                system: 'System',
+                websocket: 'WebSocket & Server',
+                ui: 'UI State',
+                user: 'User Info'
+            }
+        },
+        alerts: {
+            enterValidToken: 'Please enter a valid token',
+            enterPhoneNumber: 'Please enter a phone number',
+            errorPrefix: 'Error'
+        },
+        status: {
+            initializing: 'Initializing...',
+            initializingShort: '🔄 Initializing...',
+            widgetInitialized: '✅ Widget initialized successfully',
+            themeChanged: '🎨 Theme changed',
+            waitingJanus: '🔄 Waiting for Janus registration...',
+            janusConnected: '✅ Connected to Janus server!',
+            janusRegistered: '✅ Successfully registered on Janus as {{extension}}!'
+        }
+    },
+    it: {
+        meta: {
+            title: 'Esempio di integrazione del widget Phone Island'
+        },
+        toolbar: {
+            changeLanguage: 'Cambia lingua',
+            lightTheme: 'Tema chiaro',
+            darkTheme: 'Tema scuro'
+        },
+        login: {
+            title: '📱 Phone Island Widget - Accesso',
+            stepsTitle: 'Prima di incollare la stringa di configurazione:',
+            step1: 'Accedi al tuo CTI con le tue credenziali, ad esempio su <strong>cti.examplesite.it</strong>.',
+            step2: 'Apri <strong>Settings &gt; Integrations</strong> e clicca su <strong>Get Phone Island configuration</strong>.',
+            step3: 'Copia la stringa Base64 generata e incollala nel campo qui sotto.',
+            tokenPrompt: 'Incolla qui il token Base64 per inizializzare il widget:',
+            tokenPlaceholder: 'Token Base64 (es. Y3RpMy5kZW1vLWhlcm9uLnNmLm5ldGhzZXJ2ZXIubmV0OmxvcmVu...)',
+            initialize: '🔐 Inizializza widget'
+        },
+        main: {
+            title: '📱 Esempio di integrazione del widget Phone Island',
+            userInfoTitle: '👤 Informazioni utente',
+            logout: '🚪 Esci',
+            usernameLabel: 'Username:',
+            extensionLabel: 'Interno:',
+            serverLabel: 'Server:',
+            statusLabel: 'Stato:',
+            phoneNumberLabel: 'Numero di telefono:',
+            phoneNumberPlaceholder: 'Inserisci il numero di telefono (es. 200)',
+            call: '📞 Chiama',
+            endCall: '📴 Termina chiamata',
+            webrtcDeviceLabel: 'Dispositivo WebRTC:',
+            attachWebrtc: '🔗 Collega WebRTC',
+            detachWebrtc: '🔌 Scollega WebRTC',
+            audioVideoSettings: '🎧 Impostazioni audio e video',
+            audioInputLabel: '🎤 Microfono (ingresso audio):',
+            audioInputPlaceholder: 'Seleziona un dispositivo di ingresso audio...',
+            audioOutputLabel: '🔊 Altoparlante (uscita audio):',
+            audioOutputPlaceholder: 'Seleziona un dispositivo di uscita audio...',
+            videoInputLabel: '📹 Fotocamera (ingresso video):',
+            videoInputPlaceholder: 'Seleziona un dispositivo di ingresso video...',
+            eventFilters: '🎛️ Filtri eventi',
+            filterCore: '📦 Eventi core',
+            filterCall: '📞 Eventi chiamata',
+            filterConnection: '🌐 Connessione',
+            filterUi: '🎨 Eventi interfaccia',
+            filterRecording: '🎙️ Registrazione',
+            filterVideo: '📹 Video',
+            filterScreenShare: '🖥️ Condivisione schermo',
+            filterAudioPlayer: '🎵 Player audio',
+            filterTranscription: '💬 Trascrizione',
+            filterSystem: '⚙️ Sistema',
+            filterErrors: '⚠️ Errori/avvisi',
+            filterDebug: '🐛 Debug/stato',
+            selectAllFilters: '✅ Seleziona tutto',
+            selectNoneFilters: '❌ Deseleziona tutto',
+            defaultFilters: '🔧 Predefiniti',
+            expand: '📏 Espandi',
+            compress: '📐 Comprimi',
+            mute: '🔇 Muto',
+            unmute: '🔊 Audio attivo',
+            hold: '⏸️ Metti in attesa',
+            unhold: '▶️ Riprendi',
+            openMenu: '📋 Apri menu',
+            closeMenu: '❌ Chiudi menu',
+            checkConnection: '🌐 Verifica connessione',
+            debugStatus: '🐛 Stato debug',
+            openTranscriptions: '💬 Apri trascrizioni',
+            openEventsReference: 'Esplora reference eventi',
+            openEventsReferenceHint: 'Consulta tutti gli eventi disponibili e i payload JSON già pronti.',
+            eventLogTitle: '📡 Log eventi:',
+            clearLog: '🗑️ Svuota log',
+            eventLogCleared: '📡 Log eventi svuotato - in attesa di nuovi eventi...',
+            searchLogsPlaceholder: 'Cerca nei log...',
+            eventLogEmpty: '📡 Log eventi (gli eventi in tempo reale compariranno qui)...',
+            currentUserInfo: '👤 Informazioni utente correnti (/me)',
+            refresh: '🔄 Aggiorna',
+            refreshPrompt: 'Clicca su "Aggiorna" per caricare le informazioni utente...'
+        },
+        transcription: {
+            title: '💬 Trascrizioni live',
+            clear: '🗑️ Svuota',
+            autoScroll: '📜 Scorrimento automatico',
+            manualScroll: '📜 Manuale',
+            messagesLabel: 'Messaggi:',
+            connecting: 'Connessione al servizio di trascrizione...',
+            waitingMessages: '🎙️ In attesa dei messaggi di trascrizione...',
+            ready: '🟢 Pronto a ricevere le trascrizioni',
+            statusPrefix: 'Stato: {{status}}',
+            unknownSpeaker: 'Sconosciuto'
+        },
+        eventsReference: {
+            title: '🧭 Reference eventi Phone Island',
+            subtitle: 'Guida rapida agli eventi di integrazione più utili, con payload JSON pronti da inviare o ascoltare.',
+            listenTab: 'Phone Island → Esterno',
+            dispatchTab: 'Esterno → Phone Island',
+            fullDocs: 'Apri EVENTS.md completo',
+            searchPlaceholder: 'Cerca per nome evento, categoria o descrizione...',
+            exampleLabel: 'Payload di esempio',
+            noPayload: 'Nessun payload',
+            close: 'Chiudi',
+            filtersLabel: 'Filtri rapidi',
+            allCategories: 'Tutte le categorie',
+            resultsCount: '{{visible}} eventi visibili su {{total}}',
+            noResults: 'Nessun evento corrisponde ai filtri o alla ricerca corrente.',
+            copied: 'Copiato',
+            copyPayload: 'Copia payload',
+            copyPayloadEmpty: 'Copia payload vuoto',
+            categories: {
+                all: 'Tutte le categorie',
+                core: 'Core',
+                device: 'Dispositivi',
+                ringtone: 'Suonerie',
+                call: 'Chiamate',
+                recording: 'Registrazione',
+                summary: 'Summary e trascrizione',
+                player: 'Player audio',
+                video: 'Video e condivisione schermo',
+                conference: 'Conferenza',
+                debug: 'Debug',
+                system: 'Sistema',
+                websocket: 'WebSocket e server',
+                ui: 'Stato interfaccia',
+                user: 'Informazioni utente'
+            }
+        },
+        alerts: {
+            enterValidToken: 'Inserisci un token valido',
+            enterPhoneNumber: 'Inserisci un numero di telefono',
+            errorPrefix: 'Errore'
+        },
+        status: {
+            initializing: 'Inizializzazione...',
+            initializingShort: '🔄 Inizializzazione...',
+            widgetInitialized: '✅ Widget inizializzato correttamente',
+            themeChanged: '🎨 Tema cambiato',
+            waitingJanus: '🔄 In attesa della registrazione su Janus...',
+            janusConnected: '✅ Connesso al server Janus!',
+            janusRegistered: '✅ Registrazione su Janus completata come {{extension}}!'
+        }
+    }
+};
+
+let currentLanguage = localStorage.getItem(DEMO_STORAGE_KEYS.language) === 'it' ? 'it' : 'en';
+let currentTheme = localStorage.getItem(DEMO_STORAGE_KEYS.theme) === 'dark' ? 'dark' : 'light';
+let activeEventsReferenceTab = 'incoming';
+let activeEventsReferenceCategory = 'all';
+let eventsReferenceSearch = '';
+let copiedEventsReferenceName = '';
+
+function createEventReferenceItem(category, name, descriptionEn, descriptionIt, payload = {}, tags = []) {
+    return {
+        category,
+        name,
+        description: {
+            en: descriptionEn,
+            it: descriptionIt
+        },
+        payload,
+        tags
+    };
+}
+
+const eventReferenceData = {
+    incoming: [
+        createEventReferenceItem('core', 'phone-island-expand', 'Expand the widget popup.', 'Espande il popup del widget.', {}, ['popup', 'open']),
+        createEventReferenceItem('core', 'phone-island-compress', 'Compress the widget popup.', 'Comprimi il popup del widget.', {}, ['popup', 'close']),
+        createEventReferenceItem('core', 'phone-island-attach', 'Attach a WebRTC device to Phone Island.', 'Collega un dispositivo WebRTC a Phone Island.', {
+            id: '269',
+            type: 'webrtc',
+            secret: '<secret>',
+            username: '269',
+            description: 'WebRTC Device',
+            actions: {
+                answer: true,
+                dtmf: true,
+                hold: true
+            }
+        }, ['webrtc', 'device']),
+        createEventReferenceItem('core', 'phone-island-detach', 'Detach the current WebRTC device and return to the previous endpoint.', 'Scollega il dispositivo WebRTC corrente e torna all’endpoint precedente.', {
+            id: '92269',
+            type: 'physical',
+            description: 'Fanvil X6U-V2',
+            actions: {
+                answer: false,
+                dtmf: false,
+                hold: false
+            }
+        }, ['webrtc', 'device']),
+        createEventReferenceItem('core', 'phone-island-theme-change', 'Switch Phone Island between light and dark theme.', 'Cambia il tema di Phone Island tra chiaro e scuro.', {
+            selectedTheme: 'dark'
+        }, ['theme', 'ui']),
+        createEventReferenceItem('core', 'phone-island-default-device-change', 'Set the default endpoint used by the widget.', 'Imposta l’endpoint predefinito usato dal widget.', {
+            id: '269',
+            type: 'webrtc',
+            secret: '<secret>',
+            username: '269',
+            description: 'Primary device',
+            actions: {
+                answer: true,
+                dtmf: true,
+                hold: true
+            },
+            proxy_port: null
+        }, ['device', 'default']),
+        createEventReferenceItem('core', 'phone-island-check-connection', 'Trigger a manual internet connectivity check.', 'Avvia un controllo manuale della connettività internet.', {}, ['network']),
+        createEventReferenceItem('core', 'phone-island-sideview-open', 'Open the right side panel.', 'Apre il pannello laterale destro.', {}, ['menu', 'ui']),
+        createEventReferenceItem('core', 'phone-island-sideview-close', 'Close the right side panel.', 'Chiude il pannello laterale destro.', {}, ['menu', 'ui']),
+        createEventReferenceItem('core', 'phone-island-reset-position', 'Reset the saved widget position and center it again.', 'Azzera la posizione salvata del widget e lo recentra.', {}, ['position', 'ui']),
+        createEventReferenceItem('device', 'phone-island-audio-input-change', 'Select the default microphone device.', 'Seleziona il microfono predefinito.', {
+            deviceId: '756ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee'
+        }, ['microphone']),
+        createEventReferenceItem('device', 'phone-island-audio-output-change', 'Select the default speaker device.', 'Seleziona l’altoparlante predefinito.', {
+            deviceId: '2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f'
+        }, ['speaker']),
+        createEventReferenceItem('device', 'phone-island-video-input-change', 'Select the default camera device.', 'Seleziona la fotocamera predefinita.', {
+            deviceId: '116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee'
+        }, ['camera']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-list', 'Request the ringtone catalog available in the widget.', 'Richiede il catalogo delle suonerie disponibili nel widget.', {}, ['audio']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-select', 'Select the ringtone used for incoming calls.', 'Seleziona la suoneria usata per le chiamate in ingresso.', {
+            name: 'default'
+        }, ['audio']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-output', 'Choose the output device used for ringtone playback.', 'Sceglie il dispositivo di uscita usato per riprodurre la suoneria.', {
+            deviceId: '2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f'
+        }, ['audio', 'speaker']),
+        createEventReferenceItem('call', 'phone-island-call-start', 'Start a new outbound call.', 'Avvia una nuova chiamata in uscita.', {
+            number: '200'
+        }, ['dial']),
+        createEventReferenceItem('call', 'phone-island-call-answer', 'Answer the current ringing call.', 'Risponde alla chiamata in arrivo corrente.', {}, ['answer']),
+        createEventReferenceItem('call', 'phone-island-call-end', 'Terminate the current call.', 'Termina la chiamata corrente.', {}, ['hangup']),
+        createEventReferenceItem('call', 'phone-island-call-hold', 'Put the active call on hold.', 'Mette in attesa la chiamata attiva.', {}, ['hold']),
+        createEventReferenceItem('call', 'phone-island-call-unhold', 'Resume a held call.', 'Riprende una chiamata in attesa.', {}, ['hold']),
+        createEventReferenceItem('call', 'phone-island-call-mute', 'Mute the current call.', 'Disattiva il microfono della chiamata corrente.', {}, ['mute']),
+        createEventReferenceItem('call', 'phone-island-call-unmute', 'Unmute the current call.', 'Riattiva il microfono della chiamata corrente.', {}, ['mute']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-open', 'Open the transfer panel.', 'Apre il pannello di trasferimento.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-close', 'Close the transfer panel.', 'Chiude il pannello di trasferimento.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-switch', 'Switch the leg selected in the transfer panel.', 'Cambia la gamba selezionata nel pannello di trasferimento.', {}, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-cancel', 'Abort the in-progress transfer.', 'Annulla il trasferimento in corso.', {}, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-transfer', 'Transfer the current call to another number.', 'Trasferisce la chiamata corrente verso un altro numero.', {
+            number: '200'
+        }, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-open', 'Open the in-call keypad.', 'Apre il tastierino durante la chiamata.', {}, ['dtmf', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-close', 'Close the in-call keypad.', 'Chiude il tastierino durante la chiamata.', {}, ['dtmf', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-send', 'Send a DTMF key during the active call.', 'Invia un tasto DTMF durante la chiamata attiva.', {
+            key: '1'
+        }, ['dtmf']),
+        createEventReferenceItem('call', 'phone-island-call-park', 'Park the active call.', 'Parcheggia la chiamata attiva.', {}, ['park']),
+        createEventReferenceItem('call', 'phone-island-call-intrude', 'Intrude on a call for the provided number.', 'Si inserisce in una chiamata per il numero indicato.', {
+            number: '200'
+        }, ['barge']),
+        createEventReferenceItem('call', 'phone-island-call-listen', 'Listen to a call for the provided number.', 'Ascolta una chiamata per il numero indicato.', {
+            number: '200'
+        }, ['monitor']),
+        createEventReferenceItem('call', 'phone-island-call-audio-input-switch', 'Switch microphone while a call is active.', 'Cambia microfono mentre una chiamata è attiva.', {
+            deviceId: '756ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee'
+        }, ['microphone', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-audio-output-switch', 'Switch speaker while a call is active.', 'Cambia altoparlante mentre una chiamata è attiva.', {
+            deviceId: '2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f'
+        }, ['speaker', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-video-input-switch', 'Switch camera while a call is active.', 'Cambia fotocamera mentre una chiamata è attiva.', {
+            deviceId: '116ada2c6b10546e28808c13062982d66cae723eba1e03fe3834f8df79f794ee'
+        }, ['camera', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-actions-open', 'Open the in-call actions panel.', 'Apre il pannello azioni in chiamata.', {}, ['actions', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-actions-close', 'Close the in-call actions panel.', 'Chiude il pannello azioni in chiamata.', {}, ['actions', 'ui']),
+        createEventReferenceItem('recording', 'phone-island-recording-open', 'Open the call recording view.', 'Apre la vista di registrazione chiamata.', {}, ['recording', 'ui']),
+        createEventReferenceItem('recording', 'phone-island-recording-close', 'Close the call recording view.', 'Chiude la vista di registrazione chiamata.', {}, ['recording', 'ui']),
+        createEventReferenceItem('recording', 'phone-island-recording-start', 'Start call recording.', 'Avvia la registrazione della chiamata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-stop', 'Stop call recording.', 'Ferma la registrazione della chiamata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-play', 'Play the current recording preview.', 'Riproduce l’anteprima della registrazione corrente.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-pause', 'Pause the current recording preview.', 'Mette in pausa l’anteprima della registrazione corrente.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-save', 'Persist the current recording and expose file metadata.', 'Salva la registrazione corrente ed espone i metadati del file.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-delete', 'Delete the current recording.', 'Elimina la registrazione corrente.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-physical-recording-view', 'Open the physical device recording flow.', 'Apre il flusso di registrazione del dispositivo fisico.', {}, ['recording', 'physical']),
+        createEventReferenceItem('recording', 'phone-island-physical-recording-open', 'Start physical device recording.', 'Avvia la registrazione del dispositivo fisico.', {}, ['recording', 'physical']),
+        createEventReferenceItem('summary', 'phone-island-summary-call-check', 'Check if a summary or transcription already exists for the given linked call id.', 'Controlla se esiste già un summary o una trascrizione per il linkedid indicato.', {
+            linkedid: '1769179547.799'
+        }, ['transcription', 'summary']),
+        createEventReferenceItem('summary', 'phone-island-call-summary-notify', 'Register interest in being notified when a summary becomes ready.', 'Registra l’interesse a ricevere una notifica quando il summary sarà pronto.', {
+            linkedid: '1769179547.799'
+        }, ['transcription', 'summary', 'watch']),
+        createEventReferenceItem('player', 'phone-island-audio-player-start', 'Open the audio player and play a file.', 'Apre il player audio e riproduce un file.', {
+            base64_audio_file: 'UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==',
+            type: 'announcement',
+            id: '1',
+            description: 'My Audio File'
+        }, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-play', 'Resume audio player playback.', 'Riprende la riproduzione del player audio.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-pause', 'Pause audio player playback.', 'Mette in pausa la riproduzione del player audio.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-close', 'Close the audio player.', 'Chiude il player audio.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-emergency-stop-ringtone', 'Force stop any ringtone still playing.', 'Forza l’arresto di qualsiasi suoneria ancora in riproduzione.', {}, ['audio', 'ringtone']),
+        createEventReferenceItem('video', 'phone-island-fullscreen-enter', 'Enter fullscreen mode.', 'Entra in modalità schermo intero.', {}, ['ui']),
+        createEventReferenceItem('video', 'phone-island-fullscreen-exit', 'Exit fullscreen mode.', 'Esce dalla modalità schermo intero.', {}, ['ui']),
+        createEventReferenceItem('video', 'phone-island-video-enable', 'Enable the current video stream.', 'Abilita il flusso video corrente.', {}, ['camera']),
+        createEventReferenceItem('video', 'phone-island-video-disable', 'Disable the current video stream.', 'Disabilita il flusso video corrente.', {}, ['camera']),
+        createEventReferenceItem('video', 'phone-island-screen-share-join', 'Join a screen share started by another user.', 'Entra in una condivisione schermo avviata da un altro utente.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-leave', 'Leave a joined screen share.', 'Esce da una condivisione schermo a cui si è collegato.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-start', 'Start screen sharing.', 'Avvia la condivisione schermo.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-stop', 'Stop screen sharing.', 'Ferma la condivisione schermo.', {}, ['screen', 'share']),
+        createEventReferenceItem('conference', 'phone-island-owner-conference-enter', 'Notify Phone Island that the conference owner entered the room.', 'Notifica a Phone Island che il proprietario della conferenza è entrato nella stanza.', {}, ['conference']),
+        createEventReferenceItem('debug', 'phone-island-view-changed', 'Force the widget to render a specific view for debugging.', 'Forza il widget a mostrare una vista specifica per debug.', {
+            viewType: 'call'
+        }, ['debug', 'ui']),
+        createEventReferenceItem('debug', 'phone-island-call-status', 'Retrieve the current call state snapshot.', 'Recupera lo snapshot dello stato chiamata corrente.', {}, ['debug', 'status']),
+        createEventReferenceItem('debug', 'phone-island-user-status', 'Retrieve the main user status snapshot.', 'Recupera lo snapshot dello stato dell’utente principale.', {}, ['debug', 'status']),
+        createEventReferenceItem('debug', 'phone-island-all-users-status', 'Retrieve the snapshot of all known users.', 'Recupera lo snapshot di tutti gli utenti noti.', {}, ['debug', 'status']),
+        createEventReferenceItem('debug', 'phone-island-status', 'Request a full debug snapshot of Phone Island state.', 'Richiede uno snapshot completo dello stato di Phone Island.', {}, ['debug', 'status']),
+        createEventReferenceItem('debug', 'phone-island-webrtc-status', 'Retrieve WebRTC status information.', 'Recupera le informazioni di stato WebRTC.', {}, ['debug', 'webrtc']),
+        createEventReferenceItem('debug', 'phone-island-screen-share-status', 'Retrieve screen sharing status information.', 'Recupera le informazioni sullo stato della condivisione schermo.', {}, ['debug', 'screen', 'share']),
+        createEventReferenceItem('debug', 'phone-island-player-status', 'Retrieve audio player status information.', 'Recupera le informazioni sullo stato del player audio.', {}, ['debug', 'audio']),
+        createEventReferenceItem('debug', 'phone-island-player-force-stop', 'Force stop all audio playback.', 'Forza l’arresto di tutta la riproduzione audio.', {}, ['debug', 'audio'])
+    ],
+    outgoing: [
+        createEventReferenceItem('core', 'phone-island-expanded', 'Phone Island popup has been expanded.', 'Il popup di Phone Island è stato espanso.', {}, ['popup']),
+        createEventReferenceItem('core', 'phone-island-compressed', 'Phone Island popup has been compressed.', 'Il popup di Phone Island è stato compresso.', {}, ['popup']),
+        createEventReferenceItem('core', 'phone-island-attached', 'WebRTC device is attached and active.', 'Il dispositivo WebRTC è collegato e attivo.', {}, ['webrtc', 'device']),
+        createEventReferenceItem('core', 'phone-island-detached', 'WebRTC device has been detached.', 'Il dispositivo WebRTC è stato scollegato.', {}, ['webrtc', 'device']),
+        createEventReferenceItem('core', 'phone-island-theme-changed', 'Theme has been updated inside the widget.', 'Il tema è stato aggiornato all’interno del widget.', {}, ['theme', 'ui']),
+        createEventReferenceItem('core', 'phone-island-default-device-changed', 'The default endpoint has changed.', 'L’endpoint predefinito è cambiato.', {}, ['device', 'default']),
+        createEventReferenceItem('core', 'phone-island-presence-changed', 'Operator presence has changed.', 'La presenza dell’operatore è cambiata.', {}, ['presence']),
+        createEventReferenceItem('core', 'phone-island-all-alerts-removed', 'All widget alerts have been cleared.', 'Tutti gli alert del widget sono stati rimossi.', {}, ['alerts']),
+        createEventReferenceItem('core', 'phone-island-extensions-update', 'Extensions list has been updated.', 'La lista degli interni è stata aggiornata.', {}, ['extensions']),
+        createEventReferenceItem('device', 'phone-island-audio-input-changed', 'Default microphone has changed.', 'Il microfono predefinito è cambiato.', {}, ['microphone']),
+        createEventReferenceItem('device', 'phone-island-audio-output-changed', 'Default speaker has changed.', 'L’altoparlante predefinito è cambiato.', {}, ['speaker']),
+        createEventReferenceItem('device', 'phone-island-video-input-changed', 'Default camera has changed.', 'La fotocamera predefinita è cambiata.', {}, ['camera']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-list-response', 'Widget returned the full ringtone catalog.', 'Il widget ha restituito il catalogo completo delle suonerie.', {
+            ringtones: [
+                {
+                    name: 'default',
+                    displayName: 'Default'
+                },
+                {
+                    name: 'modern',
+                    displayName: 'Modern'
+                }
+            ]
+        }, ['audio', 'ringtone']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-selected', 'The ringtone used for incoming calls has changed.', 'La suoneria usata per le chiamate in ingresso è cambiata.', {
+            name: 'default'
+        }, ['audio', 'ringtone']),
+        createEventReferenceItem('ringtone', 'phone-island-ringing-tone-output-changed', 'Ringtone output device has changed.', 'Il dispositivo di uscita della suoneria è cambiato.', {
+            deviceId: '2d331f699ec92b95000f3a656ab1d6ff9f17b3c9502c4a8db1d3f91905b5743f'
+        }, ['audio', 'ringtone']),
+        createEventReferenceItem('call', 'phone-island-call-ringing', 'There is an incoming or outgoing ringing call.', 'È presente una chiamata in ingresso o in uscita che sta squillando.', {}, ['call']),
+        createEventReferenceItem('call', 'phone-island-call-started', 'A call has started successfully.', 'Una chiamata è iniziata correttamente.', {}, ['call']),
+        createEventReferenceItem('call', 'phone-island-outgoing-call-started', 'A new outbound call attempt has started.', 'È iniziato un nuovo tentativo di chiamata in uscita.', {}, ['call']),
+        createEventReferenceItem('call', 'phone-island-call-answered', 'A call has been answered, optionally by another device.', 'Una chiamata è stata risposta, eventualmente da un altro dispositivo.', {
+            extensionType: 'mobile'
+        }, ['call']),
+        createEventReferenceItem('call', 'phone-island-call-ended', 'The current call has ended.', 'La chiamata corrente è terminata.', {}, ['call']),
+        createEventReferenceItem('call', 'phone-island-call-held', 'The active call has been placed on hold.', 'La chiamata attiva è stata messa in attesa.', {}, ['hold']),
+        createEventReferenceItem('call', 'phone-island-call-unheld', 'A held call has been resumed.', 'Una chiamata in attesa è stata ripresa.', {}, ['hold']),
+        createEventReferenceItem('call', 'phone-island-call-muted', 'The current call has been muted.', 'La chiamata corrente è stata silenziata.', {}, ['mute']),
+        createEventReferenceItem('call', 'phone-island-call-unmuted', 'The current call has been unmuted.', 'La chiamata corrente è stata riattivata.', {}, ['mute']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-opened', 'Transfer panel has been opened.', 'Il pannello di trasferimento è stato aperto.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-closed', 'Transfer panel has been closed.', 'Il pannello di trasferimento è stato chiuso.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-switched', 'The transfer panel switched to another call leg.', 'Il pannello di trasferimento è passato a un’altra gamba della chiamata.', {}, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-canceled', 'The transfer flow has been canceled.', 'Il flusso di trasferimento è stato annullato.', {}, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-transfered', 'The call has been transferred.', 'La chiamata è stata trasferita.', {}, ['transfer']),
+        createEventReferenceItem('call', 'phone-island-call-conferenced', 'The call has been converted into a conference.', 'La chiamata è stata convertita in conferenza.', {}, ['conference']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-successfully-popup-open', 'A successful transfer message was shown while the popup was open.', 'È stato mostrato il messaggio di trasferimento riuscito mentre il popup era aperto.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-successfully-popup-close', 'A successful transfer message was shown while the popup was closed.', 'È stato mostrato il messaggio di trasferimento riuscito mentre il popup era chiuso.', {}, ['transfer', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-transfer-failed', 'The transfer operation failed.', 'L’operazione di trasferimento è fallita.', {}, ['transfer', 'error']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-opened', 'In-call keypad has been opened.', 'Il tastierino in chiamata è stato aperto.', {}, ['dtmf', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-closed', 'In-call keypad has been closed.', 'Il tastierino in chiamata è stato chiuso.', {}, ['dtmf', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-keypad-sent', 'A DTMF key has been sent.', 'È stato inviato un tasto DTMF.', {}, ['dtmf']),
+        createEventReferenceItem('call', 'phone-island-call-parked', 'The call has been parked.', 'La chiamata è stata parcheggiata.', {}, ['park']),
+        createEventReferenceItem('call', 'phone-island-call-listened', 'A listening action has been executed.', 'È stata eseguita un’azione di ascolto.', {}, ['monitor']),
+        createEventReferenceItem('call', 'phone-island-call-intruded', 'An intrude action has been executed.', 'È stata eseguita un’azione di intrusione.', {}, ['barge']),
+        createEventReferenceItem('call', 'phone-island-call-audio-input-switched', 'The in-call microphone has been switched.', 'Il microfono in chiamata è stato cambiato.', {}, ['microphone', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-audio-output-switched', 'The in-call speaker has been switched.', 'L’altoparlante in chiamata è stato cambiato.', {}, ['speaker', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-video-input-switched', 'The in-call camera has been switched.', 'La fotocamera in chiamata è stata cambiata.', {}, ['camera', 'call']),
+        createEventReferenceItem('call', 'phone-island-call-actions-opened', 'In-call actions panel has been opened.', 'Il pannello azioni in chiamata è stato aperto.', {}, ['actions', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-actions-closed', 'In-call actions panel has been closed.', 'Il pannello azioni in chiamata è stato chiuso.', {}, ['actions', 'ui']),
+        createEventReferenceItem('call', 'phone-island-call-switched', 'An active call has been switched to another device.', 'Una chiamata attiva è stata spostata su un altro dispositivo.', {}, ['device', 'call']),
+        createEventReferenceItem('call', 'phone-island-action-physical', 'A physical device action or call URL is available.', 'È disponibile un’azione o URL per dispositivo fisico.', {
+            url: 'http://username:password@phone/cgi-bin/ConfigManApp.com?key=numberCalled;ENTER',
+            urlType: 'call'
+        }, ['physical']),
+        createEventReferenceItem('recording', 'phone-island-recording-opened', 'Recording panel has been opened.', 'Il pannello registrazione è stato aperto.', {}, ['recording', 'ui']),
+        createEventReferenceItem('recording', 'phone-island-recording-closed', 'Recording panel has been closed.', 'Il pannello registrazione è stato chiuso.', {}, ['recording', 'ui']),
+        createEventReferenceItem('recording', 'phone-island-recording-started', 'Recording has started.', 'La registrazione è iniziata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-stopped', 'Recording has stopped.', 'La registrazione si è fermata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-played', 'Recording playback has started.', 'La riproduzione della registrazione è iniziata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-paused', 'Recording playback has been paused.', 'La riproduzione della registrazione è stata messa in pausa.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-saved', 'Recording has been saved and the file metadata is available.', 'La registrazione è stata salvata e sono disponibili i metadati del file.', {
+            tempFileName: 'user-cti-1686824454167.wav',
+            audioFileURL: 'blob:http://localhost:6006/3897f2da-2411-4e38-a024-56bbeab72a91'
+        }, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-recording-deleted', 'Recording has been deleted.', 'La registrazione è stata eliminata.', {}, ['recording']),
+        createEventReferenceItem('recording', 'phone-island-physical-recording-opened', 'Physical recording flow has been opened.', 'Il flusso di registrazione fisica è stato aperto.', {}, ['recording', 'physical']),
+        createEventReferenceItem('recording', 'phone-island-physical-recording-saved', 'Physical recording has been saved.', 'La registrazione fisica è stata salvata.', {}, ['recording', 'physical']),
+        createEventReferenceItem('player', 'phone-island-audio-player-started', 'Audio player opened and playback started.', 'Il player audio si è aperto e la riproduzione è iniziata.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-played', 'Audio player playback resumed.', 'La riproduzione del player audio è ripresa.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-paused', 'Audio player playback paused.', 'La riproduzione del player audio è stata messa in pausa.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-audio-player-closed', 'Audio player has been closed.', 'Il player audio è stato chiuso.', {}, ['audio']),
+        createEventReferenceItem('player', 'phone-island-emergency-stop-ringtone-completed', 'The emergency ringtone stop completed successfully.', 'L’arresto di emergenza della suoneria è stato completato con successo.', {}, ['audio', 'ringtone']),
+        createEventReferenceItem('video', 'phone-island-fullscreen-entered', 'Phone Island entered fullscreen mode.', 'Phone Island è entrato in modalità schermo intero.', {}, ['ui']),
+        createEventReferenceItem('video', 'phone-island-fullscreen-exited', 'Phone Island exited fullscreen mode.', 'Phone Island è uscito dalla modalità schermo intero.', {}, ['ui']),
+        createEventReferenceItem('video', 'phone-island-video-enabled', 'Video has been enabled during the current call.', 'Il video è stato abilitato durante la chiamata corrente.', {}, ['camera']),
+        createEventReferenceItem('video', 'phone-island-video-disabled', 'Video has been disabled during the current call.', 'Il video è stato disabilitato durante la chiamata corrente.', {}, ['camera']),
+        createEventReferenceItem('video', 'phone-island-screen-share-started', 'Screen sharing has started.', 'La condivisione schermo è iniziata.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-stopped', 'Screen sharing has stopped.', 'La condivisione schermo si è fermata.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-joined', 'User joined a screen share initiated by another party.', 'L’utente si è collegato a una condivisione schermo avviata dall’altra parte.', {}, ['screen', 'share']),
+        createEventReferenceItem('video', 'phone-island-screen-share-left', 'User left a joined screen share.', 'L’utente ha lasciato una condivisione schermo a cui si era collegato.', {}, ['screen', 'share']),
+        createEventReferenceItem('conference', 'phone-island-conference-finished', 'A conference has finished.', 'Una conferenza è terminata.', {}, ['conference']),
+        createEventReferenceItem('conference', 'phone-island-owner-conference-finished', 'The owner conference session has finished.', 'La sessione di conferenza del proprietario è terminata.', {}, ['conference']),
+        createEventReferenceItem('system', 'phone-island-user-already-login', 'User logged in from another window or session.', 'L’utente ha effettuato l’accesso da un’altra finestra o sessione.', {}, ['session']),
+        createEventReferenceItem('system', 'phone-island-main-presence', 'Presence update received from the backend.', 'Aggiornamento presenza ricevuto dal backend.', {
+            foo1: {
+                mainPresence: 'ringing'
+            }
+        }, ['presence']),
+        createEventReferenceItem('system', 'phone-island-conversations', 'Conversation data has been updated from the backend.', 'I dati delle conversazioni sono stati aggiornati dal backend.', {
+            foo1: {
+                conversations: {}
+            }
+        }, ['conversation']),
+        createEventReferenceItem('system', 'phone-island-queue-update', 'Queue information has changed.', 'Le informazioni della coda sono cambiate.', {
+            401: {
+                name: 'QueueOne',
+                queue: '401',
+                avgHoldTime: '0',
+                avgTalkTime: '0'
+            }
+        }, ['queue']),
+        createEventReferenceItem('system', 'phone-island-queue-member-update', 'A queue member status has changed.', 'Lo stato di un membro di coda è cambiato.', {
+            212: {
+                name: 'foo 2',
+                queue: '302',
+                member: '212'
+            }
+        }, ['queue']),
+        createEventReferenceItem('system', 'phone-island-current-user-queue-call-waiting', 'Current user has a queue call still waiting or ringing.', 'L’utente corrente ha una chiamata di coda ancora in attesa o in squillo.', {
+            conversationId: '1671557974.4928',
+            queueId: '410',
+            queueName: 'Customer care',
+            queuePosition: '1'
+        }, ['queue', 'call']),
+        createEventReferenceItem('system', 'phone-island-current-user-queue-call-connected', 'Current user answered a queue call and the conversation is connected.', 'L’utente corrente ha risposto a una chiamata di coda e la conversazione è connessa.', {
+            conversationId: '1671557974.4928',
+            queueId: '410',
+            queueName: 'Customer care'
+        }, ['queue', 'call']),
+        createEventReferenceItem('system', 'phone-island-parking-update', 'Parking slots or parked calls have changed.', 'Gli slot di parcheggio o le chiamate parcheggiate sono cambiati.', {}, ['park']),
+        createEventReferenceItem('system', 'phone-island-presence-change', 'Presence change data has been emitted.', 'Sono stati emessi dati di cambio presenza.', {
+            status: 'dnd'
+        }, ['presence']),
+        createEventReferenceItem('system', 'phone-island-default-device-updated', 'User default device has been updated.', 'Il dispositivo predefinito dell’utente è stato aggiornato.', {
+            id: '91204'
+        }, ['device', 'default']),
+        createEventReferenceItem('system', 'phone-island-internet-connected', 'Internet connectivity has been restored.', 'La connettività internet è stata ripristinata.', {}, ['network']),
+        createEventReferenceItem('system', 'phone-island-internet-disconnected', 'Internet connectivity has been lost.', 'La connettività internet è stata persa.', {}, ['network']),
+        createEventReferenceItem('system', 'phone-island-voicemail-received', 'A new voicemail has been received.', 'È stato ricevuto un nuovo messaggio vocale.', {
+            voicemail: '228',
+            counter: '14'
+        }, ['voicemail']),
+        createEventReferenceItem('system', 'phone-island-streaming-information-received', 'Streaming device information has been updated.', 'Le informazioni dei dispositivi di streaming sono state aggiornate.', {}, ['streaming']),
+        createEventReferenceItem('system', 'phone-island-alert-removed', 'An alert has been dismissed.', 'Un alert è stato chiuso.', {}, ['alerts']),
+        createEventReferenceItem('system', 'phone-island-url-parameter-opened', 'The user opened an URL parameter action.', 'L’utente ha aperto un’azione basata su URL parameter.', {
+            counterpartNum: '1234',
+            counterpartName: 'Antonio test',
+            owner: '91269',
+            uniqueId: '21234',
+            url: 'www.google.it/$CALLER_NUMBER-$CALLER_NAME-$CALLED-$UNIQUEID'
+        }, ['url']),
+        createEventReferenceItem('websocket', 'phone-island-server-reloaded', 'Server reloaded notification received.', 'Ricevuta notifica di riavvio server.', {}, ['server']),
+        createEventReferenceItem('websocket', 'phone-island-server-disconnected', 'Server connection has been lost.', 'La connessione al server è stata persa.', {}, ['server', 'error']),
+        createEventReferenceItem('websocket', 'phone-island-socket-connected', 'WebSocket connection is established.', 'La connessione WebSocket è stabilita.', {}, ['socket']),
+        createEventReferenceItem('websocket', 'phone-island-socket-disconnected', 'WebSocket connection has been lost.', 'La connessione WebSocket è stata persa.', {}, ['socket', 'error']),
+        createEventReferenceItem('websocket', 'phone-island-socket-reconnected', 'WebSocket connection has been re-established.', 'La connessione WebSocket è stata ristabilita.', {}, ['socket']),
+        createEventReferenceItem('websocket', 'phone-island-socket-disconnected-popup-open', 'Socket disconnected popup has been shown.', 'È stato mostrato il popup di socket disconnesso.', {}, ['socket', 'ui']),
+        createEventReferenceItem('websocket', 'phone-island-socket-disconnected-popup-close', 'Socket disconnected popup has been closed.', 'Il popup di socket disconnesso è stato chiuso.', {}, ['socket', 'ui']),
+        createEventReferenceItem('websocket', 'phone-island-socket-authorized', 'Socket authorization completed successfully.', 'L’autorizzazione del socket è stata completata con successo.', {}, ['socket']),
+        createEventReferenceItem('ui', 'phone-island-sideview-opened', 'Right side panel is open.', 'Il pannello laterale destro è aperto.', {}, ['menu']),
+        createEventReferenceItem('ui', 'phone-island-sideview-closed', 'Right side panel is closed.', 'Il pannello laterale destro è chiuso.', {}, ['menu']),
+        createEventReferenceItem('ui', 'phone-island-size-change', 'Widget size and chrome metrics changed.', 'Le dimensioni e i parametri grafici del widget sono cambiati.', {
+            width: '348px',
+            height: '304px',
+            borderRadius: '20px',
+            padding: '24px'
+        }, ['resize']),
+        createEventReferenceItem('user', 'phone-island-user-informations-update', 'Fresh main user data has been emitted.', 'Sono stati emessi nuovi dati dell’utente principale.', {
+            name: 'test',
+            username: 'user',
+            mainPresence: 'online',
+            settings: {}
+        }, ['user']),
+        createEventReferenceItem('user', 'phone-island-conversation-transcription', 'A real-time transcription message has been received for an active conversation.', 'È stato ricevuto un messaggio di trascrizione in tempo reale per una conversazione attiva.', {
+            uniqueid: '1759147339.1198',
+            transcription: 'Hello, how can I help you today?',
+            timestamp: 25.55,
+            speaker_name: 'Antonio Colapietro',
+            speaker_number: '202',
+            is_final: true
+        }, ['transcription', 'user']),
+        createEventReferenceItem('summary', 'phone-island-summary-not-ready', 'Summary is not available yet for the requested linked call id.', 'Il summary non è ancora disponibile per il linkedid richiesto.', {
+            linkedid: '1769179547.799'
+        }, ['summary', 'transcription']),
+        createEventReferenceItem('summary', 'phone-island-summary-call-notified', 'Summary watch request has been registered.', 'La richiesta di watch per il summary è stata registrata.', {
+            linkedid: '1769179547.799'
+        }, ['summary', 'transcription']),
+        createEventReferenceItem('summary', 'phone-island-summary-ready', 'Summary is ready and available to the host application.', 'Il summary è pronto e disponibile per l’applicazione host.', {
+            linkedid: '1769185498.1004',
+            display_name: 'Mario Rossi',
+            display_number: '+39021234567'
+        }, ['summary', 'transcription'])
+    ]
+};
+
 // ===========================================
 // EVENT FILTERING SYSTEM
 // ===========================================
@@ -172,9 +828,14 @@ function initializeFilterUI() {
     const filterToggleIcon = document.getElementById('filterToggleIcon');
 
     if (filterHeader && filterContent && filterToggleIcon) {
+        filterContent.classList.add('expanded');
+        filterToggleIcon.classList.add('expanded');
+        filterHeader.setAttribute('aria-expanded', 'true');
+
         filterHeader.addEventListener('click', () => {
             filterContent.classList.toggle('expanded');
             filterToggleIcon.classList.toggle('expanded');
+            filterHeader.setAttribute('aria-expanded', String(filterContent.classList.contains('expanded')));
         });
     }
 
@@ -541,55 +1202,55 @@ function renderUserInfoTable(userInfo) {
 
     // Create table HTML
     const tableHTML = `
-        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <table class="user-info-table">
             <tbody>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa; width: 30%;">Username</td>
-                    <td style="padding: 10px;">${userInfo.username || 'N/A'}</td>
+                <tr>
+                    <td class="user-info-table__label">Username</td>
+                    <td class="user-info-table__value">${userInfo.username || 'N/A'}</td>
                 </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Name</td>
-                    <td style="padding: 10px;">${userInfo.name || 'N/A'}</td>
+                <tr>
+                    <td class="user-info-table__label">Name</td>
+                    <td class="user-info-table__value">${userInfo.name || 'N/A'}</td>
                 </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Main Presence</td>
-                    <td style="padding: 10px;">
-                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; background-color: ${getPresenceColor(userInfo.mainPresence)}; color: white; font-size: 12px; font-weight: bold;">
+                <tr>
+                    <td class="user-info-table__label">Main Presence</td>
+                    <td class="user-info-table__value">
+                        <span class="presence-badge" style="background-color: ${getPresenceColor(userInfo.mainPresence)};">
                             ${userInfo.mainPresence || 'N/A'}
                         </span>
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence</td>
-                    <td style="padding: 10px;">
-                        <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; background-color: ${getPresenceColor(userInfo.presence)}; color: white; font-size: 12px; font-weight: bold;">
+                <tr>
+                    <td class="user-info-table__label">Presence</td>
+                    <td class="user-info-table__value">
+                        <span class="presence-badge" style="background-color: ${getPresenceColor(userInfo.presence)};">
                             ${userInfo.presence || 'N/A'}
                         </span>
                     </td>
                 </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Default Device</td>
-                    <td style="padding: 10px;">${userInfo.default_device?.id || 'Not set'} <span style="color: #6c757d;">(${userInfo.default_device?.type || 'N/A'})</span></td>
-                </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Endpoints</td>
-                    <td style="padding: 10px;">${formatEndpoints(userInfo.endpoints)}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence on Busy</td>
-                    <td style="padding: 10px;">${userInfo.presenceOnBusy || 'N/A'}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Presence on Unavailable</td>
-                    <td style="padding: 10px;">${userInfo.presenceOnUnavailable || 'N/A'}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Recall on Busy</td>
-                    <td style="padding: 10px;">${userInfo.recallOnBusy || 'N/A'}</td>
+                <tr>
+                    <td class="user-info-table__label">Default Device</td>
+                    <td class="user-info-table__value">${userInfo.default_device?.id || 'Not set'} <span class="user-info-table__muted">(${userInfo.default_device?.type || 'N/A'})</span></td>
                 </tr>
                 <tr>
-                    <td style="padding: 10px; font-weight: bold; background-color: #f8f9fa;">Profile</td>
-                    <td style="padding: 10px;">${userInfo.profile?.macro_permissions?.length || 0} macro permission(s)</td>
+                    <td class="user-info-table__label">Endpoints</td>
+                    <td class="user-info-table__value">${formatEndpoints(userInfo.endpoints)}</td>
+                </tr>
+                <tr>
+                    <td class="user-info-table__label">Presence on Busy</td>
+                    <td class="user-info-table__value">${userInfo.presenceOnBusy || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td class="user-info-table__label">Presence on Unavailable</td>
+                    <td class="user-info-table__value">${userInfo.presenceOnUnavailable || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td class="user-info-table__label">Recall on Busy</td>
+                    <td class="user-info-table__value">${userInfo.recallOnBusy || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td class="user-info-table__label">Profile</td>
+                    <td class="user-info-table__value">${userInfo.profile?.macro_permissions?.length || 0} macro permission(s)</td>
                 </tr>
             </tbody>
         </table>
@@ -618,14 +1279,14 @@ function getPresenceColor(presence) {
 // Format endpoints for display
 function formatEndpoints(endpoints) {
     if (!endpoints || !endpoints.extension || endpoints.extension.length === 0) {
-        return 'No endpoints';
+        return '<span class="user-info-table__muted">No endpoints</span>';
     }
 
     const endpointsList = endpoints.extension
-        .map(endpoint => `<span style="display: inline-block; margin: 2px 5px 2px 0; padding: 4px 8px; background-color: #e9ecef; border-radius: 4px; font-size: 12px;">${endpoint.id} (${endpoint.type})</span>`)
+        .map(endpoint => `<span class="endpoint-badge">${endpoint.id} (${endpoint.type})</span>`)
         .join('');
 
-    return `<div>${endpointsList}</div>`;
+    return `<div class="endpoint-badges">${endpointsList}</div>`;
 }
 
 // Render error message
@@ -634,9 +1295,9 @@ function renderUserInfoError(errorMessage) {
     if (!container) return;
 
     container.innerHTML = `
-        <div style="padding: 20px; text-align: center; color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;">
+        <div class="user-info-feedback user-info-feedback--error">
             <strong>⚠️ Error loading user information</strong><br>
-            <span style="font-size: 14px;">${errorMessage}</span>
+            <span>${errorMessage}</span>
         </div>
     `;
 }
@@ -648,7 +1309,7 @@ function initializeUserInformation() {
         refreshBtn.addEventListener('click', () => {
             const container = document.getElementById('userInfoTableContainer');
             if (container) {
-                container.innerHTML = '<p style="color: #6c757d; text-align: center; padding: 20px;">🔄 Loading...</p>';
+                container.innerHTML = '<div class="user-info-feedback user-info-feedback--loading">🔄 Loading...</div>';
             }
             fetchCurrentUserInfo();
         });
@@ -730,7 +1391,7 @@ function renderTranscriptionMessages() {
     if (transcriptionMessages.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; color: #6c757d; padding: 20px;">
-                🎙️ Waiting for transcription messages...
+                ${t('transcription.waitingMessages')}
             </div>
         `;
         return;
@@ -738,7 +1399,7 @@ function renderTranscriptionMessages() {
 
     container.innerHTML = transcriptionMessages.map(message => {
         const time = new Date(message.timestamp * 1000).toLocaleTimeString();
-        const speaker = message.speaker || 'Unknown';
+        const speaker = message.speaker || t('transcription.unknownSpeaker');
         const speakerInfo = message.speakerNumber ? `${speaker} (${message.speakerNumber})` : speaker;
 
         // Determine message type based on speaker - use first message to establish roles
@@ -768,7 +1429,7 @@ function renderTranscriptionMessages() {
 function updateTranscriptionStatus(status) {
     const statusElement = document.getElementById('transcriptionStatus');
     if (statusElement) {
-        statusElement.textContent = `Status: ${status}`;
+        statusElement.textContent = t('transcription.statusPrefix', { status });
     }
 }
 
@@ -838,6 +1499,304 @@ function displayUserInfo(tokenData) {
     document.getElementById('userExtension').textContent = tokenData.extension;
     document.getElementById('userServer').textContent = tokenData.server;
     document.getElementById('userInfo').classList.remove('hidden');
+}
+
+function t(key, replacements = {}) {
+    const fallback = translations.en;
+    const scopedTranslations = translations[currentLanguage] || fallback;
+    const segments = key.split('.');
+
+    let value = segments.reduce((accumulator, segment) => accumulator && accumulator[segment], scopedTranslations);
+    if (typeof value !== 'string') {
+        value = segments.reduce((accumulator, segment) => accumulator && accumulator[segment], fallback);
+    }
+
+    if (typeof value !== 'string') {
+        return key;
+    }
+
+    return value.replace(/\{\{(.*?)\}\}/g, (_, token) => replacements[token.trim()] ?? '');
+}
+
+function updateStaticStatusTexts() {
+    const statusContent = document.getElementById('statusContent');
+    if (statusContent && lastStatus === '') {
+        statusContent.textContent = t('status.initializing');
+    }
+
+    const janusStatus = document.getElementById('janusStatus');
+    if (janusStatus && !janusStatus.classList.contains('success') && !janusStatus.classList.contains('error')) {
+        janusStatus.textContent = t('status.waitingJanus');
+    }
+
+    const transcriptionStatus = document.getElementById('transcriptionStatus');
+    if (transcriptionStatus && transcriptionMessages.length === 0) {
+        updateTranscriptionStatus(t('transcription.connecting'));
+    }
+}
+
+function updateAutoScrollButtonText() {
+    const autoScrollToggle = document.getElementById('autoScrollToggle');
+    if (autoScrollToggle) {
+        autoScrollToggle.innerHTML = autoScroll ? t('transcription.autoScroll') : t('transcription.manualScroll');
+    }
+}
+
+function applyTranslations() {
+    document.documentElement.lang = currentLanguage;
+    document.title = t('meta.title');
+
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+        element.textContent = t(element.dataset.i18n);
+    });
+
+    document.querySelectorAll('[data-i18n-html]').forEach((element) => {
+        element.innerHTML = t(element.dataset.i18nHtml);
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+        element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach((element) => {
+        const translatedTitle = t(element.dataset.i18nTitle);
+        element.setAttribute('title', translatedTitle);
+        element.setAttribute('aria-label', translatedTitle);
+    });
+
+    const languageToggleLabel = document.getElementById('languageToggleLabel');
+    if (languageToggleLabel) {
+        languageToggleLabel.textContent = currentLanguage.toUpperCase();
+    }
+
+    updateAutoScrollButtonText();
+    updateStaticStatusTexts();
+    renderEventsReference();
+
+    if (transcriptionMessages.length === 0) {
+        renderTranscriptionMessages();
+    }
+}
+
+function setLanguage(language) {
+    if (!translations[language]) {
+        return;
+    }
+
+    currentLanguage = language;
+    localStorage.setItem(DEMO_STORAGE_KEYS.language, language);
+    applyTranslations();
+}
+
+function applyTheme(theme, dispatchToWidget = true) {
+    currentTheme = theme === 'dark' ? 'dark' : 'light';
+    localStorage.setItem(DEMO_STORAGE_KEYS.theme, currentTheme);
+    document.body.dataset.theme = currentTheme;
+    setActiveTheme(currentTheme);
+
+    if (dispatchToWidget) {
+        dispatchPhoneIslandEvent('phone-island-theme-change', {
+            selectedTheme: currentTheme
+        });
+    }
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getEventsReferenceCategoryLabel(category) {
+    const categories = translations[currentLanguage]?.eventsReference?.categories || {};
+    return categories[category] || category;
+}
+
+function getEventsReferenceDescription(eventItem) {
+    if (!eventItem?.description) {
+        return '';
+    }
+
+    if (typeof eventItem.description === 'string') {
+        return eventItem.description;
+    }
+
+    return eventItem.description[currentLanguage] || eventItem.description.en || '';
+}
+
+function getFilteredEventsReferenceItems() {
+    const items = eventReferenceData[activeEventsReferenceTab] || [];
+    const normalizedSearch = eventsReferenceSearch.trim().toLowerCase();
+
+    return items.filter((eventItem) => {
+        const matchesCategory = activeEventsReferenceCategory === 'all' || eventItem.category === activeEventsReferenceCategory;
+
+        if (!matchesCategory) {
+            return false;
+        }
+
+        if (!normalizedSearch) {
+            return true;
+        }
+
+        const haystack = [
+            eventItem.name,
+            getEventsReferenceCategoryLabel(eventItem.category),
+            getEventsReferenceDescription(eventItem),
+            ...(eventItem.tags || [])
+        ].join(' ').toLowerCase();
+
+        return haystack.includes(normalizedSearch);
+    });
+}
+
+async function copyEventsReferencePayload(eventName) {
+    const allItems = Object.values(eventReferenceData).flat();
+    const eventItem = allItems.find((item) => item.name === eventName);
+
+    if (!eventItem) {
+        return;
+    }
+
+    const payload = JSON.stringify(eventItem.payload || {}, null, 2);
+
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(payload);
+        } else {
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = payload;
+            tempTextarea.setAttribute('readonly', 'readonly');
+            tempTextarea.style.position = 'absolute';
+            tempTextarea.style.left = '-9999px';
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
+        }
+
+        copiedEventsReferenceName = eventName;
+        renderEventsReference();
+        window.setTimeout(() => {
+            if (copiedEventsReferenceName === eventName) {
+                copiedEventsReferenceName = '';
+                renderEventsReference();
+            }
+        }, 1800);
+    } catch (error) {
+        console.error('Unable to copy payload:', error);
+    }
+}
+
+function renderEventsReference() {
+    const content = document.getElementById('eventsReferenceContent');
+    const incomingTab = document.getElementById('eventsReferenceIncomingTab');
+    const outgoingTab = document.getElementById('eventsReferenceOutgoingTab');
+    const categoryFilters = document.getElementById('eventsReferenceFilters');
+    const searchInput = document.getElementById('eventsReferenceSearchInput');
+    const resultsCounter = document.getElementById('eventsReferenceResultsCounter');
+
+    if (!content) {
+        return;
+    }
+
+    if (incomingTab) {
+        incomingTab.classList.toggle('active', activeEventsReferenceTab === 'incoming');
+    }
+
+    if (outgoingTab) {
+        outgoingTab.classList.toggle('active', activeEventsReferenceTab === 'outgoing');
+    }
+
+    const allEvents = eventReferenceData[activeEventsReferenceTab] || [];
+    const categories = ['all', ...new Set(allEvents.map((eventItem) => eventItem.category))];
+    const events = getFilteredEventsReferenceItems();
+
+    if (searchInput && searchInput.value !== eventsReferenceSearch) {
+        searchInput.value = eventsReferenceSearch;
+    }
+
+    if (categoryFilters) {
+        categoryFilters.innerHTML = categories.map((category) => `
+            <button
+                type="button"
+                class="events-reference-filter-chip${category === activeEventsReferenceCategory ? ' active' : ''}"
+                data-events-category="${escapeHtml(category)}"
+            >${escapeHtml(getEventsReferenceCategoryLabel(category))}</button>
+        `).join('');
+    }
+
+    if (resultsCounter) {
+        resultsCounter.textContent = t('eventsReference.resultsCount', {
+            visible: String(events.length),
+            total: String(allEvents.length)
+        });
+    }
+
+    if (events.length === 0) {
+        content.innerHTML = `<div class="events-reference-empty">${escapeHtml(t('eventsReference.noResults'))}</div>`;
+        return;
+    }
+
+    content.innerHTML = events.map((eventItem) => {
+        const payload = JSON.stringify(eventItem.payload || {}, null, 2);
+        const hasPayload = payload !== '{}';
+        const copyLabel = copiedEventsReferenceName === eventItem.name
+            ? t('eventsReference.copied')
+            : hasPayload
+                ? t('eventsReference.copyPayload')
+                : t('eventsReference.copyPayloadEmpty');
+
+        return `
+            <article class="events-reference-card">
+                <div class="events-reference-card__top">
+                    <div class="events-reference-card__meta">${escapeHtml(getEventsReferenceCategoryLabel(eventItem.category))}</div>
+                    <button
+                        type="button"
+                        class="events-reference-copy-button${copiedEventsReferenceName === eventItem.name ? ' copied' : ''}"
+                        data-copy-payload="${escapeHtml(eventItem.name)}"
+                    >${escapeHtml(copyLabel)}</button>
+                </div>
+                <h4 class="events-reference-card__title">${escapeHtml(eventItem.name)}</h4>
+                <p class="events-reference-card__description">${escapeHtml(getEventsReferenceDescription(eventItem))}</p>
+                <div class="events-reference-card__label">${escapeHtml(t('eventsReference.exampleLabel'))}</div>
+                <pre class="events-reference-card__json"><code>${escapeHtml(payload)}</code></pre>
+            </article>
+        `;
+    }).join('');
+}
+
+function openEventsReference() {
+    const modal = document.getElementById('eventsReferenceModal');
+    const overlay = document.getElementById('eventsReferenceOverlay');
+
+    if (modal && overlay) {
+        renderEventsReference();
+        modal.classList.add('visible');
+        overlay.classList.add('visible');
+        document.body.classList.add('events-reference-open');
+
+        const searchInput = document.getElementById('eventsReferenceSearchInput');
+        if (searchInput) {
+            window.setTimeout(() => {
+                searchInput.focus();
+            }, 40);
+        }
+    }
+}
+
+function closeEventsReference() {
+    const modal = document.getElementById('eventsReferenceModal');
+    const overlay = document.getElementById('eventsReferenceOverlay');
+
+    if (modal && overlay) {
+        modal.classList.remove('visible');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('events-reference-open');
+    }
 }
 
 // ===========================================
@@ -974,7 +1933,7 @@ window.addEventListener('phone-island-socket-reconnected', (event) => {
 
 // Theme events
 window.addEventListener('phone-island-theme-changed', (event) => {
-    updateStatus('🎨 Theme changed');
+    updateStatus(t('status.themeChanged'));
 });
 
 // UI events
@@ -1132,7 +2091,7 @@ function initializeWidget(base64Token) {
     } catch (error) {
         console.error('Initialization error:', error);
         const registrationStatus = document.getElementById('registrationStatus');
-        registrationStatus.textContent = `❌ Error: ${error.message}`;
+        registrationStatus.textContent = `❌ ${t('alerts.errorPrefix')}: ${error.message}`;
         registrationStatus.classList.remove('hidden');
         registrationStatus.classList.add('error');
         return false;
@@ -1147,7 +2106,7 @@ function initializeWidget(base64Token) {
 function clearEventLog() {
     const logElement = document.getElementById('eventLog');
     if (logElement) {
-        logElement.innerHTML = '<div>📡 Event Log cleared - waiting for new events...</div>';
+        logElement.innerHTML = `<div>${t('main.eventLogCleared')}</div>`;
         logEvent('🗑️ Event log cleared by user');
         updateLogSearchCounter();
     }
@@ -1193,6 +2152,9 @@ function updateLogSearchCounter() {
 }
 
 function init() {
+    applyTranslations();
+    applyTheme(currentTheme, false);
+
     // Initialize event filter UI
     initializeFilterUI();
 
@@ -1207,6 +2169,86 @@ function init() {
     if (clearLogBtn) {
         clearLogBtn.addEventListener('click', () => {
             clearEventLog();
+        });
+    }
+
+    const openEventsReferenceBtn = document.getElementById('openEventsReference');
+    if (openEventsReferenceBtn) {
+        openEventsReferenceBtn.addEventListener('click', () => {
+            openEventsReference();
+        });
+    }
+
+    const closeEventsReferenceBtn = document.getElementById('closeEventsReference');
+    if (closeEventsReferenceBtn) {
+        closeEventsReferenceBtn.addEventListener('click', () => {
+            closeEventsReference();
+        });
+    }
+
+    const eventsReferenceOverlay = document.getElementById('eventsReferenceOverlay');
+    if (eventsReferenceOverlay) {
+        eventsReferenceOverlay.addEventListener('click', () => {
+            closeEventsReference();
+        });
+    }
+
+    const incomingEventsTab = document.getElementById('eventsReferenceIncomingTab');
+    if (incomingEventsTab) {
+        incomingEventsTab.addEventListener('click', () => {
+            activeEventsReferenceTab = 'incoming';
+            activeEventsReferenceCategory = 'all';
+            renderEventsReference();
+        });
+    }
+
+    const outgoingEventsTab = document.getElementById('eventsReferenceOutgoingTab');
+    if (outgoingEventsTab) {
+        outgoingEventsTab.addEventListener('click', () => {
+            activeEventsReferenceTab = 'outgoing';
+            activeEventsReferenceCategory = 'all';
+            renderEventsReference();
+        });
+    }
+
+    const eventsReferenceSearchInput = document.getElementById('eventsReferenceSearchInput');
+    if (eventsReferenceSearchInput) {
+        eventsReferenceSearchInput.addEventListener('input', (event) => {
+            eventsReferenceSearch = event.target.value || '';
+            renderEventsReference();
+        });
+    }
+
+    const eventsReferenceFilters = document.getElementById('eventsReferenceFilters');
+    if (eventsReferenceFilters) {
+        eventsReferenceFilters.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-events-category]');
+            if (!button) {
+                return;
+            }
+
+            activeEventsReferenceCategory = button.dataset.eventsCategory || 'all';
+            renderEventsReference();
+        });
+    }
+
+    const eventsReferenceContent = document.getElementById('eventsReferenceContent');
+    if (eventsReferenceContent) {
+        eventsReferenceContent.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-copy-payload]');
+            if (!button) {
+                return;
+            }
+
+            copyEventsReferencePayload(button.dataset.copyPayload);
+        });
+    }
+
+    const languageToggle = document.getElementById('languageToggle');
+    if (languageToggle) {
+        languageToggle.addEventListener('click', () => {
+            const nextLanguage = currentLanguage === 'en' ? 'it' : 'en';
+            setLanguage(nextLanguage);
         });
     }
 
@@ -1240,7 +2282,7 @@ function init() {
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('mainPanel').classList.remove('hidden');
 
-        updateStatus('✅ Widget initialized successfully');
+        updateStatus(t('status.widgetInitialized'));
         logEvent('🔐 Widget initialized with user:', tokenData.username);
     }
 
@@ -1252,12 +2294,12 @@ function init() {
             const token = tokenInput.value.trim();
 
             if (!token) {
-                alert('Please enter a valid token');
+                alert(t('alerts.enterValidToken'));
                 return;
             }
 
             const registrationStatus = document.getElementById('registrationStatus');
-            registrationStatus.textContent = '🔄 Initializing...';
+            registrationStatus.textContent = t('status.initializingShort');
             registrationStatus.classList.remove('hidden', 'error', 'success');
 
             // Initialize widget with token
@@ -1298,7 +2340,7 @@ function init() {
                     number: phoneNumber
                 });
             } else {
-                alert('Please enter a phone number');
+                alert(t('alerts.enterPhoneNumber'));
             }
         });
     }
@@ -1387,20 +2429,14 @@ function init() {
     const lightTheme = document.getElementById('lightTheme');
     if (lightTheme) {
         lightTheme.addEventListener('click', () => {
-            dispatchPhoneIslandEvent('phone-island-theme-change', {
-                selectedTheme: 'light'
-            });
-            setActiveTheme('light');
+            applyTheme('light');
         });
     }
 
     const darkTheme = document.getElementById('darkTheme');
     if (darkTheme) {
         darkTheme.addEventListener('click', () => {
-            dispatchPhoneIslandEvent('phone-island-theme-change', {
-                selectedTheme: 'dark'
-            });
-            setActiveTheme('dark');
+            applyTheme('dark');
         });
     }
 
@@ -1482,7 +2518,7 @@ function init() {
         autoScrollToggle.addEventListener('click', () => {
             autoScroll = !autoScroll;
             autoScrollToggle.classList.toggle('active', autoScroll);
-            autoScrollToggle.textContent = autoScroll ? '📜 Auto-scroll' : '📜 Manual';
+            updateAutoScrollButtonText();
         });
     }
 
@@ -1494,7 +2530,7 @@ function init() {
 window.addEventListener('phone-island-socket-connected', (event) => {
     const janusStatus = document.getElementById('janusStatus');
     if (janusStatus) {
-        janusStatus.textContent = '✅ Connected to Janus server!';
+        janusStatus.textContent = t('status.janusConnected');
         janusStatus.classList.add('success');
     }
 });
@@ -1511,7 +2547,7 @@ console.log = function(...args) {
         if (janusStatus) {
             const match = message.match(/registered as (\d+)/);
             const extension = match ? match[1] : 'unknown';
-            janusStatus.textContent = `✅ Successfully registered on Janus as ${extension}!`;
+            janusStatus.textContent = t('status.janusRegistered', { extension });
             janusStatus.classList.add('success');
         }
     }
@@ -1530,7 +2566,7 @@ function openTranscriptionWindow() {
         overlay.classList.add('visible');
 
         // Update status to show we're ready to receive transcriptions
-        updateTranscriptionStatus('🟢 Ready to receive transcriptions');
+        updateTranscriptionStatus(t('transcription.ready'));
 
         logEvent('💬 Transcription window opened');
     }
@@ -1630,6 +2666,12 @@ window.PhoneIslandIntegration = {
 
 // Wait for content to be rendered
 document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeEventsReference();
+    }
+});
 
 console.log('📚 Phone Island Integration loaded! Available functions:');
 console.log('- window.PhoneIslandIntegration.dispatchEvent(eventName, data)');
