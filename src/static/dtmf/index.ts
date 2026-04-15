@@ -17,7 +17,7 @@ import dtmf_star from './dtmf_star'
 import dtmf_pound from './dtmf_pound'
 import dtmf_rbtUS from './dtmf_rbt-US'
 
-const exports = {
+const dtmfAudios = {
   dtmf_0,
   dtmf_1,
   dtmf_2,
@@ -35,4 +35,4 @@ const exports = {
   dtmf_rbtUS,
 }
 
-export default exports as typeof exports
+export default dtmfAudios as typeof dtmfAudios
