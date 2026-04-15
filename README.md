@@ -113,27 +113,21 @@ Install deps
 npm install
 ```
 
-Run Storybook
+Run the local development host
 
 ```
-touch .env.development.local
-echo "CONFIG_TOKEN=$(echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>" | base64 -w0)" > .env.development.local
 npm run dev
 ```
-**Other environment variables can be specified inside the file above:**
+
+Open the local page served by Parcel and paste the base64 config token in the left panel.
+
+Example token generation:
 
 ```
-# The destination number to be called
-DEST_NUMBER=<call_destination_number>
-
-# The announcement id to be reproduced as announcement and base64 audio file
-ANNOUNCEMENT_ID=<announcement_id>
-
-# The call recording id to be reproduced
-CALL_RECORDING_ID=<call_recording_id>
+echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>:<sip_host>:<sip_port>" | base64 -w0
 ```
 
-The main component can be developed using Storybook. Inside the story is rendered the component exported by the final component library.
+The main component is developed inside a dedicated Parcel host that mounts the exported `PhoneIsland` component directly, so edits in `src/App.tsx` and child components are reflected with live reload.
 
 Tailwind CSS is enable by default.
 

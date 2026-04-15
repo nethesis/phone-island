@@ -9,10 +9,8 @@
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier",
-    "plugin:storybook/recommended",
     "react-app",
-    "react-app/jest",
-    "plugin:storybook/recommended"
+    "react-app/jest"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -40,9 +38,6 @@
     "react/display-name": false,
     "import/no-anonymous-default-export": "off"
   },
-  "files": [
-    "**/*.stories.*"
-  ],
   "settings": {
     "import/resolver": {
       "typescript": {}
