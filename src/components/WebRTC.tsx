@@ -109,7 +109,11 @@ export const WebRTC: FC<WebRTCProps> = ({
     }, 30000)
 
     // Prevent multiple Janus session creation
-    const { janusInstance: existingInstance, registered } = store.getState().webrtc
+    const {
+      janusInstance: existingInstance,
+      registered,
+      sipcall: existingSipcall,
+    }: { janusInstance: any; registered: boolean; sipcall: any } = store.getState().webrtc
 
     // Check if existing session is valid and connected
     let shouldInit = true
@@ -131,14 +135,18 @@ export const WebRTC: FC<WebRTCProps> = ({
                              currentSipcall?.webrtcStuff?.pc?.iceConnectionState === 'completed'
       const hasAnyCall = hasIncomingCall || hasActiveCall
 
+      const hasDetachedSipcall = !!existingSipcall?.detached
+      const hasValidSipcall = !!existingSipcall && !hasDetachedSipcall
+
       // If session exists AND is connected AND registered, skip init
       // UNLESS there has been long inactivity (>30 min) WITHOUT an active call
       // (we preserve sessions with active calls even after long inactivity)
-      if (isConnected && registered && (!longInactivity || hasAnyCall)) {
+      if (isConnected && registered && hasValidSipcall && (!longInactivity || hasAnyCall)) {
         console.log('[JANUS-GUARD] Valid session already exists, skipping init', {
           sessionId,
           isConnected,
           registered,
+          hasDetachedSipcall,
           inactivityMinutes,
           hasIncomingCall,
           hasActiveCall,
@@ -153,6 +161,8 @@ export const WebRTC: FC<WebRTCProps> = ({
           ? 'not connected'
           : !registered
             ? 'not registered'
+            : !hasValidSipcall
+              ? 'sip handle detached or missing'
             : longInactivity
               ? `long inactivity (${inactivityMinutes} min) without active call`
               : 'unknown'
@@ -162,6 +172,7 @@ export const WebRTC: FC<WebRTCProps> = ({
           sessionId,
           isConnected,
           registered,
+          hasDetachedSipcall,
           inactivityMinutes,
           hasIncomingCall,
           hasActiveCall,
