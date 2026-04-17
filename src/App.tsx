@@ -223,6 +223,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     store.dispatch.webrtc.updateWebRTC({
       sipcall: null,
       registered: false,
+      isDetached: true,
       jsepGlobal: null,
     })
     store.dispatch.webrtc.updateRemoteAudioStream(null)
