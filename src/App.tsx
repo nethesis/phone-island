@@ -220,6 +220,16 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
   useEventListener('phone-island-detach', (data) => {
     detach()
+    store.dispatch.webrtc.updateWebRTC({
+      sipcall: null,
+      registered: false,
+      isDetached: true,
+      jsepGlobal: null,
+    })
+    store.dispatch.webrtc.updateRemoteAudioStream(null)
+    store.dispatch.webrtc.updateLocalAudioStream(null)
+    store.dispatch.webrtc.updateLocalVideoStream(null)
+    store.dispatch.webrtc.updateRemoteVideoStream(null)
     eventDispatch('phone-island-detached', {})
   })
 

@@ -109,7 +109,7 @@ export const WebRTC: FC<WebRTCProps> = ({
     }, 30000)
 
     // Prevent multiple Janus session creation
-    const { janusInstance: existingInstance, registered } = store.getState().webrtc
+    const { janusInstance: existingInstance, registered, isDetached } = store.getState().webrtc
 
     // Check if existing session is valid and connected
     let shouldInit = true
@@ -134,11 +134,12 @@ export const WebRTC: FC<WebRTCProps> = ({
       // If session exists AND is connected AND registered, skip init
       // UNLESS there has been long inactivity (>30 min) WITHOUT an active call
       // (we preserve sessions with active calls even after long inactivity)
-      if (isConnected && registered && (!longInactivity || hasAnyCall)) {
+      if (isConnected && registered && !isDetached && (!longInactivity || hasAnyCall)) {
         console.log('[JANUS-GUARD] Valid session already exists, skipping init', {
           sessionId,
           isConnected,
           registered,
+          isDetached,
           inactivityMinutes,
           hasIncomingCall,
           hasActiveCall,
@@ -151,6 +152,8 @@ export const WebRTC: FC<WebRTCProps> = ({
         // Session exists but is dead/disconnected/stale, clean it up and recreate
         const reason = !isConnected
           ? 'not connected'
+          : isDetached
+            ? 'phone island detached'
           : !registered
             ? 'not registered'
             : longInactivity
@@ -162,6 +165,7 @@ export const WebRTC: FC<WebRTCProps> = ({
           sessionId,
           isConnected,
           registered,
+          isDetached,
           inactivityMinutes,
           hasIncomingCall,
           hasActiveCall,
@@ -180,6 +184,7 @@ export const WebRTC: FC<WebRTCProps> = ({
           janusInstance: null,
           sipcall: null,
           registered: false,
+          isDetached: false,
           jsepGlobal: null,
         })
         // Will reset inactivity after successful reload
@@ -377,6 +382,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                         if (!store.getState().webrtc.registered) {
                           store.dispatch.webrtc.updateWebRTC({
                             registered: true,
+                            isDetached: false,
                           })
                         }
                         // Remove WebRTC connections alert if any
@@ -1156,6 +1162,7 @@ export const WebRTC: FC<WebRTCProps> = ({
           janusInstance: null,
           sipcall: null,
           registered: false,
+          isDetached: false,
           jsepGlobal: null, // Also clear stale jsepGlobal
         })
         jsepGlobalTimestamp.current = null // Clear timestamp to match jsepGlobal
@@ -1390,6 +1397,7 @@ export const WebRTC: FC<WebRTCProps> = ({
             janusInstance: null,
             sipcall: null,
             registered: false,
+            isDetached: false,
             jsepGlobal: null,
           })
           jsepGlobalTimestamp.current = null

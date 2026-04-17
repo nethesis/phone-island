@@ -17,6 +17,7 @@ const defaultState = {
   remoteVideoStream: null as MediaStream | null,
   lastActivity: null,
   registered: false,
+  isDetached: false,
   destroyed: false,
   isAnswering: false,
 }
@@ -67,6 +68,7 @@ export interface WebRTCTypes {
   localAudioStream?: null
   lastActivity?: any
   registered?: boolean
+  isDetached?: boolean
   destroyed?: boolean
   isAnswering?: boolean
 }
