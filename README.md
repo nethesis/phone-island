@@ -121,13 +121,13 @@ npm run dev
 
 Open the local page served by Parcel and paste the base64 config token in the left panel.
 
+`npm run dev` generates an ignored local host from `widget-example/index.html` and replaces only the asset loading strategy for the dev session. The public integration page stays unchanged, while the local host imports `src/index.widget.tsx` and `widget-example/index.js` directly so edits in `src/App.tsx` and child components are reflected with live reload.
+
 Example token generation:
 
 ```
 echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>:<sip_host>:<sip_port>" | base64 -w0
 ```
-
-The main component is developed inside a dedicated Parcel host that mounts the exported `PhoneIsland` component directly, so edits in `src/App.tsx` and child components are reflected with live reload.
 
 Tailwind CSS is enable by default.
 

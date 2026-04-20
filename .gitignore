@@ -13,6 +13,7 @@ nethesis-phone-island-*.tgz
 
 # development
 /widget-example/static
+/.dev
 
 # misc
 .DS_Store

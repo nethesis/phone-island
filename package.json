@@ -62,7 +62,7 @@
   },
   "scripts": {
     "start": "npm run dev",
-    "dev": "parcel public/dev.html --port 6006 --open",
+    "dev": "node scripts/generate-dev-host.js && parcel .dev/phone-island-dev.html --port 6006 --open",
     "test": "tsc --noEmit",
     "watch": "rollup -w -c",
     "watch:css": "BROWSERSLIST_IGNORE_OLD_DATA=1 npx tailwindcss -o ./dist/index.css --watch",
