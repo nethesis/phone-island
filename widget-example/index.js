@@ -8,6 +8,30 @@ const DEMO_STORAGE_KEYS = {
     theme: 'phoneIslandDemoTheme'
 };
 
+const DEBUG_STATUS_ACTIONS = [
+    { buttonId: 'debugCallStatus', eventName: 'phone-island-call-status' },
+    { buttonId: 'debugUserStatus', eventName: 'phone-island-user-status' },
+    { buttonId: 'debugAllUsersStatus', eventName: 'phone-island-all-users-status' },
+    { buttonId: 'debugIslandStatus', eventName: 'phone-island-status' },
+    { buttonId: 'debugWebrtcStatus', eventName: 'phone-island-webrtc-status' },
+    { buttonId: 'debugPlayerStatus', eventName: 'phone-island-player-status' },
+    { buttonId: 'debugConferenceStatus', eventName: 'phone-island-conference-status' },
+    { buttonId: 'debugStreamingStatus', eventName: 'phone-island-streaming-status' },
+    { buttonId: 'debugParamUrlStatus', eventName: 'phone-island-paramurl-status' },
+    { buttonId: 'debugQueueStatus', eventName: 'phone-island-queue-status' }
+];
+
+const VIEW_ACTIONS = [
+    { buttonId: 'viewCall', view: 'call' },
+    { buttonId: 'viewSettings', view: 'settings' },
+    { buttonId: 'viewKeypad', view: 'keypad' },
+    { buttonId: 'viewConference', view: 'conference' },
+    { buttonId: 'viewOperatorBusy', view: 'operatorBusy' },
+    { buttonId: 'viewPlayer', view: 'player' },
+    { buttonId: 'viewRecorder', view: 'recorder' },
+    { buttonId: 'viewVideo', view: 'videoView' }
+];
+
 const translations = {
     en: {
         meta: {
@@ -43,6 +67,31 @@ const translations = {
             webrtcDeviceLabel: 'WebRTC Device:',
             attachWebrtc: '🔗 Attach WebRTC',
             detachWebrtc: '🔌 Detach WebRTC',
+            tokenLabel: 'Token:',
+            clickToReveal: 'Click to reveal',
+            clickToHide: 'Click to hide',
+            copyToken: 'Copy token',
+            copyTokenDone: 'Token copied',
+            debugActionsTitle: '🐛 Debug actions',
+            debugCallStatus: '📞 Call Status',
+            debugUserStatus: '👤 User Status',
+            debugAllUsersStatus: '👥 All Users',
+            debugIslandStatus: '🏝️ Island Status',
+            debugWebrtcStatus: '🔗 WebRTC Status',
+            debugPlayerStatus: '🎵 Player Status',
+            debugConferenceStatus: '👥 Conference Status',
+            debugStreamingStatus: '📺 Streaming Status',
+            debugParamUrlStatus: '🔐 Param URL Status',
+            debugQueueStatus: '📋 Queue Status',
+            viewActionsTitle: '🪟 View actions',
+            viewCall: '📞 Call View',
+            viewSettings: '⚙️ Settings View',
+            viewKeypad: '🔢 Keypad View',
+            viewConference: '👥 Conference View',
+            viewOperatorBusy: '🚫 Busy View',
+            viewPlayer: '🎵 Player View',
+            viewRecorder: '🎙️ Recorder View',
+            viewVideo: '📹 Video View',
             audioVideoSettings: '🎧 Audio and Video Settings',
             audioInputLabel: '🎤 Microphone (Audio Input):',
             audioInputPlaceholder: 'Select audio input device...',
@@ -184,6 +233,31 @@ const translations = {
             webrtcDeviceLabel: 'Dispositivo WebRTC:',
             attachWebrtc: '🔗 Collega WebRTC',
             detachWebrtc: '🔌 Scollega WebRTC',
+            tokenLabel: 'Token:',
+            clickToReveal: 'Clicca per mostrare',
+            clickToHide: 'Clicca per nascondere',
+            copyToken: 'Copia token',
+            copyTokenDone: 'Token copiato',
+            debugActionsTitle: '🐛 Azioni debug',
+            debugCallStatus: '📞 Stato call',
+            debugUserStatus: '👤 Stato utente',
+            debugAllUsersStatus: '👥 Stato tutti utenti',
+            debugIslandStatus: '🏝️ Stato island',
+            debugWebrtcStatus: '🔗 Stato WebRTC',
+            debugPlayerStatus: '🎵 Stato player',
+            debugConferenceStatus: '👥 Stato conferenza',
+            debugStreamingStatus: '📺 Stato streaming',
+            debugParamUrlStatus: '🔐 Stato param URL',
+            debugQueueStatus: '📋 Stato queue',
+            viewActionsTitle: '🪟 Azioni vista',
+            viewCall: '📞 Vista call',
+            viewSettings: '⚙️ Vista settings',
+            viewKeypad: '🔢 Vista keypad',
+            viewConference: '👥 Vista conference',
+            viewOperatorBusy: '🚫 Vista busy',
+            viewPlayer: '🎵 Vista player',
+            viewRecorder: '🎙️ Vista recorder',
+            viewVideo: '📹 Vista video',
             audioVideoSettings: '🎧 Impostazioni audio e video',
             audioInputLabel: '🎤 Microfono (ingresso audio):',
             audioInputPlaceholder: 'Seleziona un dispositivo di ingresso audio...',
@@ -299,6 +373,8 @@ let activeEventsReferenceTab = 'incoming';
 let activeEventsReferenceCategory = 'all';
 let eventsReferenceSearch = '';
 let copiedEventsReferenceName = '';
+let isTokenVisible = false;
+let tokenCopyResetTimeout = null;
 
 function createEventReferenceItem(category, name, descriptionEn, descriptionIt, payload = {}, tags = []) {
     return {
@@ -1499,6 +1575,87 @@ function displayUserInfo(tokenData) {
     document.getElementById('userExtension').textContent = tokenData.extension;
     document.getElementById('userServer').textContent = tokenData.server;
     document.getElementById('userInfo').classList.remove('hidden');
+    updateTokenVisibility();
+}
+
+function getStoredTokenValue() {
+    return sessionStorage.getItem('phoneIslandToken') || '';
+}
+
+function updateTokenVisibility(forceVisible) {
+    if (typeof forceVisible === 'boolean') {
+        isTokenVisible = forceVisible;
+    }
+
+    const token = getStoredTokenValue();
+    const tokenValue = document.getElementById('userTokenValue');
+    const revealTokenBtn = document.getElementById('revealTokenBtn');
+    const copyTokenBtn = document.getElementById('copyTokenBtn');
+    const hint = revealTokenBtn ? revealTokenBtn.querySelector('.token-chip__hint') : null;
+
+    if (tokenValue) {
+        tokenValue.textContent = token || '-';
+    }
+
+    if (revealTokenBtn) {
+        revealTokenBtn.classList.toggle('is-hidden', !isTokenVisible);
+        revealTokenBtn.setAttribute('aria-expanded', isTokenVisible ? 'true' : 'false');
+        revealTokenBtn.title = isTokenVisible ? t('main.clickToHide') : t('main.clickToReveal');
+        revealTokenBtn.setAttribute('aria-label', revealTokenBtn.title);
+    }
+
+    if (hint) {
+        hint.textContent = isTokenVisible ? t('main.clickToHide') : t('main.clickToReveal');
+    }
+
+    if (copyTokenBtn) {
+        copyTokenBtn.disabled = !token || !isTokenVisible;
+    }
+}
+
+async function copyStoredToken() {
+    const token = getStoredTokenValue();
+    if (!token) {
+        return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(token);
+        return;
+    }
+
+    const tempTextarea = document.createElement('textarea');
+    tempTextarea.value = token;
+    tempTextarea.setAttribute('readonly', 'readonly');
+    tempTextarea.style.position = 'absolute';
+    tempTextarea.style.left = '-9999px';
+    document.body.appendChild(tempTextarea);
+    tempTextarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempTextarea);
+}
+
+function markTokenCopied() {
+    const copyTokenBtn = document.getElementById('copyTokenBtn');
+    if (!copyTokenBtn) {
+        return;
+    }
+
+    copyTokenBtn.classList.add('is-active');
+    copyTokenBtn.textContent = '✓';
+    copyTokenBtn.title = t('main.copyTokenDone');
+    copyTokenBtn.setAttribute('aria-label', t('main.copyTokenDone'));
+
+    if (tokenCopyResetTimeout) {
+        window.clearTimeout(tokenCopyResetTimeout);
+    }
+
+    tokenCopyResetTimeout = window.setTimeout(() => {
+        copyTokenBtn.classList.remove('is-active');
+        copyTokenBtn.textContent = '⧉';
+        copyTokenBtn.title = t('main.copyToken');
+        copyTokenBtn.setAttribute('aria-label', t('main.copyToken'));
+    }, 1600);
 }
 
 function t(key, replacements = {}) {
@@ -1571,6 +1728,7 @@ function applyTranslations() {
 
     updateAutoScrollButtonText();
     updateStaticStatusTexts();
+    updateTokenVisibility();
     renderEventsReference();
 
     if (transcriptionMessages.length === 0) {
@@ -1954,6 +2112,15 @@ window.addEventListener('phone-island-fullscreen-exited', (event) => {
     updateStatus('🔍 Exited fullscreen mode');
 });
 
+window.addEventListener('phone-island-view-changed', (event) => {
+    const view = event && event.detail ? (event.detail.viewType || event.detail.view || event.detail.selectedView) : '';
+    if (view) {
+        updateStatus(`🪟 View changed to ${view}`);
+    } else {
+        logEvent('🪟 View changed', event.detail);
+    }
+});
+
 // System events
 window.addEventListener('phone-island-main-presence', (event) => {
     const data = event.detail;
@@ -2278,6 +2445,7 @@ function init() {
 
         const tokenData = JSON.parse(storedUserData);
         displayUserInfo(tokenData);
+        updateTokenVisibility(false);
 
         document.getElementById('loginContainer').classList.add('hidden');
         document.getElementById('mainPanel').classList.remove('hidden');
@@ -2324,9 +2492,33 @@ function init() {
             // Clear session storage
             sessionStorage.removeItem('phoneIslandToken');
             sessionStorage.removeItem('phoneIslandUserData');
+            isTokenVisible = false;
 
             // Reload page to show login screen
             window.location.reload();
+        });
+    }
+
+    const revealTokenBtn = document.getElementById('revealTokenBtn');
+    if (revealTokenBtn) {
+        revealTokenBtn.addEventListener('click', () => {
+            updateTokenVisibility(!isTokenVisible);
+        });
+    }
+
+    const copyTokenBtn = document.getElementById('copyTokenBtn');
+    if (copyTokenBtn) {
+        copyTokenBtn.addEventListener('click', async () => {
+            try {
+                await copyStoredToken();
+                markTokenCopied();
+                logEvent('⧉ Token copied to clipboard');
+            } catch (error) {
+                console.warn('Unable to copy token:', error);
+                logEvent('⚠️ Unable to copy token', {
+                    error: error && error.message ? error.message : String(error)
+                });
+            }
         });
     }
 
@@ -2483,6 +2675,28 @@ function init() {
             dispatchPhoneIslandEvent('phone-island-status');
         });
     }
+
+    DEBUG_STATUS_ACTIONS.forEach(({ buttonId, eventName }) => {
+        const button = document.getElementById(buttonId);
+        if (!button) {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            dispatchPhoneIslandEvent(eventName);
+        });
+    });
+
+    VIEW_ACTIONS.forEach(({ buttonId, view }) => {
+        const button = document.getElementById(buttonId);
+        if (!button) {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            dispatchPhoneIslandEvent('phone-island-view-changed', { viewType: view });
+        });
+    });
 
     // Transcription window controls
     const openTranscription = document.getElementById('openTranscription');

@@ -1,4 +1,11 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useSyncExternalStore,
+} from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
@@ -294,8 +301,21 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
   const [firstRender, setFirstRender] = useState(true)
   const [firstAudioOutputInit, setFirstAudioOutputInit] = useState(true)
+  const [paramUrlInitialized, setParamUrlInitialized] = useState(false)
+  const fetchReady = useSyncExternalStore(
+    store.subscribe,
+    () => store.getState().fetchDefaults.fetchReady || false,
+  )
 
   // Initialize application on first render
+  useEffect(() => {
+    if (firstRender) {
+      // Initialize i18n
+      initI18n()
+      setFirstRender(false)
+    }
+  }, [firstRender])
+
   useEffect(() => {
     const initParamUrl = async () => {
       try {
@@ -303,14 +323,13 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
         const url = paramUrlResponse?.url || ''
         const isValid = url && url.trim() !== ''
 
-        // Save data inside the store
         store.dispatch.paramUrl.setParamUrl({
-          url: url,
+          url,
           onlyQueues: paramUrlResponse?.only_queues || false,
           hasValidUrl: isValid,
         })
       } catch (error) {
-        console.error('Error fetching URL parameter:', error)
+        console.warn('Non-blocking param URL fetch failed:', error)
         store.dispatch.paramUrl.setParamUrl({
           url: '',
           onlyQueues: false,
@@ -319,14 +338,13 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       }
     }
 
-    if (firstRender) {
-      // Initialize i18n
-      initI18n()
-      // Initialize param URL
-      initParamUrl()
-      setFirstRender(false)
+    if (!fetchReady || paramUrlInitialized) {
+      return
     }
-  }, [firstRender])
+
+    setParamUrlInitialized(true)
+    initParamUrl()
+  }, [fetchReady, paramUrlInitialized])
 
   // Helper function to check if an audio output device is available
   const isAudioOutputDeviceAvailable = async (deviceId: string): Promise<boolean> => {
@@ -973,7 +991,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
             linkedid: callId,
           })
         } else {
-          console.error('[Summary Check] Error checking summary:', error)
+          console.warn('[Summary Check] Non-blocking summary check failed:', error)
         }
       }
     },
@@ -992,7 +1010,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
           // Dispatch event to confirm the watch request was sent
           eventDispatch('phone-island-summary-call-notified', { linkedid: callId })
         } catch (error) {
-          console.error('Error watching summary call:', error)
+          console.warn('[Summary Check] Non-blocking summary watch failed:', error)
         }
       }
     },
