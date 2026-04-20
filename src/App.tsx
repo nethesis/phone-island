@@ -981,7 +981,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
             linkedid: callId,
           })
         } else {
-          console.error('[Summary Check] Error checking summary:', error)
+          console.warn('[Summary Check] Non-blocking summary check failed:', error)
         }
       }
     },
@@ -1000,7 +1000,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
           // Dispatch event to confirm the watch request was sent
           eventDispatch('phone-island-summary-call-notified', { linkedid: callId })
         } catch (error) {
-          console.error('Error watching summary call:', error)
+          console.warn('[Summary Check] Non-blocking summary watch failed:', error)
         }
       }
     },
