@@ -61,6 +61,8 @@ const Hangup: FC<HangupProps> = ({
   }
 
   const { t } = useTranslation()
+  const showSecondaryControls = (isOpen && accepted) || (view === 'waitingConference' && isOpen)
+  const useCompactLayout = !transferring
 
   // Helper function to determine tooltip content
   const getToggleTooltipContent = () => {
@@ -92,12 +94,14 @@ const Hangup: FC<HangupProps> = ({
         <motion.div
           className={`${transferring && description
             ? 'pi-grid pi-grid-cols-4 pi-ml-4 pi-justify-start'
-            : 'pi-flex pi-w-12'
+            : useCompactLayout && showSecondaryControls
+              ? 'pi-relative pi-flex pi-h-12 pi-w-64 pi-items-center pi-justify-center pi-overflow-hidden'
+              : 'pi-flex pi-w-12 pi-items-center pi-justify-center'
             } `}
         >
           {/* collapse phone island button */}
-          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && !showFullscreenButton && (
-            <div className='pi-grid pi-grid-cols-1'>
+          {showSecondaryControls && !showFullscreenButton && (
+            <div className={useCompactLayout ? 'pi-absolute pi-left-0 pi-top-0 pi-grid pi-grid-cols-1' : 'pi-grid pi-grid-cols-1'}>
               <Button
                 variant={buttonsVariant}
                 onClick={() => dispatch.island.handleToggleIsOpen()}
@@ -105,7 +109,6 @@ const Hangup: FC<HangupProps> = ({
                 data-tooltip-content={
                   isOpen ? t('Tooltip.Collapse') || '' : t('Tooltip.Open') || ''
                 }
-                className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon icon={faDownLeftAndUpRightToCenter} className='pi-w-6 pi-h-6' />
               </Button>
@@ -113,14 +116,13 @@ const Hangup: FC<HangupProps> = ({
           )}
 
           {/* expand/compress button for streaming */}
-          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && showFullscreenButton && (
-            <div className='pi-grid pi-grid-cols-1'>
+          {showSecondaryControls && showFullscreenButton && (
+            <div className={useCompactLayout ? 'pi-absolute pi-left-0 pi-top-0 pi-grid pi-grid-cols-1' : 'pi-grid pi-grid-cols-1'}>
               <Button
                 variant={buttonsVariant}
                 onClick={onToggleExtraLarge}
                 data-tooltip-id='tooltip-toggle-fullscreen-hangup'
                 data-tooltip-content={getToggleTooltipContent()}
-                className={`${transferring && description ? '' : 'pi--ml-28'}`}
               >
                 <FontAwesomeIcon
                   className='pi-h-6 pi-w-6'
@@ -155,7 +157,9 @@ const Hangup: FC<HangupProps> = ({
             variant='red'
             className={`${transferring && description
               ? 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full pi-col-span-2'
-              : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
+              : useCompactLayout && showSecondaryControls
+                ? 'pi-relative pi-z-10 pi-gap-4 pi-font-medium pi-text-base pi-transition pi-h-12 pi-w-12 pi-min-w-12 pi-overflow-hidden'
+                : 'pi-gap-4 pi-font-medium pi-text-base pi-transition pi-min-w-12 pi-w-full'
               }`}
             data-tooltip-id={
               (description && transferring) || (view === 'waitingConference' && isActive)
@@ -180,13 +184,17 @@ const Hangup: FC<HangupProps> = ({
               </motion.div>
             )}
           </Button>
-          {((isOpen && accepted) || (view === 'waitingConference' && isOpen)) && (
+          {showSecondaryControls && (
             <Button
               variant={buttonsVariant}
               onClick={() => closeSideViewOpenSettings()}
               data-tooltip-id='tooltip-settings-view'
               data-tooltip-content={t('Tooltip.Go to settings') || ''}
-              className={`${transferring && description ? 'pi-ml-5' : 'pi-justify-end pi-ml-16'
+              className={`${transferring && description
+                ? 'pi-ml-5'
+                : useCompactLayout
+                  ? 'pi-absolute pi-right-0 pi-top-0 pi-justify-end'
+                  : 'pi-justify-end pi-ml-16'
                 } pi-flex pi-items-center`}
             >
               <FontAwesomeIcon icon={faGear} className={`pi-h-6 pi-w-6`} />
