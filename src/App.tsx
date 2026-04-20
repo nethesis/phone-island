@@ -21,7 +21,14 @@ if (typeof window !== 'undefined' && window.location.hostname.includes('.support
   }
 }
 
-import { useEventListener, eventDispatch, setJSONItem, getJSONItem } from './utils'
+import {
+  useEventListener,
+  eventDispatch,
+  setJSONItem,
+  getJSONItem,
+  dispatchSummaryReady,
+  dispatchSummaryNotReady,
+} from './utils'
 import { detach } from './lib/webrtc/messages'
 import { checkDarkTheme, setTheme } from './lib/darkTheme'
 import { changeOperatorStatus } from './services/user'
@@ -75,6 +82,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     const lastReloadTime = useRef<number>(0)
     const RELOAD_COOLDOWN = 10 * 1000 // 10 seconds between reload attempts
     const activeTranscriptionUniqueIdRef = useRef<string | null>(null)
+    const activeTranscriptionLinkedIdRef = useRef<string | null>(null)
 
     // Expose reset method via imperativeHandle
     useImperativeHandle(
@@ -621,8 +629,8 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     checkDarkTheme()
   }, [])
 
-  useEventListener('phone-island-theme-change', (theme: any) => {
-    setTheme(theme?.selectedTheme)
+  useEventListener('phone-island-theme-change', (data: any) => {
+    setTheme(data?.selectedTheme)
   })
 
   useEventListener('phone-island-default-device-change', (data) => {
@@ -630,8 +638,8 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     eventDispatch('phone-island-default-device-changed', {})
   })
 
-  useEventListener('phone-island-alert', (alertType: any) => {
-    store.dispatch.alerts.setAlert(alertType.toString())
+  useEventListener('phone-island-alert', (data: any) => {
+    store.dispatch.alerts.setAlert(data.toString())
   })
 
   // Ringtone management events
@@ -893,24 +901,27 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
   useEventListener('phone-island-transcription-close', () => {
     store.dispatch.island.toggleTranscriptionViewVisible(false)
-    if (activeTranscriptionUniqueIdRef.current) {
+    if (activeTranscriptionUniqueIdRef.current || activeTranscriptionLinkedIdRef.current) {
       eventDispatch('phone-island-stop-transcription', {
         uniqueid: activeTranscriptionUniqueIdRef.current,
-        linkedid: activeTranscriptionUniqueIdRef.current,
+        linkedid: activeTranscriptionLinkedIdRef.current,
       })
       activeTranscriptionUniqueIdRef.current = null
+      activeTranscriptionLinkedIdRef.current = null
     }
     eventDispatch('phone-island-transcription-closed', {})
   })
 
-  useEventListener('phone-island-transcription-open', (args: any) => {
-    const uniqueid = args?.linkedid || args?.uniqueid || null
-    if (!uniqueid) {
+  useEventListener('phone-island-transcription-open', (data: { linkedid?: string; uniqueid?: string }) => {
+    const linkedid = data?.linkedid
+    const uniqueid = data?.uniqueid
+    if (!linkedid && !uniqueid) {
       return
     }
-    activeTranscriptionUniqueIdRef.current = uniqueid
+    activeTranscriptionLinkedIdRef.current = linkedid || null
+    activeTranscriptionUniqueIdRef.current = uniqueid || null
     eventDispatch('phone-island-start-transcription', {
-      linkedid: uniqueid,
+      linkedid,
       uniqueid,
     })
     store.dispatch.island.toggleTranscriptionViewVisible(true)
@@ -957,10 +968,16 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   // Check if call summary/transcription exists
   useEventListener(
     'phone-island-summary-call-check',
-    async (data: { linkedid?: string; uniqueid?: string; uniqueId?: string }) => {
-      const callId = data?.linkedid || data?.uniqueid || data?.uniqueId
-      if (!callId) {
+    async (data: { linkedid?: string; uniqueid?: string; linkedId?: string; uniqueId?: string }) => {
+      const linkedid = data?.linkedid || data?.linkedId
+      const uniqueid = data?.uniqueid || data?.uniqueId
+      if (!linkedid) {
         console.warn('[Summary Check] No call identifier provided')
+        return
+      }
+
+      if (!uniqueid) {
+        console.warn('[Summary Check] No unique identifier provided')
         return
       }
 
@@ -979,16 +996,20 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
       try {
         const { checkSummaryCall } = await import('./services/user')
-        await checkSummaryCall(callId)
-        eventDispatch('phone-island-summary-ready', {
-          linkedid: callId,
+        await checkSummaryCall(uniqueid, linkedid)
+        dispatchSummaryReady({
+          linkedid,
+          uniqueid,
+          source: 'check',
         })
       } catch (error: any) {
         // 204 means summary not present yet - not an error, just not ready
         if (error?.status === 204) {
-          console.log(`[Summary Check] Summary not ready for ${callId}`)
-          eventDispatch('phone-island-summary-not-ready', {
-            linkedid: callId,
+          console.log(`[Summary Check] Summary not ready for ${linkedid}`)
+          dispatchSummaryNotReady({
+            linkedid,
+            uniqueid,
+            source: 'check',
           })
         } else {
           console.warn('[Summary Check] Non-blocking summary check failed:', error)
@@ -1000,28 +1021,40 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   // Watch for call summary/transcription notifications
   useEventListener(
     'phone-island-call-summary-notify',
-    async (data: { linkedid?: string; uniqueid?: string; uniqueId?: string }) => {
-      const callId = data?.linkedid || data?.uniqueid || data?.uniqueId
-      if (callId) {
-        try {
-          const { watchSummaryCall } = await import('./services/user')
-          await watchSummaryCall(callId)
+    async (data: { linkedid?: string; uniqueid?: string }) => {
+      const linkedid = data?.linkedid
+      const uniqueid = data?.uniqueid
 
-          // Dispatch event to confirm the watch request was sent
-          eventDispatch('phone-island-summary-call-notified', { linkedid: callId })
-        } catch (error) {
-          console.warn('[Summary Check] Non-blocking summary watch failed:', error)
-        }
+      if (!linkedid) {
+        console.warn('[Summary Notify] No call identifier provided')
+        return
+      }
+
+      if (!uniqueid) {
+        console.warn('[Summary Notify] No unique identifier provided')
+        return
+      }
+
+      try {
+        const { watchSummaryCall } = await import('./services/user')
+        await watchSummaryCall(linkedid, uniqueid)
+
+        eventDispatch('phone-island-summary-call-notified', {
+          linkedid,
+          uniqueid,
+        })
+      } catch (error) {
+        console.warn('[Summary Check] Non-blocking summary watch failed:', error)
       }
     },
   )
 
-  useEventListener('phone-island-size-change', (args: any) => {
+  useEventListener('phone-island-size-change', (data: any) => {
     const { sideViewIsVisible, transcriptionViewIsVisible, actionsExpanded } =
       store.getState().island
 
-    // Get current dimensions from args
-    const { sizeInformation } = args
+    // Get current dimensions from data
+    const { sizeInformation } = data
 
     // // Calculate extra row dimension ( side view and back call )
     const updatedSizeInformation = {
@@ -1058,7 +1091,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     eventDispatch('phone-island-conference-list-opened', {})
   })
 
-  useEventListener('phone-island-alert-removed', (alertRemovedType) => {
+  useEventListener('phone-island-alert-removed', (data) => {
     // Get current alerts status
     const { activeAlertsCount } = store.getState().alerts.status
     const { view, previousView } = store.getState().island
@@ -1068,7 +1101,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
     const { incoming, outgoing, accepted } = currentCall
 
     // Check if alert type was provided
-    const alertType = alertRemovedType?.type
+    const alertType = data?.type
 
     // Check if user is in a call
     const isInCall =

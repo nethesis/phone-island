@@ -922,10 +922,12 @@ const eventReferenceData = {
         createEventReferenceItem('recording', 'phone-island-physical-recording-view', 'Open the physical device recording flow.', 'Apre il flusso di registrazione del dispositivo fisico.', {}, ['recording', 'physical']),
         createEventReferenceItem('recording', 'phone-island-physical-recording-open', 'Start physical device recording.', 'Avvia la registrazione del dispositivo fisico.', {}, ['recording', 'physical']),
         createEventReferenceItem('summary', 'phone-island-summary-call-check', 'Check if a summary or transcription already exists for the given linked call id.', 'Controlla se esiste già un summary o una trascrizione per il linkedid indicato.', {
-            linkedid: '1769179547.799'
+            linkedid: '1769179547.799',
+            uniqueid: '1769179547.8001'
         }, ['transcription', 'summary']),
         createEventReferenceItem('summary', 'phone-island-call-summary-notify', 'Register interest in being notified when a summary becomes ready.', 'Registra l’interesse a ricevere una notifica quando il summary sarà pronto.', {
-            linkedid: '1769179547.799'
+            linkedid: '1769179547.799',
+            uniqueid: '1769179547.8001'
         }, ['transcription', 'summary', 'watch']),
         createEventReferenceItem('player', 'phone-island-audio-player-start', 'Open the audio player and play a file.', 'Apre il player audio e riproduce un file.', {
             base64_audio_file: 'UklGRiQAAABXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YYIAAAAAA==',
@@ -1148,13 +1150,16 @@ const eventReferenceData = {
             is_final: true
         }, ['transcription', 'user']),
         createEventReferenceItem('summary', 'phone-island-summary-not-ready', 'Summary is not available yet for the requested linked call id.', 'Il summary non è ancora disponibile per il linkedid richiesto.', {
-            linkedid: '1769179547.799'
+            linkedid: '1769179547.799',
+            uniqueid: '1769179547.8001'
         }, ['summary', 'transcription']),
         createEventReferenceItem('summary', 'phone-island-summary-call-notified', 'Summary watch request has been registered.', 'La richiesta di watch per il summary è stata registrata.', {
-            linkedid: '1769179547.799'
+            linkedid: '1769179547.799',
+            uniqueid: '1769179547.8001'
         }, ['summary', 'transcription']),
         createEventReferenceItem('summary', 'phone-island-summary-ready', 'Summary is ready and available to the host application.', 'Il summary è pronto e disponibile per l’applicazione host.', {
             linkedid: '1769185498.1004',
+            uniqueid: '1769185498.1005',
             display_name: 'Mario Rossi',
             display_number: '+39021234567'
         }, ['summary', 'transcription'])

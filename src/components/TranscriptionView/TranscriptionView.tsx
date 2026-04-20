@@ -347,8 +347,8 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   }, [isVisible])
 
   // Listen for transcription events
-  useEventListener('phone-island-conversation-transcription', (transcriptionData: any) => {
-    addTranscriptionMessage(transcriptionData)
+  useEventListener('phone-island-conversation-transcription', (data: any) => {
+    addTranscriptionMessage(data)
   })
 
   useEventListener('phone-island-transcription-opened', () => {

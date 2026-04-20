@@ -25,7 +25,7 @@ import {
   dispatchVideoCallStarted,
 } from '../events'
 import { store } from '../store'
-import { eventDispatch, useEventListener, withTimeout } from '../utils'
+import { dispatchSummaryReady, eventDispatch, useEventListener, withTimeout } from '../utils'
 import type {
   ConversationTypes,
   ExtensionTypes,
@@ -77,29 +77,31 @@ export const Socket: FC<SocketProps> = ({
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
   // Event listener for starting transcription
-  useEventListener('phone-island-start-transcription', (args: any) => {
+  useEventListener('phone-island-start-transcription', (data: any) => {
     if (socket.current) {
-      const linkedid = args?.linkedid || args?.uniqueid || null
-      if (!linkedid) {
+      const linkedid = data?.linkedid || data?.linkedId
+      const uniqueid = data?.uniqueid || data?.uniqueId
+      if (!linkedid && !uniqueid) {
         return
       }
       socket.current.emit('start_transcription', {
         linkedid,
-        uniqueid: args?.uniqueid || linkedid,
+        uniqueid,
       })
     }
   })
 
   // Event listener for stopping transcription
-  useEventListener('phone-island-stop-transcription', (args: any) => {
+  useEventListener('phone-island-stop-transcription', (data: any) => {
     if (socket.current) {
-      const linkedid = args?.linkedid || args?.uniqueid || null
-      if (!linkedid) {
+      const linkedid = data?.linkedid || data?.linkedId
+      const uniqueid = data?.uniqueid || data?.uniqueId
+      if (!linkedid && !uniqueid) {
         return
       }
       socket.current.emit('stop_transcription', {
         linkedid,
-        uniqueid: args?.uniqueid || linkedid,
+        uniqueid,
       })
     }
   })
@@ -743,14 +745,13 @@ export const Socket: FC<SocketProps> = ({
 
         // Get linkedId from conversations
         const { conversations } = store.getState().currentUser
-        let linkedid: any = undefined
-        let conversationWasConnected = false
+
+        let selectedConversation: any = null
 
         if (res.callerNum && conversations[res.callerNum]) {
           const extensionConversations = conversations[res.callerNum]
           const conversationKeys = Object.keys(extensionConversations)
           if (conversationKeys.length > 0) {
-            let selectedConversation: any = null
             for (const key of conversationKeys) {
               const currentConversation = extensionConversations?.[key]
               if (!currentConversation) continue
@@ -777,14 +778,16 @@ export const Socket: FC<SocketProps> = ({
                 selectedConversation = currentConversation
               }
             }
-
-            linkedid = selectedConversation?.linkedId
-            conversationWasConnected = selectedConversation?.connected || false
           }
         }
-        // Check summary/transcription only for calls that were actually answered.
-        if (linkedid && conversationWasConnected) {
-          eventDispatch('phone-island-summary-call-check', { linkedid })
+
+        // Check summary/transcription only for answered calls with a valid uniqueid.
+        const linkedId = selectedConversation?.linkedId
+        const uniqueId = selectedConversation?.uniqueId
+        const conversationWasConnected = selectedConversation?.connected || false
+
+        if (uniqueId && linkedId && conversationWasConnected) {
+          eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
         }
 
         // If cause is normal_clearing and extension is physical or mobile
@@ -1096,11 +1099,16 @@ export const Socket: FC<SocketProps> = ({
 
       // `satellite/summary` is the socket event when summary is ready
       socket.current.on('satellite/summary', (data: any) => {
-        if (data?.uniqueid) {
-          eventDispatch('phone-island-summary-ready', {
-            linkedid: data?.uniqueid,
+        const uniqueid = data?.uniqueid || data?.uniqueId
+        const linkedid = data?.linkedid || data?.linkedId
+
+        if (uniqueid) {
+          dispatchSummaryReady({
+            linkedid,
+            uniqueid,
             display_name: data?.display_name,
             display_number: data?.display_number,
+            source: 'socket',
           })
         }
       })
