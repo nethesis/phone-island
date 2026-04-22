@@ -39,12 +39,19 @@ import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
+import { dispatchVideoCallStarted } from '../../events'
 
 export interface VideoViewProps {}
 
 export type ScreenSharingMessage = {
   message: 'screenSharingStart' | 'screenSharingStop'
   roomId: string
+  destUser: string
+  callUser: string
+}
+
+export type VideoCallMessage = {
+  message: 'videoCallStart'
   destUser: string
   callUser: string
 }
@@ -87,6 +94,22 @@ export const VideoView: FC<VideoViewProps> = () => {
   const smallRemoteVideo = useRef<HTMLVideoElement>(null)
   const janus = useRef<JanusTypes>(JanusLib)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
+
+  const notifyPeerVideoStart = () => {
+    const { socket } = store.getState().websocket
+    const { username: destUser } = store.getState().currentCall
+    const { username: callUser } = store.getState().currentUser
+
+    if (!socket || !destUser || !callUser) {
+      return
+    }
+
+    socket.emit('message', {
+      message: 'videoCallStart',
+      destUser,
+      callUser,
+    } as VideoCallMessage)
+  }
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
@@ -408,6 +431,12 @@ export const VideoView: FC<VideoViewProps> = () => {
       tracks: tracks,
       success: function (jsep) {
         sipcall.send({ message: { request: 'update' }, jsep: jsep })
+        notifyPeerVideoStart()
+        dispatchVideoCallStarted({
+          initiator: 'local',
+          callUser: store.getState().currentUser.username,
+          destUser: store.getState().currentCall.username,
+        })
         eventDispatch('phone-island-video-enabled', {})
       },
       error: function (error) {

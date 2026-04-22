@@ -22,6 +22,7 @@ import {
   dispatchExtensions,
   dispatchUrlCall,
   dispatchDefaultDeviceUpdate,
+  dispatchVideoCallStarted,
 } from '../events'
 import { store } from '../store'
 import { eventDispatch, useEventListener, withTimeout } from '../utils'
@@ -37,7 +38,7 @@ import { getTimestampInSeconds } from '../utils/genericFunctions/timestamp'
 import { userTotallyFree } from '../lib/user/extensions'
 import { isEmpty } from '../utils/genericFunctions/isEmpty'
 import { isPhysical } from '../lib/user/default_device'
-import { ScreenSharingMessage } from './VideoView'
+import { ScreenSharingMessage, VideoCallMessage } from './VideoView'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
@@ -1106,6 +1107,13 @@ export const Socket: FC<SocketProps> = ({
 
       socket.current.on('message', (data: any) => {
         switch (data.message) {
+          case 'videoCallStart':
+            dispatchVideoCallStarted({
+              initiator: 'remote',
+              callUser: (data as VideoCallMessage).callUser,
+              destUser: (data as VideoCallMessage).destUser,
+            })
+            break
           case 'screenSharingStart':
             dispatch.island.toggleSideViewVisible(false)
             dispatch.island.toggleTranscriptionViewVisible(false)
