@@ -5,8 +5,14 @@
 
 const DEMO_STORAGE_KEYS = {
     language: 'phoneIslandDemoLanguage',
-    theme: 'phoneIslandDemoTheme'
+    theme: 'phoneIslandDemoTheme',
+    toastPreferences: 'phoneIslandToastPreferences',
+    collapsibleSections: 'phoneIslandCollapsedSections',
+    debugMode: 'phoneIslandDemoDebugMode'
 };
+
+const PACKAGE_JSON_VERSION_PATHS = ['../package.json', './package.json', '/package.json'];
+const GITHUB_TAGS_API_URL = 'https://api.github.com/repos/nethesis/phone-island/tags?per_page=1';
 
 const DEBUG_STATUS_ACTIONS = [
     { buttonId: 'debugCallStatus', eventName: 'phone-island-call-status' },
@@ -133,6 +139,25 @@ const translations = {
             eventLogCleared: '📡 Event Log cleared - waiting for new events...',
             searchLogsPlaceholder: 'Search in logs...',
             eventLogEmpty: '📡 Event Log (real-time events will appear here)...',
+            toastManagerTitle: '🔔 Toast Manager',
+            toastManagerDescription: 'Choose which Phone Island events should generate a toast in this demo. By default the incoming video-call-started event is enabled.',
+            toastManagerEnabled: 'Enable toasts',
+            selectAllToastEvents: '✅ All Toasts',
+            selectNoneToastEvents: '❌ No Toasts',
+            defaultToastEvents: '🎯 Video Default',
+            resetDemoLayout: '♻️ Reset Demo Layout',
+            usefulLinksTitle: 'Useful links',
+            debugModeLabel: 'Show advanced panels',
+            toastSearchPlaceholder: 'Search toast events...',
+            toastActiveCount: '{{count}} toast event selected',
+            toastActiveCountPlural: '{{count}} toast events selected',
+            versionLabel: 'Version',
+            versionSourceLoading: 'loading source',
+            versionSourcePackageJson: 'package.json',
+            versionSourceGithubTag: 'GitHub tag',
+            versionSourceUnavailable: 'source unavailable',
+            npmLinkLabel: 'npm package',
+            readmeLinkLabel: 'README',
             currentUserInfo: '👤 Current User Information (/me)',
             refresh: '🔄 Refresh',
             refreshPrompt: 'Click "Refresh" to load user information...'
@@ -299,6 +324,25 @@ const translations = {
             eventLogCleared: '📡 Log eventi svuotato - in attesa di nuovi eventi...',
             searchLogsPlaceholder: 'Cerca nei log...',
             eventLogEmpty: '📡 Log eventi (gli eventi in tempo reale compariranno qui)...',
+            toastManagerTitle: '🔔 Gestore toast',
+            toastManagerDescription: 'Scegli quali eventi di Phone Island devono generare una toast notification in questo demo. Di default è attivo l’evento di avvio videochiamata.',
+            toastManagerEnabled: 'Abilita toast',
+            selectAllToastEvents: '✅ Tutte le toast',
+            selectNoneToastEvents: '❌ Nessuna toast',
+            defaultToastEvents: '🎯 Default video',
+            resetDemoLayout: '♻️ Reset layout demo',
+            usefulLinksTitle: 'Link utili',
+            debugModeLabel: 'Mostra pannelli avanzati',
+            toastSearchPlaceholder: 'Cerca eventi toast...',
+            toastActiveCount: '{{count}} evento toast selezionato',
+            toastActiveCountPlural: '{{count}} eventi toast selezionati',
+            versionLabel: 'Versione',
+            versionSourceLoading: 'caricamento sorgente',
+            versionSourcePackageJson: 'package.json',
+            versionSourceGithubTag: 'tag GitHub',
+            versionSourceUnavailable: 'sorgente non disponibile',
+            npmLinkLabel: 'pacchetto npm',
+            readmeLinkLabel: 'README',
             currentUserInfo: '👤 Informazioni utente correnti (/me)',
             refresh: '🔄 Aggiorna',
             refreshPrompt: 'Clicca su "Aggiorna" per caricare le informazioni utente...'
@@ -369,12 +413,135 @@ const translations = {
 
 let currentLanguage = localStorage.getItem(DEMO_STORAGE_KEYS.language) === 'it' ? 'it' : 'en';
 let currentTheme = localStorage.getItem(DEMO_STORAGE_KEYS.theme) === 'dark' ? 'dark' : 'light';
+let currentDebugMode = localStorage.getItem(DEMO_STORAGE_KEYS.debugMode) === 'minimal' ? 'minimal' : 'full';
 let activeEventsReferenceTab = 'incoming';
 let activeEventsReferenceCategory = 'all';
 let eventsReferenceSearch = '';
 let copiedEventsReferenceName = '';
 let isTokenVisible = false;
 let tokenCopyResetTimeout = null;
+let currentVersionInfo = {
+    version: null,
+    source: 'loading'
+};
+
+function normalizeVersion(version) {
+    return String(version || '').trim().replace(/^v/i, '');
+}
+
+async function fetchJSON(url) {
+    const response = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+            Accept: 'application/json, application/vnd.github+json'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Unable to fetch ${url}: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+async function resolvePhoneIslandVersion() {
+    for (const candidate of PACKAGE_JSON_VERSION_PATHS) {
+        try {
+            const packageJson = await fetchJSON(candidate);
+            if (packageJson?.version) {
+                return {
+                    version: normalizeVersion(packageJson.version),
+                    source: 'packageJson'
+                };
+            }
+        } catch (error) {
+            console.debug('Version lookup from package.json failed:', candidate, error);
+        }
+    }
+
+    try {
+        const tags = await fetchJSON(GITHUB_TAGS_API_URL);
+        if (Array.isArray(tags) && tags[0]?.name) {
+            return {
+                version: normalizeVersion(tags[0].name),
+                source: 'githubTag'
+            };
+        }
+    } catch (error) {
+        console.debug('Version lookup from GitHub tags failed:', error);
+    }
+
+    return null;
+}
+
+function renderPhoneIslandVersion() {
+    const versionElement = document.getElementById('phoneIslandVersion');
+    const versionSourceElement = document.getElementById('phoneIslandVersionSource');
+
+    if (!versionElement || !versionSourceElement) {
+        return;
+    }
+
+    versionElement.textContent = currentVersionInfo.version || '--';
+
+    if (currentVersionInfo.source === 'packageJson') {
+        versionSourceElement.textContent = t('main.versionSourcePackageJson');
+        return;
+    }
+
+    if (currentVersionInfo.source === 'githubTag') {
+        versionSourceElement.textContent = t('main.versionSourceGithubTag');
+        return;
+    }
+
+    if (currentVersionInfo.source === 'unavailable') {
+        versionSourceElement.textContent = t('main.versionSourceUnavailable');
+        return;
+    }
+
+    versionSourceElement.textContent = t('main.versionSourceLoading');
+}
+
+async function updatePhoneIslandVersion() {
+    const resolvedVersion = await resolvePhoneIslandVersion();
+    currentVersionInfo = resolvedVersion || {
+        version: null,
+        source: 'unavailable'
+    };
+    renderPhoneIslandVersion();
+}
+
+function applyDebugMode(mode, persist = true) {
+    currentDebugMode = mode === 'minimal' ? 'minimal' : 'full';
+    document.body.dataset.debugMode = currentDebugMode;
+
+    const debugToggle = document.getElementById('debugModeToggle');
+    if (debugToggle) {
+        debugToggle.checked = currentDebugMode === 'full';
+    }
+
+    if (persist) {
+        localStorage.setItem(DEMO_STORAGE_KEYS.debugMode, currentDebugMode);
+    }
+}
+
+function initializeDebugModeToggle() {
+    const debugToggle = document.getElementById('debugModeToggle');
+    if (!debugToggle) {
+        return;
+    }
+
+    applyDebugMode(currentDebugMode, false);
+
+    if (debugToggle.dataset.bound === 'true') {
+        return;
+    }
+
+    debugToggle.dataset.bound = 'true';
+    debugToggle.addEventListener('change', (event) => {
+        applyDebugMode(event.target.checked ? 'full' : 'minimal');
+    });
+}
 
 function createEventReferenceItem(category, name, descriptionEn, descriptionIt, payload = {}, tags = []) {
     return {
@@ -624,6 +791,11 @@ const eventReferenceData = {
         createEventReferenceItem('player', 'phone-island-emergency-stop-ringtone-completed', 'The emergency ringtone stop completed successfully.', 'L’arresto di emergenza della suoneria è stato completato con successo.', {}, ['audio', 'ringtone']),
         createEventReferenceItem('video', 'phone-island-fullscreen-entered', 'Phone Island entered fullscreen mode.', 'Phone Island è entrato in modalità schermo intero.', {}, ['ui']),
         createEventReferenceItem('video', 'phone-island-fullscreen-exited', 'Phone Island exited fullscreen mode.', 'Phone Island è uscito dalla modalità schermo intero.', {}, ['ui']),
+        createEventReferenceItem('video', 'phone-island-video-call-started', 'Video call start has been signaled by one party.', 'L’avvio della videochiamata è stato segnalato da una delle due parti.', {
+            initiator: 'remote',
+            callUser: 'andrea',
+            destUser: 'antonio'
+        }, ['camera', 'call', 'video']),
         createEventReferenceItem('video', 'phone-island-video-enabled', 'Video has been enabled during the current call.', 'Il video è stato abilitato durante la chiamata corrente.', {}, ['camera']),
         createEventReferenceItem('video', 'phone-island-video-disabled', 'Video has been disabled during the current call.', 'Il video è stato disabilitato durante la chiamata corrente.', {}, ['camera']),
         createEventReferenceItem('video', 'phone-island-screen-share-started', 'Screen sharing has started.', 'La condivisione schermo è iniziata.', {}, ['screen', 'share']),
@@ -834,6 +1006,412 @@ const eventCategories = {
 
 // Active filters - loaded from localStorage or defaults
 let activeFilters = { ...defaultFilters };
+let toastEventSearch = '';
+let collapsibleSectionState = {};
+
+const defaultToastEventNames = ['phone-island-video-call-started'];
+let toastPreferences = createDefaultToastPreferences();
+let toastListenersRegistered = false;
+
+function getToastEventCatalog() {
+    const uniqueEvents = new Map();
+
+    eventReferenceData.outgoing.forEach((eventItem) => {
+        if (eventItem?.name && !uniqueEvents.has(eventItem.name)) {
+            uniqueEvents.set(eventItem.name, eventItem);
+        }
+    });
+
+    return Array.from(uniqueEvents.values());
+}
+
+function createDefaultToastPreferences() {
+    const events = {};
+
+    getToastEventCatalog().forEach((eventItem) => {
+        events[eventItem.name] = defaultToastEventNames.includes(eventItem.name);
+    });
+
+    return {
+        enabled: true,
+        events,
+    };
+}
+
+function loadToastPreferences() {
+    const defaults = createDefaultToastPreferences();
+
+    try {
+        const stored = localStorage.getItem(DEMO_STORAGE_KEYS.toastPreferences);
+        if (!stored) {
+            toastPreferences = defaults;
+            return;
+        }
+
+        const parsed = JSON.parse(stored);
+        toastPreferences = {
+            enabled: parsed?.enabled !== false,
+            events: {
+                ...defaults.events,
+                ...(parsed?.events || {}),
+            },
+        };
+    } catch (error) {
+        console.error('Error loading toast preferences:', error);
+        toastPreferences = defaults;
+    }
+}
+
+function saveToastPreferences() {
+    try {
+        localStorage.setItem(DEMO_STORAGE_KEYS.toastPreferences, JSON.stringify(toastPreferences));
+    } catch (error) {
+        console.error('Error saving toast preferences:', error);
+    }
+}
+
+function loadCollapsibleSectionState() {
+    try {
+        const stored = localStorage.getItem(DEMO_STORAGE_KEYS.collapsibleSections);
+        collapsibleSectionState = stored ? JSON.parse(stored) : {};
+    } catch (error) {
+        console.error('Error loading collapsible section state:', error);
+        collapsibleSectionState = {};
+    }
+}
+
+function saveCollapsibleSectionState() {
+    try {
+        localStorage.setItem(
+            DEMO_STORAGE_KEYS.collapsibleSections,
+            JSON.stringify(collapsibleSectionState),
+        );
+    } catch (error) {
+        console.error('Error saving collapsible section state:', error);
+    }
+}
+
+function updateToastEventCount() {
+    const countElement = document.getElementById('toastEventCount');
+    if (!countElement) {
+        return;
+    }
+
+    const selectedCount = Object.values(toastPreferences.events).filter(Boolean).length;
+    const label = selectedCount === 1 ? 'main.toastActiveCount' : 'main.toastActiveCountPlural';
+    countElement.textContent = t(label, { count: selectedCount });
+}
+
+function renderToastManagerUI() {
+    const listElement = document.getElementById('toastEventList');
+    const enabledCheckbox = document.getElementById('toastManagerEnabled');
+    const searchInput = document.getElementById('toastEventSearch');
+    if (!listElement || !enabledCheckbox) {
+        return;
+    }
+
+    const eventMarkup = getToastEventCatalog()
+        .map((eventItem) => {
+            const description = getEventsReferenceDescription(eventItem);
+            const checked = toastPreferences.events[eventItem.name] ? 'checked' : '';
+            const haystack = `${eventItem.name} ${description}`.toLowerCase();
+            const matchesSearch = toastEventSearch === '' || haystack.includes(toastEventSearch.toLowerCase());
+            const hiddenClass = matchesSearch ? '' : 'is-hidden';
+
+            return `
+                <label class="toast-event-option ${hiddenClass}" for="toast-event-${escapeHtml(eventItem.name)}">
+                    <input type="checkbox" id="toast-event-${escapeHtml(eventItem.name)}" data-toast-event="${escapeHtml(eventItem.name)}" ${checked}>
+                    <span>
+                        <span class="toast-event-option__name">${escapeHtml(eventItem.name)}</span>
+                        <span class="toast-event-option__description">${escapeHtml(description)}</span>
+                    </span>
+                </label>
+            `;
+        })
+        .join('');
+
+    enabledCheckbox.checked = toastPreferences.enabled;
+    if (searchInput) {
+        searchInput.value = toastEventSearch;
+    }
+    listElement.innerHTML = eventMarkup;
+    updateToastEventCount();
+}
+
+function initializeToastManager() {
+    loadToastPreferences();
+    renderToastManagerUI();
+
+    const enabledCheckbox = document.getElementById('toastManagerEnabled');
+    const listElement = document.getElementById('toastEventList');
+    const selectAllButton = document.getElementById('selectAllToastEvents');
+    const selectNoneButton = document.getElementById('selectNoneToastEvents');
+    const selectDefaultButton = document.getElementById('selectDefaultToastEvents');
+    const resetLayoutButton = document.getElementById('resetDemoLayout');
+    const searchInput = document.getElementById('toastEventSearch');
+
+    if (enabledCheckbox && !enabledCheckbox.dataset.bound) {
+        enabledCheckbox.dataset.bound = 'true';
+        enabledCheckbox.addEventListener('change', (event) => {
+            toastPreferences.enabled = Boolean(event.target.checked);
+            saveToastPreferences();
+        });
+    }
+
+    if (listElement && !listElement.dataset.bound) {
+        listElement.dataset.bound = 'true';
+        listElement.addEventListener('change', (event) => {
+            const input = event.target.closest('[data-toast-event]');
+            if (!input) {
+                return;
+            }
+
+            const eventName = input.dataset.toastEvent;
+            toastPreferences.events[eventName] = input.checked;
+            saveToastPreferences();
+            updateToastEventCount();
+        });
+    }
+
+    if (selectAllButton && !selectAllButton.dataset.bound) {
+        selectAllButton.dataset.bound = 'true';
+        selectAllButton.addEventListener('click', () => {
+            Object.keys(toastPreferences.events).forEach((eventName) => {
+                toastPreferences.events[eventName] = true;
+            });
+            renderToastManagerUI();
+            saveToastPreferences();
+        });
+    }
+
+    if (selectNoneButton && !selectNoneButton.dataset.bound) {
+        selectNoneButton.dataset.bound = 'true';
+        selectNoneButton.addEventListener('click', () => {
+            Object.keys(toastPreferences.events).forEach((eventName) => {
+                toastPreferences.events[eventName] = false;
+            });
+            renderToastManagerUI();
+            saveToastPreferences();
+        });
+    }
+
+    if (selectDefaultButton && !selectDefaultButton.dataset.bound) {
+        selectDefaultButton.dataset.bound = 'true';
+        selectDefaultButton.addEventListener('click', () => {
+            toastPreferences = createDefaultToastPreferences();
+            renderToastManagerUI();
+            saveToastPreferences();
+        });
+    }
+
+    if (resetLayoutButton && !resetLayoutButton.dataset.bound) {
+        resetLayoutButton.dataset.bound = 'true';
+        resetLayoutButton.addEventListener('click', () => {
+            resetDemoLayoutPreferences();
+        });
+    }
+
+    if (searchInput && !searchInput.dataset.bound) {
+        searchInput.dataset.bound = 'true';
+        searchInput.addEventListener('input', (event) => {
+            toastEventSearch = event.target.value || '';
+            renderToastManagerUI();
+        });
+    }
+
+    registerToastListeners();
+}
+
+function initializeCollapsibleSections() {
+    loadCollapsibleSectionState();
+
+    document.querySelectorAll('[data-collapse-toggle]').forEach((toggle) => {
+        const contentId = toggle.dataset.collapseToggle;
+        const content = document.getElementById(contentId);
+        if (!content) {
+            return;
+        }
+
+        const storedExpanded = collapsibleSectionState[contentId];
+        const isExpanded = storedExpanded !== false;
+        toggle.setAttribute('aria-expanded', String(isExpanded));
+        content.classList.toggle('is-collapsed', !isExpanded);
+
+        if (toggle.dataset.bound === 'true') {
+            return;
+        }
+
+        toggle.dataset.bound = 'true';
+
+        toggle.addEventListener('click', () => {
+            const currentlyExpanded = toggle.getAttribute('aria-expanded') !== 'false';
+            const nextExpanded = !currentlyExpanded;
+            toggle.setAttribute('aria-expanded', String(nextExpanded));
+            content.classList.toggle('is-collapsed', !nextExpanded);
+            collapsibleSectionState[contentId] = nextExpanded;
+            saveCollapsibleSectionState();
+        });
+    });
+
+    const filterHeader = document.getElementById('filterHeader');
+    const filterContent = document.getElementById('filterContent');
+    const filterToggleIcon = document.getElementById('filterToggleIcon');
+
+    if (filterHeader && filterContent && filterToggleIcon) {
+        const filterContentId = 'filterContent';
+        const filterExpanded = collapsibleSectionState[filterContentId] !== false;
+        filterContent.classList.toggle('expanded', filterExpanded);
+        filterToggleIcon.classList.toggle('expanded', filterExpanded);
+        filterHeader.setAttribute('aria-expanded', String(filterExpanded));
+
+        if (!filterHeader.dataset.bound) {
+            filterHeader.dataset.bound = 'true';
+            filterHeader.addEventListener('click', () => {
+                const currentlyExpanded = filterHeader.getAttribute('aria-expanded') !== 'false';
+                const nextExpanded = !currentlyExpanded;
+                filterContent.classList.toggle('expanded', nextExpanded);
+                filterToggleIcon.classList.toggle('expanded', nextExpanded);
+                filterHeader.setAttribute('aria-expanded', String(nextExpanded));
+                collapsibleSectionState[filterContentId] = nextExpanded;
+                saveCollapsibleSectionState();
+            });
+        }
+    }
+}
+
+function syncFilterCheckboxes() {
+    Object.keys(activeFilters).forEach((filterKey) => {
+        const checkbox = document.getElementById(`filter_${filterKey}`);
+        if (checkbox) {
+            checkbox.checked = activeFilters[filterKey];
+        }
+    });
+}
+
+function resetDemoLayoutPreferences() {
+    activeFilters = { ...defaultFilters };
+    toastEventSearch = '';
+    toastPreferences = createDefaultToastPreferences();
+    collapsibleSectionState = {};
+
+    try {
+        localStorage.removeItem(DEMO_STORAGE_KEYS.toastPreferences);
+        localStorage.removeItem(DEMO_STORAGE_KEYS.collapsibleSections);
+    } catch (error) {
+        console.error('Error clearing demo layout preferences:', error);
+    }
+
+    saveFilterPreferences();
+    syncFilterCheckboxes();
+    renderToastManagerUI();
+    initializeCollapsibleSections();
+
+    updateStatus(currentLanguage === 'it'
+        ? '♻️ Preferenze demo ripristinate'
+        : '♻️ Demo preferences reset');
+}
+
+function shouldShowToastForEvent(eventName) {
+    return toastPreferences.enabled && toastPreferences.events[eventName] === true;
+}
+
+function getToastDescription(eventName, detail) {
+    if (eventName === 'phone-island-video-call-started') {
+        if (detail?.initiator === 'remote') {
+            return currentLanguage === 'it'
+                ? `L'utente ${detail.callUser || 'remoto'} ha avviato la videochiamata verso ${detail.destUser || 'di te'}.`
+                : `${detail.callUser || 'Remote user'} started the video call toward ${detail.destUser || 'you'}.`;
+        }
+
+        if (detail?.initiator === 'local') {
+            return currentLanguage === 'it'
+                ? `Hai avviato la videochiamata verso ${detail.destUser || 'la controparte'}.`
+                : `You started the video call toward ${detail.destUser || 'the other party'}.`;
+        }
+    }
+
+    const eventItem = getToastEventCatalog().find((item) => item.name === eventName);
+    return eventItem ? getEventsReferenceDescription(eventItem) : eventName;
+}
+
+function getToastMeta(detail) {
+    if (!detail || Object.keys(detail).length === 0) {
+        return '';
+    }
+
+    const serialized = JSON.stringify(detail);
+    return serialized.length > 180 ? `${serialized.slice(0, 177)}...` : serialized;
+}
+
+function removeToast(toastElement) {
+    if (!toastElement || toastElement.dataset.removing === 'true') {
+        return;
+    }
+
+    toastElement.dataset.removing = 'true';
+    toastElement.classList.remove('is-visible');
+    toastElement.classList.add('is-leaving');
+    setTimeout(() => {
+        toastElement.remove();
+    }, 220);
+}
+
+function showToast(eventName, detail = {}) {
+    if (!shouldShowToastForEvent(eventName)) {
+        return;
+    }
+
+    const viewport = document.getElementById('toastViewport');
+    if (!viewport) {
+        return;
+    }
+
+    while (viewport.children.length >= 5) {
+        viewport.removeChild(viewport.firstElementChild);
+    }
+
+    const toastElement = document.createElement('article');
+    toastElement.className = 'toast-card';
+
+    const title = eventName;
+    const body = getToastDescription(eventName, detail);
+    const meta = getToastMeta(detail);
+
+    toastElement.innerHTML = `
+        <div class="toast-card__header">
+            <h4 class="toast-card__title">${escapeHtml(title)}</h4>
+            <button class="toast-card__close" type="button" aria-label="Close toast">×</button>
+        </div>
+        <div class="toast-card__body">${escapeHtml(body)}</div>
+        ${meta ? `<div class="toast-card__meta">${escapeHtml(meta)}</div>` : ''}
+    `;
+
+    const closeButton = toastElement.querySelector('.toast-card__close');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => removeToast(toastElement));
+    }
+
+    viewport.appendChild(toastElement);
+    requestAnimationFrame(() => {
+        toastElement.classList.add('is-visible');
+    });
+
+    setTimeout(() => removeToast(toastElement), 5200);
+}
+
+function registerToastListeners() {
+    if (toastListenersRegistered) {
+        return;
+    }
+
+    toastListenersRegistered = true;
+
+    getToastEventCatalog().forEach((eventItem) => {
+        window.addEventListener(eventItem.name, (event) => {
+            showToast(eventItem.name, event.detail || {});
+        });
+    });
+}
 
 // Load filter preferences from localStorage
 function loadFilterPreferences() {
@@ -879,12 +1457,7 @@ function shouldLogEvent(message) {
 // Initialize filter UI checkboxes
 function initializeFilterUI() {
     // Set checkbox states from active filters
-    Object.keys(activeFilters).forEach(filterKey => {
-        const checkbox = document.getElementById(`filter_${filterKey}`);
-        if (checkbox) {
-            checkbox.checked = activeFilters[filterKey];
-        }
-    });
+    syncFilterCheckboxes();
 
     // Add change listeners to all filter checkboxes
     Object.keys(activeFilters).forEach(filterKey => {
@@ -897,23 +1470,6 @@ function initializeFilterUI() {
             });
         }
     });
-
-    // Toggle filter panel
-    const filterHeader = document.getElementById('filterHeader');
-    const filterContent = document.getElementById('filterContent');
-    const filterToggleIcon = document.getElementById('filterToggleIcon');
-
-    if (filterHeader && filterContent && filterToggleIcon) {
-        filterContent.classList.add('expanded');
-        filterToggleIcon.classList.add('expanded');
-        filterHeader.setAttribute('aria-expanded', 'true');
-
-        filterHeader.addEventListener('click', () => {
-            filterContent.classList.toggle('expanded');
-            filterToggleIcon.classList.toggle('expanded');
-            filterHeader.setAttribute('aria-expanded', String(filterContent.classList.contains('expanded')));
-        });
-    }
 
     // Select All button
     const selectAllBtn = document.getElementById('selectAllFilters');
@@ -1730,6 +2286,8 @@ function applyTranslations() {
     updateStaticStatusTexts();
     updateTokenVisibility();
     renderEventsReference();
+    renderToastManagerUI();
+    renderPhoneIslandVersion();
 
     if (transcriptionMessages.length === 0) {
         renderTranscriptionMessages();
@@ -2321,9 +2879,17 @@ function updateLogSearchCounter() {
 function init() {
     applyTranslations();
     applyTheme(currentTheme, false);
+    initializeDebugModeToggle();
+    updatePhoneIslandVersion();
 
     // Initialize event filter UI
     initializeFilterUI();
+
+    // Initialize toast manager UI
+    initializeToastManager();
+
+    // Initialize collapsible sections
+    initializeCollapsibleSections();
 
     // Initialize device management
     initializeDeviceManagement();

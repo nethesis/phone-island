@@ -15,6 +15,7 @@
     />
 
     <style>
+        /* Design tokens */
         :root {
             color-scheme: light;
             --demo-bg: #eef3f8;
@@ -58,6 +59,7 @@
             z-index: -1;
         }
 
+        /* Shell layout */
         .demo-toolbar {
             position: fixed;
             top: 20px;
@@ -150,10 +152,109 @@
             margin: 0 0 24px;
         }
 
+        /* Header and quick links */
+        .demo-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .demo-title-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            color: var(--demo-primary-strong);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .demo-link-list {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .demo-links-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .demo-links-title {
+            color: var(--demo-text-soft);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .debug-mode-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .debug-mode-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--demo-primary);
+        }
+
+        body[data-debug-mode="minimal"] .debug-only-section {
+            display: none !important;
+        }
+
+        .demo-link-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .demo-link-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(37, 99, 235, 0.22);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+        }
+
         h3 {
             letter-spacing: -0.02em;
         }
 
+        /* Primary actions */
         .controls {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
@@ -285,6 +386,7 @@
             box-shadow: 0 12px 26px rgba(71, 85, 105, 0.22);
         }
 
+        /* Panels and cards */
         .device-selector {
             margin: 16px 0;
         }
@@ -484,39 +586,7 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
-        .theme-selector {
-            margin: 10px 0;
-        }
-
-        .theme-selector button {
-            margin-right: 10px;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .theme-selector button.active {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .token-info {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .token-info code {
-            background-color: #f8f9fa;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
+        /* Login flow */
         .login-container {
             background-color: var(--demo-surface);
             padding: 32px;
@@ -657,7 +727,7 @@
             display: none;
         }
 
-        /* Transcription Window Styles */
+        /* Overlays and transcription */
         .transcription-container {
             position: fixed;
             top: 50%;
@@ -803,7 +873,7 @@
             color: white;
         }
 
-        /* Event Filter Panel Styles */
+        /* Filters, collapsible sections and toast manager */
         .event-filter-panel {
             background-color: var(--demo-surface);
             padding: 20px;
@@ -879,6 +949,273 @@
             border-top: 1px solid var(--demo-border);
         }
 
+        .section-collapse-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-collapse-header h3,
+        .section-collapse-header strong,
+        .section-collapse-header .section-title {
+            margin: 0;
+        }
+
+        .section-collapse-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.28s ease, opacity 0.2s ease;
+            opacity: 1;
+        }
+
+        .section-collapse-content.is-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+        }
+
+        .section-collapse-icon {
+            flex-shrink: 0;
+            color: var(--demo-text-soft);
+            transition: transform 0.2s ease;
+        }
+
+        .section-collapse-header[aria-expanded="false"] .section-collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .toast-manager-panel {
+            background-color: var(--demo-surface);
+            padding: 20px;
+            border-radius: 22px;
+            border: 1px solid var(--demo-border);
+            box-shadow: var(--demo-shadow);
+            margin-bottom: 20px;
+        }
+
+        .toast-manager-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .toast-manager-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .toast-manager-description {
+            margin: 6px 0 0;
+            color: var(--demo-text-soft);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .toast-manager-master {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: var(--demo-surface-soft);
+            border: 1px solid var(--demo-border);
+            white-space: nowrap;
+        }
+
+        .toast-manager-master input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--demo-primary);
+        }
+
+        .toast-manager-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .toast-manager-count {
+            color: var(--demo-text-soft);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .toast-manager-header .toast-manager-count {
+            margin-left: auto;
+        }
+
+        .toast-manager-content {
+            margin-top: 14px;
+        }
+
+        .toast-event-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .toast-search-wrapper {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .toast-search-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px 12px 38px;
+            border-radius: 14px;
+            border: 1px solid var(--demo-border);
+            background: var(--demo-surface-strong);
+            color: var(--demo-text);
+            font-size: 14px;
+        }
+
+        .toast-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--demo-text-soft);
+            pointer-events: none;
+        }
+
+        .toast-event-option.is-hidden {
+            display: none;
+        }
+
+        .toast-event-option {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 12px 14px;
+            background-color: var(--demo-surface-soft);
+            border-radius: 14px;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .toast-event-option:hover {
+            background-color: #edf3fb;
+            border-color: rgba(37, 99, 235, 0.12);
+        }
+
+        .toast-event-option input[type="checkbox"] {
+            margin-top: 2px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--demo-success);
+        }
+
+        .toast-event-option__name {
+            display: block;
+            color: var(--demo-text);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .toast-event-option__description {
+            display: block;
+            margin-top: 4px;
+            color: var(--demo-text-soft);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .toast-viewport {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 1600;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: min(360px, calc(100vw - 48px));
+            pointer-events: none;
+        }
+
+        .toast-card {
+            pointer-events: auto;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: translateY(-8px) scale(0.98);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .toast-card.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .toast-card.is-leaving {
+            opacity: 0;
+            transform: translateY(-6px) scale(0.98);
+        }
+
+        .toast-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .toast-card__title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--demo-text);
+            line-height: 1.35;
+        }
+
+        .toast-card__close {
+            border: none;
+            background: transparent;
+            color: var(--demo-text-soft);
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .toast-card__body {
+            color: var(--demo-text-soft);
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .toast-card__meta {
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #475569;
+            background: rgba(241, 245, 249, 0.92);
+            border-radius: 10px;
+            padding: 8px 10px;
+            max-height: 74px;
+            overflow: hidden;
+        }
+
         .filter-toggle-icon {
             transition: transform 0.3s ease;
         }
@@ -929,6 +1266,7 @@
             display: none !important;
         }
 
+        /* Scrollbars */
         html,
         body,
         .event-log,
@@ -978,6 +1316,7 @@
             overflow: hidden;
         }
 
+        /* Events reference modal */
         .event-log-actions {
             display: flex;
             align-items: center;
@@ -1434,6 +1773,7 @@
             color: #b91c1c;
         }
 
+        /* Dark theme overrides */
         body[data-theme="dark"] {
             --demo-bg: #09111b;
             --demo-bg-accent: rgba(59, 130, 246, 0.22);
@@ -1484,8 +1824,7 @@
         }
 
         body[data-theme="dark"] .toolbar-button,
-        body[data-theme="dark"] .theme-button,
-        body[data-theme="dark"] .theme-selector button {
+        body[data-theme="dark"] .theme-button {
             background-color: #17202b;
             border-color: #344150;
             color: #e5edf5;
@@ -1510,8 +1849,7 @@
         body[data-theme="dark"] .filter-checkbox,
         body[data-theme="dark"] .transcription-status,
         body[data-theme="dark"] .transcription-messages,
-        body[data-theme="dark"] .user-info,
-        body[data-theme="dark"] .token-info {
+        body[data-theme="dark"] .user-info {
             background-color: var(--demo-surface-soft);
             border-color: var(--demo-border);
             color: var(--demo-text);
@@ -1672,9 +2010,40 @@
             border-color: rgba(96, 165, 250, 0.18);
         }
 
+        body[data-theme="dark"] .toast-search-input,
+        body[data-theme="dark"] .toast-manager-master,
+        body[data-theme="dark"] .toast-event-option {
+            background: rgba(15, 23, 42, 0.78);
+            border-color: rgba(148, 163, 184, 0.18);
+            color: var(--demo-text);
+        }
+
+        body[data-theme="dark"] .toast-event-option:hover {
+            background-color: #223047;
+            border-color: rgba(96, 165, 250, 0.18);
+        }
+
         body[data-theme="dark"] .events-reference-modal,
         body[data-theme="dark"] .events-reference-card {
             background: var(--demo-surface);
+        }
+
+        body[data-theme="dark"] .version-badge {
+            background: rgba(96, 165, 250, 0.12);
+            border-color: rgba(96, 165, 250, 0.18);
+            color: #dbeafe;
+        }
+
+        body[data-theme="dark"] .demo-link-chip {
+            background: rgba(15, 23, 42, 0.82);
+            border-color: rgba(148, 163, 184, 0.18);
+            color: var(--demo-text);
+        }
+
+        body[data-theme="dark"] .debug-mode-toggle {
+            background: rgba(15, 23, 42, 0.82);
+            border-color: rgba(148, 163, 184, 0.18);
+            color: var(--demo-text);
         }
 
         body[data-theme="dark"] .events-reference-header,
@@ -1793,6 +2162,7 @@
             color: white;
         }
 
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             body {
                 padding-top: 92px;
@@ -1813,6 +2183,29 @@
             .event-filter-panel {
                 padding: 20px;
                 border-radius: 18px;
+            }
+
+            .demo-title-row {
+                align-items: stretch;
+            }
+
+            .demo-title-meta,
+            .demo-link-list {
+                width: 100%;
+            }
+
+            .demo-links-header {
+                align-items: stretch;
+            }
+
+            .debug-mode-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .demo-link-chip {
+                width: 100%;
+                justify-content: center;
             }
 
             .call-input {
@@ -1930,7 +2323,25 @@
     </div>
 
     <div class="integration-panel hidden" id="mainPanel">
-        <h1 data-i18n-html="main.title">📱 Phone Island Widget Integration Example</h1>
+        <div class="demo-title-row">
+            <div>
+                <h1 data-i18n-html="main.title">📱 Phone Island Widget Integration Example</h1>
+            </div>
+            <div class="demo-title-meta">
+                <span class="version-badge"><span data-i18n="main.versionLabel">Version</span> <span id="phoneIslandVersion">...</span> <span aria-hidden="true">•</span> <span id="phoneIslandVersionSource" data-i18n="main.versionSourceLoading">loading source</span></span>
+            </div>
+        </div>
+        <div class="demo-links-header">
+            <span class="demo-links-title" data-i18n="main.usefulLinksTitle">Useful links</span>
+            <label class="debug-mode-toggle" for="debugModeToggle">
+                <input type="checkbox" id="debugModeToggle" checked>
+                <span data-i18n="main.debugModeLabel">Show advanced panels</span>
+            </label>
+        </div>
+        <div class="demo-link-list" style="margin-bottom: 22px;">
+            <a class="demo-link-chip" href="https://www.npmjs.com/package/@nethesis/phone-island" target="_blank" rel="noopener noreferrer"><span>📦</span><span data-i18n="main.npmLinkLabel">npm package</span></a>
+            <a class="demo-link-chip" href="https://github.com/nethesis/phone-island#readme" target="_blank" rel="noopener noreferrer"><span>📘</span><span data-i18n="main.readmeLinkLabel">README</span></a>
+        </div>
 
         <!-- User Info Display -->
         <div class="user-info hidden" id="userInfo">
@@ -1955,7 +2366,7 @@
         </div>
 
         <!-- Status Display -->
-        <div id="status">
+        <div id="status" class="debug-only-section">
             <strong data-i18n="main.statusLabel">Status:</strong> <span id="statusContent">Initializing...</span>
         </div>
 
@@ -1968,14 +2379,18 @@
         </div>
 
         <!-- Device Management -->
-        <div class="device-selector">
+        <div class="device-selector debug-only-section">
             <strong data-i18n="main.webrtcDeviceLabel">WebRTC Device:</strong>
             <button id="attachDevice" class="success" data-i18n-html="main.attachWebrtc">🔗 Attach WebRTC</button>
             <button id="detachDevice" class="danger" data-i18n-html="main.detachWebrtc">🔌 Detach WebRTC</button>
         </div>
 
-        <div class="stack-section">
-            <h3 class="section-title" data-i18n="main.debugActionsTitle">Debug Actions</h3>
+        <div class="stack-section debug-only-section">
+            <div class="section-collapse-header" data-collapse-toggle="debugActionsSection" aria-expanded="true">
+                <h3 class="section-title" data-i18n="main.debugActionsTitle">Debug Actions</h3>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content" id="debugActionsSection">
             <div class="inline-button-row">
                 <button id="debugCallStatus" class="demo-action-button demo-action-button--debug" data-i18n-html="main.debugCallStatus">📞 Call Status</button>
                 <button id="debugUserStatus" class="demo-action-button demo-action-button--debug" data-i18n-html="main.debugUserStatus">👤 User Status</button>
@@ -1988,10 +2403,15 @@
                 <button id="debugParamUrlStatus" class="demo-action-button demo-action-button--debug" data-i18n-html="main.debugParamUrlStatus">🔐 Param URL Status</button>
                 <button id="debugQueueStatus" class="demo-action-button demo-action-button--debug" data-i18n-html="main.debugQueueStatus">📋 Queue Status</button>
             </div>
+            </div>
         </div>
 
-        <div class="stack-section">
-            <h3 class="section-title" data-i18n="main.viewActionsTitle">View Actions</h3>
+        <div class="stack-section debug-only-section">
+            <div class="section-collapse-header" data-collapse-toggle="viewActionsSection" aria-expanded="true">
+                <h3 class="section-title" data-i18n="main.viewActionsTitle">View Actions</h3>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content" id="viewActionsSection">
             <div class="inline-button-row">
                 <button id="viewCall" class="demo-action-button demo-action-button--view" data-i18n-html="main.viewCall">📞 Call View</button>
                 <button id="viewSettings" class="demo-action-button demo-action-button--view" data-i18n-html="main.viewSettings">⚙️ Settings View</button>
@@ -2002,12 +2422,16 @@
                 <button id="viewRecorder" class="demo-action-button demo-action-button--view" data-i18n-html="main.viewRecorder">🎙️ Recorder View</button>
                 <button id="viewVideo" class="demo-action-button demo-action-button--view" data-i18n-html="main.viewVideo">📹 Video View</button>
             </div>
+            </div>
         </div>
 
         <!-- Audio/Video Device Selectors -->
-        <div class="integration-panel" style="margin-top: 20px;">
-            <h3 style="margin-top: 0;" data-i18n-html="main.audioVideoSettings">🎧 Audio and Video Settings</h3>
-            
+        <div class="integration-panel debug-only-section" style="margin-top: 20px;">
+            <div class="section-collapse-header" data-collapse-toggle="audioVideoSection" aria-expanded="true">
+                <h3 style="margin-top: 0;" data-i18n-html="main.audioVideoSettings">🎧 Audio and Video Settings</h3>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content" id="audioVideoSection">
             <div class="device-selector">
                 <strong data-i18n-html="main.audioInputLabel">🎤 Microphone (Audio Input):</strong>
                 <select id="audioInputSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-top: 5px;">
@@ -2028,10 +2452,11 @@
                     <option value="" data-i18n="main.videoInputPlaceholder">Select video input device...</option>
                 </select>
             </div>
+            </div>
         </div>
 
         <!-- Event Filter Panel -->
-        <div class="event-filter-panel">
+        <div class="event-filter-panel debug-only-section">
             <div class="event-filter-header" id="filterHeader" aria-expanded="true">
                 <h3 data-i18n-html="main.eventFilters">🎛️ Event Filters</h3>
                 <span class="filter-toggle-icon expanded" id="filterToggleIcon">▼</span>
@@ -2093,8 +2518,40 @@
             </div>
         </div>
 
+        <div class="toast-manager-panel debug-only-section">
+            <div class="section-collapse-header toast-manager-header" data-collapse-toggle="toastManagerSection" aria-expanded="true">
+                <div>
+                    <h3 data-i18n-html="main.toastManagerTitle">🔔 Toast Manager</h3>
+                </div>
+                <span class="toast-manager-count" id="toastEventCount" data-i18n="main.toastActiveCount">1 toast event selected</span>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content toast-manager-content" id="toastManagerSection">
+            <p class="toast-manager-description" data-i18n="main.toastManagerDescription">Choose which Phone Island events should produce a toast in this demo.</p>
+            <div style="margin-top: 12px; margin-bottom: 14px;">
+                <label class="toast-manager-master" for="toastManagerEnabled">
+                    <input type="checkbox" id="toastManagerEnabled" checked>
+                    <span data-i18n="main.toastManagerEnabled">Enable toasts</span>
+                </label>
+            </div>
+            <div class="toast-manager-actions">
+                <div class="filter-actions" style="margin-top: 0; padding-top: 0; border-top: none;">
+                    <button id="selectAllToastEvents" data-i18n-html="main.selectAllToastEvents">✅ All Toasts</button>
+                    <button id="selectNoneToastEvents" data-i18n-html="main.selectNoneToastEvents">❌ No Toasts</button>
+                    <button id="selectDefaultToastEvents" data-i18n-html="main.defaultToastEvents">🎯 Video Default</button>
+                    <button id="resetDemoLayout" data-i18n-html="main.resetDemoLayout">♻️ Reset Demo Layout</button>
+                </div>
+            </div>
+            <div class="toast-search-wrapper">
+                <span class="toast-search-icon">🔍</span>
+                <input type="text" id="toastEventSearch" class="toast-search-input" data-i18n-placeholder="main.toastSearchPlaceholder" placeholder="Search toast events...">
+            </div>
+            <div class="toast-event-list" id="toastEventList"></div>
+            </div>
+        </div>
+
         <!-- Control Buttons -->
-        <div class="controls">
+        <div class="controls debug-only-section">
             <button id="expandBtn" data-i18n-html="main.expand">📏 Expand</button>
             <button id="compressBtn" data-i18n-html="main.compress">📐 Compress</button>
             <button id="muteBtn" data-i18n-html="main.mute">🔇 Mute</button>
@@ -2109,8 +2566,13 @@
         </div>
 
         <!-- Event Log -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <strong data-i18n-html="main.eventLogTitle">📡 Event Log:</strong>
+        <div class="integration-panel debug-only-section" style="margin-top: 20px;">
+            <div class="section-collapse-header" data-collapse-toggle="eventLogSection" aria-expanded="true">
+                <strong data-i18n-html="main.eventLogTitle">📡 Event Log:</strong>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content" id="eventLogSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div class="event-log-actions">
                 <button id="openEventsReference" class="events-reference-cta" type="button">
                     <span class="events-reference-cta__icon" aria-hidden="true">🧭</span>
@@ -2132,21 +2594,30 @@
         <div class="event-log" id="eventLog">
             <div data-i18n-html="main.eventLogEmpty">📡 Event Log (real-time events will appear here)...</div>
         </div>
+            </div>
+        </div>
 
         <!-- User Information Table -->
         <div class="integration-panel" style="margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div class="section-collapse-header" data-collapse-toggle="userInfoSection" aria-expanded="true">
                 <h3 style="margin: 0;" data-i18n-html="main.currentUserInfo">👤 Current User Information (/me)</h3>
+                <span class="section-collapse-icon">▼</span>
+            </div>
+            <div class="section-collapse-content" id="userInfoSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <button id="refreshUserInfoBtn" style="padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;" data-i18n-html="main.refresh">🔄 Refresh</button>
             </div>
             <div id="userInfoTableContainer">
                 <p style="color: #6c757d; text-align: center; padding: 20px;" data-i18n="main.refreshPrompt">Click "Refresh" to load user information...</p>
+            </div>
             </div>
         </div>
     </div>
 
     <!-- Transcription Window Overlay -->
     <div class="transcription-overlay" id="transcriptionOverlay"></div>
+
+    <div class="toast-viewport" id="toastViewport" aria-live="polite" aria-atomic="false"></div>
 
     <div class="events-reference-overlay" id="eventsReferenceOverlay"></div>
 

@@ -13,6 +13,85 @@ Available as widget on `jsDelivr`
 [![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-js&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.js)
 [![alt_text](https://img.shields.io/jsdelivr/gh/hw/nethesis/phone-island?label=jsdelivr-css&color=blue&style=for-the-badge)](https://cdn.jsdelivr.net/gh/nethesis/phone-island/dist-widget/index.widget.css)
 
+## Integrate in any template
+
+Phone Island can be embedded in any HTML template, CMS page or server-rendered application without a React-specific integration.
+
+To embed the standalone widget you need:
+
+1. the CDN CSS file
+2. the CDN JavaScript bundle
+3. a container element with class `phone-island`
+4. a Base64 config token in `data-config`
+5. a host-side JavaScript file that dispatches commands and listens to Phone Island browser events
+
+### Minimal HTML example
+
+```html
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Phone Island integration</title>
+
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.css"
+        />
+    </head>
+    <body>
+        <div class="phone-island" data-config="YOUR_BASE64_CONFIG_TOKEN"></div>
+
+        <script src="https://cdn.jsdelivr.net/gh/nethesis/phone-island@latest/dist-widget/index.widget.js"></script>
+        <script src="./phone-island-integration.js"></script>
+    </body>
+</html>
+```
+
+### Host-side integration script
+
+Create a file such as `phone-island-integration.js` and use it to control the widget from your page.
+
+```javascript
+function dispatchPhoneIslandEvent(eventName, detail = {}) {
+    window.dispatchEvent(new CustomEvent(eventName, { detail }))
+}
+
+window.addEventListener('phone-island-call-started', (event) => {
+    console.log('Call started', event.detail)
+})
+
+window.addEventListener('phone-island-video-call-started', (event) => {
+    console.log('Video call started', event.detail)
+})
+
+document.getElementById('call-200')?.addEventListener('click', () => {
+    dispatchPhoneIslandEvent('phone-island-call-start', { number: '200' })
+})
+```
+
+### Base64 config token
+
+The standalone widget expects a Base64 string in this format:
+
+```text
+<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>:<sip_host>:<sip_port>
+```
+
+Example generation:
+
+```sh
+echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>:<sip_host>:<sip_port>" | base64 -w0
+```
+
+### Full example
+
+For a complete browser integration example, including event log, device switching, toast notifications and debug actions, see:
+
+1. `widget-example/index.html`
+2. `widget-example/index.js`
+
 ## Online Demo
 
 The repository root now contains a demo entrypoint for GitHub Pages.

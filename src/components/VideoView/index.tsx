@@ -39,7 +39,7 @@ import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
-import { dispatchVideoCallStarted } from '../../events'
+import { dispatchVideoCallStarted } from '../../events/SocketEvents'
 
 export interface VideoViewProps {}
 
