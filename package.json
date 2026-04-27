@@ -35,7 +35,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "6.2.1",
     "@fortawesome/free-solid-svg-icons": "6.2.1",
-    "@fortawesome/react-fontawesome": "0.2.0",
+    "@fortawesome/react-fontawesome": "0.2.6",
     "@headlessui/react": "^2.2.8",
     "@nethesis/nethesis-solid-svg-icons": "github:nethesis/Font-Awesome#ns-solid",
     "@rematch/core": "^2.2.0",
