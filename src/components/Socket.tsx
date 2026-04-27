@@ -1108,6 +1108,26 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('message', (data: any) => {
         switch (data.message) {
           case 'videoCallStart':
+            {
+              const {
+                currentCall: { incoming, outgoing, accepted },
+                currentUser: { default_device },
+                island: { isFromStreaming, view },
+              } = store.getState()
+
+              const isWebrtcDevice =
+                default_device?.type === 'webrtc' || default_device?.type === 'nethlink'
+              const hasCompatibleCallState = incoming || outgoing || accepted
+              const canOpenVideoView =
+                isWebrtcDevice && hasCompatibleCallState && !isFromStreaming && view !== 'video'
+
+              if (canOpenVideoView) {
+                dispatch.island.toggleSideViewVisible(false)
+                dispatch.island.toggleTranscriptionViewVisible(false)
+                dispatch.island.setIslandView('video')
+              }
+            }
+
             dispatchVideoCallStarted({
               initiator: 'remote',
               callUser: (data as VideoCallMessage).callUser,
