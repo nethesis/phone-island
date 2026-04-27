@@ -8,7 +8,9 @@ const DEMO_STORAGE_KEYS = {
     theme: 'phoneIslandDemoTheme',
     toastPreferences: 'phoneIslandToastPreferences',
     collapsibleSections: 'phoneIslandCollapsedSections',
-    debugMode: 'phoneIslandDemoDebugMode'
+    debugMode: 'phoneIslandDemoDebugMode',
+    phoneNumberDraft: 'phoneIslandDemoPhoneNumberDraft',
+    savedPhoneNumbers: 'phoneIslandDemoSavedPhoneNumbers'
 };
 
 const PACKAGE_JSON_VERSION_PATHS = ['../package.json', './package.json', '/package.json'];
@@ -68,6 +70,13 @@ const translations = {
             statusLabel: 'Status:',
             phoneNumberLabel: 'Phone Number:',
             phoneNumberPlaceholder: 'Enter phone number (e.g. 200)',
+            savedPhoneNumbersTitle: 'Saved test numbers',
+            addSavedPhoneNumber: '➕ Add number',
+            savedPhoneNamePlaceholder: 'Saved contact name',
+            savedPhoneNumberPlaceholder: 'Saved phone number',
+            savedPhoneNumbersEmpty: 'Add one or more numbers to keep quick call targets available after refresh.',
+            useSavedPhoneNumber: 'Use',
+            removeSavedPhoneNumber: 'Remove',
             call: '📞 Call',
             endCall: '📴 End Call',
             webrtcDeviceLabel: 'WebRTC Device:',
@@ -253,6 +262,13 @@ const translations = {
             statusLabel: 'Stato:',
             phoneNumberLabel: 'Numero di telefono:',
             phoneNumberPlaceholder: 'Inserisci il numero di telefono (es. 200)',
+            savedPhoneNumbersTitle: 'Numeri test salvati',
+            addSavedPhoneNumber: '➕ Aggiungi numero',
+            savedPhoneNamePlaceholder: 'Nome contatto salvato',
+            savedPhoneNumberPlaceholder: 'Numero di telefono salvato',
+            savedPhoneNumbersEmpty: 'Aggiungi uno o piu numeri per ritrovarli subito dopo il refresh.',
+            useSavedPhoneNumber: 'Usa',
+            removeSavedPhoneNumber: 'Rimuovi',
             call: '📞 Chiama',
             endCall: '📴 Termina chiamata',
             webrtcDeviceLabel: 'Dispositivo WebRTC:',
@@ -424,6 +440,244 @@ let currentVersionInfo = {
     version: null,
     source: 'loading'
 };
+let currentSavedPhoneNumbers = readSavedPhoneNumbers();
+
+function normalizeSavedPhoneNumberEntry(value) {
+    if (typeof value === 'string') {
+        return {
+            name: '',
+            number: value
+        };
+    }
+
+    if (!value || typeof value !== 'object') {
+        return {
+            name: '',
+            number: ''
+        };
+    }
+
+    return {
+        name: String(value.name ?? ''),
+        number: String(value.number ?? '')
+    };
+}
+
+function readSavedPhoneNumbers() {
+    try {
+        const storedValue = localStorage.getItem(DEMO_STORAGE_KEYS.savedPhoneNumbers);
+        if (!storedValue) {
+            return [];
+        }
+
+        const parsedValue = JSON.parse(storedValue);
+        if (!Array.isArray(parsedValue)) {
+            return [];
+        }
+
+        return parsedValue.map(normalizeSavedPhoneNumberEntry).slice(0, 50);
+    } catch (error) {
+        console.warn('Unable to restore saved phone numbers:', error);
+        return [];
+    }
+}
+
+function persistSavedPhoneNumbers(phoneNumbers) {
+    currentSavedPhoneNumbers = phoneNumbers.map(normalizeSavedPhoneNumberEntry).slice(0, 50);
+    localStorage.setItem(DEMO_STORAGE_KEYS.savedPhoneNumbers, JSON.stringify(currentSavedPhoneNumbers));
+}
+
+function setPrimaryPhoneNumber(value) {
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const normalizedValue = String(value ?? '');
+
+    if (phoneNumberInput) {
+        phoneNumberInput.value = normalizedValue;
+    }
+
+    localStorage.setItem(DEMO_STORAGE_KEYS.phoneNumberDraft, normalizedValue);
+}
+
+function getCallTargetValue() {
+    const activeElement = document.activeElement;
+    if (activeElement && activeElement.classList) {
+        if (activeElement.classList.contains('saved-phone-number-input')) {
+            const activeValue = activeElement.value.trim();
+            if (activeValue) {
+                return activeValue;
+            }
+        }
+
+        if (activeElement.classList.contains('saved-phone-name-input') || activeElement.classList.contains('saved-phone-number-input')) {
+            const index = Number(activeElement.dataset.index);
+            if (!Number.isNaN(index) && currentSavedPhoneNumbers[index]?.number?.trim()) {
+                return currentSavedPhoneNumbers[index].number.trim();
+            }
+        }
+    }
+
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    return phoneNumberInput ? phoneNumberInput.value.trim() : '';
+}
+
+function renderSavedPhoneNumbers() {
+    const savedPhoneNumbersList = document.getElementById('savedPhoneNumbersList');
+    if (!savedPhoneNumbersList) {
+        return;
+    }
+
+    if (currentSavedPhoneNumbers.length === 0) {
+        savedPhoneNumbersList.innerHTML = `<p class="call-input__saved-empty">${escapeHtml(t('main.savedPhoneNumbersEmpty'))}</p>`;
+        return;
+    }
+
+    savedPhoneNumbersList.innerHTML = currentSavedPhoneNumbers
+        .map((entry, index) => `
+            <div class="call-input__saved-row">
+                <input
+                    type="text"
+                    class="saved-phone-name-input"
+                    data-field="name"
+                    data-index="${index}"
+                    value="${escapeHtml(entry.name)}"
+                    placeholder="${escapeHtml(t('main.savedPhoneNamePlaceholder'))}"
+                >
+                <input
+                    type="text"
+                    class="saved-phone-number-input"
+                    data-field="number"
+                    data-index="${index}"
+                    value="${escapeHtml(entry.number)}"
+                    placeholder="${escapeHtml(t('main.savedPhoneNumberPlaceholder'))}"
+                >
+                <div class="call-input__saved-actions">
+                    <button type="button" class="success" data-action="use" data-index="${index}">${escapeHtml(t('main.useSavedPhoneNumber'))}</button>
+                    <button type="button" class="danger" data-action="remove" data-index="${index}">${escapeHtml(t('main.removeSavedPhoneNumber'))}</button>
+                </div>
+            </div>
+        `)
+        .join('');
+}
+
+function triggerCall() {
+    const phoneNumber = getCallTargetValue();
+
+    if (phoneNumber) {
+        setPrimaryPhoneNumber(phoneNumber);
+        dispatchPhoneIslandEvent('phone-island-call-start', {
+            number: phoneNumber
+        });
+        return;
+    }
+
+    alert(t('alerts.enterPhoneNumber'));
+}
+
+function handleCallInputEnter(event) {
+    if (event.key !== 'Enter') {
+        return;
+    }
+
+    const target = event.target;
+    if (!target || target.tagName !== 'INPUT') {
+        return;
+    }
+
+    if (target.classList.contains('saved-phone-number-input')) {
+        const helperValue = target.value.trim();
+        if (helperValue) {
+            setPrimaryPhoneNumber(helperValue);
+        }
+    }
+
+    event.preventDefault();
+    triggerCall();
+}
+
+function initializePhoneNumberHelpers() {
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const savedPhoneNumbersList = document.getElementById('savedPhoneNumbersList');
+    const addSavedPhoneNumberBtn = document.getElementById('addSavedPhoneNumberBtn');
+    const storedPrimaryPhoneNumber = localStorage.getItem(DEMO_STORAGE_KEYS.phoneNumberDraft);
+
+    if (storedPrimaryPhoneNumber !== null) {
+        setPrimaryPhoneNumber(storedPrimaryPhoneNumber);
+    }
+
+    if (phoneNumberInput) {
+        phoneNumberInput.addEventListener('input', (event) => {
+            localStorage.setItem(DEMO_STORAGE_KEYS.phoneNumberDraft, event.currentTarget.value);
+        });
+        phoneNumberInput.addEventListener('keydown', handleCallInputEnter);
+    }
+
+    if (savedPhoneNumbersList) {
+        savedPhoneNumbersList.addEventListener('input', (event) => {
+            const target = event.target;
+            if (!target || (!target.classList.contains('saved-phone-number-input') && !target.classList.contains('saved-phone-name-input'))) {
+                return;
+            }
+
+            const index = Number(target.dataset.index);
+            if (Number.isNaN(index) || index < 0 || index >= currentSavedPhoneNumbers.length) {
+                return;
+            }
+
+            const nextPhoneNumbers = [...currentSavedPhoneNumbers];
+            const field = target.dataset.field === 'name' ? 'name' : 'number';
+            nextPhoneNumbers[index] = {
+                ...normalizeSavedPhoneNumberEntry(nextPhoneNumbers[index]),
+                [field]: target.value
+            };
+            persistSavedPhoneNumbers(nextPhoneNumbers);
+        });
+
+        savedPhoneNumbersList.addEventListener('keydown', handleCallInputEnter);
+
+        savedPhoneNumbersList.addEventListener('click', (event) => {
+            const actionButton = event.target.closest('button[data-action]');
+            if (!actionButton) {
+                return;
+            }
+
+            const index = Number(actionButton.dataset.index);
+            if (Number.isNaN(index) || index < 0 || index >= currentSavedPhoneNumbers.length) {
+                return;
+            }
+
+            if (actionButton.dataset.action === 'use') {
+                const selectedPhoneNumber = currentSavedPhoneNumbers[index].number.trim();
+                if (selectedPhoneNumber) {
+                    setPrimaryPhoneNumber(selectedPhoneNumber);
+                    phoneNumberInput?.focus();
+                }
+                return;
+            }
+
+            if (actionButton.dataset.action === 'remove') {
+                persistSavedPhoneNumbers(currentSavedPhoneNumbers.filter((_, phoneIndex) => phoneIndex !== index));
+                renderSavedPhoneNumbers();
+            }
+        });
+    }
+
+    if (addSavedPhoneNumberBtn) {
+        addSavedPhoneNumberBtn.addEventListener('click', () => {
+            persistSavedPhoneNumbers([...currentSavedPhoneNumbers, { name: '', number: '' }]);
+            renderSavedPhoneNumbers();
+
+            requestAnimationFrame(() => {
+                const savedInputs = document.querySelectorAll('.saved-phone-name-input');
+                const lastSavedInput = savedInputs[savedInputs.length - 1];
+                if (lastSavedInput) {
+                    lastSavedInput.focus();
+                }
+            });
+        });
+    }
+
+    renderSavedPhoneNumbers();
+}
 
 function normalizeVersion(version) {
     return String(version || '').trim().replace(/^v/i, '');
@@ -2285,6 +2539,7 @@ function applyTranslations() {
     updateAutoScrollButtonText();
     updateStaticStatusTexts();
     updateTokenVisibility();
+    renderSavedPhoneNumbers();
     renderEventsReference();
     renderToastManagerUI();
     renderPhoneIslandVersion();
@@ -2879,6 +3134,7 @@ function updateLogSearchCounter() {
 function init() {
     applyTranslations();
     applyTheme(currentTheme, false);
+    initializePhoneNumberHelpers();
     initializeDebugModeToggle();
     updatePhoneIslandVersion();
 
@@ -3092,14 +3348,7 @@ function init() {
     const callBtn = document.getElementById('callBtn');
     if (callBtn) {
         callBtn.addEventListener('click', () => {
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            if (phoneNumber) {
-                dispatchPhoneIslandEvent('phone-island-call-start', {
-                    number: phoneNumber
-                });
-            } else {
-                alert(t('alerts.enterPhoneNumber'));
-            }
+            triggerCall();
         });
     }
 

@@ -87,6 +87,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const videoRenegotiationInFlightRef = useRef(false)
+  const screenSharePublisherJoinRequestedRef = useRef(false)
   const screenShareViewRef = useRef(null)
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
@@ -579,6 +580,15 @@ export const VideoView: FC<VideoViewProps> = () => {
 
           const { username } = store.getState().currentUser
 
+          if (screenSharePublisherJoinRequestedRef.current) {
+            janus.current.log?.(
+              'Screen share publisher join already requested on this handle, skipping duplicate join',
+            )
+            return
+          }
+
+          screenSharePublisherJoinRequestedRef.current = true
+
           let register = {
             request: 'join',
             room: room,
@@ -664,6 +674,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   plugin.send({ message: publish, jsep: jsep })
                 },
                 error: function (error) {
+                  screenSharePublisherJoinRequestedRef.current = false
                   janus.current.error?.('WebRTC error:', error)
                   dispatch.screenShare.update({ active: false, role: '' })
                 },
@@ -784,6 +795,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       },
       oncleanup: function () {
         janus.current.log?.(' ::: Got a cleanup notification :::')
+        screenSharePublisherJoinRequestedRef.current = false
 
         dispatch.screenShare.update({
           localTracks: {},
@@ -837,6 +849,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const initAndStartScreenShare = () => {
+    screenSharePublisherJoinRequestedRef.current = false
     dispatch.screenShare.update({ active: true, role: 'publisher' })
     initScreenShare()
   }
@@ -905,6 +918,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const stopScreenShare = () => {
     const { plugin, localScreenStream } = store.getState().screenShare
 
+    screenSharePublisherJoinRequestedRef.current = false
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
     plugin.detach()

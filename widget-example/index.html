@@ -317,6 +317,76 @@
             align-items: end;
         }
 
+        .call-input__saved {
+            grid-column: 1 / -1;
+            display: grid;
+            gap: 12px;
+            padding-top: 4px;
+            justify-items: start;
+        }
+
+        .call-input__saved-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .call-input__saved-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--demo-text-soft);
+        }
+
+        .call-input__saved-list {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .call-input__saved-row {
+            display: grid;
+            grid-template-columns: minmax(150px, 220px) minmax(84px, 120px) auto;
+            gap: 10px;
+            align-items: center;
+            width: fit-content;
+            max-width: 100%;
+        }
+
+        .call-input__saved-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+
+        .call-input__saved-empty {
+            margin: 0;
+            padding: 12px 14px;
+            border: 1px dashed var(--demo-border);
+            border-radius: 14px;
+            background: var(--demo-surface-soft);
+            color: var(--demo-text-soft);
+            font-size: 14px;
+        }
+
+        .call-input__saved-row button,
+        .call-input__saved-header button {
+            min-width: 48px;
+        }
+
+        .call-input__saved-actions button {
+            padding: 10px 14px;
+            font-size: 13px;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+        }
+
+        .call-input__saved-row input {
+            min-width: 0;
+        }
+
         .call-input label {
             grid-column: 1 / -1;
             font-weight: 600;
@@ -1895,6 +1965,16 @@
             color: #89a0b9;
         }
 
+        body[data-theme="dark"] .call-input__saved-title,
+        body[data-theme="dark"] .call-input__saved-empty {
+            color: #a9b8c7;
+        }
+
+        body[data-theme="dark"] .call-input__saved-empty {
+            background: rgba(15, 23, 42, 0.72);
+            border-color: rgba(148, 163, 184, 0.22);
+        }
+
         body[data-theme="dark"] .login-steps li::before {
             box-shadow: 0 10px 18px rgba(37, 99, 235, 0.24);
         }
@@ -2212,6 +2292,15 @@
                 grid-template-columns: 1fr;
             }
 
+            .call-input__saved-row {
+                grid-template-columns: 1fr;
+            }
+
+            .call-input__saved-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .token-row {
                 grid-template-columns: 1fr;
             }
@@ -2376,6 +2465,13 @@
             <input type="text" id="phoneNumber" data-i18n-placeholder="main.phoneNumberPlaceholder" placeholder="Enter phone number (e.g. 200)" value="200">
             <button id="callBtn" class="success" data-i18n-html="main.call">📞 Call</button>
             <button id="endCallBtn" class="danger" data-i18n-html="main.endCall">📴 End Call</button>
+            <div class="call-input__saved debug-only-section">
+                <div class="call-input__saved-header">
+                    <span class="call-input__saved-title" data-i18n="main.savedPhoneNumbersTitle">Saved test numbers</span>
+                    <button id="addSavedPhoneNumberBtn" type="button" data-i18n-html="main.addSavedPhoneNumber">➕ Add number</button>
+                </div>
+                <div id="savedPhoneNumbersList" class="call-input__saved-list"></div>
+            </div>
         </div>
 
         <!-- Device Management -->
