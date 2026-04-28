@@ -1,7 +1,7 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '../Button'
 import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState, store } from '../../store'
@@ -25,6 +25,7 @@ import {
   muteCurrentCall,
   pauseCurrentCall,
   recordCurrentCall,
+  isRecordingControlAvailable,
   unmuteCurrentCall,
   unpauseCurrentCall,
 } from '../../lib/phone/call'
@@ -74,7 +75,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const intrudeListenStatus = useSelector((state: RootState) => state.listen)
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { janusInstance, remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
-  const userInfo = store.getState().currentUser
+  const userInfo = useSelector((state: RootState) => state.currentUser)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUiShown, setUiShown] = useState(false)
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -87,6 +88,15 @@ export const VideoView: FC<VideoViewProps> = () => {
   const smallRemoteVideo = useRef<HTMLVideoElement>(null)
   const janus = useRef<JanusTypes>(JanusLib)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
+  const activeConversation = useMemo(() => {
+    const conversations = userInfo?.conversations || {}
+    const activeConversation = Object.values(conversations).find((conv) => Object.keys(conv).length > 0)
+    return activeConversation ? (Object.values(activeConversation)[0] as any) : null
+  }, [userInfo?.conversations])
+  const recordingPermission =
+    userInfo?.profile?.macro_permissions?.settings?.permissions?.recording?.value || false
+  const recordingControlAvailable = isRecordingControlAvailable(activeConversation)
+  const canRecordCurrentCall = recordingPermission && recordingControlAvailable
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
@@ -1054,7 +1064,7 @@ export const VideoView: FC<VideoViewProps> = () => {
               )}
 
               {/* record */}
-              {userInfo?.profile?.macro_permissions?.settings?.permissions?.recording?.value && (
+              {canRecordCurrentCall && (
                 <Button
                   variant='default'
                   onClick={() => recordCurrentCall(isRecording)}
