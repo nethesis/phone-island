@@ -22,6 +22,7 @@ export interface ConversationTypes {
   startTime: number
   connected: boolean
   recording: 'false' | 'true'
+  recordingControlAvailable?: boolean
   direction: 'out' | 'in'
   inConference: boolean
   throughQueue: boolean
