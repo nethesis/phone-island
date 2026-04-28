@@ -6,6 +6,7 @@ import JanusLib from '../../../lib/webrtc/janus.js'
 import { isFromTrunk } from '../../../lib/user/extensions'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
+import { isRecordingControlAvailable } from '../../../lib/phone/call'
 
 export interface UseSideViewLogicResult {
   userInformation: RootState['currentUser']
@@ -105,22 +106,28 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
     [userInformation?.profile?.macro_permissions],
   )
 
-  const userCapabilities = useMemo(
-    () => ({
-      canRecord: permissions?.settings?.permissions?.recording?.value || false,
+  const userCapabilities = useMemo(() => {
+    const activeConversation = getActiveConversationData()
+    const recordingPermission = permissions?.settings?.permissions?.recording?.value || false
+    const recordingControlAvailable = isRecordingControlAvailable(activeConversation)
+    const canRecord = recordingPermission && recordingControlAvailable
+
+    return {
+      canRecord,
       canShareScreen:
         janus?.current?.webRTCAdapter?.browserDetails?.browser !== 'safari' &&
         (permissions?.nethvoice_cti?.permissions?.screen_sharing?.value || false),
       canSwitchDevice: availableDevices?.length > 0,
-    }),
-    [
-      permissions?.settings?.permissions?.recording?.value,
-      permissions?.nethvoice_cti?.permissions?.screen_sharing?.value,
-      availableDevices?.length,
-      userInformation?.default_device?.type,
-      uaType,
-    ],
-  )
+    }
+  }, [
+    permissions?.settings?.permissions?.recording?.value,
+    permissions?.nethvoice_cti?.permissions?.screen_sharing?.value,
+    getActiveConversationData,
+    conversations,
+    availableDevices?.length,
+    userInformation?.default_device?.type,
+    uaType,
+  ])
 
   const isUrlButtonEnabled = useMemo(() => {
     const conversationData = getActiveConversationData()

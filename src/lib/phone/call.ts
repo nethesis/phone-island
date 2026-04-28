@@ -326,14 +326,20 @@ const findFirstExtesnionNotEmpty = (data) => {
       return {
         id: firstEntry.id,
         recording: firstEntry.recording,
+        recordingControlAvailable: firstEntry.recordingControlAvailable,
       }
     }
   }
   return null
 }
 
+export const isRecordingControlAvailable = (conversation?: {
+  recording?: string
+  recordingControlAvailable?: boolean
+} | null) =>
+  !conversation || conversation.recording === 'true' || conversation.recordingControlAvailable !== false
+
 export async function recordCurrentCall(recordingValue: boolean) {
-  store.dispatch.currentCall.updateRecordingStatus(!recordingValue)
   const userConversationInformations = store?.getState()?.currentUser?.conversations
 
   const firstExtensionNotEmpty = findFirstExtesnionNotEmpty(userConversationInformations)
@@ -341,6 +347,10 @@ export async function recordCurrentCall(recordingValue: boolean) {
   if (!firstExtensionNotEmpty) {
     return
   } else {
+    if (!isRecordingControlAvailable(firstExtensionNotEmpty)) {
+      return
+    }
+
     const numberToSendCall = firstExtensionNotEmpty?.id?.match(/\/(\d+)-/)
     const endpointId = numberToSendCall[1]
 
@@ -355,19 +365,17 @@ export async function recordCurrentCall(recordingValue: boolean) {
         recordingValues = 'start_record'
         break
       case 'true':
-        recordingValues = 'mute_record'
-        break
-      case 'mute':
-        recordingValues = 'unmute_record'
+        recordingValues = 'stop_record'
         break
       default:
         recordingValues = ''
         break
     }
 
-    if (listenInformations) {
+    if (listenInformations && recordingValues) {
       try {
         await toggleRecord(recordingValues, listenInformations)
+        store.dispatch.currentCall.updateRecordingStatus(!recordingValue)
       } catch (e) {
         console.error(e)
         return []
