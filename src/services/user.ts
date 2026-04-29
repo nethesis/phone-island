@@ -276,7 +276,8 @@ export async function getFeatureCodes(): Promise<any> {
 export async function checkSummaryCall(uniqueid: string, linkedid?: string): Promise<void> {
   const { baseURL, headers } = store.getState().fetchDefaults
   const queryString = linkedid ? `?linkedid=${encodeURIComponent(linkedid)}` : ''
-  const response = await fetch(`${baseURL}/summary/${uniqueid}${queryString}`, {
+  const url = `${baseURL}/summary/${uniqueid}${queryString}`
+  const response = await fetch(url, {
     method: 'HEAD',
     headers: { ...headers },
   })
@@ -306,7 +307,8 @@ export async function checkSummaryCall(uniqueid: string, linkedid?: string): Pro
 export async function watchSummaryCall(linkedid: string, uniqueid: string): Promise<void> {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/summary/watch`, {
+    const url = `${baseURL}/summary/watch`
+    const response = await fetch(url, {
       method: 'POST',
       headers: { ...headers },
       body: JSON.stringify({ linkedid, uniqueid }),

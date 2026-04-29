@@ -56,6 +56,13 @@ interface SocketProps {
   uaType: string
 }
 
+interface SummaryConversationCacheEntry {
+  conversation: ConversationTypes
+  cachedAt: number
+}
+
+const SUMMARY_CONVERSATION_CACHE_TTL_MS = 10 * 60 * 1000
+
 export const Socket: FC<SocketProps> = ({
   hostName,
   username,
@@ -74,6 +81,7 @@ export const Socket: FC<SocketProps> = ({
     conversationId: string
     phase: 'waiting' | 'connected'
   } | null>(null)
+  const summaryConversationCache = useRef<Map<string, SummaryConversationCacheEntry>>(new Map())
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
 
   // Event listener for starting transcription
@@ -277,6 +285,143 @@ export const Socket: FC<SocketProps> = ({
       })
 
       return selectedConversation
+    }
+
+    const getConversationLinkedId = (conversation?: any) =>
+      conversation?.linkedId || conversation?.linkedid || ''
+
+    const getConversationUniqueId = (conversation?: any) =>
+      conversation?.uniqueId || conversation?.uniqueid || ''
+
+    const isSummaryConversationCandidate = (conversation?: any) =>
+      !!conversation?.connected &&
+      !!getConversationLinkedId(conversation) &&
+      !!getConversationUniqueId(conversation)
+
+    const selectLiveSummaryConversation = (extensionConversations?: Record<string, any>) => {
+      let selectedConversation: any = null
+      let selectedConversationKey: string | undefined
+      const entries = Object.entries(extensionConversations || {}).filter(
+        ([, conversation]) => conversation && Object.keys(conversation).length > 0,
+      )
+
+      entries.forEach(([key, currentConversation]) => {
+        if (!selectedConversation) {
+          selectedConversation = currentConversation
+          selectedConversationKey = key
+          return
+        }
+
+        const selectedIsSummaryCandidate = isSummaryConversationCandidate(selectedConversation)
+        const currentIsSummaryCandidate = isSummaryConversationCandidate(currentConversation)
+
+        if (currentIsSummaryCandidate && !selectedIsSummaryCandidate) {
+          selectedConversation = currentConversation
+          selectedConversationKey = key
+          return
+        }
+
+        if (currentIsSummaryCandidate === selectedIsSummaryCandidate) {
+          const selectedConnected = !!selectedConversation.connected
+          const currentConnected = !!currentConversation.connected
+
+          if (currentConnected && !selectedConnected) {
+            selectedConversation = currentConversation
+            selectedConversationKey = key
+            return
+          }
+
+          const selectedStartTime = selectedConversation.startTime ?? 0
+          const currentStartTime = currentConversation.startTime ?? 0
+
+          if (currentConnected === selectedConnected && currentStartTime > selectedStartTime) {
+            selectedConversation = currentConversation
+            selectedConversationKey = key
+          }
+        }
+      })
+
+      return {
+        conversation: selectedConversation,
+        key: selectedConversationKey,
+        count: entries.length,
+      }
+    }
+
+    const getCachedSummaryConversation = (extension?: string) => {
+      if (!extension) {
+        return null
+      }
+
+      const cached = summaryConversationCache.current.get(extension)
+      if (!cached) {
+        return null
+      }
+
+      const cacheAgeMs = Date.now() - cached.cachedAt
+      if (cacheAgeMs > SUMMARY_CONVERSATION_CACHE_TTL_MS) {
+        summaryConversationCache.current.delete(extension)
+        return null
+      }
+
+      return {
+        ...cached,
+        cacheAgeMs,
+      }
+    }
+
+    const selectSummaryConversationForHangup = (extension?: string) => {
+      const { conversations } = store.getState().currentUser
+      const extensionConversations = extension ? conversations?.[extension] : undefined
+      const liveSelection = selectLiveSummaryConversation(extensionConversations)
+
+      if (isSummaryConversationCandidate(liveSelection.conversation)) {
+        return {
+          ...liveSelection,
+          source: 'live',
+          cacheAgeMs: undefined,
+          hasConversationForCaller: !!extensionConversations,
+          liveConversationKeys: Object.keys(extensionConversations || {}),
+        }
+      }
+
+      const cached = getCachedSummaryConversation(extension)
+      if (cached && isSummaryConversationCandidate(cached.conversation)) {
+        return {
+          conversation: cached.conversation,
+          key: cached.conversation.id,
+          count: liveSelection.count,
+          source: 'cache',
+          cacheAgeMs: cached.cacheAgeMs,
+          hasConversationForCaller: !!extensionConversations,
+          liveConversationKeys: Object.keys(extensionConversations || {}),
+        }
+      }
+
+      return {
+        ...liveSelection,
+        source: liveSelection.conversation ? 'live_invalid' : 'none',
+        cacheAgeMs: cached?.cacheAgeMs,
+        hasConversationForCaller: !!extensionConversations,
+        liveConversationKeys: Object.keys(extensionConversations || {}),
+      }
+    }
+
+    const cacheSummaryConversations = (extension?: string, conversations?: Record<string, any>) => {
+      if (!extension) {
+        return
+      }
+
+      Object.values(conversations || {}).forEach((conversation) => {
+        if (!isSummaryConversationCandidate(conversation)) {
+          return
+        }
+
+        summaryConversationCache.current.set(extension, {
+          conversation,
+          cachedAt: Date.now(),
+        })
+      })
     }
 
     const shouldKeepCurrentAcceptedCall = (ownerExtension?: string) => {
@@ -737,57 +882,33 @@ export const Socket: FC<SocketProps> = ({
 
         // Get user extensions
         const userExtensions = endpoints?.extension || []
+        const userExtensionIds = userExtensions.map((ext) => ext.id)
+        let summaryExtension = res?.callerNum
+        if (
+          !userExtensionIds.includes(summaryExtension) &&
+          userExtensionIds.includes(res?.channelExten)
+        ) {
+          summaryExtension = res?.channelExten
+        }
 
         // Find the extension type based on callerNum
         const connectedExtension = userExtensions.find((ext) => ext.id === res.callerNum)
 
         const extensionType: any = connectedExtension?.type
 
-        // Get linkedId from conversations
-        const { conversations } = store.getState().currentUser
-
-        let selectedConversation: any = null
-
-        if (res.callerNum && conversations[res.callerNum]) {
-          const extensionConversations = conversations[res.callerNum]
-          const conversationKeys = Object.keys(extensionConversations)
-          if (conversationKeys.length > 0) {
-            for (const key of conversationKeys) {
-              const currentConversation = extensionConversations?.[key]
-              if (!currentConversation) continue
-
-              if (!selectedConversation) {
-                selectedConversation = currentConversation
-                continue
-              }
-
-              const selectedConnected = !!selectedConversation.connected
-              const currentConnected = !!currentConversation.connected
-
-              // Prefer connected conversations over non-connected ones
-              if (currentConnected && !selectedConnected) {
-                selectedConversation = currentConversation
-                continue
-              }
-
-              const selectedStartTime = selectedConversation.startTime ?? 0
-              const currentStartTime = currentConversation.startTime ?? 0
-
-              // Among conversations with the same connected status, prefer the most recent one
-              if (currentConnected === selectedConnected && currentStartTime > selectedStartTime) {
-                selectedConversation = currentConversation
-              }
-            }
-          }
-        }
+        const summaryConversationSelection = selectSummaryConversationForHangup(summaryExtension)
+        const selectedConversation: any = summaryConversationSelection.conversation
 
         // Check summary/transcription only for answered calls with a valid uniqueid.
-        const linkedId = selectedConversation?.linkedId
-        const uniqueId = selectedConversation?.uniqueId
+        const linkedId = getConversationLinkedId(selectedConversation)
+        const uniqueId = getConversationUniqueId(selectedConversation)
         const conversationWasConnected = selectedConversation?.connected || false
 
         if (uniqueId && linkedId && conversationWasConnected) {
           eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
+          if (summaryExtension) {
+            summaryConversationCache.current.delete(summaryExtension)
+          }
         }
 
         // If cause is normal_clearing and extension is physical or mobile
@@ -997,9 +1118,14 @@ export const Socket: FC<SocketProps> = ({
         }
 
         const associatedExtensions: any = deviceMap[res.username]
+        const conversationKeys = Object.keys(res.conversations || {})
+        const isCurrentUserUpdate = res.username === username
 
         // Initialize conversation
-        let conv = res.conversations[Object.keys(res.conversations)[0]] || {}
+        let conv = res.conversations?.[conversationKeys[0]] || {}
+        if (isCurrentUserUpdate) {
+          cacheSummaryConversations(res.exten, res.conversations)
+        }
 
         // Check if this is a mobile extension call for the current user
         let isMobileExtensionCall = false
