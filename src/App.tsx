@@ -972,12 +972,10 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       const linkedid = data?.linkedid || data?.linkedId
       const uniqueid = data?.uniqueid || data?.uniqueId
       if (!linkedid) {
-        console.warn('[Summary Check] No call identifier provided')
         return
       }
 
       if (!uniqueid) {
-        console.warn('[Summary Check] No unique identifier provided')
         return
       }
 
@@ -1005,14 +1003,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       } catch (error: any) {
         // 204 means summary not present yet - not an error, just not ready
         if (error?.status === 204) {
-          console.log(`[Summary Check] Summary not ready for ${linkedid}`)
           dispatchSummaryNotReady({
             linkedid,
             uniqueid,
             source: 'check',
           })
-        } else {
-          console.warn('[Summary Check] Non-blocking summary check failed:', error)
         }
       }
     },
@@ -1026,12 +1021,10 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       const uniqueid = data?.uniqueid
 
       if (!linkedid) {
-        console.warn('[Summary Notify] No call identifier provided')
         return
       }
 
       if (!uniqueid) {
-        console.warn('[Summary Notify] No unique identifier provided')
         return
       }
 
@@ -1043,8 +1036,8 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
           linkedid,
           uniqueid,
         })
-      } catch (error) {
-        console.warn('[Summary Check] Non-blocking summary watch failed:', error)
+      } catch {
+        return
       }
     },
   )
