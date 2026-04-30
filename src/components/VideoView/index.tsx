@@ -1100,7 +1100,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 >
                   <FontAwesomeIcon
                     className='pi-h-6 pi-w-6'
-                    icon={isVideoCallButtonVisible || isLocalVideoEnabled ? faVideo : faVideoSlash}
+                    icon={isLocalVideoEnabled ? faVideoSlash : faVideo}
                   />
                 </Button>
               )}
