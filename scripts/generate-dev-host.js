@@ -30,6 +30,7 @@ if (!template.includes(cssBlock) || !template.includes(scriptBlock)) {
 
 const devHost = template
   .replace(cssBlock, '')
+  .replace(/\.\/public\//g, '../public/')
   .replace(scriptBlock, `    <script type="module" src="../src/dev-widget-example.ts"></script>`)
 
 fs.mkdirSync(outputDir, { recursive: true })

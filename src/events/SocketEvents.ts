@@ -15,6 +15,12 @@ import type {
   ParkingUpdateEventTypes,
 } from '../types'
 
+export interface VideoCallStartedEvent {
+  initiator: 'local' | 'remote'
+  callUser?: string
+  destUser?: string
+}
+
 const PARKING_UPDATE_DISPATCH_DELAY_MS = 200
 let parkingUpdateBuffer: ParkingUpdateEventTypes = {}
 let parkingUpdateDispatchTimer: ReturnType<typeof setTimeout> | null = null
@@ -202,4 +208,13 @@ export function dispatchUrlCall(url: string, urlType: string) {
 export function dispatchDefaultDeviceUpdate(extension: string) {
   // Dispatch the event on window for external handlers
   eventDispatch('phone-island-default-device-updated', { id: extension })
+}
+
+/**
+ * The dispatch function for video call start notifications.
+ *
+ * @param event Video call start metadata
+ */
+export function dispatchVideoCallStarted(event: VideoCallStartedEvent) {
+  eventDispatch('phone-island-video-call-started', event)
 }

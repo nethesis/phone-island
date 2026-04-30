@@ -85,6 +85,7 @@ export function answerWebRTC() {
           sipcall.send({
             message: {
               request: 'accept',
+              autoaccept_reinvites: false,
             },
             jsep: jsep,
           })
@@ -105,6 +106,7 @@ export function answerWebRTC() {
             sipcall.send({
               message: {
                 request: 'accept',
+                autoaccept_reinvites: false,
               },
             })
           } else {
@@ -125,6 +127,7 @@ export function answerWebRTC() {
       sipcall.send({
         message: {
           request: 'accept',
+          autoaccept_reinvites: false,
         },
       })
     }
@@ -229,6 +232,7 @@ export function call(sipURI: string, tracks: JanusTrack[]) {
           message: {
             request: 'call',
             uri: sipURI,
+            autoaccept_reinvites: false,
           },
           jsep: jsep,
         })

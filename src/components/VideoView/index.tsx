@@ -39,12 +39,19 @@ import { faDisplaySlash, faRecord } from '@nethesis/nethesis-solid-svg-icons'
 import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
+import { dispatchVideoCallStarted } from '../../events/SocketEvents'
 
 export interface VideoViewProps {}
 
 export type ScreenSharingMessage = {
   message: 'screenSharingStart' | 'screenSharingStop'
   roomId: string
+  destUser: string
+  callUser: string
+}
+
+export type VideoCallMessage = {
+  message: 'videoCallStart'
   destUser: string
   callUser: string
 }
@@ -79,6 +86,8 @@ export const VideoView: FC<VideoViewProps> = () => {
   const [isUiShown, setUiShown] = useState(false)
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const videoRenegotiationInFlightRef = useRef(false)
+  const screenSharePublisherJoinRequestedRef = useRef(false)
   const screenShareViewRef = useRef(null)
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
@@ -87,6 +96,22 @@ export const VideoView: FC<VideoViewProps> = () => {
   const smallRemoteVideo = useRef<HTMLVideoElement>(null)
   const janus = useRef<JanusTypes>(JanusLib)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
+
+  const notifyPeerVideoStart = () => {
+    const { socket } = store.getState().websocket
+    const { username: destUser } = store.getState().currentCall
+    const { username: callUser } = store.getState().currentUser
+
+    if (!socket || !destUser || !callUser) {
+      return
+    }
+
+    socket.emit('message', {
+      message: 'videoCallStart',
+      destUser,
+      callUser,
+    } as VideoCallMessage)
+  }
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({
@@ -193,6 +218,12 @@ export const VideoView: FC<VideoViewProps> = () => {
         remoteVideoStream as MediaStream,
       )
     }
+
+    if (remoteVideoStream instanceof MediaStream && remoteVideoStream.getVideoTracks().length > 0) {
+      dispatch.currentCall.updateCurrentCall({
+        showRemoteVideoPlaceHolder: false,
+      })
+    }
   }
 
   const handleFullscreenChange = () => {
@@ -201,11 +232,9 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const toggleFullScreen = () => {
     if (document.fullscreenElement) {
-      // exit full screen
       document.exitFullscreen()
       eventDispatch('phone-island-fullscreen-exited', {})
     } else {
-      // enter full screen
       if (screenShareViewRef.current) {
         ;(screenShareViewRef.current as HTMLElement).requestFullscreen()
         eventDispatch('phone-island-fullscreen-entered', {})
@@ -374,7 +403,12 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const enableVideo = () => {
+    if (videoRenegotiationInFlightRef.current) {
+      return
+    }
+
     const { sipcall }: { sipcall: any } = store.getState().webrtc
+    videoRenegotiationInFlightRef.current = true
     store.dispatch.currentCall.updateCurrentCall({
       isLocalVideoEnabled: true,
     })
@@ -393,24 +427,55 @@ export const VideoView: FC<VideoViewProps> = () => {
     }
 
     const { hasVideoTrackAdded } = store.getState().currentCall
+    const { remoteVideoStream } = store.getState().webrtc
+    const videoTransceiver = sipcall?.webrtcStuff?.pc
+      ?.getTransceivers?.()
+      ?.find(
+        (transceiver: RTCRtpTransceiver) =>
+          transceiver.receiver?.track?.kind === 'video' ||
+          transceiver.sender?.track?.kind === 'video',
+      )
+    const shouldReplaceExistingVideoTransceiver =
+      hasVideoTrackAdded ||
+      Boolean(videoTransceiver) ||
+      (remoteVideoStream instanceof MediaStream && remoteVideoStream.getVideoTracks().length > 0)
 
-    if (!hasVideoTrackAdded) {
+    if (!shouldReplaceExistingVideoTransceiver) {
       track.add = true
       dispatch.currentCall.setVideoTrackAdded(true)
     } else {
-      // replace video track (video track has been previously added and removed)
-      track.replace = true
-      track.mid = '1'
+      // Reuse the existing video transceiver when available instead of assuming a
+      // fixed mid, otherwise fall back to adding a new local video track.
+      if (videoTransceiver) {
+        track.replace = true
+        if (videoTransceiver.mid) {
+          track.mid = videoTransceiver.mid
+        }
+        if (!hasVideoTrackAdded) {
+          dispatch.currentCall.setVideoTrackAdded(true)
+        }
+      } else {
+        track.add = true
+        dispatch.currentCall.setVideoTrackAdded(true)
+      }
     }
     tracks.push(track as JanusTrack)
 
     sipcall.createOffer({
       tracks: tracks,
       success: function (jsep) {
+        videoRenegotiationInFlightRef.current = false
         sipcall.send({ message: { request: 'update' }, jsep: jsep })
+        notifyPeerVideoStart()
+        dispatchVideoCallStarted({
+          initiator: 'local',
+          callUser: store.getState().currentUser.username,
+          destUser: store.getState().currentCall.username,
+        })
         eventDispatch('phone-island-video-enabled', {})
       },
       error: function (error) {
+        videoRenegotiationInFlightRef.current = false
         console.error('WebRTC error... ' + JSON.stringify(error))
       },
     })
@@ -420,22 +485,40 @@ export const VideoView: FC<VideoViewProps> = () => {
   })
 
   const disableVideo = () => {
+    if (videoRenegotiationInFlightRef.current) {
+      return
+    }
+
     const { sipcall, localVideoStream }: { sipcall: any; localVideoStream: MediaStream | null } =
       store.getState().webrtc
+    videoRenegotiationInFlightRef.current = true
+    const videoTransceiver = sipcall?.webrtcStuff?.pc
+      ?.getTransceivers?.()
+      ?.find(
+        (transceiver: RTCRtpTransceiver) =>
+          transceiver.receiver?.track?.kind === 'video' ||
+          transceiver.sender?.track?.kind === 'video',
+      )
 
     janus.current.stopAllTracks(localVideoStream)
     store.dispatch.webrtc.updateLocalVideoStream(null)
     store.dispatch.currentCall.setLocalVideoEnabled(false)
     const tracks: JanusTrack[] = []
-    tracks.push({ type: 'video', mid: '1', remove: true })
+    tracks.push({
+      type: 'video',
+      ...(videoTransceiver?.mid ? { mid: videoTransceiver.mid } : {}),
+      remove: true,
+    })
 
     sipcall.createOffer({
       tracks: tracks,
       success: function (jsep) {
+        videoRenegotiationInFlightRef.current = false
         sipcall.send({ message: { request: 'update' }, jsep: jsep })
         eventDispatch('phone-island-video-disabled', {})
       },
       error: function (error) {
+        videoRenegotiationInFlightRef.current = false
         console.error('WebRTC error... ' + JSON.stringify(error))
       },
     })
@@ -496,6 +579,15 @@ export const VideoView: FC<VideoViewProps> = () => {
           janus.current.log?.('Screen sharing session created: ' + room)
 
           const { username } = store.getState().currentUser
+
+          if (screenSharePublisherJoinRequestedRef.current) {
+            janus.current.log?.(
+              'Screen share publisher join already requested on this handle, skipping duplicate join',
+            )
+            return
+          }
+
+          screenSharePublisherJoinRequestedRef.current = true
 
           let register = {
             request: 'join',
@@ -582,6 +674,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   plugin.send({ message: publish, jsep: jsep })
                 },
                 error: function (error) {
+                  screenSharePublisherJoinRequestedRef.current = false
                   janus.current.error?.('WebRTC error:', error)
                   dispatch.screenShare.update({ active: false, role: '' })
                 },
@@ -702,6 +795,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       },
       oncleanup: function () {
         janus.current.log?.(' ::: Got a cleanup notification :::')
+        screenSharePublisherJoinRequestedRef.current = false
 
         dispatch.screenShare.update({
           localTracks: {},
@@ -755,6 +849,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const initAndStartScreenShare = () => {
+    screenSharePublisherJoinRequestedRef.current = false
     dispatch.screenShare.update({ active: true, role: 'publisher' })
     initScreenShare()
   }
@@ -823,6 +918,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const stopScreenShare = () => {
     const { plugin, localScreenStream } = store.getState().screenShare
 
+    screenSharePublisherJoinRequestedRef.current = false
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
     plugin.detach()
@@ -1004,7 +1100,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                 >
                   <FontAwesomeIcon
                     className='pi-h-6 pi-w-6'
-                    icon={isVideoCallButtonVisible || isLocalVideoEnabled ? faVideo : faVideoSlash}
+                    icon={isLocalVideoEnabled ? faVideoSlash : faVideo}
                   />
                 </Button>
               )}

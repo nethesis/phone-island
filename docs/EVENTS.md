@@ -1237,6 +1237,20 @@ Indicates that the video has been enabled during the current call
 {}
 ```
 
+#### `phone-island-video-call-started`
+Indicates that a video call start has been initiated, either by the local user or by the remote party.
+
+```json
+{
+  "initiator": "local | remote",
+  "callUser": "200",
+  "destUser": "201"
+}
+```
+
+- `initiator: local` means the current Phone Island instance has started the video.
+- `initiator: remote` means the other party has started the video and the current instance has been notified through signaling.
+
 #### `phone-island-video-disabled`
 Indicates that the video has been disabled during the current call
 

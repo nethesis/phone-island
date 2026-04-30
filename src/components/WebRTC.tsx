@@ -6,10 +6,14 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
-import type { JanusTypes } from '../types'
+import type { JanusTrack, JanusTypes } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { store } from '../store'
-import { checkMediaPermissions } from '../lib/devices/devices'
+import {
+  checkMediaPermissions,
+  getCurrentAudioInputDeviceId,
+  getCurrentVideoInputDeviceId,
+} from '../lib/devices/devices'
 import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
@@ -78,6 +82,93 @@ export const WebRTC: FC<WebRTCProps> = ({
   let localVideos = 0
   let remoteTracks = {}
   let remoteVideos = 0
+
+  const handleSipUpdateJsep = useCallback((jsep: any, sourceEvent: string) => {
+    if (!jsep) {
+      return
+    }
+
+    if (jsep.type === 'answer') {
+      handleRemote(jsep)
+      return
+    }
+
+    if (jsep.type !== 'offer') {
+      console.warn('[SIP UPDATE] Unsupported JSEP type', {
+        sourceEvent,
+        type: jsep.type,
+      })
+      handleRemote(jsep)
+      return
+    }
+
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    const { isLocalVideoEnabled } = store.getState().currentCall
+
+    if (!sipcall) {
+      return
+    }
+
+    const transceivers: RTCRtpTransceiver[] = sipcall?.webrtcStuff?.pc?.getTransceivers?.() ?? []
+    const hasLocalAudioSender = transceivers.some(
+      (transceiver) => transceiver.sender?.track?.kind === 'audio',
+    )
+    const hasLocalVideoSender = transceivers.some(
+      (transceiver) => transceiver.sender?.track?.kind === 'video',
+    )
+    const tracks: JanusTrack[] = []
+    const offeredAudio = typeof jsep.sdp === 'string' && jsep.sdp.includes('m=audio ')
+    const offeredVideo = typeof jsep.sdp === 'string' && jsep.sdp.includes('m=video ')
+
+    if (offeredAudio && !hasLocalAudioSender) {
+      const currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
+
+      tracks.push(
+        currentAudioInputDeviceId
+          ? {
+              type: 'audio',
+              capture: { deviceId: { exact: currentAudioInputDeviceId } },
+              recv: true,
+            }
+          : { type: 'audio', capture: true, recv: true },
+      )
+    }
+
+    if (offeredVideo) {
+      if (isLocalVideoEnabled) {
+        const currentVideoInputDeviceId = getCurrentVideoInputDeviceId()
+
+        tracks.push(
+          currentVideoInputDeviceId
+            ? {
+                type: 'video',
+                capture: { deviceId: { exact: currentVideoInputDeviceId } },
+                recv: true,
+              }
+            : { type: 'video', capture: true, recv: true },
+        )
+      } else {
+        tracks.push({ type: 'video', recv: true })
+      }
+    }
+
+    sipcall.createAnswer({
+      jsep,
+      tracks,
+      success: function (answerJsep: any) {
+        sipcall.send({
+          message: { request: 'update' },
+          jsep: answerJsep,
+        })
+      },
+      error: function (error: any) {
+        console.error('[SIP UPDATE] WebRTC error...', {
+          sourceEvent,
+          error,
+        })
+      },
+    })
+  }, [])
 
   // Initializes the webrtc connection and handlers
   const initWebRTC = useCallback(() => {
@@ -567,6 +658,18 @@ export const WebRTC: FC<WebRTCProps> = ({
                         store.dispatch.player.stopAudioPlayer()
 
                         // Update webrtc lastActivity time
+                        dispatch.webrtc.updateLastActivity(new Date().getTime())
+                        break
+
+                      case 'updatingcall':
+                        if (janus.current.log) {
+                          janus.current.log('Got SIP re-INVITE, preparing update answer')
+                        }
+
+                        if (jsep) {
+                          handleSipUpdateJsep(jsep, 'updatingcall')
+                        }
+
                         dispatch.webrtc.updateLastActivity(new Date().getTime())
                         break
 
