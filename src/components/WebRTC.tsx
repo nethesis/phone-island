@@ -549,7 +549,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                         }
                         // Set the remote description to janus lib
                         if (jsep) {
-                          handleSipUpdateJsep(jsep, 'progress')
+                          handleRemote(jsep)
                         }
                         // Update webrtc lastActivity time
                         dispatch.webrtc.updateLastActivity(new Date().getTime())
@@ -633,7 +633,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                         }
                         // Set the remote description to janus lib
                         if (jsep) {
-                          handleSipUpdateJsep(jsep, 'accepted')
+                          handleRemote(jsep)
                         }
                         // Clear jsepGlobal after call is accepted
                         console.log('[JSEP] Clearing jsepGlobal after call accepted', {
