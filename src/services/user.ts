@@ -266,23 +266,25 @@ export async function getFeatureCodes(): Promise<any> {
 }
 
 /**
- * Check if a call summary/transcription exists for a given uniqueId
- * Returns: { uniqueid: string, has_summary: boolean }
+ * Check if a call summary/transcription exists for a given uniqueid
+ * Returns: { has_summary: boolean }
  * Throws:
  *   - Error with status 204 when the summary is not ready yet.
  *   - Error with the corresponding HTTP status code for any other non-200 response
  *     (including, but not limited to, 401, 403, 404, 503).
  */
-export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: string; has_summary: boolean }> {
+export async function checkSummaryCall(uniqueid: string, linkedid?: string): Promise<void> {
   const { baseURL, headers } = store.getState().fetchDefaults
-  const response = await fetch(`${baseURL}/summary/${uniqueId}`, {
+  const queryString = linkedid ? `?linkedid=${encodeURIComponent(linkedid)}` : ''
+  const url = `${baseURL}/summary/${uniqueid}${queryString}`
+  const response = await fetch(url, {
     method: 'HEAD',
     headers: { ...headers },
   })
 
   // 200 - Summary exists
   if (response.status === 200) {
-    return { uniqueid: uniqueId, has_summary: true }
+    return
   }
 
   // 204 - Summary not present yet (not an error, just not ready)
@@ -299,15 +301,17 @@ export async function checkSummaryCall(uniqueId: string): Promise<{ uniqueid: st
 }
 
 /**
- * Watch for call summary/transcription for a given linkedId (uniqueid)
+ * Watch for call summary/transcription for a given linkedid and uniqueid.
+ * If uniqueid differs from linkedid (e.g. queue call), both are sent.
  */
-export async function watchSummaryCall(uniqueid: string): Promise<void> {
+export async function watchSummaryCall(linkedid: string, uniqueid: string): Promise<void> {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/summary/watch`, {
+    const url = `${baseURL}/summary/watch`
+    const response = await fetch(url, {
       method: 'POST',
       headers: { ...headers },
-      body: JSON.stringify({ uniqueid }),
+      body: JSON.stringify({ linkedid, uniqueid }),
     })
     if (!response.ok) {
       throw new Error(`Failed to watch summary call: ${response.status} ${response.statusText}`)
