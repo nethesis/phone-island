@@ -5,6 +5,7 @@ import React, { type FC, useMemo, useCallback, memo } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faPhone,
   faEarListen,
@@ -145,7 +146,7 @@ const CallView: FC<CallViewProps> = () => {
   const renderLandlinePhoneDiv = useCallback(
     () => (
       <div className='pi-text-gray-600 dark:pi-text-gray-300 pi-font-normal pi-text-sm pi-flex pi-items-center pi-truncate'>
-        <FontAwesomeIcon size='sm' icon={faOfficePhone} className='pi-mr-1' />
+        <FontAwesomeIcon size='sm' icon={faOfficePhone as IconProp} className='pi-mr-1' />
         <span className='pi-max-w-16 pi-truncate'>
           {currentUser?.default_device?.description || t('Common.Physical phone')}
         </span>
@@ -415,15 +416,15 @@ const CallView: FC<CallViewProps> = () => {
         {shouldShowStreamingImage ? (
           <>
             <div className='pi-flex pi-items-center pi-justify-between'>
-              <div className='pi-flex pi-items-center pi-gap-4'>
+              <div className='pi-flex pi-min-w-0 pi-flex-1 pi-items-center pi-gap-4'>
                 {renderStatusIcon()}
-                <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2'>
+                <div className='pi-flex pi-min-w-0 pi-flex-1 pi-flex-col pi-justify-center pi-space-y-2'>
                   <DisplayName />
                   <Number />
                 </div>
               </div>
 
-              <div className='pi-flex pi-gap-2'>
+              <div className='pi-flex pi-flex-shrink-0 pi-gap-2'>
                 <Hangup description={t('Tooltip.Hangup')} />
                 {!outgoing && (
                   <Button
