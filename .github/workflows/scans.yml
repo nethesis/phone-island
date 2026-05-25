@@ -21,7 +21,7 @@ jobs:
       - name: Generate Trivy GitHub report
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          version: 'v0.69.2'
+          version: 'v0.70.0'
           scan-type: 'fs'
           scan-ref: '.'
           format: 'github'
@@ -31,7 +31,7 @@ jobs:
       - name: Generate Trivy SARIF report
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          version: 'v0.69.2'
+          version: 'v0.70.0'
           scan-type: 'fs'
           scan-ref: '.'
           format: 'sarif'
