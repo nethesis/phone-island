@@ -813,6 +813,8 @@ export const Socket: FC<SocketProps> = ({
           dispatch.player.stopAudioPlayer()
           // Reset current call info
           dispatch.currentCall.reset()
+          dispatch.listen.reset()
+          dispatch.intrude.reset()
           dispatch.physicalRecorder.setRecordingTempVariable(false)
           // Reset isFromStreaming flag
           dispatch.island.setIsFromStreaming(false)
