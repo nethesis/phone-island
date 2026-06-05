@@ -83,6 +83,13 @@ export const Socket: FC<SocketProps> = ({
   } | null>(null)
   const summaryConversationCache = useRef<Map<string, SummaryConversationCacheEntry>>(new Map())
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
+  // Identifiers of the transcription the user currently has open. Incoming
+  // realtime chunks are matched against these to avoid mixing transcripts from
+  // a different concurrent call into the open view.
+  const activeTranscriptionIdsRef = useRef<{ linkedid: string | null; uniqueid: string | null }>({
+    linkedid: null,
+    uniqueid: null,
+  })
 
   // Event listener for starting transcription
   useEventListener('phone-island-start-transcription', (data: any) => {
@@ -91,6 +98,10 @@ export const Socket: FC<SocketProps> = ({
       const uniqueid = data?.uniqueid || data?.uniqueId
       if (!linkedid && !uniqueid) {
         return
+      }
+      activeTranscriptionIdsRef.current = {
+        linkedid: linkedid || null,
+        uniqueid: uniqueid || null,
       }
       socket.current.emit('start_transcription', {
         linkedid,
@@ -107,6 +118,7 @@ export const Socket: FC<SocketProps> = ({
       if (!linkedid && !uniqueid) {
         return
       }
+      activeTranscriptionIdsRef.current = { linkedid: null, uniqueid: null }
       socket.current.emit('stop_transcription', {
         linkedid,
         uniqueid,
@@ -1387,6 +1399,25 @@ export const Socket: FC<SocketProps> = ({
 
       // Handle satellite/transcription messages
       socket.current.on('satellite/transcription', (transcriptionData: any) => {
+        // Drop chunks belonging to a different call than the one open in the
+        // transcription view, to prevent cross-call transcript mixing when more
+        // than one call is being transcribed at the same time.
+        //
+        // The realtime chunk identifies its call in the `uniqueid` field, which
+        // actually carries the call_id (linkedid when available — see satellite
+        // backend). We only filter when we know the active linkedid: in that case
+        // matching is reliable. If we don't, we forward everything (unchanged
+        // behaviour) to avoid ever dropping a valid chunk.
+        const active = activeTranscriptionIdsRef.current
+        const chunkId = transcriptionData?.uniqueid
+        const chunkLinkedId = transcriptionData?.linkedid
+        if (active.linkedid && chunkId) {
+          const matchesActive = (id: any) =>
+            id != null && (id === active.linkedid || id === active.uniqueid)
+          if (!matchesActive(chunkId) && !matchesActive(chunkLinkedId)) {
+            return
+          }
+        }
         // Dispatch the transcription event to external listeners
         eventDispatch('phone-island-conversation-transcription', transcriptionData)
       })
