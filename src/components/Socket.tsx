@@ -94,15 +94,14 @@ export const Socket: FC<SocketProps> = ({
   // Event listener for starting transcription
   useEventListener('phone-island-start-transcription', (data: any) => {
     if (socket.current) {
-      const linkedid = data?.linkedid || data?.linkedId
-      const uniqueid = data?.uniqueid || data?.uniqueId
+      // Fall back to the other identifier so both fields are always populated
+      // (the backend keys the stream on linkedid || uniqueid).
+      const linkedid = data?.linkedid || data?.linkedId || data?.uniqueid || data?.uniqueId || null
+      const uniqueid = data?.uniqueid || data?.uniqueId || linkedid
       if (!linkedid && !uniqueid) {
         return
       }
-      activeTranscriptionIdsRef.current = {
-        linkedid: linkedid || null,
-        uniqueid: uniqueid || null,
-      }
+      activeTranscriptionIdsRef.current = { linkedid, uniqueid }
       socket.current.emit('start_transcription', {
         linkedid,
         uniqueid,
@@ -113,8 +112,10 @@ export const Socket: FC<SocketProps> = ({
   // Event listener for stopping transcription
   useEventListener('phone-island-stop-transcription', (data: any) => {
     if (socket.current) {
-      const linkedid = data?.linkedid || data?.linkedId
-      const uniqueid = data?.uniqueid || data?.uniqueId
+      // Fall back to the other identifier so both fields are always populated
+      // (matches the start_transcription payload above).
+      const linkedid = data?.linkedid || data?.linkedId || data?.uniqueid || data?.uniqueId || null
+      const uniqueid = data?.uniqueid || data?.uniqueId || linkedid
       if (!linkedid && !uniqueid) {
         return
       }

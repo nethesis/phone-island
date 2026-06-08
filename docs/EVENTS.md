@@ -475,7 +475,7 @@ The event to start the recording
 ### Call Summary/Transcription Check Events
 
 #### `phone-island-summary-call-check`
-The event to check if a call summary/transcription exists for a given unique ID. This event triggers an API call to verify the presence of the transcription.
+The event to check if a call summary/transcription exists for a given call. This event triggers an API call to verify the presence of the transcription. The payload requires both `linkedid` and `uniqueid`.
 
 ```json
 {
@@ -485,7 +485,7 @@ The event to check if a call summary/transcription exists for a given unique ID.
 ```
 
 #### `phone-island-call-summary-notify`
-The event to watch and register for call summary/transcription notifications for a given unique ID. This event triggers a POST request to subscribe to summary updates.
+The event to watch and register for call summary/transcription notifications for a given call. This event triggers a POST request to subscribe to summary updates. The payload requires both `linkedid` and `uniqueid`.
 
 ```json
 {

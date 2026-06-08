@@ -266,8 +266,8 @@ export async function getFeatureCodes(): Promise<any> {
 }
 
 /**
- * Check if a call summary/transcription exists for a given uniqueid
- * Returns: { has_summary: boolean }
+ * Check if a call summary/transcription exists for a given uniqueid.
+ * Resolves (returns void) when the summary exists (HTTP 200).
  * Throws:
  *   - Error with status 204 when the summary is not ready yet.
  *   - Error with the corresponding HTTP status code for any other non-200 response
