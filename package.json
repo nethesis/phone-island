@@ -130,7 +130,7 @@
   },
   "overrides": {
     "@tootallnate/once": "^3.0.0",
-    "esbuild": "^0.25.11",
+    "esbuild": "^0.28.0",
     "nth-check": "^2.0.1",
     "serialize-javascript": "^7.0.0",
     "tar": "^7.5.1"
