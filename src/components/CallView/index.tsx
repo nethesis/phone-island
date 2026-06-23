@@ -37,11 +37,19 @@ function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
 }
 
-const Details = memo(({ children }: { children: React.ReactNode }) => (
-  <div className='pi-grid pi-min-w-0 pi-self-center pi-gap-1 pi-grid-cols-1 pi-grid-rows-2'>
-    {children}
-  </div>
-))
+const Details = memo(
+  ({
+    children,
+    className = 'pi-gap-1 pi-grid-rows-2',
+  }: {
+    children: React.ReactNode
+    className?: string
+  }) => (
+    <div className={`pi-grid pi-min-w-0 pi-self-center pi-grid-cols-1 ${className}`}>
+      {children}
+    </div>
+  ),
+)
 Details.displayName = 'Details'
 
 const QueueBadge = memo(
@@ -68,6 +76,33 @@ const QueueBadge = memo(
   },
 )
 QueueBadge.displayName = 'QueueBadge'
+
+const IncomingQueueBadge = memo(
+  ({
+    label,
+    tooltipContent,
+  }: {
+    label: string
+    tooltipContent?: string
+  }) => {
+    if (!label) {
+      return null
+    }
+
+    return (
+      <span
+        className='pi-inline-flex pi-w-fit pi-max-w-full pi-flex-none pi-items-center pi-gap-1.5 pi-self-start pi-rounded-full pi-bg-iconSecondary pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-leading-none pi-text-iconWhite dark:pi-bg-iconSecondaryDark'
+        data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
+        data-tooltip-content={tooltipContent || ''}
+        aria-label={tooltipContent || label}
+      >
+        <FontAwesomeIcon icon={faUsers} className='pi-h-3 pi-w-3 pi-flex-none' />
+        <span className='pi-block pi-max-w-28 pi-truncate'>{label}</span>
+      </span>
+    )
+  },
+)
+IncomingQueueBadge.displayName = 'IncomingQueueBadge'
 
 /**
  * The main view to manage calls, the starting point for calls actions flows
@@ -141,6 +176,11 @@ const CallView: FC<CallViewProps> = () => {
 
     return `${t('Common.Queue')}: ${queueLabel}`
   }, [throughQueue, queueLabel, t])
+
+  const shouldShowIncomingQueueBadge = useMemo(
+    () => Boolean(incoming && !accepted && throughQueue && queueLabel),
+    [accepted, incoming, throughQueue, queueLabel],
+  )
 
   const renderLandlinePhoneDiv = useCallback(
     () => (
@@ -307,6 +347,16 @@ const CallView: FC<CallViewProps> = () => {
       )
     }
 
+    if (shouldShowIncomingQueueBadge) {
+      return (
+        <Details className='pi-grid-rows-[20px_24px_24px] pi-gap-0.5'>
+          <IncomingQueueBadge label={queueLabel} tooltipContent={queueTooltipContent} />
+          <DisplayName />
+          <Number />
+        </Details>
+      )
+    }
+
     return (
       <Details>
         {accepted && throughQueue && queueLabel ? (
@@ -344,6 +394,7 @@ const CallView: FC<CallViewProps> = () => {
     throughQueue,
     queueLabel,
     queueTooltipContent,
+    shouldShowIncomingQueueBadge,
   ])
 
   const renderAudioIndicator = useCallback(() => {
