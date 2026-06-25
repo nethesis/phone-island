@@ -17,6 +17,9 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     incomingWebRTC,
     incomingSocket,
     conferencing,
+    throughQueue,
+    queueName,
+    queueNumber,
   } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
   const { view, isOpen, actionsExpanded, sideViewIsVisible,transcriptionViewIsVisible, isFromStreaming, isExtraLarge } = useSelector(
@@ -74,10 +77,17 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               height: variants.call.expanded.listening.height,
             }
           } else if (incoming && !isFromStreaming) {
-            size = {
-              width: variants.call.expanded.incoming.width,
-              height: variants.call.expanded.incoming.height,
-            }
+            const showIncomingQueueBadge =
+              incoming && !accepted && throughQueue && Boolean(queueName || queueNumber)
+            size = showIncomingQueueBadge
+              ? {
+                width: variants.call.expanded.incomingQueue.width,
+                height: variants.call.expanded.incomingQueue.height,
+              }
+              : {
+                width: variants.call.expanded.incoming.width,
+                height: variants.call.expanded.incoming.height,
+              }
           } else if (incoming && isFromStreaming) {
             size = {
               width: variants.call.expanded.incomingStreaming.width,
@@ -242,7 +252,10 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     incomingSocket,
     isActive,
     isFromStreaming,
-    isExtraLarge
+    isExtraLarge,
+    throughQueue,
+    queueName,
+    queueNumber,
   ])
 
   useEffect(() => {

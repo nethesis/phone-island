@@ -225,7 +225,7 @@ const CallView: FC<CallViewProps> = () => {
     let baseClasses = 'pi-grid pi-items-center'
 
     if (isOpen) {
-      baseClasses = 'pi-grid pi-items-start'
+      baseClasses = shouldShowIncomingQueueBadge ? 'pi-grid pi-items-center' : 'pi-grid pi-items-start'
 
       if (accepted) {
         baseClasses += ' pi-grid-rows-[72px_1fr]'
@@ -237,7 +237,7 @@ const CallView: FC<CallViewProps> = () => {
     }
 
     return shouldShowStreamingImage ? 'pi-flex pi-flex-col' : baseClasses
-  }, [isOpen, accepted, incoming, outgoing, shouldShowStreamingImage])
+  }, [isOpen, accepted, incoming, outgoing, shouldShowStreamingImage, shouldShowIncomingQueueBadge])
 
   const topContentClasses = useMemo(() => {
     let columns = ''
@@ -254,10 +254,10 @@ const CallView: FC<CallViewProps> = () => {
       columns = 'pi-grid-cols-[24px_66px_24px]'
     }
 
-    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${
-      isOpen ? 'start' : 'center'
-    } pi-justify-center pi-w-full`
-  }, [isOpen, accepted, incoming, outgoing])
+    const itemsAlign = isOpen && !shouldShowIncomingQueueBadge ? 'start' : 'center'
+
+    return `pi-grid ${columns} pi-gap-${isOpen ? '5' : '3'} pi-items-${itemsAlign} pi-justify-center pi-w-full`
+  }, [isOpen, accepted, incoming, outgoing, shouldShowIncomingQueueBadge])
 
   const getGridClasses = useMemo(() => {
     if (shouldShowStreamingImage) return 'pi-grid-cols-3'
