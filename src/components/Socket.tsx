@@ -7,6 +7,7 @@ import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import { getApiMode } from './RestAPI'
 import { getDisplayName } from '../lib/phone/conversation'
+import { searchPhonebook } from '../services/phonebook'
 import { getCurrentUserInfo } from '../services/user'
 import busyRingtone from '../static/busy_ringtone'
 import {
@@ -82,6 +83,14 @@ export const Socket: FC<SocketProps> = ({
     phase: 'waiting' | 'connected'
   } | null>(null)
   const summaryConversationCache = useRef<Map<string, SummaryConversationCacheEntry>>(new Map())
+  // Caller names resolved via a fallback phonebook lookup (by digits-only
+  // number), used when the server could not resolve the name itself (e.g.
+  // group-shared phonebook contacts). Persisted across socket events so the
+  // resolved name survives the ringing -> connected transitions.
+  const resolvedContactNamesRef = useRef<Map<string, string>>(new Map())
+  // Conversation ids for which a fallback lookup has already been issued, to
+  // avoid firing the same request on every socket event.
+  const contactLookupConversationsRef = useRef<Set<string>>(new Set())
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
   // Identifiers of the transcription the user currently has open. Incoming
   // realtime chunks are matched against these to avoid mixing transcripts from
@@ -192,6 +201,90 @@ export const Socket: FC<SocketProps> = ({
           )
         }
       }
+    }
+
+    const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
+
+    /**
+     * Display name for a conversation, preferring a name resolved by the
+     * fallback phonebook lookup when the server itself could not resolve one
+     * (i.e. when getDisplayName falls back to the bare number). Group-shared
+     * phonebook contacts are only resolved by the middleware search endpoint,
+     * never by the realtime server side.
+     */
+    const getResolvedDisplayName = (conv: ConversationTypes) => {
+      const serverName = getDisplayName(conv)
+      const number = (conv?.counterpartNum || '').trim()
+      // The server already resolved a real name (not the bare number).
+      if (serverName && serverName !== number) {
+        return serverName
+      }
+      const cached = number ? resolvedContactNamesRef.current.get(onlyDigits(number)) : undefined
+      return cached || serverName
+    }
+
+    /**
+     * Best-effort fallback: for an incoming external call whose name the server
+     * did not resolve, query the middleware phonebook by number and update the
+     * displayed caller name. Reuses the same search path as the phonebook UI,
+     * so it honors the group-shared visibility rules.
+     */
+    const resolveIncomingContactName = (conv: ConversationTypes) => {
+      if (!conv || conv.direction !== 'in') return
+      const number = (conv.counterpartNum || '').trim()
+      if (number.length < 3) return
+
+      // Skip when the server already provided a real name.
+      const serverName = (conv.counterpartName || '').trim()
+      if (serverName && serverName !== '<unknown>' && serverName !== number) return
+
+      // Skip internal extensions (operators resolve via the users store) and
+      // streaming sources (handled separately).
+      const { extensions } = store.getState().users
+      if (extensions && extensions[number]) return
+      if (isFromStreaming(number)) return
+
+      // Already resolved or already looked up for this conversation.
+      const target = onlyDigits(number)
+      if (resolvedContactNamesRef.current.has(target)) return
+      if (conv.id && contactLookupConversationsRef.current.has(conv.id)) return
+      if (conv.id) {
+        // Best-effort de-dup cache: bound it so a long-lived session cannot grow
+        // it without limit. Clearing only risks one redundant lookup.
+        if (contactLookupConversationsRef.current.size > 500) {
+          contactLookupConversationsRef.current.clear()
+        }
+        contactLookupConversationsRef.current.add(conv.id)
+      }
+
+      searchPhonebook(1, number, '')
+        .then((result: any) => {
+          const rows = result?.rows || []
+          const match = rows.find((row: any) =>
+            [row.extension, row.workphone, row.homephone, row.cellphone, row.fax].some(
+              (field: string) => {
+                const digits = onlyDigits(field)
+                return (
+                  digits.length > 0 &&
+                  (digits === target || digits.endsWith(target) || target.endsWith(digits))
+                )
+              },
+            ),
+          )
+          const resolvedName = (match?.name || match?.company || '').trim()
+          if (!resolvedName) return
+
+          resolvedContactNamesRef.current.set(target, resolvedName)
+
+          // Only apply if the same call is still the current one.
+          const current = store.getState().currentCall
+          if (onlyDigits(current.number) === target) {
+            dispatch.currentCall.updateCurrentCall({ displayName: resolvedName })
+          }
+        })
+        .catch(() => {
+          // Fallback resolution is best-effort; ignore failures.
+        })
     }
 
     const getCurrentCallQueuePayload = (conv: ConversationTypes) => {
@@ -495,6 +588,10 @@ export const Socket: FC<SocketProps> = ({
               // Handle streaming source for incoming calls
               handleStreamingSource(conv)
 
+              // Fallback: resolve the caller name from the phonebook when the
+              // server could not (e.g. group-shared contacts).
+              resolveIncomingContactName(conv)
+
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
                 (uaType === 'desktop' &&
@@ -504,7 +601,7 @@ export const Socket: FC<SocketProps> = ({
               ) {
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
-                  displayName: getDisplayName(conv),
+                  displayName: getResolvedDisplayName(conv),
                   number: `${conv.counterpartNum}`,
                   incomingSocket: true,
                   incoming: true,
@@ -554,7 +651,7 @@ export const Socket: FC<SocketProps> = ({
                 store.dispatch.island.setUrlOpened(false)
                 eventDispatch('phone-island-url-parameter-opened', {
                   counterpartNum: conv.counterpartNum,
-                  counterpartName: getDisplayName(conv),
+                  counterpartName: getResolvedDisplayName(conv),
                   owner: conv.owner,
                   uniqueId: conv.uniqueId,
                   linkedId: conv.linkedId,
@@ -583,7 +680,7 @@ export const Socket: FC<SocketProps> = ({
                   // Current call accepted and update connected call
                   dispatch.currentCall.updateCurrentCall({
                     conversationId: conv.id,
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedDisplayName(conv),
                     number: `${conv.counterpartNum}`,
                     ownerExtension: conv.owner,
                     username:
@@ -602,7 +699,7 @@ export const Socket: FC<SocketProps> = ({
                   // Add call to transfer calls
                   dispatch.currentCall.addTransferCalls({
                     type: 'transferred',
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedDisplayName(conv),
                     number: `${conv.counterpartNum}`,
                     startTime: `${getTimestampInSeconds()}`,
                   })
@@ -1430,6 +1527,11 @@ export const Socket: FC<SocketProps> = ({
     // Close the socket connection
     return () => {
       clearInterval(connectionCheckInterval.current)
+      // Drop fallback-resolved caller names so a previous user's group-shared
+      // phonebook names cannot surface after a host/user/auth change (the effect
+      // re-runs on username/authToken changes without unmounting the component).
+      resolvedContactNamesRef.current.clear()
+      contactLookupConversationsRef.current.clear()
       socket.current.close()
     }
   }, [hostName, username, authToken, uaType, dispatch])
