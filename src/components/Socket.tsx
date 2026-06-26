@@ -296,6 +296,9 @@ export const Socket: FC<SocketProps> = ({
       queueContext: ReturnType<typeof getCurrentCallQueuePayload>,
     ) => {
       const currentCall = store.getState().currentCall
+      const queueId = queueContext?.queueId || currentCall.queueId || ''
+      const queueName = queueContext?.queueName || currentCall.queueName || ''
+      const queueNumber = queueContext?.queueNumber || currentCall.queueNumber || ''
 
       return {
         conversationId: conv.id,
@@ -303,9 +306,9 @@ export const Socket: FC<SocketProps> = ({
         uniqueId: conv.uniqueId,
         ownerExtension: conv.owner,
         number: `${conv.counterpartNum || ''}`,
-        queueId: queueContext?.queueId || currentCall.queueId || '',
-        queueName: queueContext?.queueName || currentCall.queueName || '',
-        queueNumber: queueContext?.queueNumber || currentCall.queueNumber || '',
+        queueId,
+        queueName,
+        queueNumber,
         queuePosition: queueContext?.queuePosition || '',
         queueWaitingTime: queueContext?.queueWaitingTime || 0,
       }
@@ -583,6 +586,9 @@ export const Socket: FC<SocketProps> = ({
                 break
               }
 
+              const ringingQueueContext = getCurrentCallQueuePayload(conv)
+              const ringingQueuePayload = getQueuePayloadWithFallback(conv, ringingQueueContext)
+
               syncCurrentUserQueueCall(conv)
 
               // Handle streaming source for incoming calls
@@ -605,6 +611,16 @@ export const Socket: FC<SocketProps> = ({
                   number: `${conv.counterpartNum}`,
                   incomingSocket: true,
                   incoming: true,
+                  throughQueue: Boolean(
+                    ringingQueuePayload.queueId ||
+                      ringingQueuePayload.queueName ||
+                      ringingQueuePayload.queueNumber,
+                  ),
+                  queueId: ringingQueuePayload.queueId,
+                  queueName: ringingQueuePayload.queueName,
+                  queueNumber: ringingQueuePayload.queueNumber,
+                  queuePosition: ringingQueuePayload.queuePosition,
+                  queueWaitingTime: ringingQueuePayload.queueWaitingTime,
                   username:
                     `${
                       extensions &&
@@ -813,6 +829,7 @@ export const Socket: FC<SocketProps> = ({
           dispatch.player.stopAudioPlayer()
           // Reset current call info
           dispatch.currentCall.reset()
+          dispatch.listen.reset()
           dispatch.physicalRecorder.setRecordingTempVariable(false)
           // Reset isFromStreaming flag
           dispatch.island.setIsFromStreaming(false)
