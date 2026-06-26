@@ -248,7 +248,14 @@ export const Socket: FC<SocketProps> = ({
       const target = onlyDigits(number)
       if (resolvedContactNamesRef.current.has(target)) return
       if (conv.id && contactLookupConversationsRef.current.has(conv.id)) return
-      if (conv.id) contactLookupConversationsRef.current.add(conv.id)
+      if (conv.id) {
+        // Best-effort de-dup cache: bound it so a long-lived session cannot grow
+        // it without limit. Clearing only risks one redundant lookup.
+        if (contactLookupConversationsRef.current.size > 500) {
+          contactLookupConversationsRef.current.clear()
+        }
+        contactLookupConversationsRef.current.add(conv.id)
+      }
 
       searchPhonebook(1, number, '')
         .then((result: any) => {
@@ -1520,6 +1527,11 @@ export const Socket: FC<SocketProps> = ({
     // Close the socket connection
     return () => {
       clearInterval(connectionCheckInterval.current)
+      // Drop fallback-resolved caller names so a previous user's group-shared
+      // phonebook names cannot surface after a host/user/auth change (the effect
+      // re-runs on username/authToken changes without unmounting the component).
+      resolvedContactNamesRef.current.clear()
+      contactLookupConversationsRef.current.clear()
       socket.current.close()
     }
   }, [hostName, username, authToken, uaType, dispatch])
