@@ -324,6 +324,9 @@ const findFirstExtesnionNotEmpty = (data) => {
     if (Object.keys(data[key]).length !== 0) {
       const firstEntry: any = Object.values(data[key])[0]
       return {
+        // the map is keyed by the current user's own extension: this is the endpoint that
+        // owns the conversation and must be used for recording, regardless of the call direction.
+        exten: key,
         id: firstEntry.id,
         recording: firstEntry.recording,
         recordingControlAvailable: firstEntry.recordingControlAvailable,
@@ -351,8 +354,10 @@ export async function recordCurrentCall(recordingValue: boolean) {
       return
     }
 
-    const numberToSendCall = firstExtensionNotEmpty?.id?.match(/\/(\d+)-/)
-    const endpointId = numberToSendCall[1]
+    // endpointId must be the current user's own extension (the map key), NOT the first channel
+    // parsed from the convid: when the user is the callee that channel is the other party, so
+    // start_record would be rejected ("endpoint not owned by the user").
+    const endpointId = firstExtensionNotEmpty?.exten
 
     const listenInformations = {
       convid: firstExtensionNotEmpty?.id?.toString(),
