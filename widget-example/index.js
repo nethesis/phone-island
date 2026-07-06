@@ -794,6 +794,11 @@ function initializeDebugModeToggle() {
     debugToggle.dataset.bound = 'true';
     debugToggle.addEventListener('change', (event) => {
         applyDebugMode(event.target.checked ? 'full' : 'minimal');
+        updateCitofonoButtonVisibility();
+        // Hide citofono panel when debug mode is disabled
+        if (!event.target.checked && typeof window.phoneIslandDev !== 'undefined' && window.phoneIslandDev.hidePanel) {
+            window.phoneIslandDev.hidePanel();
+        }
     });
 }
 
@@ -3084,6 +3089,32 @@ function initializeWidget(base64Token) {
 }
 
 // ===========================================
+// CITOFONO SIMULATOR (DEV ONLY)
+// ===========================================
+
+function updateCitofonoButtonVisibility() {
+    const btn = document.getElementById('citofonoSimulator');
+    if (!btn) return;
+    btn.style.display = currentDebugMode === 'full' ? 'inline-flex' : 'none';
+}
+
+function initializeCitofonoButton() {
+    const btn = document.getElementById('citofonoSimulator');
+    if (!btn) return;
+
+    updateCitofonoButtonVisibility();
+
+    if (btn.dataset.bound === 'true') return;
+    btn.dataset.bound = 'true';
+
+    btn.addEventListener('click', () => {
+        if (typeof window.phoneIslandDev !== 'undefined' && window.phoneIslandDev.togglePanel) {
+            window.phoneIslandDev.togglePanel();
+        }
+    });
+}
+
+// ===========================================
 // UI EVENT HANDLERS
 // ===========================================
 
@@ -3141,6 +3172,7 @@ function init() {
     applyTheme(currentTheme, false);
     initializePhoneNumberHelpers();
     initializeDebugModeToggle();
+    initializeCitofonoButton();
     updatePhoneIslandVersion();
 
     // Initialize event filter UI

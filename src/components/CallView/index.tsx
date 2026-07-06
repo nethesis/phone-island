@@ -465,16 +465,16 @@ const CallView: FC<CallViewProps> = () => {
       <div className={callViewClasses}>
         {shouldShowStreamingImage ? (
           <>
-            <div className='pi-flex pi-items-center pi-justify-between'>
-              <div className='pi-flex pi-items-center pi-gap-4'>
+            <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-gap-2'>
+              <div className='pi-flex pi-items-center pi-gap-4 pi-min-w-0 pi-flex-1'>
                 {renderStatusIcon()}
-                <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2'>
+                <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2 pi-min-w-0'>
                   <DisplayName />
                   <Number />
                 </div>
               </div>
 
-              <div className='pi-flex pi-gap-2'>
+              <div className='pi-flex pi-gap-2 pi-flex-shrink-0'>
                 <Hangup description={t('Tooltip.Hangup')} />
                 {!outgoing && (
                   <Button
