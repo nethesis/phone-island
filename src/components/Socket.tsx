@@ -979,8 +979,10 @@ export const Socket: FC<SocketProps> = ({
 
                     if (isStaleConnection) {
                       console.warn('Stale socket connection detected - forcing reconnection')
-                      // Force disconnect to trigger reconnection
+                      // A manual disconnect() disables socket.io auto-reconnection,
+                      // so an explicit connect() is required to actually reconnect
                       socket.current.disconnect()
+                      socket.current.connect()
                     }
 
                     dispatch.alerts.setAlert('socket_down')
@@ -1560,20 +1562,22 @@ export const Socket: FC<SocketProps> = ({
       const { data } = store.getState().alerts
       const { forceReload } = store.getState().island
 
-      // Check if socket is actually down using alerts (more reliable than socket.connected)
+      // Check the alert but also the real socket state: the socket can be
+      // disconnected without the socket_down alert being active, because the
+      // ping interval is cleared on disconnect so no ping ever fails
       const isSocketDown = data.socket_down?.active || false
+      const isSocketDisconnected = !socket.current?.connected
 
-      // Only reconnect if socket_down alert is active OR force reload is requested
-      if (isSocketDown || forceReload) {
+      // Only reconnect if socket is down/disconnected OR force reload is requested
+      if (isSocketDown || isSocketDisconnected || forceReload) {
         console.info(
           forceReload
             ? 'Force reload requested, performing Socket reconnection'
-            : 'Socket down detected (alert active), performing reconnection',
+            : 'Socket down detected (alert active or disconnected), performing reconnection',
         )
-        // Reset force reload flag
-        if (forceReload) {
-          store.dispatch.island.setForceReload(false)
-        }
+        // Note: forceReload is NOT reset here, the WebRTC reload effect runs
+        // after this one and needs to read it too; App resets it when the
+        // reload cycle completes
         // Clear the connection check interval to avoid stale ping timeouts during reconnection
         if (connectionCheckInterval.current) {
           clearInterval(connectionCheckInterval.current)

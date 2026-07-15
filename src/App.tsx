@@ -143,8 +143,24 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       setReload(false)
       setReloadedWebRTC(false)
       setReloadedSocket(false)
+      store.dispatch.island.setForceReload(false)
     }
   }, [reloadedSocket, reloadedWebRTC])
+
+  // Failsafe: if a reload cycle never completes (a reload effect returning
+  // without calling its reloaded callback), reload would stay true forever,
+  // making both the automatic monitor and the manual refresh button no-ops
+  useEffect(() => {
+    if (!reload) return
+    const failsafe = setTimeout(() => {
+      console.warn('Reload cycle did not complete within 30s, resetting reload state')
+      setReload(false)
+      setReloadedWebRTC(false)
+      setReloadedSocket(false)
+      store.dispatch.island.setForceReload(false)
+    }, 30000)
+    return () => clearTimeout(failsafe)
+  }, [reload])
 
   // Monitor alerts and trigger automatic reload when webrtc_down or socket_down become active
   useEffect(() => {
