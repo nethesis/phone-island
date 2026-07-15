@@ -445,6 +445,20 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.error(
                             'Registration failed: ' + result['code'] + ' ' + result['reason'],
                           )
+                        // Init is over (unsuccessfully): reset the init state now,
+                        // otherwise reload requests are skipped until the 30s safety
+                        // timeout and no registration retry is ever scheduled
+                        isInitializing.current = false
+                        if (initTimeoutRef.current) {
+                          clearTimeout(initTimeoutRef.current)
+                          initTimeoutRef.current = null
+                        }
+                        store.dispatch.webrtc.updateWebRTC({
+                          registered: false,
+                        })
+                        // Set the alert so the automatic reload monitor retries
+                        dispatch.alerts.setAlert('webrtc_down')
+                        eventDispatch('phone-island-alert-set', { type: 'webrtc_down' })
                         break
 
                       case 'unregistered':
@@ -1223,6 +1237,9 @@ export const WebRTC: FC<WebRTCProps> = ({
           })
         }
 
+        // If this run was also driven by a reload request, complete the cycle
+        // so App can reset the reload flag
+        if (reload && reloadedCallback) reloadedCallback()
         setConnectionReturned(false)
         return
       }
@@ -1234,6 +1251,10 @@ export const WebRTC: FC<WebRTCProps> = ({
             isReloading: isReloading.current,
             isInitializing: isInitializing.current
           })
+          // Complete the reload cycle anyway: without this callback the reload
+          // flag in App stays true forever and both the automatic monitor and
+          // the manual refresh button become no-ops
+          if (reloadedCallback) reloadedCallback()
           return
         }
 
