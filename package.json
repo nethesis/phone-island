@@ -98,7 +98,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.20.2",
+    "@babel/core": "^8.0.0",
     "@babel/preset-env": "^7.20.2",
     "@parcel/transformer-typescript-types": "^2.8.0",
     "@rollup/plugin-babel": "^6.0.2",
