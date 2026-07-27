@@ -16,7 +16,7 @@ jobs:
     name: SBOM
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Generate Trivy GitHub report
         uses: aquasecurity/trivy-action@v0.36.0
