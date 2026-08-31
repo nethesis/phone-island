@@ -106,7 +106,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^9.0.2",
+    "@rollup/plugin-typescript": "^12.0.0",
     "@testing-library/react": "^13.4.0",
     "@types/audioworklet": "^0.0.100",
     "@types/jest": "^29.2.2",
