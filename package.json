@@ -102,7 +102,7 @@
     "@babel/preset-env": "^7.20.2",
     "@parcel/transformer-typescript-types": "^2.8.0",
     "@rollup/plugin-babel": "^6.0.2",
-    "@rollup/plugin-commonjs": "^23.0.2",
+    "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",
