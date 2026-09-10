@@ -8,6 +8,18 @@ import { getCurrentAudioInputDeviceId, getSupportedDevices } from '../devices/de
 import { getJSONItem } from '../../utils'
 import { JanusTrack } from '../../types'
 
+// Strip chars that break the SIP Contact header: a leading "*" is read by Asterisk as
+// the wildcard Contact (REGISTER dropped), quotes and backslashes make sofia-sip fail.
+export function toSipDisplayName(name?: string): string {
+  if (!name) {
+    return ''
+  }
+  return name
+    .replace(/["\\\r\n\t]/g, '')
+    .trim()
+    .replace(/^\*+\s*/, '')
+}
+
 export function register({
   sipExten,
   sipSecret,
@@ -40,7 +52,7 @@ export function register({
       message: {
         request: 'register',
         username: `sip:${sipExten}@${sipHost}`,
-        display_name: name || '',
+        display_name: toSipDisplayName(name),
         secret: sipSecret,
         proxy: `sip:${sipHost}:${sipPort}`,
         outbound_proxy: `sip:${sipHost}:${sipPort}`,
