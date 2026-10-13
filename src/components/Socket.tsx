@@ -1005,7 +1005,7 @@ export const Socket: FC<SocketProps> = ({
       })
 
       socket.current.on('extenHangup', (res: any) => {
-        const { endpoints, username } = store.getState().currentUser
+        const { endpoints, username, call_summary_enabled } = store.getState().currentUser
         const { isActive, conferenceStartedFrom } = store.getState().conference
         const { view, previewCallFromMobileOrNethlink } = store.getState().island
 
@@ -1028,12 +1028,13 @@ export const Socket: FC<SocketProps> = ({
         const summaryConversationSelection = selectSummaryConversationForHangup(summaryExtension)
         const selectedConversation: any = summaryConversationSelection.conversation
 
-        // Check summary/transcription only for answered calls with a valid uniqueid.
+        // Check summary/transcription only for answered calls with a valid uniqueid,
+        // and only when call summary is enabled for the user.
         const linkedId = getConversationLinkedId(selectedConversation)
         const uniqueId = getConversationUniqueId(selectedConversation)
         const conversationWasConnected = selectedConversation?.connected || false
 
-        if (uniqueId && linkedId && conversationWasConnected) {
+        if (call_summary_enabled && uniqueId && linkedId && conversationWasConnected) {
           eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
           if (summaryExtension) {
             summaryConversationCache.current.delete(summaryExtension)

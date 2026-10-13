@@ -79,4 +79,5 @@ export interface UserInfoTypes {
   default_device?: UserExtensionTypes
   settings?: SettingTypes
   call_transcription_enabled?: boolean
+  call_summary_enabled?: boolean
 }
