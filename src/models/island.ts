@@ -59,10 +59,6 @@ export const island = createModel<RootModel>()({
       state.actionsExpanded = payload
       return state
     },
-    toggleInputOutputOpened: (state, payload: boolean) => {
-      state.inputOutputOpened = payload
-      return state
-    },
     setSettingsView: (state, payload: SettingsViewType) => {
       state.settingsView = payload
     },
@@ -93,15 +89,6 @@ export const island = createModel<RootModel>()({
       state.forceReload = payload
       return state
     },
-    resetSettingsView: (state) => {
-      state.settingsView = 'main'
-    },
-    setFullScreen: (state, payload: boolean) => {
-      return {
-        ...state,
-        isFullScreen: payload,
-      }
-    },
     setIsFromStreaming: (state, payload: boolean) => {
       return {
         ...state,
@@ -117,14 +104,8 @@ export const island = createModel<RootModel>()({
     resetPlayerClose: (state) => {
       return getResetState(state, false)
     },
-    resetIslandStore: (state) => {
-      return getResetState(state, true)
-    },
     _resetIslandStoreInternal: (state) => {
       return getResetState(state, true)
-    },
-    _resetPlayerCloseInternal: (state) => {
-      return getResetState(state, false)
     },
     setOperatorBusyCalledNumber: (state, payload: string) => {
       state.operatorBusy.calledNumber = payload
@@ -168,10 +149,6 @@ export const island = createModel<RootModel>()({
     },
     handleResetIslandStore: () => {
       dispatch.island._resetIslandStoreInternal()
-      eventDispatch('phone-island-transcription-close', {})
-    },
-    handleResetPlayerClose: () => {
-      dispatch.island._resetPlayerCloseInternal()
       eventDispatch('phone-island-transcription-close', {})
     },
   }),

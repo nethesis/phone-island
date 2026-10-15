@@ -5,7 +5,6 @@ import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 import { dispatchOutgoingCallStarted } from '../events/index'
 import { eventDispatch } from '../utils'
-import { PhonebookContact } from '../types/phonebook'
 
 const defaultState = {
   displayName: '',
@@ -115,10 +114,6 @@ export const currentCall = createModel<RootModel>()({
       state.isRecording = payload
       return state
     },
-    updateStartTime: (state, payload: string) => {
-      state.startTime = payload
-      return state
-    },
     updateIncoming: (state, payload: boolean) => {
       state.incoming = payload
       return state
@@ -133,12 +128,6 @@ export const currentCall = createModel<RootModel>()({
     setVideoTrackAdded: (state, payload: boolean) => {
       state.hasVideoTrackAdded = payload
       return state
-    },
-    updateConferencing: (state, payload: boolean) => {
-      return {
-        ...state,
-        conferencing: payload,
-      }
     },
   },
   effects: (dispatch) => ({
@@ -206,32 +195,6 @@ export type TransferCallsTypes = {
   displayName: string
   number: string
   startTime: string
-}
-
-export type chDestTypes = {
-  type: 'dest'
-  channel: string
-  callerNum: string
-  startTime: number
-  callerName: string
-  bridgedNum: string
-  bridgedName: string
-  inConference: boolean
-  channelStatus: string
-  bridgedChannel: string
-}
-
-export type chSourceTypes = {
-  type: 'source'
-  channel: string
-  callerNum: string
-  startTime: number
-  callerName: string
-  bridgedNum: string
-  bridgedName: string
-  inConference: boolean
-  channelStatus: string
-  bridgedChannel: string
 }
 
 export interface CurrentCallTypes {

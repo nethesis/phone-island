@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useEffect, useRef } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState } from '../store'
+import { useDispatch } from 'react-redux'
+import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import { getApiMode } from './RestAPI'
 import { getDisplayName } from '../lib/phone/conversation'
@@ -562,7 +562,6 @@ export const Socket: FC<SocketProps> = ({
           const { extensions } = store.getState().users
           const { default_device } = store.getState().currentUser
           const { endpoints, username } = store.getState().currentUser
-          const { incoming, outgoing } = store.getState().currentCall
 
           const hasOnlineNethlink = () => {
             if (!extensions || !username) return false
@@ -1502,10 +1501,6 @@ export const Socket: FC<SocketProps> = ({
         if (streamingData) {
           const { source, image } = streamingData
           if (source && image) {
-            const { isFromStreaming } = store.getState().island
-            const { streamingSourceNumber } = store.getState().currentCall
-            const sourceId = getStreamingSourceId(streamingSourceNumber)
-
             dispatch.streaming.updateSourceImage({
               source: source,
               image: image,

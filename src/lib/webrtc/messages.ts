@@ -5,7 +5,6 @@ import Janus from './janus'
 import { store } from '../../store'
 import adapter from 'webrtc-adapter'
 import { getCurrentAudioInputDeviceId, getSupportedDevices } from '../devices/devices'
-import { getJSONItem } from '../../utils'
 import { JanusTrack } from '../../types'
 
 // Strip chars that break the SIP Contact header: a leading "*" is read by Asterisk as
@@ -143,17 +142,6 @@ export function answerWebRTC() {
         },
       })
     }
-  }
-}
-
-export function decline() {
-  const { sipcall }: { sipcall: any } = store.getState().webrtc
-  if (sipcall) {
-    sipcall.send({
-      message: {
-        request: 'decline',
-      },
-    })
   }
 }
 

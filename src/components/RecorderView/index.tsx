@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useState, useRef, useEffect, useCallback, memo } from 'react'
+import React, { type FC, useRef, useEffect } from 'react'
 import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { Dispatch, RootState } from '../../store'
 import { Actions } from './Actions'
@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faXmark, faPlay } from '@fortawesome/free-solid-svg-icons'
-import { eventDispatch } from '../../utils'
 
 // The number of groups to be created
 // ...the minimun to have this effect is 2
@@ -91,14 +90,6 @@ export const RecorderView: FC<RecorderViewProps> = () => {
   }, [])
 
   const { t } = useTranslation()
-
-  function playerClose() {
-    if (audioPlayerPlaying) {
-      dispatch.player.stopAudioPlayer()
-      eventDispatch('phone-island-audio-player-close', {})
-    }
-    dispatch.island.resetPlayerClose()
-  }
 
   function close() {
     dispatch.island.resetPlayerClose()

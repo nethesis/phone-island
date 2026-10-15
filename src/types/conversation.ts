@@ -1,12 +1,6 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export interface ConversationsEventType {
-  [username: string]: {
-    conversations: ConversationsTypes
-  }
-}
-
 export interface ConversationsTypes {
   [id: string]: ConversationTypes
 }

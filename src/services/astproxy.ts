@@ -3,7 +3,6 @@
 
 import { store } from '../store'
 import { ExtensionsTypes, TransferTypes } from '../types'
-import { useSelector } from 'react-redux'
 
 /**
  * Get all extensions

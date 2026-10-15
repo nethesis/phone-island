@@ -39,15 +39,6 @@ const saveApiMode = (username: string, mode: 'new' | 'legacy') => {
 // Export function to get current API mode from localStorage
 export const getApiMode = (username: string) => getSavedApiMode(username)
 
-// Export function to reset API mode (useful for error recovery)
-export const resetApiMode = (username: string) => {
-  try {
-    localStorage.removeItem(`${API_MODE_STORAGE_KEY}_${username}`)
-  } catch (error) {
-    console.warn('Failed to reset API mode in localStorage:', error)
-  }
-}
-
 export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, children }) => {
   const dispatch = useDispatch<Dispatch>()
   const { fetchReady } = useSelector((state: RootState) => state.fetchDefaults)

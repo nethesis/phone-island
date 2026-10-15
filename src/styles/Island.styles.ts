@@ -1,15 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import styled, { css } from 'styled-components'
-
-export const StyledDetails = styled.div<StyledDetailsProps>`
-  display: grid;
-  align-self: center;
-  grid-gap: 0.25rem;
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(2, 24px);
-`
+import styled from 'styled-components'
 
 export const StyledTimer = styled.div<React.PropsWithChildren<StyledTimerProps>>`
   ${({ isOpen, size }) =>
@@ -26,15 +18,6 @@ export const StyledNumber = styled.div<React.PropsWithChildren<StyledNumberProps
   letter-spacing: 0.5px;
   max-width: fit-content;
 `
-
-export const StyledName = styled.div`
-  font-size: 1.125rem;
-  font-weight: 500;
-`
-
-interface StyledDetailsProps {
-  numberExists?: boolean
-}
 
 interface StyledTimerProps {
   isOpen: boolean

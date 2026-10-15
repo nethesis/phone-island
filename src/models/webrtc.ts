@@ -3,7 +3,6 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import { JanusTypes } from '../types'
 
 const defaultState = {
   INACTIVE_DEADLINE_TIME: 1000 * 60 * 45,

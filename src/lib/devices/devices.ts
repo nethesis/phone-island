@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {
-  MediaPermissionsError,
   MediaPermissionsErrorType,
   requestMediaPermissions,
 } from 'mic-check'
@@ -11,13 +10,11 @@ import { JanusTypes } from '../../types'
 import { store } from '../../store'
 import { isPhysical } from '../user/default_device'
 import { getJSONItem, setJSONItem } from '../../utils'
-import { eventDispatch} from '../../utils/genericFunctions/eventDispatch'
 
 const Janus: JanusTypes = JanusLib
 
 export const getSupportedDevices = function (origCallback: () => void) {
   let hasMicrophone = false
-  let hasSpeakers = false
   let hasWebcam = false
   let isMicrophoneAlreadyCaptured = false
   let isWebcamAlreadyCaptured = false
@@ -48,10 +45,6 @@ export const getSupportedDevices = function (origCallback: () => void) {
 
         if (device.kind === 'audioinput') {
           hasMicrophone = true
-        }
-
-        if (device.kind === 'audiooutput') {
-          hasSpeakers = true
         }
 
         if (device.kind === 'videoinput') {

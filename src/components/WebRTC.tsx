@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import adapter from 'webrtc-adapter'
 import JanusLib from '../lib/webrtc/janus.js'
-import type { JanusTrack, JanusTypes } from '../types'
+import type { JanusTrack } from '../types'
 import { register, unregister, handleRemote } from '../lib/webrtc/messages'
 import { store } from '../store'
 import {
@@ -112,9 +112,6 @@ export const WebRTC: FC<WebRTCProps> = ({
     const transceivers: RTCRtpTransceiver[] = sipcall?.webrtcStuff?.pc?.getTransceivers?.() ?? []
     const hasLocalAudioSender = transceivers.some(
       (transceiver) => transceiver.sender?.track?.kind === 'audio',
-    )
-    const hasLocalVideoSender = transceivers.some(
-      (transceiver) => transceiver.sender?.track?.kind === 'video',
     )
     const tracks: JanusTrack[] = []
     const offeredAudio = typeof jsep.sdp === 'string' && jsep.sdp.includes('m=audio ')
@@ -706,17 +703,6 @@ export const WebRTC: FC<WebRTCProps> = ({
                           // Stop the local audio element ringing
                           store.dispatch.player.stopAudioPlayer()
 
-                          // Check the janus doc before enable the following
-                          // if (
-                          //   result['code'] === 486 &&
-                          //   result['event'] === 'hangup' &&
-                          //   result['reason'] === 'Busy Here'
-                          // ) {
-                          //   dispatch.player.updateAudioSource({
-                          //     src: busyRingtone,
-                          //   })
-                          //   dispatch.player.playAudio()
-                          // }
                           // Reset current call info
                           store.dispatch.currentCall.reset()
                           if (janus.current.log)

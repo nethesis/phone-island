@@ -86,16 +86,4 @@ export const ringtones = createModel<RootModel>()({
       return defaultState
     },
   },
-  effects: (dispatch) => ({
-    /**
-     * Gets the currently selected ringtone's base64 audio data
-     */
-    getSelectedRingtoneAudio: (_: void, rootState): string => {
-      const { selectedRingtone, availableRingtones } = rootState.ringtones
-      const ringtone = (availableRingtones as RingtoneOption[]).find(
-        (r) => r.name === selectedRingtone,
-      )
-      return ringtone?.base64Audio || (availableRingtones as RingtoneOption[])[0].base64Audio
-    },
-  }),
 })

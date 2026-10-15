@@ -90,12 +90,6 @@ export const conference = createModel<RootModel>()({
         conferenceStartTime: isActive ? conferenceStartTime : null,
       }
     },
-    updateOwnerInformations: (state, payload: ConferenceUser | null) => {
-      return {
-        ...state,
-        ownerInformations: payload,
-      }
-    },
     setConferenceActive: (state, isActive: boolean) => {
       return {
         ...state,
@@ -108,18 +102,6 @@ export const conference = createModel<RootModel>()({
       return {
         ...state,
         conferenceStartedFrom,
-      }
-    },
-    resetTimer: (state) => {
-      return {
-        ...state,
-        conferenceStartTime: Date.now(),
-      }
-    },
-    resetFirstUserFlag: (state) => {
-      return {
-        ...state,
-        isFirstUser: false,
       }
     },
     toggleUserMuted: (state, payload: { extenId: string; muted?: boolean }) => {
@@ -184,12 +166,6 @@ export const conference = createModel<RootModel>()({
       return {
         ...state,
         pendingUsers: Object.keys(updatedPendingUsers).length > 0 ? updatedPendingUsers : null,
-      }
-    },
-    clearPendingUsers: (state) => {
-      return {
-        ...state,
-        pendingUsers: null,
       }
     },
     resetConference: () => defaultState,

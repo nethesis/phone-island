@@ -53,7 +53,6 @@ export function dispatchRecordingSave() {
  */
 export function dispatchPhysicalRecordingSave() {
   const tempFileName = store.getState().physicalRecorder.tempFileName
-  console.log('dispatchPhysicalRecordingSave', tempFileName)
   eventDispatch('phone-island-physical-recording-saved', {
     tempFileName,
   })

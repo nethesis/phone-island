@@ -23,28 +23,6 @@ export async function getCurrentUserInfo(): Promise<UserInfoTypes | undefined> {
   }
 }
 
-export async function setDefaultDevice(
-  default_type: string,
-  extensionNumber: string,
-): Promise<any> {
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-
-    let webrtcId: any = { id: extensionNumber }
-    let physicalId: any = { id: extensionNumber }
-    const response = await fetch(`${baseURL}/user/default_device`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: default_type === 'physical' ? JSON.stringify(physicalId) : JSON.stringify(webrtcId),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
-    }
-  } catch (error: any) {
-    throw new Error(error)
-  }
-}
-
 /**
  * Get all avatars
  */
@@ -102,23 +80,6 @@ export async function changeOperatorStatus(obj: any) {
 }
 
 export async function changeDefaultDevice(obj: any) {
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/user/default_device`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: JSON.stringify(obj),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
-    }
-    return true
-  } catch (error: any) {
-    throw error
-  }
-}
-
-export async function setMainDevice(obj: any) {
   try {
     const { baseURL, headers } = store.getState().fetchDefaults
     const response = await fetch(`${baseURL}/user/default_device`, {
@@ -217,31 +178,6 @@ export async function unsubscribe(obj: any) {
     }
     return true
   } catch (error: any) {
-    throw error
-  }
-}
-
-export async function setIncomingCallsPreference(settingsStatus: any) {
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/user/settings`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: JSON.stringify(settingsStatus),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
-    }
-
-    const contentType = response.headers.get('content-type')
-    if (contentType && contentType.includes('application/json')) {
-      const text = await response.text()
-      return text ? JSON.parse(text) : {}
-    }
-
-    return { success: true }
-  } catch (error: any) {
-    console.error('Error updating user settings:', error)
     throw error
   }
 }

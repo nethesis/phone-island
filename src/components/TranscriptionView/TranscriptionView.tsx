@@ -96,8 +96,6 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
   const [autoScroll, setAutoScroll] = useState(true)
 
   const MAX_VISIBLE_MESSAGES = 100
-  const BUFFER_MESSAGES = 10
-  const SCROLL_DEBOUNCE_MS = 100
 
   const resetTranscriptionState = () => {
     timestampCorrectionRef.current = null
@@ -291,8 +289,6 @@ const TranscriptionView: FC<TranscriptionViewProps> = memo(({ isVisible }) => {
     if (!scrollContainerRef.current) return
 
     const atBottom = isAtBottom()
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
-
     if (atBottom) {
       // User is at bottom, clear indicators and enable auto-scroll
       setHasNewContent(false)
