@@ -1,7 +1,6 @@
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import typescript from '@rollup/plugin-typescript'
-import postcss from 'rollup-plugin-postcss'
 import babel from '@rollup/plugin-babel'
 import terser from '@rollup/plugin-terser'
 import { getFiles } from './scripts/buildUtils'
@@ -61,8 +60,7 @@ export default {
       babelHelpers: 'bundled',
       presets: ['@babel/preset-env'],
     }),
-    postcss(),
     terser(),
   ],
-  external: ['react', 'react-dom', 'react-scripts'],
+  external: ['react', 'react-dom'],
 }

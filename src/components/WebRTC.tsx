@@ -70,10 +70,10 @@ export const WebRTC: FC<WebRTCProps> = ({
   const isInitializing = useRef<boolean>(false)
 
   // Timeout ID for initialization safety timeout
-  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const initTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Timeout ID for network error grace period (during active calls)
-  const networkErrorGraceRef = useRef<NodeJS.Timeout | null>(null)
+  const networkErrorGraceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Initialize Janus from Janus library
   const janus = useRef<any>(JanusLib)
