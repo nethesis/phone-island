@@ -11,6 +11,8 @@ interface CustomThemedTooltipProps {
   openOnClick?: boolean
   clickable?: boolean
   globalCloseEvents?: ITooltip['globalCloseEvents']
+  offset?: number
+  maxWidth?: string
   children?: ReactNode
 }
 
@@ -21,6 +23,8 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
   openOnClick,
   clickable,
   globalCloseEvents,
+  offset,
+  maxWidth = '185px',
   children,
 }) => {
   const { theme } = useSelector((state: RootState) => state.darkTheme)
@@ -34,7 +38,7 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
           fontWeight: 400,
           lineHeight: '1.25rem',
           padding: '0.375rem 0.625rem',
-          maxWidth: '185px',
+          maxWidth,
           borderRadius: '4px',
         }
       : {
@@ -44,7 +48,7 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
           fontWeight: 400,
           lineHeight: '1.25rem',
           padding: '0.375rem 0.625rem',
-          maxWidth: '185px',
+          maxWidth,
           borderRadius: '4px',
         }
 
@@ -58,6 +62,7 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
       openOnClick={openOnClick}
       clickable={clickable}
       globalCloseEvents={globalCloseEvents}
+      offset={offset}
     >
       {children}
     </Tooltip>
