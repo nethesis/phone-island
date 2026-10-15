@@ -663,6 +663,13 @@ export const VideoView: FC<VideoViewProps> = () => {
                   screenSharePublisherJoinRequestedRef.current = false
                   janus.current.error?.('WebRTC error:', error)
                   dispatch.screenShare.update({ active: false, role: '' })
+                  const { room } = store.getState().screenShare
+                  const releaseHandle = () => plugin.detach()
+                  plugin.send({
+                    message: { request: 'destroy', room },
+                    success: releaseHandle,
+                    error: releaseHandle,
+                  })
                 },
               })
             } else {
