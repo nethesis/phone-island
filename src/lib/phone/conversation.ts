@@ -24,3 +24,8 @@ export function getDisplayName(conv: ConversationTypes): string {
   }
   return dispName
 }
+
+export function isNumberOnlyName(name?: string): boolean {
+  const value = (name || '').trim()
+  return /\d/.test(value) && /^[\d\s+\-().*#/]+$/.test(value)
+}
