@@ -591,7 +591,13 @@ const CallView: FC<CallViewProps> = () => {
       <CustomThemedTooltip id='tooltip-unlock' place='left' />
       <CustomThemedTooltip id='tooltip-display-name' place='bottom' />
       <CustomThemedTooltip id='tooltip-queue' place='bottom' />
-      <CustomThemedTooltip id={DEVICE_TOOLTIP_ID} place='right' />
+      <CustomThemedTooltip
+        id={DEVICE_TOOLTIP_ID}
+        place='right'
+        offset={11}
+        maxWidth='300px'
+        className='[&_.react-tooltip-content-wrapper]:pi-p-0'
+      />
     </div>
   )
 }

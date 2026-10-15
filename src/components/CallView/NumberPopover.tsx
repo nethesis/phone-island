@@ -89,6 +89,9 @@ const NumberPopover: FC = () => {
       <CustomThemedTooltip
         id={NUMBER_POPOVER_ID}
         place='bottom'
+        offset={12}
+        maxWidth='300px'
+        className='[&_.react-tooltip-content-wrapper]:pi-p-0'
         openOnClick
         clickable
         globalCloseEvents={{ clickOutsideAnchor: true, escape: true }}
