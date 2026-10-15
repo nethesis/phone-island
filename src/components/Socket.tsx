@@ -1033,8 +1033,10 @@ export const Socket: FC<SocketProps> = ({
         const uniqueId = getConversationUniqueId(selectedConversation)
         const conversationWasConnected = selectedConversation?.connected || false
 
-        if (call_summary_enabled && uniqueId && linkedId && conversationWasConnected) {
-          eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
+        if (uniqueId && linkedId && conversationWasConnected) {
+          if (call_summary_enabled) {
+            eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
+          }
           if (summaryExtension) {
             summaryConversationCache.current.delete(summaryExtension)
           }
