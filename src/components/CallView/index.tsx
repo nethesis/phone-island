@@ -596,7 +596,6 @@ const CallView: FC<CallViewProps> = () => {
         place='right'
         offset={11}
         maxWidth='300px'
-        className='[&_.react-tooltip-content-wrapper]:pi-p-0'
       />
     </div>
   )

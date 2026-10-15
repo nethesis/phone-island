@@ -56,7 +56,7 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
     <Tooltip
       id={id}
       place={place}
-      className={`pi-z-1000 ${className}`}
+      className={`pi-z-1000 [&_.react-tooltip-content-wrapper]:pi-p-0 ${className}`}
       opacity={1}
       style={tooltipStyle}
       openOnClick={openOnClick}
