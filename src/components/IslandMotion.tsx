@@ -294,7 +294,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   return (
     <motion.div
       className={`${isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
-        } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 dark:pi-border dark:pi-border-solid dark:pi-border-gray-800 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
+        } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-border pi-border-solid pi-border-gray-200 dark:pi-border-gray-800 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}
       transition={{
         duration: 0.15,
