@@ -37,3 +37,5 @@ export const initI18n = () => {
     .use(initReactI18next)
     .init(i18nConfig)
 }
+
+export default i18next.createInstance()

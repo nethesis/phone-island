@@ -25,3 +25,13 @@ export const getJSONItem = (name: string) => {
   const initialValue = saved && JSON.parse(saved)
   return initialValue || ''
 }
+
+/**
+ * Deletes an Item from localstorage
+ *
+ * @param name - The key used to save the object
+ */
+
+export const removeItem = (name: string) => {
+  localStorage.removeItem(name)
+}

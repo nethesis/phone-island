@@ -108,3 +108,8 @@ export const SettingsView: FC<SettingsViewProps> = () => {
 }
 
 export interface SettingsViewProps {}
+
+export { default as AudioView } from './AudioView'
+export { default as MicrophoneView } from './MicrophoneView'
+export { default as ThemeView } from './ThemeView'
+export { default as VideoInputView } from './VideoInputView'

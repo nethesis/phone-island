@@ -39,6 +39,15 @@ export const users = createModel<RootModel>()({
         endpoints: payload,
       }
     },
+    updateEndpoint: (state, payload: UserEndpointsTypes) => {
+      return {
+        ...state,
+        endpoints: {
+          ...state.endpoints,
+          [payload.username]: payload,
+        },
+      }
+    },
     updateEndpointMainPresence: (state, payload: { username: string; status: string }) => {
       if (state.endpoints) {
         const newEndpoint: UserEndpointsTypes = {
