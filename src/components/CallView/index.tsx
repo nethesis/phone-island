@@ -23,7 +23,7 @@ import { isNumberOnlyName } from '../../lib/phone/conversation'
 import Avatar from './Avatar'
 import DeviceIcon, { DEVICE_TOOLTIP_ID } from './DeviceIcon'
 import NumberPopover from './NumberPopover'
-import { StyledNumber } from '../../styles/Island.styles'
+import { StyledNumber, StyledTimer } from '../../styles/Island.styles'
 import Actions from './Actions'
 import Hangup from '../Hangup'
 import { useTranslation } from 'react-i18next'
@@ -386,10 +386,24 @@ const CallView: FC<CallViewProps> = () => {
         {accepted
           ? renderWithDeviceIcon(
               <>
-                {!isPhysical() ? (
-                  <Timer startTime={startTime} isNotAlwaysWhite />
-                ) : (
+                {isPhysical() ? (
                   renderLandlinePhoneDiv()
+                ) : canRevealNumber ? (
+                  <span className='pi-grid pi-items-center'>
+                    <StyledTimer
+                      isOpen={isOpen}
+                      size='large'
+                      aria-hidden='true'
+                      className='pi-invisible pi-col-start-1 pi-row-start-1'
+                    >
+                      00:00:00
+                    </StyledTimer>
+                    <span className='pi-col-start-1 pi-row-start-1'>
+                      <Timer startTime={startTime} isNotAlwaysWhite />
+                    </span>
+                  </span>
+                ) : (
+                  <Timer startTime={startTime} isNotAlwaysWhite />
                 )}
                 {canRevealNumber && <NumberPopover />}
               </>,

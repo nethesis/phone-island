@@ -36,7 +36,7 @@ const DeviceIcon: FC = () => {
       data-tooltip-content={tooltipContent}
       aria-label={tooltipContent}
     >
-      <FontAwesomeIcon icon={device.icon} className='pi-h-4 pi-w-4' />
+      <FontAwesomeIcon icon={device.icon} className='pi-h-5 pi-w-5' />
     </span>
   )
 }
