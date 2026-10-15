@@ -11,6 +11,7 @@ import { updateAudioPlayerSource } from '../../lib/phone/audio'
 import fixWebmDuration from 'webm-duration-fix'
 import Timer from './Timer'
 import { useTranslation } from 'react-i18next'
+import { eventDispatch } from '../../utils'
 import { Button } from '../Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faXmark, faPlay } from '@fortawesome/free-solid-svg-icons'
@@ -91,7 +92,11 @@ export const RecorderView: FC<RecorderViewProps> = () => {
 
   const { t } = useTranslation()
 
-  function close() {
+  function playerClose() {
+    if (audioPlayerPlaying) {
+      dispatch.player.stopAudioPlayer()
+      eventDispatch('phone-island-audio-player-close', {})
+    }
     dispatch.island.resetPlayerClose()
   }
 
@@ -103,7 +108,7 @@ export const RecorderView: FC<RecorderViewProps> = () => {
           <div className='pi-flex pi-items-center pi-justify-between pi-text-gray-900 dark:pi-text-gray-50'>
             <h1 className='pi-text-lg pi-font-medium pi-leading-7'>{t('Common.Record message')}</h1>
             <Button
-              onClick={() => close()}
+              onClick={() => playerClose()}
               variant='transparentSettings'
               data-tooltip-id='tooltip-close-settings'
               data-tooltip-content={t('Common.Close') || ''}
