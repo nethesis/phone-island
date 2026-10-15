@@ -9,7 +9,6 @@ import {
   faPhone,
   faEarListen,
   faHandPointUp,
-  faArrowLeft,
   faCircle,
   faUnlock,
   faUsers,
@@ -20,7 +19,11 @@ import Number from './Number'
 import DisplayName from './DisplayName'
 import { AudioBars } from '../'
 import { answerIncomingCall } from '../../lib/phone/call'
+import { isNumberOnlyName } from '../../lib/phone/conversation'
 import Avatar from './Avatar'
+import DeviceIcon, { DEVICE_TOOLTIP_ID } from './DeviceIcon'
+import NumberPopover from './NumberPopover'
+import { StyledNumber } from '../../styles/Island.styles'
 import Actions from './Actions'
 import Hangup from '../Hangup'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +35,8 @@ import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
 import { handleStreamingUnlock } from '../../utils'
 import { useDispatch } from 'react-redux'
+
+const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
 
 function isAnswerVisible(outgoing: boolean, accepted: boolean): boolean {
   return !outgoing && !accepted
@@ -119,12 +124,13 @@ const CallView: FC<CallViewProps> = () => {
     startTime,
     paused,
     number,
+    displayName,
     isRecording,
-    username,
     streamingSourceNumber,
     queueName,
     queueNumber,
     throughQueue,
+    counterpartDeviceType,
   } = currentCall
 
   const { isOpen, isFromStreaming } = useSelector((state: RootState) => state.island)
@@ -165,7 +171,14 @@ const CallView: FC<CallViewProps> = () => {
     return { canUnlock, tooltipText }
   }, [streamingSourceNumber, videoSources, t])
 
-  const hasValidUsername = useMemo(() => username !== '' && username !== 'undefined', [username])
+  const isNameNumberOnly = useMemo(() => isNumberOnlyName(displayName), [displayName])
+
+  const canRevealNumber = useMemo(
+    () => !isNameNumberOnly && onlyDigits(number).length > 0,
+    [isNameNumberOnly, number],
+  )
+
+  const hasCounterpartDevice = Boolean(counterpartDeviceType)
 
   const queueLabel = useMemo(() => queueName || queueNumber || '', [queueName, queueNumber])
 
@@ -279,26 +292,21 @@ const CallView: FC<CallViewProps> = () => {
       return <FontAwesomeIcon className={iconSizeClass} icon={faHandPointUp} />
     }
 
-    if (number !== '' && hasValidUsername) {
-      return <Avatar />
-    }
+    return <Avatar />
+  }, [isOpen, isListen, isIntrude])
 
-    if (incoming && !hasValidUsername) {
-      return <FontAwesomeIcon className={`${iconSizeClass} pi--rotate-45`} icon={faArrowLeft} />
-    }
-
-    if (accepted && !outgoing && !hasValidUsername) {
-      return <FontAwesomeIcon className={`${iconSizeClass} pi--rotate-45`} icon={faArrowLeft} />
-    }
-
-    if (outgoing && !hasValidUsername) {
-      return (
-        <FontAwesomeIcon className={`${iconSizeClass} pi-rotate-[135deg]`} icon={faArrowLeft} />
-      )
-    }
-
-    return null
-  }, [isOpen, isListen, isIntrude, number, hasValidUsername, incoming, outgoing, accepted])
+  const renderWithDeviceIcon = useCallback(
+    (content: React.ReactNode, forceRow: boolean) =>
+      hasCounterpartDevice || forceRow ? (
+        <div className='pi-flex pi-min-w-0 pi-items-center pi-gap-2'>
+          {hasCounterpartDevice && <DeviceIcon />}
+          {content}
+        </div>
+      ) : (
+        content
+      ),
+    [hasCounterpartDevice],
+  )
 
   const renderDetails = useCallback(() => {
     if (!isOpen) return null
@@ -349,10 +357,16 @@ const CallView: FC<CallViewProps> = () => {
 
     if (shouldShowIncomingQueueBadge) {
       return (
-        <Details className='pi-grid-rows-[20px_24px_24px] pi-gap-0.5'>
+        <Details
+          className={
+            isNameNumberOnly
+              ? 'pi-grid-rows-[20px_24px] pi-gap-0.5'
+              : 'pi-grid-rows-[20px_24px_24px] pi-gap-0.5'
+          }
+        >
           <IncomingQueueBadge label={queueLabel} tooltipContent={queueTooltipContent} />
           <DisplayName />
-          <Number />
+          {!isNameNumberOnly && <Number />}
         </Details>
       )
     }
@@ -369,18 +383,38 @@ const CallView: FC<CallViewProps> = () => {
         ) : (
           <DisplayName />
         )}
-        {accepted ? (
-          !isPhysical() ? (
-            <Timer startTime={startTime} isNotAlwaysWhite />
-          ) : (
-            renderLandlinePhoneDiv()
-          )
-        ) : (
-          <Number />
-        )}
+        {accepted
+          ? renderWithDeviceIcon(
+              <>
+                {!isPhysical() ? (
+                  <Timer startTime={startTime} isNotAlwaysWhite />
+                ) : (
+                  renderLandlinePhoneDiv()
+                )}
+                {canRevealNumber && <NumberPopover />}
+              </>,
+              canRevealNumber,
+            )
+          : renderWithDeviceIcon(
+              isNameNumberOnly && (outgoing || incoming) ? (
+                <StyledNumber isOpen={isOpen}>
+                  <span className='dark:pi-text-gray-50 pi-text-gray-600'>
+                    {outgoing ? t('Call.Calling...') : t('Call.Incoming call')}
+                  </span>
+                </StyledNumber>
+              ) : (
+                <Number />
+              ),
+              false,
+            )}
       </Details>
     )
   }, [
+    incoming,
+    outgoing,
+    isNameNumberOnly,
+    canRevealNumber,
+    renderWithDeviceIcon,
     isOpen,
     isIntrude,
     isListen,
@@ -543,6 +577,7 @@ const CallView: FC<CallViewProps> = () => {
       <CustomThemedTooltip id='tooltip-unlock' place='left' />
       <CustomThemedTooltip id='tooltip-display-name' place='bottom' />
       <CustomThemedTooltip id='tooltip-queue' place='bottom' />
+      <CustomThemedTooltip id={DEVICE_TOOLTIP_ID} place='right' />
     </div>
   )
 }

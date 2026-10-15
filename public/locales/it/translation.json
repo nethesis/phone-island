@@ -72,7 +72,13 @@
     "Outgoing call": "Chiamata in uscita",
     "Incoming call": "Chiamata in arrivo",
     "Number busy": "Numero occupato...",
-    "User busy": "Utente occupato..."
+    "User busy": "Utente occupato...",
+    "Calling...": "Chiamata in corso...",
+    "Web phone": "Telefono web",
+    "Desktop phone": "Telefono desktop",
+    "Show number": "Mostra numero",
+    "Copy number": "Copia numero",
+    "Copied": "Copiato"
   },
   "Transfer": {
     "No contacts found": "Nessun contatto trovato"

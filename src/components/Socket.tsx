@@ -6,7 +6,8 @@ import { useDispatch } from 'react-redux'
 import { Dispatch } from '../store'
 import { io } from 'socket.io-client'
 import { getApiMode } from './RestAPI'
-import { getDisplayName } from '../lib/phone/conversation'
+import { getDisplayName, isNumberOnlyName } from '../lib/phone/conversation'
+import { getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
 import { searchPhonebook } from '../services/phonebook'
 import { getCurrentUserInfo } from '../services/user'
 import busyRingtone from '../static/busy_ringtone'
@@ -63,6 +64,7 @@ interface SummaryConversationCacheEntry {
 }
 
 const SUMMARY_CONVERSATION_CACHE_TTL_MS = 10 * 60 * 1000
+const MIN_SUFFIX_MATCH_DIGITS = 6
 
 export const Socket: FC<SocketProps> = ({
   hostName,
@@ -216,7 +218,7 @@ export const Socket: FC<SocketProps> = ({
       const serverName = getDisplayName(conv)
       const number = (conv?.counterpartNum || '').trim()
       // The server already resolved a real name (not the bare number).
-      if (serverName && serverName !== number) {
+      if (serverName && serverName !== number && !isNumberOnlyName(serverName)) {
         return serverName
       }
       const cached = number ? resolvedContactNamesRef.current.get(onlyDigits(number)) : undefined
@@ -224,19 +226,25 @@ export const Socket: FC<SocketProps> = ({
     }
 
     /**
-     * Best-effort fallback: for an incoming external call whose name the server
+     * Best-effort fallback: for an external call whose name the server
      * did not resolve, query the middleware phonebook by number and update the
      * displayed caller name. Reuses the same search path as the phonebook UI,
      * so it honors the group-shared visibility rules.
      */
-    const resolveIncomingContactName = (conv: ConversationTypes) => {
-      if (!conv || conv.direction !== 'in') return
+    const resolveContactName = (conv: ConversationTypes) => {
+      if (!conv) return
       const number = (conv.counterpartNum || '').trim()
       if (number.length < 3) return
 
       // Skip when the server already provided a real name.
       const serverName = (conv.counterpartName || '').trim()
-      if (serverName && serverName !== '<unknown>' && serverName !== number) return
+      if (
+        serverName &&
+        serverName !== '<unknown>' &&
+        serverName !== number &&
+        !isNumberOnlyName(serverName)
+      )
+        return
 
       // Skip internal extensions (operators resolve via the users store) and
       // streaming sources (handled separately).
@@ -264,10 +272,10 @@ export const Socket: FC<SocketProps> = ({
             [row.extension, row.workphone, row.homephone, row.cellphone, row.fax].some(
               (field: string) => {
                 const digits = onlyDigits(field)
-                return (
-                  digits.length > 0 &&
-                  (digits === target || digits.endsWith(target) || target.endsWith(digits))
-                )
+                if (digits.length === 0) return false
+                if (digits === target) return true
+                if (Math.min(digits.length, target.length) < MIN_SUFFIX_MATCH_DIGITS) return false
+                return digits.endsWith(target) || target.endsWith(digits)
               },
             ),
           )
@@ -595,7 +603,7 @@ export const Socket: FC<SocketProps> = ({
 
               // Fallback: resolve the caller name from the phonebook when the
               // server could not (e.g. group-shared contacts).
-              resolveIncomingContactName(conv)
+              resolveContactName(conv)
 
               if (
                 (uaType === 'mobile' && hasOnlineNethlink()) ||
@@ -627,6 +635,7 @@ export const Socket: FC<SocketProps> = ({
                       extensions[conv.counterpartNum].username
                     }` || '',
                   ownerExtension: conv.owner,
+                  counterpartDeviceType: getCounterpartDeviceType(conv, store.getState().users),
                 })
                 store.dispatch.island.setIslandView('call')
               }
@@ -706,6 +715,7 @@ export const Socket: FC<SocketProps> = ({
                       }` || '',
                     chDest: conv?.chDest || {},
                     chSource: conv?.chSource || {},
+                    counterpartDeviceType: getCounterpartDeviceType(conv, store.getState().users),
                   })
                   // Update the current call informations for physical devices
                   dispatch.currentCall.checkAcceptedUpdate({
@@ -766,11 +776,15 @@ export const Socket: FC<SocketProps> = ({
                 }
                 // Handle outgoing call
                 if (conv && !conv.connected && conv.direction === 'out') {
+                  if (conv?.counterpartName !== 'REC') {
+                    resolveContactName(conv)
+                  }
                   // Update the current outgoing conversation
                   dispatch.currentCall.checkOutgoingUpdate({
                     outgoingSocket: true,
                     outgoing: conv?.counterpartName === 'REC' ? false : true,
-                    displayName: getDisplayName(conv),
+                    displayName: getResolvedDisplayName(conv),
+                    counterpartDeviceType: '',
                     number: `${conv?.counterpartNum}`,
                     username:
                       `${
@@ -807,6 +821,7 @@ export const Socket: FC<SocketProps> = ({
                   number: counterpartNum,
                   startTime: `${startTime / 1000}`,
                   conversationId: conv.id,
+                  counterpartDeviceType: '',
                 })
                 // Set the view of the island to call
                 dispatch.island.setIslandView('call')

@@ -6,6 +6,7 @@ import type { RootModel } from '.'
 import { dispatchOutgoingCallStarted } from '../events/index'
 import { eventDispatch } from '../utils'
 import { PhonebookContact } from '../types/phonebook'
+import { ExtensionTypeTypes } from '../types/user'
 
 const defaultState = {
   displayName: '',
@@ -48,6 +49,7 @@ const defaultState = {
   queueNumber: '',
   queuePosition: '',
   queueWaitingTime: 0,
+  counterpartDeviceType: '' as ExtensionTypeTypes | '',
 }
 
 export const currentCall = createModel<RootModel>()({
@@ -274,4 +276,5 @@ export interface CurrentCallTypes {
   queueNumber?: string
   queuePosition?: string
   queueWaitingTime?: number
+  counterpartDeviceType?: ExtensionTypeTypes | ''
 }

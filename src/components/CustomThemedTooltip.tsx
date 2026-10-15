@@ -1,19 +1,27 @@
 // src/components/CustomThemedTooltip.tsx
-import React, { FC } from 'react'
+import React, { FC, ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store'
-import { Tooltip } from 'react-tooltip'
+import { Tooltip, type ITooltip } from 'react-tooltip'
 
 interface CustomThemedTooltipProps {
   id: string
   place?: 'top' | 'right' | 'bottom' | 'left'
   className?: string
+  openOnClick?: boolean
+  clickable?: boolean
+  globalCloseEvents?: ITooltip['globalCloseEvents']
+  children?: ReactNode
 }
 
 export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
   id,
   place = 'bottom',
   className = '',
+  openOnClick,
+  clickable,
+  globalCloseEvents,
+  children,
 }) => {
   const { theme } = useSelector((state: RootState) => state.darkTheme)
 
@@ -47,6 +55,11 @@ export const CustomThemedTooltip: FC<CustomThemedTooltipProps> = ({
       className={`pi-z-1000 ${className}`}
       opacity={1}
       style={tooltipStyle}
-    />
+      openOnClick={openOnClick}
+      clickable={clickable}
+      globalCloseEvents={globalCloseEvents}
+    >
+      {children}
+    </Tooltip>
   )
 }
