@@ -6,6 +6,7 @@ import { RootState } from '../store'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { eventDispatch } from '../utils'
+import { isNumberOnlyName } from '../lib/phone/conversation'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
@@ -20,6 +21,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     throughQueue,
     queueName,
     queueNumber,
+    displayName,
   } = useSelector((state: RootState) => state.currentCall)
   const { isListen } = useSelector((state: RootState) => state.listen)
   const { view, isOpen, actionsExpanded, sideViewIsVisible,transcriptionViewIsVisible, isFromStreaming, isExtraLarge } = useSelector(
@@ -79,7 +81,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
           } else if (incoming && !isFromStreaming) {
             const showIncomingQueueBadge =
               incoming && !accepted && throughQueue && Boolean(queueName || queueNumber)
-            size = showIncomingQueueBadge
+            size = showIncomingQueueBadge && !isNumberOnlyName(displayName)
               ? {
                 width: variants.call.expanded.incomingQueue.width,
                 height: variants.call.expanded.incomingQueue.height,
@@ -256,6 +258,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     throughQueue,
     queueName,
     queueNumber,
+    displayName,
   ])
 
   useEffect(() => {
