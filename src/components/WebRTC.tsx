@@ -15,6 +15,8 @@ import {
   getCurrentVideoInputDeviceId,
 } from '../lib/devices/devices'
 import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
+import { notifyPeerVideoStart, sdpHasActiveVideo } from '../lib/phone/video'
+import { dispatchVideoCallStarted } from '../events/SocketEvents'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { eventDispatch, useEventListener, getJSONItem, setJSONItem } from '../utils'
@@ -664,6 +666,23 @@ export const WebRTC: FC<WebRTCProps> = ({
                           incomingWebRTC: false,
                           startTime: acceptedTimestamp?.toString(),
                         })
+                        // Call started with the camera in the first INVITE
+                        if (store.getState().currentCall.isLocalVideoEnabled) {
+                          if (sdpHasActiveVideo(jsep?.sdp)) {
+                            dispatch.island.setIslandView('video')
+                            notifyPeerVideoStart()
+                            dispatchVideoCallStarted({
+                              initiator: 'local',
+                              callUser: store.getState().currentUser.username,
+                              destUser: store.getState().currentCall.username,
+                            })
+                            eventDispatch('phone-island-video-enabled', {})
+                          } else {
+                            // The remote party refused the video stream: stay audio only
+                            dispatch.currentCall.updateCurrentCall({ isLocalVideoEnabled: false })
+                            eventDispatch('phone-island-video-disabled', {})
+                          }
+                        }
 
                         // Stop the local audio element ringing
                         store.dispatch.player.stopAudioPlayer()

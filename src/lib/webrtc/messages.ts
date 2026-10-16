@@ -4,7 +4,11 @@
 import Janus from './janus'
 import { store } from '../../store'
 import adapter from 'webrtc-adapter'
-import { getCurrentAudioInputDeviceId, getSupportedDevices } from '../devices/devices'
+import {
+  getCurrentAudioInputDeviceId,
+  getCurrentVideoInputDeviceId,
+  getSupportedDevices,
+} from '../devices/devices'
 import { getJSONItem } from '../../utils'
 import { JanusTrack } from '../../types'
 
@@ -206,10 +210,10 @@ export function handleRemote(jsep: any) {
   }
 }
 
-export function callSipURI(sipURI: string) {
+export function callSipURI(sipURI: string, options: { video?: boolean } = {}) {
   getSupportedDevices(async () => {
     // @ts-ignore
-    Janus.log('This is a SIP call')
+    Janus.log(options.video ? 'This is a SIP video call' : 'This is a SIP call')
 
     let currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
 
@@ -223,6 +227,19 @@ export function callSipURI(sipURI: string) {
       })
     } else {
       tracks.push({ type: 'audio', capture: true, recv: true })
+    }
+
+    // Put the camera in the first INVITE: desk phones such as the Yealink T58W
+    // accept video only when it is offered from the start and reject a later upgrade
+    if (options.video) {
+      const currentVideoInputDeviceId = getCurrentVideoInputDeviceId()
+      tracks.push({
+        type: 'video',
+        capture: currentVideoInputDeviceId ? { deviceId: { exact: currentVideoInputDeviceId } } : true,
+        recv: true,
+      })
+      store.dispatch.currentCall.updateCurrentCall({ isLocalVideoEnabled: true })
+      store.dispatch.currentCall.setVideoTrackAdded(true)
     }
 
     await call(sipURI, tracks)
