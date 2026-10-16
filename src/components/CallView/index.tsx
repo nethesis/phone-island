@@ -71,7 +71,7 @@ const QueueBadge = memo(
 
     return (
       <span
-        className='pi-inline-flex pi-flex-none pi-items-center pi-justify-center pi-text-iconSecondary'
+        className='pi-inline-flex pi-flex-none pi-items-center pi-justify-center pi-text-iconSecondary dark:pi-text-indigo-400'
         data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
         data-tooltip-content={tooltipContent || ''}
       >
