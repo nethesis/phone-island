@@ -41,7 +41,7 @@ import { unsubscribe } from '../../services/user'
  * Starts a call to a number
  * @param number The number string
  */
-export function callNumber(number: string, sipHost: string) {
+export function callNumber(number: string, sipHost: string, options: { video?: boolean } = {}) {
   const sipURI = `sip:${number}@${sipHost}`
 
   // Reset any previous operator busy state when starting a new call
@@ -50,7 +50,7 @@ export function callNumber(number: string, sipHost: string) {
   store.dispatch.island.setOperatorBusyCalledNumber(number)
 
   if (isWebRTC()) {
-    callSipURI(sipURI)
+    callSipURI(sipURI, options)
   } else {
     callPhysical(number)
   }
