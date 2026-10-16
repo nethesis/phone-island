@@ -3,7 +3,6 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
-import { screenShare } from './screenShare'
 
 // Common dimensions
 const commonCollapsed = {
@@ -121,5 +120,3 @@ const defaultState = {
 export const motions = createModel<RootModel>()({
   state: defaultState,
 })
-
-export type AnimationsTypes = typeof defaultState

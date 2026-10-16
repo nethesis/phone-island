@@ -4,7 +4,7 @@
 import React, { type FC, useEffect, useRef, useState } from 'react'
 import { Button } from '../Button'
 import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState, store } from '../../store'
+import { Dispatch, RootState } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faMicrophone,

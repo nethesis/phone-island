@@ -1,5 +1,5 @@
-import React, { FC, useCallback, useMemo, memo, useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { FC, useCallback, useMemo, memo } from 'react'
+import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { motion, AnimatePresence } from 'framer-motion'
 import {

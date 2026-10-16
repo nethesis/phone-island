@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 
 export const KeypadView: FC<KeypadViewTypes> = () => {
-  const { audioPlayerTrackType, audioPlayerTrackName, audioPlayer, audioPlayerPlaying } =
+  const { audioPlayerTrackType, audioPlayerTrackName, audioPlayerPlaying } =
     useSelector((state: RootState) => state.player)
   const { isOpen } = useSelector((state: RootState) => state.island)
 

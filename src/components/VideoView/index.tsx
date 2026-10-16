@@ -84,8 +84,8 @@ export const VideoView: FC<VideoViewProps> = () => {
   const userInfo = store.getState().currentUser
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUiShown, setUiShown] = useState(false)
-  const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const uiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const videoRenegotiationInFlightRef = useRef(false)
   const screenSharePublisherJoinRequestedRef = useRef(false)
   const screenShareViewRef = useRef(null)

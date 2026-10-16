@@ -35,7 +35,7 @@ import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import TransferButton from '../TransferButton'
 import { isWebRTC } from '../../lib/user/default_device'
 import { sendPhysicalDTMF } from '../../services/astproxy'
-import { IconDefinition } from '@fortawesome/fontawesome-common-types'
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 
 interface ActionButtonProps {
   active: boolean
