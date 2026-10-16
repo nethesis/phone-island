@@ -678,7 +678,20 @@ export const WebRTC: FC<WebRTCProps> = ({
                             })
                             eventDispatch('phone-island-video-enabled', {})
                           } else {
-                            // The remote party refused the video stream: stay audio only
+                            // The remote party refused the video stream: release the camera and stay audio only
+                            const { localVideoStream, sipcall: currentCall }: { localVideoStream: MediaStream | null; sipcall: any } =
+                              store.getState().webrtc
+                            if (localVideoStream && janus.current.stopAllTracks) {
+                              janus.current.stopAllTracks(localVideoStream)
+                            }
+                            dispatch.webrtc.updateLocalVideoStream(null)
+                            const senders: RTCRtpSender[] = currentCall?.webrtcStuff?.pc?.getSenders?.() ?? []
+                            senders.forEach((sender) => {
+                              if (sender.track?.kind === 'video') {
+                                sender.track.stop()
+                                sender.replaceTrack(null).catch(() => {})
+                              }
+                            })
                             dispatch.currentCall.updateCurrentCall({ isLocalVideoEnabled: false })
                             eventDispatch('phone-island-video-disabled', {})
                           }
