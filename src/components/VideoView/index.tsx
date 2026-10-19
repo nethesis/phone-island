@@ -40,6 +40,7 @@ import { getCurrentVideoInputDeviceId } from '../../lib/devices/devices'
 import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
 import { dispatchVideoCallStarted } from '../../events/SocketEvents'
+import { notifyPeerVideoStart } from '../../lib/phone/video'
 
 export interface VideoViewProps {}
 
@@ -97,21 +98,6 @@ export const VideoView: FC<VideoViewProps> = () => {
   const janus = useRef<JanusTypes>(JanusLib)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
 
-  const notifyPeerVideoStart = () => {
-    const { socket } = store.getState().websocket
-    const { username: destUser } = store.getState().currentCall
-    const { username: callUser } = store.getState().currentUser
-
-    if (!socket || !destUser || !callUser) {
-      return
-    }
-
-    socket.emit('message', {
-      message: 'videoCallStart',
-      destUser,
-      callUser,
-    } as VideoCallMessage)
-  }
 
   useIsomorphicLayoutEffect(() => {
     dispatch.player.updatePlayer({

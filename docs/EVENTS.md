@@ -277,11 +277,12 @@ Set the audio output device for ringtone playback
 ### Call Control Events
 
 #### `phone-island-call-start`
-The event to start a call
+The event to start a call. With `video: true` the local camera is sent in the first INVITE (WebRTC devices only), which desk video phones such as the Yealink T58W require: they refuse a video upgrade added later in the call. If the called party answers without video the call goes on audio only.
 
 ```json
 {
-  "number": "200"
+  "number": "200",
+  "video": false
 }
 ```
 

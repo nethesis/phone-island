@@ -30,7 +30,7 @@ export const CallEvents: FC<{ sipHost: string }> = ({ sipHost }) => {
 
   useEventListener('phone-island-call-start', (data: CallStartTypes) => {
     const number = sanitizePhoneNumber(data.number)
-    callNumber(number, sipHost)
+    callNumber(number, sipHost, { video: Boolean(data.video) })
   })
   useEventListener('phone-island-call-hold', () => {
     pauseCurrentCall()
@@ -83,6 +83,8 @@ export function dispatchOutgoingCallStarted(name: string = '', number: string = 
 
 interface CallStartTypes {
   number: string
+  // Start the call with the local camera already in the first INVITE (WebRTC only)
+  video?: boolean
 }
 
 interface OutgoingCallStartedTypes {
