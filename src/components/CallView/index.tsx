@@ -75,7 +75,7 @@ const QueueBadge = memo(
         data-tooltip-id={tooltipContent ? 'tooltip-queue' : undefined}
         data-tooltip-content={tooltipContent || ''}
       >
-        <FontAwesomeIcon icon={faUsers} className='pi-h-4 pi-w-4' />
+        <FontAwesomeIcon icon={faUsers} className='pi-h-5 pi-w-5' />
       </span>
     )
   },
