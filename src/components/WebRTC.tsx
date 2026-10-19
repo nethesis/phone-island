@@ -15,7 +15,12 @@ import {
   getCurrentVideoInputDeviceId,
 } from '../lib/devices/devices'
 import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
-import { notifyPeerVideoStart, sdpHasActiveVideo } from '../lib/phone/video'
+import {
+  notifyPeerVideoStart,
+  releaseLocalVideo,
+  sdpDeclinesVideo,
+  sdpHasActiveVideo,
+} from '../lib/phone/video'
 import { dispatchVideoCallStarted } from '../events/SocketEvents'
 import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
@@ -117,7 +122,7 @@ export const WebRTC: FC<WebRTCProps> = ({
     )
     const tracks: JanusTrack[] = []
     const offeredAudio = typeof jsep.sdp === 'string' && jsep.sdp.includes('m=audio ')
-    const offeredVideo = typeof jsep.sdp === 'string' && jsep.sdp.includes('m=video ')
+    const offeredVideo = sdpHasActiveVideo(jsep.sdp)
 
     if (offeredAudio && !hasLocalAudioSender) {
       const currentAudioInputDeviceId = getCurrentAudioInputDeviceId()
@@ -679,21 +684,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                             eventDispatch('phone-island-video-enabled', {})
                           } else {
                             // The remote party refused the video stream: release the camera and stay audio only
-                            const { localVideoStream, sipcall: currentCall }: { localVideoStream: MediaStream | null; sipcall: any } =
-                              store.getState().webrtc
-                            if (localVideoStream && janus.current.stopAllTracks) {
-                              janus.current.stopAllTracks(localVideoStream)
-                            }
-                            dispatch.webrtc.updateLocalVideoStream(null)
-                            const senders: RTCRtpSender[] = currentCall?.webrtcStuff?.pc?.getSenders?.() ?? []
-                            senders.forEach((sender) => {
-                              if (sender.track?.kind === 'video') {
-                                sender.track.stop()
-                                sender.replaceTrack(null).catch(() => {})
-                              }
-                            })
-                            dispatch.currentCall.updateCurrentCall({ isLocalVideoEnabled: false })
-                            eventDispatch('phone-island-video-disabled', {})
+                            releaseLocalVideo()
                           }
                         }
 
@@ -709,6 +700,10 @@ export const WebRTC: FC<WebRTCProps> = ({
                           janus.current.log('Got SIP re-INVITE, preparing update answer')
                         }
 
+                        // Asterisk declines our video stream when the other party has none
+                        if (jsep && sdpDeclinesVideo(jsep.sdp) && store.getState().currentCall.isLocalVideoEnabled) {
+                          releaseLocalVideo()
+                        }
                         if (jsep) {
                           handleSipUpdateJsep(jsep, 'updatingcall')
                         }
