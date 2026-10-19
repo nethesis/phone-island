@@ -12,12 +12,12 @@ const iconVariants = {
   open: {
     width: '56px',
     height: '56px',
-    borderRadius: '26px',
+    borderRadius: '50%',
   },
   closed: {
     width: '24px',
     height: '24px',
-    borderRadius: '26px',
+    borderRadius: '50%',
   },
 }
 
