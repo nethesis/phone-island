@@ -3,6 +3,8 @@
 
 import React, { type FC, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 
@@ -10,12 +12,12 @@ const iconVariants = {
   open: {
     width: '56px',
     height: '56px',
-    borderRadius: '26px',
+    borderRadius: '50%',
   },
   closed: {
     width: '24px',
     height: '24px',
-    borderRadius: '26px',
+    borderRadius: '50%',
   },
 }
 
@@ -58,7 +60,7 @@ const Avatar: FC = () => {
         />
       )}
       <motion.div
-        className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-bg-secondaryNeutral dark:pi-bg-secondaryNeutralDark pi-rounded-sm pi-bg-cover'
+        className='pi-relative pi-z-30 pi-h-12 pi-w-12 pi-bg-secondaryNeutral dark:pi-bg-secondaryNeutralDark pi-rounded-sm pi-bg-cover pi-flex pi-items-center pi-justify-center'
         style={{
           backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
           backgroundRepeat: 'no-repeat',
@@ -66,7 +68,16 @@ const Avatar: FC = () => {
         }}
         animate={isOpen ? 'open' : 'closed'}
         variants={iconVariants}
-      />
+      >
+        {!avatarUrl && (
+          <FontAwesomeIcon
+            icon={faUser}
+            className={`${
+              isOpen ? 'pi-h-8 pi-w-8' : 'pi-h-3.5 pi-w-3.5'
+            } pi-text-white dark:pi-text-gray-950`}
+          />
+        )}
+      </motion.div>
     </motion.div>
   )
 }
