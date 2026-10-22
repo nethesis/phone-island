@@ -99,8 +99,8 @@ export const Socket: FC<SocketProps> = ({
   // The server can take several seconds to answer the login: don't tear down
   // a connected socket that is still authenticating within this window
   const LOGIN_PENDING_GRACE = 30 * 1000
-  // Whether the current socket already completed a login at least once
-  const hasAuthenticated = useRef(false)
+  // Whether the socket got disconnected after its last successful login
+  const disconnectedSinceAuth = useRef(false)
   // Identifiers of the transcription the user currently has open. Incoming
   // realtime chunks are matched against these to avoid mixing transcripts from
   // a different concurrent call into the open view.
@@ -863,7 +863,7 @@ export const Socket: FC<SocketProps> = ({
      */
     const initSocketConnection = () => {
       const currentApiMode = getApiMode(username)
-      hasAuthenticated.current = false
+      disconnectedSinceAuth.current = false
 
       const socketOptions: any = {
         upgrade: false,
@@ -890,6 +890,7 @@ export const Socket: FC<SocketProps> = ({
       socket.current.on('disconnect', (reason) => {
         console.debug(`Socket disconnect - reason: ${reason}`)
         loginPendingSince.current = null
+        disconnectedSinceAuth.current = true
         // Clear the connection check interval on disconnect to avoid stale pings
         if (connectionCheckInterval.current) {
           clearInterval(connectionCheckInterval.current)
@@ -958,11 +959,12 @@ export const Socket: FC<SocketProps> = ({
         // Notify every reconnection, also the ones forced on a stale socket that
         // socket.io does not report as 'reconnect', so state lost while the
         // socket was down gets refreshed. Dispatched after the login because the
-        // server sends events to this socket only once authenticated
-        if (hasAuthenticated.current) {
+        // server sends events to this socket only once authenticated. Tied to an
+        // actual disconnection, so a duplicated authe_ok does not trigger it
+        if (disconnectedSinceAuth.current) {
+          disconnectedSinceAuth.current = false
           eventDispatch('phone-island-socket-reconnected', {})
         }
-        hasAuthenticated.current = true
         // The socket is connected and authenticated: it is healthy, clear the
         // alert now instead of waiting for the first ping (5s later), otherwise
         // a slow login lets the automatic reload kill the socket in a loop
