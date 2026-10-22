@@ -1198,13 +1198,16 @@ export const WebRTC: FC<WebRTCProps> = ({
       // Check if WebRTC is actually disconnected using alerts (more reliable than registered/sipcall)
       const { data } = store.getState().alerts
       const { forceReload } = store.getState().island
-      const { sipcall, janusInstance }: { sipcall: any; janusInstance: any } = store.getState().webrtc
+      const { sipcall, janusInstance, jsepGlobal }: { sipcall: any; janusInstance: any; jsepGlobal: any } =
+        store.getState().webrtc
       const { accepted, outgoing } = store.getState().currentCall
 
       // Check if there's an active call - if so, don't reload automatically
-      // WebRTC/ICE is designed to recover from brief network interruptions
+      // WebRTC/ICE is designed to recover from brief network interruptions.
+      // A ringing incoming call counts as well, a reload would drop its JSEP
       const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-      const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
+      const hasActiveCall =
+        accepted || outgoing || !!jsepGlobal || iceState === 'connected' || iceState === 'completed'
 
       // Only do full reload if webrtc_down alert is active OR force reload is requested OR connection just returned
       const isWebRTCDown = data.webrtc_down?.active || false
@@ -1582,14 +1585,20 @@ export const WebRTC: FC<WebRTCProps> = ({
   // This prevents stale Janus sessions that cause 469 "Unexpected ANSWER" errors
   // BUT if there's an active call, try to reconnect Janus HTTP without killing ICE
   useEventListener('phone-island-socket-reconnected', () => {
-    const { sipcall, janusInstance }: { sipcall: any; janusInstance: any } = store.getState().webrtc
+    const { sipcall, janusInstance, jsepGlobal }: { sipcall: any; janusInstance: any; jsepGlobal: any } =
+      store.getState().webrtc
     const { accepted, outgoing } = store.getState().currentCall
     const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-    const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
+    // A ringing incoming call must be preserved too: a full reload would drop
+    // its JSEP and the call could no longer be answered
+    const hasIncomingCall = !!jsepGlobal
+    const hasActiveCall =
+      accepted || outgoing || hasIncomingCall || iceState === 'connected' || iceState === 'completed'
     const janusConnected = janusInstance?.isConnected?.()
 
     console.log('[EVENT] phone-island-socket-reconnected received', {
       hasActiveCall,
+      hasIncomingCall,
       iceState,
       accepted,
       outgoing,
@@ -1645,16 +1654,7 @@ export const WebRTC: FC<WebRTCProps> = ({
       return
     }
 
-    // No active call - proceed with reload to ensure clean state
-    // Clear any stale jsepGlobal - it's invalid after network reconnect
-    const { jsepGlobal } = store.getState().webrtc
-    if (jsepGlobal) {
-      console.log('[EVENT] Clearing stale jsepGlobal after socket reconnect', {
-        timestamp: new Date().toISOString()
-      })
-      dispatch.webrtc.updateWebRTC({ jsepGlobal: null })
-      jsepGlobalTimestamp.current = null // Clear timestamp to match jsepGlobal
-    }
+    // No call at all (jsepGlobal is empty here) - proceed with reload to ensure clean state
     // Trigger reload via connectionReturned (forceReload not needed - connectionReturned already triggers reload)
     setConnectionReturned(true)
   })
