@@ -94,6 +94,13 @@ export const Socket: FC<SocketProps> = ({
   // avoid firing the same request on every socket event.
   const contactLookupConversationsRef = useRef<Set<string>>(new Set())
   const STALE_CONNECTION_THRESHOLD = 3 // Force reconnect after 3 consecutive ping timeouts
+  // Timestamp of the last login emitted and not yet answered by authe_ok
+  const loginPendingSince = useRef<number | null>(null)
+  // The server can take several seconds to answer the login: don't tear down
+  // a connected socket that is still authenticating within this window
+  const LOGIN_PENDING_GRACE = 30 * 1000
+  // Whether the current socket already completed a login at least once
+  const hasAuthenticated = useRef(false)
   // Identifiers of the transcription the user currently has open. Incoming
   // realtime chunks are matched against these to avoid mixing transcripts from
   // a different concurrent call into the open view.
@@ -856,6 +863,7 @@ export const Socket: FC<SocketProps> = ({
      */
     const initSocketConnection = () => {
       const currentApiMode = getApiMode(username)
+      hasAuthenticated.current = false
 
       const socketOptions: any = {
         upgrade: false,
@@ -881,6 +889,7 @@ export const Socket: FC<SocketProps> = ({
       })
       socket.current.on('disconnect', (reason) => {
         console.debug(`Socket disconnect - reason: ${reason}`)
+        loginPendingSince.current = null
         // Clear the connection check interval on disconnect to avoid stale pings
         if (connectionCheckInterval.current) {
           clearInterval(connectionCheckInterval.current)
@@ -901,7 +910,6 @@ export const Socket: FC<SocketProps> = ({
       socket.current.io.on('reconnect', (attempt) => {
         // Reset consecutive ping timeout counter on successful reconnection
         consecutivePingTimeouts.current = 0
-        eventDispatch('phone-island-socket-reconnected', {})
         console.debug(`Socket reconnect attemp ${attempt} (sid: ${socket.current.id})`)
       })
       socket.current.io.on('reconnect_attempt', (attempt) => {
@@ -920,6 +928,9 @@ export const Socket: FC<SocketProps> = ({
       // Handle connection message
       socket.current.on('connect', () => {
         console.debug('Socket on: ' + hostName + ' is connected!')
+        // Ping timeouts of a previous connection must not count against this one
+        consecutivePingTimeouts.current = 0
+        loginPendingSince.current = Date.now()
         socket.current.emit('login', {
           accessKeyId: `${username}`,
           token: authToken,
@@ -927,10 +938,35 @@ export const Socket: FC<SocketProps> = ({
         })
       })
 
+      // Remove socket_down alert (async to avoid React error #300 with framer-motion)
+      const removeSocketDownAlert = () => {
+        setTimeout(() => {
+          dispatch.alerts.removeAlert('socket_down')
+          eventDispatch('phone-island-alert-removed', {
+            type: 'socket_down',
+          })
+          eventDispatch('phone-island-socket-disconnected-popup-close', {})
+        }, 0)
+      }
+
       // Handle authentication success message
       socket.current.on('authe_ok', () => {
         console.debug('Socket authentication success!')
+        loginPendingSince.current = null
+        consecutivePingTimeouts.current = 0
         eventDispatch('phone-island-socket-authorized', {})
+        // Notify every reconnection, also the ones forced on a stale socket that
+        // socket.io does not report as 'reconnect', so state lost while the
+        // socket was down gets refreshed. Dispatched after the login because the
+        // server sends events to this socket only once authenticated
+        if (hasAuthenticated.current) {
+          eventDispatch('phone-island-socket-reconnected', {})
+        }
+        hasAuthenticated.current = true
+        // The socket is connected and authenticated: it is healthy, clear the
+        // alert now instead of waiting for the first ping (5s later), otherwise
+        // a slow login lets the automatic reload kill the socket in a loop
+        removeSocketDownAlert()
 
         // Start connection check interval after successful authentication
         // Clear any existing interval first to avoid duplicates
@@ -938,22 +974,20 @@ export const Socket: FC<SocketProps> = ({
           clearInterval(connectionCheckInterval.current)
         }
         connectionCheckInterval.current = setInterval(() => {
+          // Remember the connection this ping belongs to
+          const pingSocketId = socket.current.id
           socket.current.volatile.emit(
             'ping',
             withTimeout(
               () => {
                 // Ping success - reset consecutive timeout counter
                 consecutivePingTimeouts.current = 0
-                // Remove socket_down alert (async to avoid React error #300 with framer-motion)
-                setTimeout(() => {
-                  dispatch.alerts.removeAlert('socket_down')
-                  eventDispatch('phone-island-alert-removed', {
-                    type: 'socket_down',
-                  })
-                  eventDispatch('phone-island-socket-disconnected-popup-close', {})
-                }, 0)
+                removeSocketDownAlert()
               },
               () => {
+                // Ignore timeouts of pings sent on a previous connection: the
+                // socket reconnected meanwhile and must not be considered stale
+                if (socket.current.connected && socket.current.id !== pingSocketId) return
                 // Ping timeout - increment counter
                 consecutivePingTimeouts.current++
                 console.debug(
@@ -1581,8 +1615,18 @@ export const Socket: FC<SocketProps> = ({
       const isSocketDown = data.socket_down?.active || false
       const isSocketDisconnected = !socket.current?.connected
 
-      // Only reconnect if socket is down/disconnected OR force reload is requested
-      if (isSocketDown || isSocketDisconnected || forceReload) {
+      // A connected socket waiting for the login answer is not down: reconnecting
+      // it would restart the login and, with a slow server, loop forever
+      const isLoginPending =
+        !isSocketDisconnected &&
+        loginPendingSince.current !== null &&
+        Date.now() - loginPendingSince.current < LOGIN_PENDING_GRACE
+
+      if (isLoginPending && !forceReload) {
+        console.info('Socket connected and authenticating, skipping reconnection')
+        reloadedCallback()
+      } else if (isSocketDown || isSocketDisconnected || forceReload) {
+        // Only reconnect if socket is down/disconnected OR force reload is requested
         console.info(
           forceReload
             ? 'Force reload requested, performing Socket reconnection'

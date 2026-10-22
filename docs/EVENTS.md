@@ -1593,7 +1593,7 @@ Indicates that websocket connection it's been disconnected
 ```
 
 #### `phone-island-socket-reconnected`
-Indicates that websocket connection it's been reconnected
+Indicates that websocket connection it's been reconnected and authenticated again (also when the reconnection is forced by phone-island on a stale connection)
 
 ```json
 {}
