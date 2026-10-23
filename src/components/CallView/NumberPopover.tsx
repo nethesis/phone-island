@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faCopy, faEllipsis } from '@fortawesome/free-solid-svg-icons'
 import { RootState } from '../../store'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import { getMainExtensionNumber } from '../../lib/phone/counterpartDevice'
 
 const NUMBER_POPOVER_ID = 'tooltip-number-popover'
 const COPIED_FEEDBACK_MS = 2000
@@ -45,7 +46,9 @@ const copyToClipboard = async (text: string): Promise<boolean> => {
 
 const NumberPopover: FC = () => {
   const { t } = useTranslation()
-  const { number } = useSelector((state: RootState) => state.currentCall)
+  const number = useSelector((state: RootState) =>
+    getMainExtensionNumber(state.currentCall.number, state.users),
+  )
   const [copied, setCopied] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isMountedRef = useRef(true)
