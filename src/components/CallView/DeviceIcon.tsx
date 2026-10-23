@@ -9,6 +9,7 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faDesktop, faHeadset, faMobileScreen } from '@fortawesome/free-solid-svg-icons'
 import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { RootState } from '../../store'
+import { getMainExtensionNumber } from '../../lib/phone/counterpartDevice'
 
 export const DEVICE_TOOLTIP_ID = 'tooltip-device'
 
@@ -21,7 +22,12 @@ const DEVICE_ICONS: Record<string, { icon: IconProp; labelKey: string }> = {
 
 const DeviceIcon: FC = () => {
   const { t } = useTranslation()
-  const { counterpartDeviceType, number } = useSelector((state: RootState) => state.currentCall)
+  const counterpartDeviceType = useSelector(
+    (state: RootState) => state.currentCall.counterpartDeviceType,
+  )
+  const number = useSelector((state: RootState) =>
+    getMainExtensionNumber(state.currentCall.number, state.users),
+  )
 
   const device = counterpartDeviceType ? DEVICE_ICONS[counterpartDeviceType] : undefined
   if (!device) return null

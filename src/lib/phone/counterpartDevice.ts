@@ -54,6 +54,12 @@ function findDeviceByLinkedId(
   return ''
 }
 
+export function getMainExtensionNumber(number: string, users: UsersDataTypes): string {
+  const username = users.extensions?.[number]?.username
+  if (!username) return number
+  return users.endpoints?.[username]?.endpoints?.mainextension?.[0]?.id || number
+}
+
 export function getCounterpartDeviceType(
   conv: ConversationTypes,
   users: UsersDataTypes,
