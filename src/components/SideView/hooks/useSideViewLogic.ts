@@ -96,11 +96,19 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
   const goToScreenSharing = useCallback(async () => {
     // Pick the screen before anything else: the picker opens right away and, if the
     // user cancels, the island stays on the call view with nothing to undo
+    if (store.getState().screenShare.active) {
+      closeSideViewAndLaunchEvent('video')
+      return
+    }
     let pendingScreenStream: MediaStream
     try {
       pendingScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
     } catch (error) {
       console.warn('Screen share not started:', error)
+      return
+    }
+    if (!store.getState().currentCall.accepted || store.getState().screenShare.active) {
+      pendingScreenStream.getTracks().forEach((track) => track.stop())
       return
     }
     store.dispatch.screenShare.update({

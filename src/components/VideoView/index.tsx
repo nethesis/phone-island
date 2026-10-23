@@ -41,6 +41,7 @@ import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
 import { dispatchVideoCallStarted } from '../../events/SocketEvents'
 import { notifyPeerVideoStart } from '../../lib/phone/video'
+import { destroyScreenShareRoom, releaseScreenShareHandles } from '../../lib/phone/screenShare'
 
 export interface VideoViewProps {}
 
@@ -90,6 +91,7 @@ export const VideoView: FC<VideoViewProps> = () => {
   const videoRenegotiationInFlightRef = useRef(false)
   const screenSharePublisherJoinRequestedRef = useRef(false)
   const screenShareViewRef = useRef(null)
+  const fullscreenElementRef = useRef<HTMLElement | null>(null)
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -119,6 +121,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
     return () => {
       removeEventListener('fullscreenchange', handleFullscreenChange)
+      exitFullScreenIfActive()
 
       // clear timeout
       if (uiTimeoutRef.current) {
@@ -216,13 +219,21 @@ export const VideoView: FC<VideoViewProps> = () => {
     setIsFullscreen(!!document.fullscreenElement)
   }
 
+  const exitFullScreenIfActive = () => {
+    if (document.fullscreenElement && document.fullscreenElement === fullscreenElementRef.current) {
+      document.exitFullscreen()
+      eventDispatch('phone-island-fullscreen-exited', {})
+    }
+  }
+
   const toggleFullScreen = () => {
     if (document.fullscreenElement) {
       document.exitFullscreen()
       eventDispatch('phone-island-fullscreen-exited', {})
     } else {
       if (screenShareViewRef.current) {
-        ;(screenShareViewRef.current as HTMLElement).requestFullscreen()
+        fullscreenElementRef.current = screenShareViewRef.current as HTMLElement
+        fullscreenElementRef.current.requestFullscreen()
         eventDispatch('phone-island-fullscreen-entered', {})
       }
     }
@@ -346,6 +357,9 @@ export const VideoView: FC<VideoViewProps> = () => {
             ':',
           track,
         )
+        if (store.getState().screenShare.remoteFeed !== remoteFeed) {
+          return
+        }
         // Screen sharing tracks are sometimes muted/unmuted by browser
         // when data is not flowing fast enough; this can make streams blink.
         // We can ignore these.
@@ -529,6 +543,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       janus.current.error?.(
         "This browser doesn't support screensharing (getDisplayMedia unavailable)",
       )
+      abortScreenShare()
       return
     }
 
@@ -558,6 +573,10 @@ export const VideoView: FC<VideoViewProps> = () => {
           // Our own screen sharing session has been created, join it
 
           const room = result['room']
+          if (store.getState().screenShare.plugin !== plugin) {
+            destroyScreenShareRoom(plugin, room)
+            return
+          }
           // Set room to the store
           dispatch.screenShare.update({
             room: room,
@@ -593,6 +612,10 @@ export const VideoView: FC<VideoViewProps> = () => {
       plugin: 'janus.plugin.videoroom',
       opaqueId: janus.current.randomString(32),
       success: function (pluginHandle) {
+        if (!store.getState().screenShare.active) {
+          pluginHandle.detach()
+          return
+        }
         // Set plugin to the store
         dispatch.screenShare.update({
           plugin: pluginHandle,
@@ -668,13 +691,7 @@ export const VideoView: FC<VideoViewProps> = () => {
                   screenTrack?.stop()
                   dispatch.screenShare.update({ active: false, role: '' })
                   exitVideoViewIfNoVideo()
-                  const { room } = store.getState().screenShare
-                  const releaseHandle = () => plugin.detach()
-                  plugin.send({
-                    message: { request: 'destroy', room },
-                    success: releaseHandle,
-                    error: releaseHandle,
-                  })
+                  releaseScreenShareHandles(true)
                 },
               })
             } else {
@@ -709,6 +726,8 @@ export const VideoView: FC<VideoViewProps> = () => {
               janus.current.log?.('Publisher left: ' + leaving)
             } else if (msg['error']) {
               janus.current.error?.('Error event: ' + msg['error'])
+              abortScreenShare()
+              releaseScreenShareHandles(role === 'publisher')
             }
           }
         }
@@ -866,16 +885,23 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const abortScreenShare = () => {
-    const { pendingScreenStream, role } = store.getState().screenShare
-    if (role !== 'publisher') return
+    const { pendingScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(pendingScreenStream)
     dispatch.screenShare.update({ active: false, role: '', pendingScreenStream: null })
     exitVideoViewIfNoVideo()
   }
 
   const initAndStartScreenShare = () => {
+    if (store.getState().screenShare.active) {
+      const { pendingScreenStream } = store.getState().screenShare
+      if (pendingScreenStream) {
+        janus.current.stopAllTracks(pendingScreenStream)
+        dispatch.screenShare.update({ pendingScreenStream: null })
+      }
+      return
+    }
     screenSharePublisherJoinRequestedRef.current = false
-    dispatch.screenShare.update({ active: true, role: 'publisher' })
+    dispatch.screenShare.update({ active: true, role: 'publisher', room: '' })
     initScreenShare()
   }
   useEventListener('phone-island-screen-share-start', () => {
@@ -904,9 +930,15 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const leaveScreenShare = () => {
-    const { remoteScreenStream } = store.getState().screenShare
+    const { remoteScreenStream, role, active } = store.getState().screenShare
+    if (role === 'publisher') {
+      if (active) stopScreenShare(false)
+      return
+    }
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false })
+    releaseScreenShareHandles(false)
+    exitFullScreenIfActive()
     exitVideoViewIfNoVideo()
     eventDispatch('phone-island-screen-share-left', {})
   }
@@ -941,26 +973,27 @@ export const VideoView: FC<VideoViewProps> = () => {
     }, 100) // small delay to detect "stopped moving"
   }
 
-  const stopScreenShare = () => {
-    const { plugin, localScreenStream } = store.getState().screenShare
+  const stopScreenShare = (notifyRemote = true) => {
+    const { localScreenStream, role, room } = store.getState().screenShare
 
     screenSharePublisherJoinRequestedRef.current = false
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
-    plugin.detach()
+    releaseScreenShareHandles(role === 'publisher')
 
-    // send message to websocket to tell the other user the screen share has stopped
-    const { socket } = store.getState().websocket
-    const { username: destUsername } = store.getState().currentCall
-    const { room } = store.getState().screenShare
-    const { username } = store.getState().currentUser
+    if (notifyRemote) {
+      // send message to websocket to tell the other user the screen share has stopped
+      const { socket } = store.getState().websocket
+      const { username: destUsername } = store.getState().currentCall
+      const { username } = store.getState().currentUser
 
-    socket.emit('message', {
-      message: 'screenSharingStop',
-      roomId: room,
-      destUser: destUsername,
-      callUser: username,
-    } as ScreenSharingMessage)
+      socket.emit('message', {
+        message: 'screenSharingStop',
+        roomId: room,
+        destUser: destUsername,
+        callUser: username,
+      } as ScreenSharingMessage)
+    }
 
     eventDispatch('phone-island-screen-share-stopped', {})
     exitVideoViewIfNoVideo()
@@ -971,7 +1004,9 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const pauseCall = () => {
     pauseCurrentCall()
-    stopScreenShare()
+    if (store.getState().screenShare.active) {
+      stopScreenShare()
+    }
   }
 
   const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)

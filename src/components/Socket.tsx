@@ -1460,7 +1460,12 @@ export const Socket: FC<SocketProps> = ({
               room: (data as ScreenSharingMessage).roomId,
             })
             break
-          case 'screenSharingStop':
+          case 'screenSharingStop': {
+            const { room: currentShareRoom } = store.getState().screenShare
+            const stoppedRoom = (data as ScreenSharingMessage).roomId
+            if (currentShareRoom && stoppedRoom && `${stoppedRoom}` !== `${currentShareRoom}`) {
+              break
+            }
             dispatch.island.toggleSideViewVisible(false)
             dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
@@ -1469,6 +1474,7 @@ export const Socket: FC<SocketProps> = ({
               isLeavingScreenShare: true,
             })
             break
+          }
           default:
             console.warn('Socket: unknown message type ', data.message)
         }
