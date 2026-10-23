@@ -346,6 +346,9 @@ export const VideoView: FC<VideoViewProps> = () => {
             ':',
           track,
         )
+        if (store.getState().screenShare.remoteFeed !== remoteFeed) {
+          return
+        }
         // Screen sharing tracks are sometimes muted/unmuted by browser
         // when data is not flowing fast enough; this can make streams blink.
         // We can ignore these.
@@ -904,9 +907,13 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const leaveScreenShare = () => {
-    const { remoteScreenStream } = store.getState().screenShare
+    const { remoteScreenStream, remoteFeed, plugin, role } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
-    dispatch.screenShare.update({ active: false })
+    dispatch.screenShare.update({ active: false, remoteFeed: null })
+    remoteFeed?.detach()
+    if (role === 'listener') {
+      plugin?.detach()
+    }
     exitVideoViewIfNoVideo()
     eventDispatch('phone-island-screen-share-left', {})
   }
