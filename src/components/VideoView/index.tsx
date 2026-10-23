@@ -877,6 +877,9 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const initAndStartScreenShare = () => {
+    if (store.getState().screenShare.active) {
+      return
+    }
     screenSharePublisherJoinRequestedRef.current = false
     dispatch.screenShare.update({ active: true, role: 'publisher' })
     initScreenShare()
