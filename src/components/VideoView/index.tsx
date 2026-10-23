@@ -949,12 +949,21 @@ export const VideoView: FC<VideoViewProps> = () => {
   }
 
   const stopScreenShare = () => {
-    const { plugin, localScreenStream } = store.getState().screenShare
+    const { plugin, localScreenStream, role, active, room: sharedRoom } = store.getState().screenShare
 
     screenSharePublisherJoinRequestedRef.current = false
     janus.current.stopAllTracks(localScreenStream)
     dispatch.screenShare.update({ active: false })
-    plugin.detach()
+    if (role === 'publisher' && active && plugin) {
+      const releaseHandle = () => plugin.detach()
+      plugin.send({
+        message: { request: 'destroy', room: sharedRoom },
+        success: releaseHandle,
+        error: releaseHandle,
+      })
+    } else {
+      plugin.detach()
+    }
 
     // send message to websocket to tell the other user the screen share has stopped
     const { socket } = store.getState().websocket

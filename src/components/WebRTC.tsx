@@ -917,13 +917,24 @@ export const WebRTC: FC<WebRTCProps> = ({
                           plugin,
                           localScreenStream,
                           remoteScreenStream,
+                          role: screenShareRole,
+                          room: screenShareRoom,
                         } = store.getState().screenShare
 
                         if (screenShareActive) {
                           janus.current.stopAllTracks(localScreenStream)
                           janus.current.stopAllTracks(remoteScreenStream)
                           dispatch.screenShare.update({ active: false })
-                          plugin.detach()
+                          if (screenShareRole === 'publisher') {
+                            const releaseHandle = () => plugin.detach()
+                            plugin.send({
+                              message: { request: 'destroy', room: screenShareRoom },
+                              success: releaseHandle,
+                              error: releaseHandle,
+                            })
+                          } else {
+                            plugin.detach()
+                          }
                         }
 
                         // After call cleanup, if connection was stale, force reload to reset Janus session
