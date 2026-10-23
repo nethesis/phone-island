@@ -26,6 +26,7 @@ import { webrtcCheck } from '../lib/webrtc/connection'
 import outgoingRingtone from '../static/outgoing_ringtone'
 import { eventDispatch, useEventListener, getJSONItem, setJSONItem } from '../utils'
 import { isPhysical } from '../lib/user/default_device'
+import { releaseScreenShareHandles } from '../lib/phone/screenShare'
 
 interface WebRTCProps {
   children: ReactNode
@@ -914,27 +915,18 @@ export const WebRTC: FC<WebRTCProps> = ({
                         // Stop screen sharing if active
                         const {
                           active: screenShareActive,
-                          plugin,
                           localScreenStream,
                           remoteScreenStream,
+                          pendingScreenStream,
                           role: screenShareRole,
-                          room: screenShareRoom,
                         } = store.getState().screenShare
 
                         if (screenShareActive) {
                           janus.current.stopAllTracks(localScreenStream)
                           janus.current.stopAllTracks(remoteScreenStream)
-                          dispatch.screenShare.update({ active: false })
-                          if (screenShareRole === 'publisher') {
-                            const releaseHandle = () => plugin.detach()
-                            plugin.send({
-                              message: { request: 'destroy', room: screenShareRoom },
-                              success: releaseHandle,
-                              error: releaseHandle,
-                            })
-                          } else {
-                            plugin.detach()
-                          }
+                          janus.current.stopAllTracks(pendingScreenStream)
+                          dispatch.screenShare.update({ active: false, pendingScreenStream: null })
+                          releaseScreenShareHandles(screenShareRole === 'publisher')
                         }
 
                         // After call cleanup, if connection was stale, force reload to reset Janus session

@@ -107,6 +107,10 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
       console.warn('Screen share not started:', error)
       return
     }
+    if (!store.getState().currentCall.accepted || store.getState().screenShare.active) {
+      pendingScreenStream.getTracks().forEach((track) => track.stop())
+      return
+    }
     store.dispatch.screenShare.update({
       pendingScreenStream,
       isStartingScreenShare: true,
