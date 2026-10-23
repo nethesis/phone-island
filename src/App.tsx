@@ -1064,14 +1064,18 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
 
     // Get current dimensions from data
     const { sizeInformation } = data
+    // A closed island stays 0x0, without the extra rows below
+    const isClosed =
+      parseFloat(sizeInformation?.width) === 0 && parseFloat(sizeInformation?.height) === 0
 
     // // Calculate extra row dimension ( side view and back call )
     const updatedSizeInformation = {
       ...sizeInformation,
-      right: sideViewIsVisible ? '42px' : '0px',
-      top: isBackCallActive() ? '40px' : '0px',
-      bottomTranscription:
-        transcriptionViewIsVisible && actionsExpanded
+      right: sideViewIsVisible && !isClosed ? '42px' : '0px',
+      top: isBackCallActive() && !isClosed ? '40px' : '0px',
+      bottomTranscription: isClosed
+        ? '0px'
+        : transcriptionViewIsVisible && actionsExpanded
           ? '335px'
           : transcriptionViewIsVisible && !actionsExpanded
           ? '330px'

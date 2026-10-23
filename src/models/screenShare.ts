@@ -16,6 +16,7 @@ export interface ScreenShareTypes {
   localVideos?: number
   remoteVideos?: number
   localScreenStream?: MediaStream
+  pendingScreenStream?: MediaStream | null
   remoteScreenStream?: MediaStream
   isStartingScreenShare?: boolean
   isJoiningScreenShare?: boolean
@@ -34,6 +35,7 @@ const defaultState = {
   localVideos: 0,
   remoteVideos: 0,
   localScreenStream: null as MediaStream | null,
+  pendingScreenStream: null as MediaStream | null,
   remoteScreenStream: null as MediaStream | null,
   isStartingScreenShare: false,
   isJoiningScreenShare: false,

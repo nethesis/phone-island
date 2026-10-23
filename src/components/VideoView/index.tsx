@@ -549,6 +549,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       success: function (result) {
         if (result['error']) {
           janus.current.error?.("Couldn't create room: " + result['error'])
+          abortScreenShare()
           return
         }
         let event = result['videoroom']
@@ -599,12 +600,8 @@ export const VideoView: FC<VideoViewProps> = () => {
         const { role } = store.getState().screenShare
 
         if (role === 'publisher') {
-          // trigger event to nethlink
           eventDispatch('phone-island-screen-share-initialized', {})
-
-          setTimeout(function () {
-            shareScreen()
-          }, 500)
+          shareScreen()
         } else if (role === 'listener') {
           joinScreenShare()
         }
@@ -612,6 +609,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       },
       error: function (error) {
         janus.current.error?.('Error attaching videoroom plugin', error)
+        abortScreenShare()
       },
       consentDialog: function (on) {},
       iceState: function (state) {
@@ -648,11 +646,16 @@ export const VideoView: FC<VideoViewProps> = () => {
               // This is our session, publish our stream
               janus.current.debug?.('Negotiating WebRTC stream for our screen')
 
+              // The screen picked at click time, otherwise Janus asks for one
+              const { pendingScreenStream } = store.getState().screenShare
+              const screenTrack = pendingScreenStream?.getVideoTracks()[0]
+              dispatch.screenShare.update({ pendingScreenStream: null })
+
               plugin.createOffer({
                 // We want sendonly audio and screensharing
                 tracks: [
                   { type: 'audio', capture: true, recv: false },
-                  { type: 'screen', capture: true, recv: false },
+                  { type: 'screen', capture: screenTrack ?? true, recv: false },
                 ],
                 success: function (jsep) {
                   janus.current.debug?.('Got publisher SDP!', jsep)
@@ -662,7 +665,9 @@ export const VideoView: FC<VideoViewProps> = () => {
                 error: function (error) {
                   screenSharePublisherJoinRequestedRef.current = false
                   janus.current.error?.('WebRTC error:', error)
+                  screenTrack?.stop()
                   dispatch.screenShare.update({ active: false, role: '' })
+                  exitVideoViewIfNoVideo()
                   const { room } = store.getState().screenShare
                   const releaseHandle = () => plugin.detach()
                   plugin.send({
@@ -841,6 +846,33 @@ export const VideoView: FC<VideoViewProps> = () => {
     } as ScreenSharingMessage)
   }
 
+  // Back to the call view once nothing is left to show: no camera, no remote video
+  // and no screen share. Otherwise an audio call stays stuck on the video view
+  const exitVideoViewIfNoVideo = () => {
+    const { isLocalVideoEnabled } = store.getState().currentCall
+    const { remoteVideoStream } = store.getState().webrtc
+    const { active: isScreenShareActive } = store.getState().screenShare
+    const hasRemoteVideo = !!remoteVideoStream
+      ?.getVideoTracks()
+      .some((track) => track.readyState === 'live' && !track.muted)
+    if (
+      !isLocalVideoEnabled &&
+      !hasRemoteVideo &&
+      !isScreenShareActive &&
+      store.getState().island.view === 'video'
+    ) {
+      dispatch.island.setIslandView('call')
+    }
+  }
+
+  const abortScreenShare = () => {
+    const { pendingScreenStream, role } = store.getState().screenShare
+    if (role !== 'publisher') return
+    janus.current.stopAllTracks(pendingScreenStream)
+    dispatch.screenShare.update({ active: false, role: '', pendingScreenStream: null })
+    exitVideoViewIfNoVideo()
+  }
+
   const initAndStartScreenShare = () => {
     screenSharePublisherJoinRequestedRef.current = false
     dispatch.screenShare.update({ active: true, role: 'publisher' })
@@ -875,6 +907,7 @@ export const VideoView: FC<VideoViewProps> = () => {
     const { remoteScreenStream } = store.getState().screenShare
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false })
+    exitVideoViewIfNoVideo()
     eventDispatch('phone-island-screen-share-left', {})
   }
 
@@ -930,6 +963,7 @@ export const VideoView: FC<VideoViewProps> = () => {
     } as ScreenSharingMessage)
 
     eventDispatch('phone-island-screen-share-stopped', {})
+    exitVideoViewIfNoVideo()
   }
   useEventListener('phone-island-screen-share-stop', () => {
     stopScreenShare()

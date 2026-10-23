@@ -93,11 +93,21 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
     }
   }, [checkCameraPermission, closeSideViewAndLaunchEvent])
 
-  const goToScreenSharing = useCallback(() => {
-    closeSideViewAndLaunchEvent('video')
+  const goToScreenSharing = useCallback(async () => {
+    // Pick the screen before anything else: the picker opens right away and, if the
+    // user cancels, the island stays on the call view with nothing to undo
+    let pendingScreenStream: MediaStream
+    try {
+      pendingScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
+    } catch (error) {
+      console.warn('Screen share not started:', error)
+      return
+    }
     store.dispatch.screenShare.update({
+      pendingScreenStream,
       isStartingScreenShare: true,
     })
+    closeSideViewAndLaunchEvent('video')
   }, [closeSideViewAndLaunchEvent])
 
   const permissions = useMemo(
