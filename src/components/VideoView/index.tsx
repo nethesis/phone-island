@@ -119,6 +119,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
     return () => {
       removeEventListener('fullscreenchange', handleFullscreenChange)
+      exitFullScreenIfActive()
 
       // clear timeout
       if (uiTimeoutRef.current) {
@@ -214,6 +215,13 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const handleFullscreenChange = () => {
     setIsFullscreen(!!document.fullscreenElement)
+  }
+
+  const exitFullScreenIfActive = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+      eventDispatch('phone-island-fullscreen-exited', {})
+    }
   }
 
   const toggleFullScreen = () => {
@@ -917,6 +925,7 @@ export const VideoView: FC<VideoViewProps> = () => {
     if (role === 'listener') {
       plugin?.detach()
     }
+    exitFullScreenIfActive()
     exitVideoViewIfNoVideo()
     eventDispatch('phone-island-screen-share-left', {})
   }
