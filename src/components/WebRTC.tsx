@@ -82,8 +82,145 @@ export const WebRTC: FC<WebRTCProps> = ({
   // Timeout ID for network error grace period (during active calls)
   const networkErrorGraceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Media recovery of an established call after a network change (e.g. VPN):
+  // the ICE path towards Janus breaks when the local address changes, and the
+  // Janus HTTP session can be lost while the call is still alive server side
+  const iceRestartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const iceRestartAttempts = useRef<number>(0)
+  const iceRestartPendingSince = useRef<number | null>(null)
+  const janusReconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const ICE_RESTART_MAX_ATTEMPTS = 5
+  const ICE_RESTART_RETRY_MS = 5000
+  const JANUS_RECONNECT_RETRY_MS = 3000
+  // Janus destroys a session without activity after about 60 seconds
+  const JANUS_RECONNECT_MAX_MS = 60000
+
   // Initialize Janus from Janus library
   const janus = useRef<any>(JanusLib)
+
+  const hasEstablishedCall = () => {
+    const { sipcall }: { sipcall: any } = store.getState().webrtc
+    const { accepted } = store.getState().currentCall
+    return !!(accepted && sipcall?.webrtcStuff?.pc)
+  }
+
+  const stopJanusReconnect = () => {
+    if (janusReconnectTimerRef.current) {
+      clearInterval(janusReconnectTimerRef.current)
+      janusReconnectTimerRef.current = null
+    }
+  }
+
+  // Reclaim the existing Janus session during an established call: a full
+  // reload would create a new session and drop the call
+  const startJanusReconnect = () => {
+    if (janusReconnectTimerRef.current) return
+    const startedAt = Date.now()
+    let inFlight = false
+    const attempt = () => {
+      const { janusInstance }: { janusInstance: any } = store.getState().webrtc
+      if (
+        !janusInstance?.reconnect ||
+        janusInstance.isConnected?.() ||
+        !hasEstablishedCall() ||
+        Date.now() - startedAt > JANUS_RECONNECT_MAX_MS
+      ) {
+        stopJanusReconnect()
+        return
+      }
+      if (inFlight) return
+      inFlight = true
+      janusInstance.reconnect({
+        success: () => {
+          inFlight = false
+          console.info('[MEDIA-RECOVERY] Janus session reclaimed during active call', {
+            sessionId: janusInstance.getSessionId?.(),
+            timestamp: new Date().toISOString(),
+          })
+          connectionStale.current = false
+          stopJanusReconnect()
+          // The media path may be broken as well
+          scheduleIceRestart(0)
+        },
+        error: (error: any) => {
+          inFlight = false
+          console.warn('[MEDIA-RECOVERY] Janus session reclaim failed, retrying', {
+            error,
+            timestamp: new Date().toISOString(),
+          })
+        },
+      })
+    }
+    janusReconnectTimerRef.current = setInterval(attempt, JANUS_RECONNECT_RETRY_MS)
+    attempt()
+  }
+
+  const clearIceRestart = () => {
+    if (iceRestartTimerRef.current) {
+      clearTimeout(iceRestartTimerRef.current)
+      iceRestartTimerRef.current = null
+    }
+    iceRestartAttempts.current = 0
+  }
+
+  const scheduleIceRestart = (delay: number) => {
+    if (iceRestartTimerRef.current) return
+    iceRestartTimerRef.current = setTimeout(runIceRestart, delay)
+  }
+
+  // Restart ICE with a re-INVITE on the same call, so that the media flows
+  // again on the new network path without hanging up
+  const runIceRestart = () => {
+    iceRestartTimerRef.current = null
+    const { sipcall, janusInstance }: { sipcall: any; janusInstance: any } = store.getState().webrtc
+    const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
+    if (
+      !hasEstablishedCall() ||
+      iceState === 'connected' ||
+      iceState === 'completed' ||
+      iceState === 'closed'
+    ) {
+      iceRestartAttempts.current = 0
+      return
+    }
+    // The re-INVITE and the new candidates go through Janus: reclaim the
+    // session first, its success schedules the ICE restart again
+    if (!janusInstance?.isConnected?.()) {
+      startJanusReconnect()
+      return
+    }
+    // Don't overlap re-INVITEs, wait for the previous one to be answered
+    const pendingSince = iceRestartPendingSince.current
+    if (pendingSince && Date.now() - pendingSince < ICE_RESTART_RETRY_MS * 2) {
+      scheduleIceRestart(ICE_RESTART_RETRY_MS)
+      return
+    }
+    if (iceRestartAttempts.current >= ICE_RESTART_MAX_ATTEMPTS) {
+      console.warn('[MEDIA-RECOVERY] ICE restart attempts exhausted', {
+        iceState,
+        timestamp: new Date().toISOString(),
+      })
+      return
+    }
+    iceRestartAttempts.current++
+    console.info('[MEDIA-RECOVERY] Media path down during active call, restarting ICE', {
+      attempt: iceRestartAttempts.current,
+      iceState,
+      timestamp: new Date().toISOString(),
+    })
+    sipcall.createOffer({
+      iceRestart: true,
+      success: (jsep: any) => {
+        iceRestartPendingSince.current = Date.now()
+        sipcall.send({ message: { request: 'update' }, jsep })
+      },
+      error: (error: any) => {
+        console.error('[MEDIA-RECOVERY] ICE restart offer failed', { error })
+      },
+    })
+    // Try again if ICE does not get connected
+    scheduleIceRestart(ICE_RESTART_RETRY_MS)
+  }
 
   let localTracks = {}
   let localVideos = 0
@@ -374,6 +511,14 @@ export const WebRTC: FC<WebRTCProps> = ({
                       )
                   }
 
+                  // The media path broke (e.g. network change): restart ICE. A
+                  // 'disconnected' state can recover by itself, give it a moment
+                  if ((newState === 'disconnected' || newState === 'failed') && hasEstablishedCall()) {
+                    scheduleIceRestart(newState === 'failed' ? 0 : 2000)
+                  } else if (newState === 'connected' || newState === 'completed') {
+                    clearIceRestart()
+                  }
+
                   // Fix: Ensure view is set to 'call' when ICE is connected but view is null
                   // This can happen after standby when socket events are missed
                   if (newState === 'connected' || newState === 'completed') {
@@ -416,6 +561,12 @@ export const WebRTC: FC<WebRTCProps> = ({
                   // Handle errors in message
                   var error = msg['error']
                   if (error != null && error != undefined) {
+                    if (iceRestartPendingSince.current) {
+                      // A refused ICE restart re-INVITE must not hang up the call
+                      console.warn('[MEDIA-RECOVERY] ICE restart update refused', { error })
+                      iceRestartPendingSince.current = null
+                      return
+                    }
                     if (!store.getState().webrtc.registered) {
                       if (janus.current.log) janus.current.log('User is not registered')
                     } else {
@@ -644,6 +795,18 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'accepted':
+                        // Answer to our ICE restart re-INVITE: only apply the new
+                        // remote description, the call itself is already accepted
+                        if (iceRestartPendingSince.current) {
+                          iceRestartPendingSince.current = null
+                          console.info('[MEDIA-RECOVERY] ICE restart answered', {
+                            timestamp: new Date().toISOString(),
+                          })
+                          if (jsep) {
+                            handleRemote(jsep)
+                          }
+                          break
+                        }
                         const acceptedTimestamp = Math.floor(Date.now() / 1000)
                         if (janus.current.log) {
                           const caller = result['username'] || result['displayname'] || store.getState().currentCall.number || 'Remote party'
@@ -712,6 +875,10 @@ export const WebRTC: FC<WebRTCProps> = ({
                         break
 
                       case 'hangup':
+                        // Stop any media recovery of the ended call
+                        clearIceRestart()
+                        stopJanusReconnect()
+                        iceRestartPendingSince.current = null
                         // Clear jsepGlobal when call ends
                         console.log('[JSEP] Clearing jsepGlobal on hangup', {
                           timestamp: new Date().toISOString()
@@ -1026,6 +1193,9 @@ export const WebRTC: FC<WebRTCProps> = ({
             const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
 
             if (hasActiveCall) {
+              // Reclaim the session as soon as the network is back, before Janus
+              // destroys it and the call with it
+              startJanusReconnect()
               console.info('[JANUS-GUARD] Network error during active call - giving ICE grace period to recover', {
                 iceState,
                 accepted,
@@ -1189,6 +1359,9 @@ export const WebRTC: FC<WebRTCProps> = ({
         clearTimeout(networkErrorGraceRef.current)
         networkErrorGraceRef.current = null
       }
+      // Stop any media recovery
+      clearIceRestart()
+      stopJanusReconnect()
     }
   }, [])
 
@@ -1198,20 +1371,24 @@ export const WebRTC: FC<WebRTCProps> = ({
       // Check if WebRTC is actually disconnected using alerts (more reliable than registered/sipcall)
       const { data } = store.getState().alerts
       const { forceReload } = store.getState().island
-      const { sipcall, janusInstance }: { sipcall: any; janusInstance: any } = store.getState().webrtc
+      const { sipcall, janusInstance, jsepGlobal }: { sipcall: any; janusInstance: any; jsepGlobal: any } =
+        store.getState().webrtc
       const { accepted, outgoing } = store.getState().currentCall
 
       // Check if there's an active call - if so, don't reload automatically
-      // WebRTC/ICE is designed to recover from brief network interruptions
+      // WebRTC/ICE is designed to recover from brief network interruptions.
+      // A ringing incoming call counts as well, a reload would drop its JSEP
       const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-      const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
+      const hasActiveCall =
+        accepted || outgoing || !!jsepGlobal || iceState === 'connected' || iceState === 'completed'
 
       // Only do full reload if webrtc_down alert is active OR force reload is requested OR connection just returned
       const isWebRTCDown = data.webrtc_down?.active || false
 
-      // If connection returned but there's an active call, try to reconnect Janus HTTP without full reload
+      // If connection returned or a reload is forced (alert reload icon) but there's an active call,
+      // try to reconnect Janus HTTP without full reload: a full reload would hang up the call
       // This preserves ICE (audio) while restoring Janus signaling
-      if (connectionReturned && hasActiveCall && !forceReload) {
+      if ((connectionReturned || forceReload) && hasActiveCall) {
         const janusConnected = janusInstance?.isConnected?.()
 
         if (!janusConnected && janusInstance?.reconnect) {
@@ -1228,6 +1405,8 @@ export const WebRTC: FC<WebRTCProps> = ({
                 timestamp: new Date().toISOString()
               })
               connectionStale.current = false
+              // The media path may be broken as well
+              scheduleIceRestart(0)
               // Clear grace period timer since we successfully reconnected
               if (networkErrorGraceRef.current) {
                 clearTimeout(networkErrorGraceRef.current)
@@ -1243,11 +1422,13 @@ export const WebRTC: FC<WebRTCProps> = ({
             }
           })
         } else {
-          console.info('[JANUS-GUARD] Connection returned but active call in progress - Janus still connected, no action needed', {
+          console.info('[JANUS-GUARD] Connection returned but active call in progress - Janus still connected, no reload needed', {
             iceState,
             janusConnected,
             timestamp: new Date().toISOString()
           })
+          // Restart ICE if the media path is down
+          scheduleIceRestart(0)
         }
 
         // If this run was also driven by a reload request, complete the cycle
@@ -1582,14 +1763,20 @@ export const WebRTC: FC<WebRTCProps> = ({
   // This prevents stale Janus sessions that cause 469 "Unexpected ANSWER" errors
   // BUT if there's an active call, try to reconnect Janus HTTP without killing ICE
   useEventListener('phone-island-socket-reconnected', () => {
-    const { sipcall, janusInstance }: { sipcall: any; janusInstance: any } = store.getState().webrtc
+    const { sipcall, janusInstance, jsepGlobal }: { sipcall: any; janusInstance: any; jsepGlobal: any } =
+      store.getState().webrtc
     const { accepted, outgoing } = store.getState().currentCall
     const iceState = sipcall?.webrtcStuff?.pc?.iceConnectionState
-    const hasActiveCall = accepted || outgoing || iceState === 'connected' || iceState === 'completed'
+    // A ringing incoming call must be preserved too: a full reload would drop
+    // its JSEP and the call could no longer be answered
+    const hasIncomingCall = !!jsepGlobal
+    const hasActiveCall =
+      accepted || outgoing || hasIncomingCall || iceState === 'connected' || iceState === 'completed'
     const janusConnected = janusInstance?.isConnected?.()
 
     console.log('[EVENT] phone-island-socket-reconnected received', {
       hasActiveCall,
+      hasIncomingCall,
       iceState,
       accepted,
       outgoing,
@@ -1613,6 +1800,8 @@ export const WebRTC: FC<WebRTCProps> = ({
           })
           // Reset stale flag since we reconnected
           connectionStale.current = false
+          // The media path may be broken as well
+          scheduleIceRestart(0)
           // Clear grace period timer since we successfully reconnected
           if (networkErrorGraceRef.current) {
             clearTimeout(networkErrorGraceRef.current)
@@ -1642,19 +1831,12 @@ export const WebRTC: FC<WebRTCProps> = ({
         clearTimeout(networkErrorGraceRef.current)
         networkErrorGraceRef.current = null
       }
+      // Janus signaling is fine, but the media path can be down after a network change
+      scheduleIceRestart(0)
       return
     }
 
-    // No active call - proceed with reload to ensure clean state
-    // Clear any stale jsepGlobal - it's invalid after network reconnect
-    const { jsepGlobal } = store.getState().webrtc
-    if (jsepGlobal) {
-      console.log('[EVENT] Clearing stale jsepGlobal after socket reconnect', {
-        timestamp: new Date().toISOString()
-      })
-      dispatch.webrtc.updateWebRTC({ jsepGlobal: null })
-      jsepGlobalTimestamp.current = null // Clear timestamp to match jsepGlobal
-    }
+    // No call at all (jsepGlobal is empty here) - proceed with reload to ensure clean state
     // Trigger reload via connectionReturned (forceReload not needed - connectionReturned already triggers reload)
     setConnectionReturned(true)
   })
