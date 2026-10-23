@@ -242,7 +242,20 @@ export function callSipURI(sipURI: string, options: { video?: boolean } = {}) {
       store.dispatch.currentCall.setVideoTrackAdded(true)
     }
 
-    await call(sipURI, tracks)
+    try {
+      await call(sipURI, tracks)
+    } catch (error) {
+      if (!options.video) return
+      // No camera (permission denied, busy or missing): call in audio only rather than not at all
+      // @ts-ignore
+      Janus.warn('Video call could not start, calling in audio only')
+      store.dispatch.currentCall.updateCurrentCall({ isLocalVideoEnabled: false })
+      store.dispatch.currentCall.setVideoTrackAdded(false)
+      // Drop the half-prepared PeerConnection locally, nothing was sent yet
+      const { sipcall }: { sipcall: any } = store.getState().webrtc
+      sipcall.hangup(false)
+      await call(sipURI, tracks.filter((track) => track.type !== 'video')).catch(() => {})
+    }
   })
 }
 
