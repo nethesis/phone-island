@@ -16,7 +16,7 @@ const ANIMATION_CONFIG = {
   exit: { height: 0, opacity: 0 },
   transition: {
     duration: 0.1,
-    ease: 'easeOut',
+    ease: 'easeOut' as const,
   },
 }
 
