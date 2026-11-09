@@ -43,7 +43,7 @@
     "@rematch/select": "^3.1.2",
     "buffer": "^6.0.0",
     "framer-motion": "^14.0.0",
-    "i18next": "^22.4.9",
+    "i18next": "^27.0.0",
     "i18next-browser-languagedetector": "^7.0.1",
     "immer": "^9.0.21",
     "js-base64": "^3.7.3",
