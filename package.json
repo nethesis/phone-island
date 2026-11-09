@@ -120,5 +120,10 @@
     "tailwindcss": "^3.4.16",
     "typescript": "^5.9.3"
   },
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "overrides": {
+    "@nethesis/nethesis-solid-svg-icons": {
+      "@fortawesome/fontawesome-common-types": "7.3.1"
+    }
+  }
 }
