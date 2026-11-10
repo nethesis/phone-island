@@ -168,6 +168,12 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const gateName = (gate: VideoSourceGateType) => gate.name || source.description || gate.id
   const gateTitle = (gate: VideoSourceGateType) =>
     needsAnswer(gate) ? answerToOpen : `${t('VideoStreaming.Open')}: ${gateName(gate)}`
+  // chooser gates: the full name (the label may be truncated) and what a click does
+  const gateTooltip = (gate: VideoSourceGateType) =>
+    needsAnswer(gate)
+      ? `${gateName(gate)}: ${answerToOpen}`
+      : `${t('VideoStreaming.Open')}: ${gateName(gate)}`
+  const gatesTooltipId = `${tooltipId || 'tooltip-streaming-unlock'}-gates`
   // not the disabled attribute: the hint must still show on hover and on click
   const waitingClasses = '!pi-opacity-40 !pi-cursor-not-allowed'
 
@@ -191,9 +197,13 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const gateButtons = (
     <div
       className={`pi-flex pi-min-w-0 pi-items-center pi-gap-1.5 ${
-        // large (answered call bar): the room left by the other buttons
-        rowMode ? 'pi-w-full' : size === 'large' ? 'pi-max-w-full' : 'pi-max-w-[18rem]'
-      } pi-overflow-x-auto pi-scrollbar-none`}
+        rowMode
+          ? 'pi-w-full pi-overflow-x-auto pi-scrollbar-none'
+          : size === 'large'
+          ? // answered call bar: the room left by the other buttons, more lines if needed
+            'pi-max-w-full pi-flex-wrap pi-justify-center'
+          : 'pi-max-w-[18rem] pi-overflow-x-auto pi-scrollbar-none'
+      }`}
     >
       {gates.map((gate) => {
         // in the row the result replaces the name of its gate
@@ -207,7 +217,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
             onClick={() => openGate(gate)}
             disabled={pendingGate !== null}
             aria-disabled={needsAnswer(gate) ? true : undefined}
-            title={result ? undefined : gateTitle(gate)}
+            data-tooltip-id={result ? undefined : gatesTooltipId}
+            data-tooltip-content={result ? undefined : gateTooltip(gate)}
             className={`${
               needsAnswer(gate) ? (result ? '!pi-cursor-not-allowed' : waitingClasses) : ''
             } pi-flex pi-flex-shrink-0 pi-items-center pi-gap-1.5 pi-rounded-full pi-px-3 ${
@@ -227,7 +238,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
                 {result.message}
               </span>
             ) : (
-              <span className='pi-max-w-[10rem] pi-truncate'>{gateName(gate)}</span>
+              <span className='pi-max-w-[9rem] pi-truncate'>{gateName(gate)}</span>
             )}
           </button>
         )
@@ -284,15 +295,17 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
       ) : (
         <>
           {gateButtons}
+          {/* a filled round button like the others: visible on any picture */}
           <Button
-            variant='transparent'
-            className={`pi-flex-shrink-0 ${size === 'large' ? '!pi-h-10 !pi-w-10' : '!pi-h-8 !pi-w-8'}`}
+            variant='default'
+            className={`pi-flex-shrink-0 ${size === 'large' ? '' : '!pi-h-10 !pi-w-10'}`}
             onClick={closeChooser}
             aria-label={t('Common.Close') || 'Close'}
+            data-streaming-unlock='close'
             data-tooltip-id={tooltipId}
             data-tooltip-content={t('Common.Close') || 'Close'}
           >
-            <FontAwesomeIcon className='pi-h-4 pi-w-4' icon={faXmark} />
+            <FontAwesomeIcon className={iconSize} icon={faXmark} />
           </Button>
         </>
       )}
@@ -332,6 +345,15 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
           gatesContainer,
         )}
       {tooltipId && <CustomThemedTooltip className='pi-z-20' id={tooltipId} place={tooltipPlace} />}
+      {/* over the picture, never over the call buttons: below the gates row, above the bar */}
+      {gates.length > 1 && (
+        <CustomThemedTooltip
+          className='pi-z-20'
+          id={gatesTooltipId}
+          place={rowMode || feedbackPlacement === 'below' ? 'bottom' : 'top'}
+          maxWidth='260px'
+        />
+      )}
     </div>
   )
 }

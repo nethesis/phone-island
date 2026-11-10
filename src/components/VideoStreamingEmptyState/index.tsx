@@ -7,19 +7,17 @@ interface VideoStreamingEmptyStateProps {
     className?: string
     title?: string
     message?: string
-    style?: React.CSSProperties
 }
 
 const VideoStreamingEmptyState: React.FC<VideoStreamingEmptyStateProps> = ({
     className = '',
     title,
-    message,
-    style
+    message
 }) => {
     const { t } = useTranslation()
 
     return (
-        <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 ${className}`} style={style}>
+        <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 ${className}`}>
             <div className="pi-flex pi-flex-col pi-items-center pi-justify-center pi-space-y-4 pi-p-8">
                 <FontAwesomeIcon
                     icon={faVideoSlash}
