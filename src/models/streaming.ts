@@ -36,11 +36,17 @@ export interface VideoSourceType {
 interface StreamingStateType {
   videoSources: Record<string, VideoSourceType>
   sourceImages: Record<string, string>
+  // width / height of the picture of each source, once known (sizes the call views)
+  aspectRatios: Record<string, number>
+  // the gate chooser of the ringing call view is open (the island makes room for it)
+  gateChooserOpen: boolean
 }
 
 const defaultState: StreamingStateType = {
   videoSources: {},
   sourceImages: {},
+  aspectRatios: {},
+  gateChooserOpen: false,
 }
 
 export const streaming = createModel<RootModel>()({
@@ -77,6 +83,24 @@ export const streaming = createModel<RootModel>()({
         ...state,
         sourceImages: updatedSourceImages,
         videoSources: updatedVideoSources,
+      }
+    },
+    setSourceAspectRatio: (state, payload: { source: string; aspectRatio: number }) => {
+      const { source, aspectRatio } = payload
+      if (!source || !isFinite(aspectRatio) || aspectRatio <= 0) return state
+      // ignore rounding noise: the island is resized only on a real change
+      const current = state.aspectRatios[source]
+      if (current && Math.abs(current - aspectRatio) < 0.01) return state
+      return {
+        ...state,
+        aspectRatios: { ...state.aspectRatios, [source]: aspectRatio },
+      }
+    },
+    setGateChooserOpen: (state, payload: boolean) => {
+      if (state.gateChooserOpen === payload) return state
+      return {
+        ...state,
+        gateChooserOpen: payload,
       }
     },
     clearSourceImages: (state) => {

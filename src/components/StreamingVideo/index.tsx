@@ -5,6 +5,8 @@ import React, { FC, memo, RefObject, useEffect, useRef, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
+import type { Dispatch } from '../../store'
 import type { VideoSourceType } from '../../models/streaming'
 import { useStreamingVideo } from '../../utils/customHooks/useStreamingVideo'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
@@ -14,6 +16,7 @@ import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
  * Live video of an "rtsp" video source (door intercom).
  *
  * The video is always muted: the audio of the intercom is the SIP call itself.
+ * The whole picture is shown (letterboxed if needed): its aspect ratio is stored to size the box.
  */
 const StreamingVideo: FC<StreamingVideoProps> = ({
   source,
@@ -21,9 +24,11 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
   className = '',
   videoClassName = '',
   overlayClassName = 'pi-rounded-lg',
+  reconnectingClassName = 'pi-bottom-3',
   videoRef,
 }) => {
   const { t } = useTranslation()
+  const dispatch = useDispatch<Dispatch>()
   const ownVideoRef = useRef<HTMLVideoElement>(null)
   const ref = videoRef || ownVideoRef
   // last frame shown while reconnecting: the <video> turns black when the stalled connection
@@ -54,6 +59,17 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
     }
   }, [stream, ref])
 
+  // the size of the video is known with the first frame and changes if the source changes it
+  const storeAspectRatio = () => {
+    const video = ref.current
+    if (video && video.videoWidth && video.videoHeight) {
+      dispatch.streaming.setSourceAspectRatio({
+        source: source.id,
+        aspectRatio: video.videoWidth / video.videoHeight,
+      })
+    }
+  }
+
   // the last frame stays visible while reconnecting
   const showVideo = state.status === 'playing' || state.status === 'reconnecting'
 
@@ -75,7 +91,9 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
         autoPlay
         playsInline
         disablePictureInPicture
-        className={`pi-w-full pi-h-full pi-object-cover pi-bg-black pi-transition-opacity pi-duration-300 ${
+        onLoadedMetadata={storeAspectRatio}
+        onResize={storeAspectRatio}
+        className={`pi-w-full pi-h-full pi-object-contain pi-bg-black pi-transition-opacity pi-duration-300 ${
           showVideo ? 'pi-opacity-100' : 'pi-opacity-0'
         } ${videoClassName}`}
       />
@@ -94,11 +112,14 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
         <img
           src={frozenFrame}
           alt=''
-          className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-object-cover ${videoClassName}`}
+          className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-object-contain ${videoClassName}`}
         />
       )}
       {state.status === 'reconnecting' && (
-        <div className='pi-absolute pi-top-2 pi-left-2 pi-flex pi-items-center pi-gap-1.5 pi-rounded-full pi-bg-black/60 pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-text-white'>
+        // bottom centre: devices often print the time in the top corners
+        <div
+          className={`pi-absolute ${reconnectingClassName} pi-left-1/2 -pi-translate-x-1/2 pi-flex pi-items-center pi-whitespace-nowrap pi-gap-1.5 pi-rounded-full pi-bg-black/60 pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-text-white`}
+        >
           <FontAwesomeIcon icon={faCircleNotch} className='pi-h-3 pi-w-3 pi-animate-spin' />
           {t('VideoStreaming.Reconnecting')}
         </div>
@@ -129,6 +150,8 @@ export interface StreamingVideoProps {
   videoClassName?: string
   // classes of the skeleton and empty state overlays (rounded corners)
   overlayClassName?: string
+  // position of the "reconnecting" badge (bottom centre), e.g. above an overlay bar
+  reconnectingClassName?: string
   videoRef?: RefObject<HTMLVideoElement>
 }
 

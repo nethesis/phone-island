@@ -36,6 +36,8 @@ import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
 import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
 import { useDispatch } from 'react-redux'
+import { useStreamingAspectRatio } from '../../utils/customHooks/useStreamingAspectRatio'
+import { getStreamingPreviewHeight } from '../../utils/streaming/previewSize'
 
 const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
 
@@ -140,9 +142,18 @@ const CallView: FC<CallViewProps> = () => {
   const { isListen, isIntrude, isListenExtension, isIntrudeExtension } = listenState
   const { data: alertsData } = useSelector((state: RootState) => state.alerts)
   const currentUser = useSelector((state: RootState) => state.currentUser)
-  const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
-  // the gate chooser of the video source is open
-  const [gateChooserOpen, setGateChooserOpen] = useState(false)
+  const { videoSources, sourceImages, gateChooserOpen } = useSelector(
+    (state: RootState) => state.streaming,
+  )
+  // row below the buttons for the gates of the video source (and the result of an opening)
+  const [gatesRow, setGatesRow] = useState<HTMLDivElement | null>(null)
+  // the preview shows the whole picture: its height follows the aspect ratio (see IslandMotion)
+  const { variants } = useSelector((state: RootState) => state.motions)
+  const streamingAspectRatio = useStreamingAspectRatio()
+  const previewHeight = getStreamingPreviewHeight(
+    variants.call.expanded.incomingStreaming.previewWidth,
+    streamingAspectRatio,
+  )
 
   const activeAlerts = useMemo(
     () => Object.values(alertsData).filter((alert: any) => alert.active),
@@ -464,24 +475,26 @@ const CallView: FC<CallViewProps> = () => {
   const renderStreamingContent = useCallback(() => {
     // Show skeleton while videoSources are loading or if streaming source number is not set yet
     if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
-      return <VideoStreamingSkeleton className='pi-w-full pi-h-40 pi-mt-4' />
+      return <VideoStreamingSkeleton className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
     }
 
     const source = streamingSource
 
     // If source doesn't exist, show empty state
     if (!source) {
-      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
+      return (
+        <VideoStreamingEmptyState className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
+      )
     }
 
     // Live video (only while the island is expanded, the preview is hidden when collapsed)
     if (isRtspVideoSource(source)) {
       return (
-        <div className='pi-mt-4 pi-w-full pi-flex pi-justify-center'>
+        <div className='pi-mt-4 pi-w-full' style={{ height: previewHeight }}>
           <StreamingVideo
             source={source}
             active={isOpen}
-            className='pi-h-[10.5rem] pi-w-full pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700'
+            className='pi-h-full pi-w-full pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black'
           />
         </div>
       )
@@ -492,12 +505,14 @@ const CallView: FC<CallViewProps> = () => {
 
     // If no image available, show empty state
     if (!hasImage) {
-      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
+      return (
+        <VideoStreamingEmptyState className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
+      )
     }
 
     // If we have an image, show StreamingImage component
-    return <StreamingImage />
-  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen])
+    return <StreamingImage height={previewHeight} />
+  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen, previewHeight])
 
   // Early return AFTER all hooks have been called
   if (latestAlert !== null) {
@@ -518,22 +533,15 @@ const CallView: FC<CallViewProps> = () => {
         {shouldShowStreamingImage ? (
           <>
             <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-gap-2'>
-              {/* with the gate chooser open the name keeps a minimum room and the gates scroll */}
-              <div
-                className={`pi-flex pi-items-center pi-gap-4 pi-flex-1 ${
-                  gateChooserOpen ? 'pi-min-w-[8.5rem]' : 'pi-min-w-0'
-                }`}
-              >
+              <div className='pi-flex pi-items-center pi-gap-4 pi-flex-1 pi-min-w-0'>
                 {renderStatusIcon()}
                 <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2 pi-min-w-0'>
-                  <DisplayName truncate={gateChooserOpen} />
+                  <DisplayName />
                   <Number />
                 </div>
               </div>
 
-              <div
-                className={`pi-flex pi-gap-2 ${gateChooserOpen ? 'pi-min-w-0' : 'pi-flex-shrink-0'}`}
-              >
+              <div className='pi-flex pi-gap-2 pi-flex-shrink-0'>
                 <Hangup description={t('Tooltip.Hangup')} />
                 {!outgoing && (
                   <Button
@@ -550,15 +558,22 @@ const CallView: FC<CallViewProps> = () => {
                   <StreamingUnlock
                     source={streamingSource}
                     tooltipId='tooltip-unlock'
-                    tooltipPlace='left'
-                    feedbackPlacement='below'
+                    // not on the left: the hangup and answer buttons stay visible
+                    tooltipPlace='bottom-end'
                     // the collapsed island has no room for the gates: expand it
                     onChoose={!isOpen ? () => dispatch.island.toggleIsOpen(true) : undefined}
-                    onChooserChange={setGateChooserOpen}
+                    onChooserChange={dispatch.streaming.setGateChooserOpen}
+                    gatesContainer={gatesRow}
                   />
                 )}
               </div>
             </div>
+
+            {/* gates of the video source: the island grows by gatesHeight while it is shown */}
+            <div
+              ref={setGatesRow}
+              className={gateChooserOpen ? 'pi-mt-3 pi-flex pi-h-10 pi-w-full' : 'pi-hidden'}
+            />
 
             {renderStreamingContent()}
           </>
