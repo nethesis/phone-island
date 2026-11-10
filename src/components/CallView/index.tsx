@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useMemo, useCallback, memo } from 'react'
+import React, { type FC, useMemo, useCallback, memo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -141,6 +141,8 @@ const CallView: FC<CallViewProps> = () => {
   const { data: alertsData } = useSelector((state: RootState) => state.alerts)
   const currentUser = useSelector((state: RootState) => state.currentUser)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
+  // the gate chooser of the video source is open
+  const [gateChooserOpen, setGateChooserOpen] = useState(false)
 
   const activeAlerts = useMemo(
     () => Object.values(alertsData).filter((alert: any) => alert.active),
@@ -516,15 +518,22 @@ const CallView: FC<CallViewProps> = () => {
         {shouldShowStreamingImage ? (
           <>
             <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-gap-2'>
-              <div className='pi-flex pi-items-center pi-gap-4 pi-min-w-0 pi-flex-1'>
+              {/* with the gate chooser open the name keeps a minimum room and the gates scroll */}
+              <div
+                className={`pi-flex pi-items-center pi-gap-4 pi-flex-1 ${
+                  gateChooserOpen ? 'pi-min-w-[8.5rem]' : 'pi-min-w-0'
+                }`}
+              >
                 {renderStatusIcon()}
                 <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2 pi-min-w-0'>
-                  <DisplayName />
+                  <DisplayName truncate={gateChooserOpen} />
                   <Number />
                 </div>
               </div>
 
-              <div className='pi-flex pi-gap-2 pi-flex-shrink-0'>
+              <div
+                className={`pi-flex pi-gap-2 ${gateChooserOpen ? 'pi-min-w-0' : 'pi-flex-shrink-0'}`}
+              >
                 <Hangup description={t('Tooltip.Hangup')} />
                 {!outgoing && (
                   <Button
@@ -545,6 +554,7 @@ const CallView: FC<CallViewProps> = () => {
                     feedbackPlacement='below'
                     // the collapsed island has no room for the gates: expand it
                     onChoose={!isOpen ? () => dispatch.island.toggleIsOpen(true) : undefined}
+                    onChooserChange={setGateChooserOpen}
                   />
                 )}
               </div>

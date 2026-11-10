@@ -156,7 +156,8 @@
     "The gate did not respond in time": "The gate did not respond in time",
     "The gate is unreachable": "The gate is unreachable",
     "You are not allowed to open this gate": "You are not allowed to open this gate",
-    "Unable to open the gate": "Unable to open the gate"
+    "Unable to open the gate": "Unable to open the gate",
+    "Answer the call to open": "Answer the call to open"
   },
   "TranscriptionView": {
     "New message": "New message",
