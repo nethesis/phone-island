@@ -1,13 +1,14 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useMemo, useEffect } from 'react'
+import React, { type ReactNode, FC, useMemo, useEffect, useRef, useState } from 'react'
 import { RootState } from '../store'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { eventDispatch } from '../utils'
 import { isNumberOnlyName } from '../lib/phone/conversation'
 import { useStreamingAspectRatio } from '../utils/customHooks/useStreamingAspectRatio'
+import { useIsomorphicLayoutEffect } from '../utils'
 import { getStreamingPreviewHeight } from '../utils/streaming/previewSize'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
@@ -43,7 +44,30 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   const { isActive } = useSelector((state: RootState) => state.conference)
   // video source calls: the island fits the picture of the source and the gate chooser
   const streamingAspectRatio = useStreamingAspectRatio()
-  const { gateChooserOpen } = useSelector((state: RootState) => state.streaming)
+  const { gateChooserOpen, contentHeight } = useSelector((state: RootState) => state.streaming)
+
+  // the measured content height of a streaming view becomes the island height: with a
+  // border-box island (host styles) its padding and border are added, with content-box not
+  const islandRef = useRef<HTMLDivElement>(null)
+  const [islandBox, setIslandBox] = useState({ borderBox: true, border: 2 })
+  useIsomorphicLayoutEffect(() => {
+    if (!islandRef.current) return
+    const style = getComputedStyle(islandRef.current)
+    const border =
+      (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0)
+    const borderBox = style.boxSizing === 'border-box'
+    if (borderBox !== islandBox.borderBox || border !== islandBox.border) {
+      setIslandBox({ borderBox, border })
+    }
+  }, [])
+  const streamingHeight = (
+    view: 'call' | 'streamingAnswer',
+    padding: number,
+    estimate: number,
+  ): number =>
+    contentHeight && contentHeight.view === view
+      ? contentHeight.height + (islandBox.borderBox ? padding * 2 + islandBox.border : 0)
+      : estimate
 
   const motionVariants = useMemo(() => {
     // Initial size
@@ -101,10 +125,14 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
               : variants.call.expanded.outgoingStreaming
             size = {
               width: streaming.width,
-              height:
+              height: streamingHeight(
+                'call',
+                padding_expanded,
+                // until the content is measured
                 streaming.height +
-                getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio) +
-                (gateChooserOpen ? streaming.gatesHeight : 0),
+                  getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio) +
+                  (gateChooserOpen ? streaming.gatesHeight : 0),
+              ),
             }
           } else if (outgoing && !isFromStreaming) {
             size = {
@@ -193,9 +221,13 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
         size = isOpen
           ? {
             width: streaming.width,
-            height:
+            height: streamingHeight(
+              'streamingAnswer',
+              streaming.padding,
+              // until the content is measured
               streaming.height +
-              getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio),
+                getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio),
+            ),
             padding: streaming.padding,
           }
           : {
@@ -263,6 +295,8 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     isExtraLarge,
     streamingAspectRatio,
     gateChooserOpen,
+    contentHeight,
+    islandBox,
     throughQueue,
     queueName,
     queueNumber,
@@ -304,6 +338,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
+      ref={islandRef}
       className={`${isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
         } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-border pi-border-solid pi-border-gray-200 dark:pi-border-gray-800 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}

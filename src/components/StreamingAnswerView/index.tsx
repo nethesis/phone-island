@@ -30,7 +30,8 @@ import StreamingUnlock from '../StreamingUnlock'
 import { StreamingSourceImage } from '../StreamingImage'
 import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
 import { useStreamingAspectRatio } from '../../utils/customHooks/useStreamingAspectRatio'
-import { getStreamingPreviewHeight } from '../../utils/streaming/previewSize'
+import { getStreamingPreviewBoxRatio } from '../../utils/streaming/previewSize'
+import { useStreamingContentHeight } from '../../utils/customHooks/useStreamingContentHeight'
 
 export interface StreamingAnswerViewProps { }
 
@@ -57,14 +58,20 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     return { image: sourceImages[streamingSource.id] || streamingSource.image || null }
   }, [streamingSource, sourceImages])
   const liveVideo = useRef<HTMLVideoElement>(null)
-  // the video box follows the aspect ratio of the picture, the island fits it (see IslandMotion)
-  const { variants } = useSelector((state: RootState) => state.motions)
-  const aspectRatio = useStreamingAspectRatio()
-  const previewWidth = (isExtraLarge ? variants.streamingAnswer.extraLarge : variants.streamingAnswer.expanded).previewWidth
-  const previewHeight = getStreamingPreviewHeight(previewWidth, aspectRatio)
+  // the video box takes the island width and follows the aspect ratio of the picture
+  const previewBoxRatio = getStreamingPreviewBoxRatio(useStreamingAspectRatio())
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const streamingAnswerViewRef = useRef(null)
+  const streamingAnswerViewRef = useRef<HTMLDivElement | null>(null)
+  // the island fits the measured content (see IslandMotion), not in full screen
+  const measureContent = useStreamingContentHeight('streamingAnswer', isOpen && !isFullscreen)
+  const setStreamingAnswerView = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      streamingAnswerViewRef.current = node
+      measureContent(node)
+    },
+    [measureContent],
+  )
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -131,34 +138,35 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
     <>
       {isOpen ? (
         <div
-          ref={streamingAnswerViewRef}
-          className={isFullscreen ? 'pi-h-screen pi-w-full' : ''}
-          style={isFullscreen ? undefined : { width: previewWidth }}
+          ref={setStreamingAnswerView}
+          className={isFullscreen ? 'pi-h-screen pi-w-full' : 'pi-w-full'}
         >
           <div className={`${isFullscreen ? `pi-h-[500px]` : ''} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
             {/* Video container with rounded corners: the whole picture, letterboxed if needed */}
             <div
               className={`pi-relative pi-bg-black pi-rounded-[20px] ${isFullscreen ? 'pi-flex-1' : ''}`}
-              style={isFullscreen ? undefined : { height: previewHeight }}
+              style={isFullscreen ? undefined : { aspectRatio: previewBoxRatio }}
             >
               {/* Live video, streaming source image or placeholder */}
               {isLiveVideo && streamingSource ? (
-                <StreamingVideo
-                  source={streamingSource}
-                  videoRef={liveVideo}
-                  className='pi-w-full pi-h-full pi-rounded-[20px]'
-                  overlayClassName='pi-rounded-[20px]'
-                  reconnectingClassName='pi-bottom-24'
-                />
+                <div className='pi-absolute pi-inset-0'>
+                  <StreamingVideo
+                    source={streamingSource}
+                    videoRef={liveVideo}
+                    className='pi-w-full pi-h-full pi-rounded-[20px]'
+                    overlayClassName='pi-rounded-[20px]'
+                    reconnectingClassName='pi-bottom-24'
+                  />
+                </div>
               ) : streamingSourceData.image ? (
                 <StreamingSourceImage
                   sourceId={streamingSource?.id}
                   src={streamingSourceData.image}
                   alt='Streaming source'
-                  className='pi-rounded-[20px] pi-w-full pi-h-full'
+                  className='pi-absolute pi-inset-0 pi-rounded-[20px] pi-w-full pi-h-full'
                 />
               ) : (
-                <div className='pi-w-full pi-h-full pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
+                <div className='pi-absolute pi-inset-0 pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
                   <FontAwesomeIcon
                     icon={faVideoSlash}
                     className='pi-w-24 pi-h-24 pi-text-gray-400 dark:pi-text-gray-600'

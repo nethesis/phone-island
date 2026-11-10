@@ -40,6 +40,13 @@ interface StreamingStateType {
   aspectRatios: Record<string, number>
   // the gate chooser of the ringing call view is open (the island makes room for it)
   gateChooserOpen: boolean
+  // measured height of the content of the streaming view shown (the island fits it)
+  contentHeight: StreamingContentHeight | null
+}
+
+export interface StreamingContentHeight {
+  view: 'call' | 'streamingAnswer'
+  height: number
 }
 
 const defaultState: StreamingStateType = {
@@ -47,6 +54,7 @@ const defaultState: StreamingStateType = {
   sourceImages: {},
   aspectRatios: {},
   gateChooserOpen: false,
+  contentHeight: null,
 }
 
 export const streaming = createModel<RootModel>()({
@@ -101,6 +109,24 @@ export const streaming = createModel<RootModel>()({
       return {
         ...state,
         gateChooserOpen: payload,
+      }
+    },
+    setContentHeight: (state, payload: StreamingContentHeight | null) => {
+      const current = state.contentHeight
+      if (current === payload) return state
+      if (current && payload && current.view === payload.view && current.height === payload.height) {
+        return state
+      }
+      return {
+        ...state,
+        contentHeight: payload,
+      }
+    },
+    clearContentHeight: (state, view: StreamingContentHeight['view']) => {
+      if (state.contentHeight?.view !== view) return state
+      return {
+        ...state,
+        contentHeight: null,
       }
     },
     clearSourceImages: (state) => {

@@ -36,7 +36,7 @@ export const StreamingSourceImage: FC<
 /**
  * Component that displays the streaming image from a source
  */
-const StreamingImage: FC<StreamingImageProps> = ({ height }) => {
+const StreamingImage: FC<StreamingImageProps> = ({ className = '' }) => {
   const streamingSourceNumber = useSelector(
     (state: RootState) => state.currentCall.streamingSourceNumber,
   )
@@ -77,13 +77,12 @@ const StreamingImage: FC<StreamingImageProps> = ({ height }) => {
   }
 
   if (!imageUrl) {
-    return <VideoStreamingSkeleton className='pi-w-full pi-mt-4' style={{ height }} />
+    return <VideoStreamingSkeleton className={className} />
   }
 
   return (
     <div
-      className='pi-relative pi-mt-4 pi-w-full pi-overflow-hidden pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black'
-      style={{ height }}
+      className={`pi-overflow-hidden pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black ${className}`}
     >
       {!imageLoaded && (
         <VideoStreamingSkeleton className='pi-absolute pi-inset-0 pi-w-full pi-h-full' />
@@ -93,7 +92,7 @@ const StreamingImage: FC<StreamingImageProps> = ({ height }) => {
         sourceId={source?.id}
         src={imageUrl}
         alt='Streaming view'
-        className={`pi-w-full pi-h-full pi-transition-opacity pi-duration-300 ${imageLoaded ? 'pi-opacity-100' : 'pi-opacity-0'
+        className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-transition-opacity pi-duration-300 ${imageLoaded ? 'pi-opacity-100' : 'pi-opacity-0'
           }`}
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageLoaded(false)}
@@ -103,8 +102,8 @@ const StreamingImage: FC<StreamingImageProps> = ({ height }) => {
 }
 
 export interface StreamingImageProps {
-  // height of the box (its width is the available one)
-  height: number
+  // size and position of the box (e.g. filling a box with the aspect ratio of the picture)
+  className?: string
 }
 
 export default memo(StreamingImage)

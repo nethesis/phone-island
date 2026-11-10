@@ -37,7 +37,8 @@ import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
 import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
 import { useDispatch } from 'react-redux'
 import { useStreamingAspectRatio } from '../../utils/customHooks/useStreamingAspectRatio'
-import { getStreamingPreviewHeight } from '../../utils/streaming/previewSize'
+import { getStreamingPreviewBoxRatio } from '../../utils/streaming/previewSize'
+import { useStreamingContentHeight } from '../../utils/customHooks/useStreamingContentHeight'
 
 const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
 
@@ -147,13 +148,9 @@ const CallView: FC<CallViewProps> = () => {
   )
   // row below the buttons for the gates of the video source (and the result of an opening)
   const [gatesRow, setGatesRow] = useState<HTMLDivElement | null>(null)
-  // the preview shows the whole picture: its height follows the aspect ratio (see IslandMotion)
-  const { variants } = useSelector((state: RootState) => state.motions)
-  const streamingAspectRatio = useStreamingAspectRatio()
-  const previewHeight = getStreamingPreviewHeight(
-    variants.call.expanded.incomingStreaming.previewWidth,
-    streamingAspectRatio,
-  )
+  // the preview shows the whole picture: the available width, the height follows the aspect
+  // ratio of the picture
+  const previewBoxRatio = getStreamingPreviewBoxRatio(useStreamingAspectRatio())
 
   const activeAlerts = useMemo(
     () => Object.values(alertsData).filter((alert: any) => alert.active),
@@ -472,31 +469,46 @@ const CallView: FC<CallViewProps> = () => {
     return null
   }, [accepted, isRecording, remoteAudioStream, isOpen, paused, renderPulseIcon])
 
+  // the island fits the measured content of the streaming call (see IslandMotion)
+  const streamingContentRef = useStreamingContentHeight(
+    'call',
+    Boolean(shouldShowStreamingImage && isOpen),
+  )
+
   const renderStreamingContent = useCallback(() => {
+    // the same box for every state (no jump when the picture arrives): the content fills it
+    const previewBox = (content: React.ReactNode) => (
+      <div
+        className='pi-relative pi-mt-4 pi-w-full pi-flex-shrink-0'
+        style={{ aspectRatio: previewBoxRatio }}
+      >
+        {content}
+      </div>
+    )
+    const fill = 'pi-absolute pi-inset-0'
+
     // Show skeleton while videoSources are loading or if streaming source number is not set yet
     if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
-      return <VideoStreamingSkeleton className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
+      return previewBox(<VideoStreamingSkeleton className={fill} />)
     }
 
     const source = streamingSource
 
     // If source doesn't exist, show empty state
     if (!source) {
-      return (
-        <VideoStreamingEmptyState className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
-      )
+      return previewBox(<VideoStreamingEmptyState className={fill} />)
     }
 
     // Live video (only while the island is expanded, the preview is hidden when collapsed)
     if (isRtspVideoSource(source)) {
-      return (
-        <div className='pi-mt-4 pi-w-full' style={{ height: previewHeight }}>
+      return previewBox(
+        <div className={fill}>
           <StreamingVideo
             source={source}
             active={isOpen}
             className='pi-h-full pi-w-full pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black'
           />
-        </div>
+        </div>,
       )
     }
 
@@ -505,14 +517,12 @@ const CallView: FC<CallViewProps> = () => {
 
     // If no image available, show empty state
     if (!hasImage) {
-      return (
-        <VideoStreamingEmptyState className='pi-w-full pi-mt-4' style={{ height: previewHeight }} />
-      )
+      return previewBox(<VideoStreamingEmptyState className={fill} />)
     }
 
     // If we have an image, show StreamingImage component
-    return <StreamingImage height={previewHeight} />
-  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen, previewHeight])
+    return previewBox(<StreamingImage className={fill} />)
+  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen, previewBoxRatio])
 
   // Early return AFTER all hooks have been called
   if (latestAlert !== null) {
@@ -529,7 +539,7 @@ const CallView: FC<CallViewProps> = () => {
 
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
-      <div className={callViewClasses}>
+      <div className={callViewClasses} ref={shouldShowStreamingImage ? streamingContentRef : undefined}>
         {shouldShowStreamingImage ? (
           <>
             <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-gap-2'>
