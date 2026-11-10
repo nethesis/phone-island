@@ -147,7 +147,16 @@
     "Take a screenshot": "Cattura schermata",
     "Open": "Apri",
     "Open door": "Apri porta",
-    "Unlock streaming": "Sblocca streaming"
+    "Unlock streaming": "Sblocca streaming",
+    "Reconnecting": "Riconnessione...",
+    "The browser cannot play the video format of this source": "Il browser non può riprodurre il formato video di questa sorgente",
+    "You are not allowed to watch this video source": "Non hai i permessi per vedere questa sorgente video",
+    "Choose the gate to open": "Scegli il varco da aprire",
+    "Opened": "Aperto",
+    "The gate did not respond in time": "Il varco non ha risposto in tempo",
+    "The gate is unreachable": "Il varco non è raggiungibile",
+    "You are not allowed to open this gate": "Non hai i permessi per aprire questo varco",
+    "Unable to open the gate": "Impossibile aprire il varco"
   },
   "TranscriptionView": {
     "New message": "Nuovo messaggio",

@@ -4,16 +4,33 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
-interface VideoSourceType {
+export type VideoSourceKind = 'image' | 'rtsp'
+
+export interface VideoSourceGateType {
+  id: string
+  name: string
+  // how the server opens the gate ("dtmf", "url", ...), informative only
+  type?: string
+}
+
+export interface VideoSourceType {
   cmdOpen: string
   description: string
-  extension: string
+  // null when the source is not associated with an extension
+  extension: string | null
   frameRate: string
   id: string
   password: string
   url: string
   user: string
   image?: string
+  // "image": JPEG frames pushed through the websocket, "rtsp": live WebRTC video (WHEP).
+  // Missing on older servers, which only have image sources.
+  type?: VideoSourceKind
+  // WHEP path of the video gateway (rtsp sources only), null for image sources
+  whep?: string | null
+  // gates that can be opened, missing on older servers (see getVideoSourceGates)
+  gates?: VideoSourceGateType[]
 }
 
 interface StreamingStateType {

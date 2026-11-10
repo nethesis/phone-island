@@ -44,6 +44,7 @@ import { ScreenSharingMessage, VideoCallMessage } from './VideoView'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../utils/streaming/videoSource'
 import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
 import { getCurrentCallQueueContext } from '../lib/phone/queue'
@@ -201,9 +202,14 @@ export const Socket: FC<SocketProps> = ({
           streamingSourceNumber: conv.counterpartNum,
         })
 
-        // Find the source ID and subscribe to streaming updates
+        // Subscribe to the image updates (pushed through the websocket) of image sources only:
+        // rtsp sources are watched as live video by the views showing them
         const sourceId = getStreamingSourceId(conv.counterpartNum)
-        if (sourceId) {
+        const { videoSources } = store.getState().streaming
+        if (
+          sourceId &&
+          !isRtspVideoSource(findVideoSourceByNumber(videoSources, conv.counterpartNum))
+        ) {
           // Subscribe to streaming updates
           subscribe({ id: sourceId }).catch((error) =>
             console.error('Error subscribing to streaming source:', error),

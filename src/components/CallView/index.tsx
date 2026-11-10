@@ -10,7 +10,6 @@ import {
   faEarListen,
   faHandPointUp,
   faCircle,
-  faUnlock,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
@@ -31,9 +30,11 @@ import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import StreamingImage from '../StreamingImage'
+import StreamingVideo from '../StreamingVideo'
+import StreamingUnlock from '../StreamingUnlock'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
-import { handleStreamingUnlock } from '../../utils'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
 import { useDispatch } from 'react-redux'
 
 const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
@@ -156,20 +157,11 @@ const CallView: FC<CallViewProps> = () => {
     [isFromStreaming, streamingSourceNumber, accepted],
   )
 
-  // Check if unlock button should be shown and get tooltip text
-  const unlockData = useMemo(() => {
-    if (!streamingSourceNumber || !videoSources) return { canUnlock: false, tooltipText: '' }
-
-    const source = Object.values(videoSources).find(
-      (source) => source?.extension === streamingSourceNumber,
-    )
-
-    const canUnlock = Boolean(source?.cmdOpen && source?.cmdOpen.trim() !== '')
-    const tooltipText =
-      canUnlock && source ? `${t('VideoStreaming.Open')}: ${source?.description}` : ''
-
-    return { canUnlock, tooltipText }
-  }, [streamingSourceNumber, videoSources, t])
+  // The video source of the streaming call
+  const streamingSource = useMemo(
+    () => findVideoSourceByNumber(videoSources, streamingSourceNumber),
+    [streamingSourceNumber, videoSources],
+  )
 
   const isNameNumberOnly = useMemo(() => isNumberOnlyName(displayName), [displayName])
 
@@ -473,14 +465,24 @@ const CallView: FC<CallViewProps> = () => {
       return <VideoStreamingSkeleton className='pi-w-full pi-h-40 pi-mt-4' />
     }
 
-    // Find the streaming source
-    const source = Object.values(videoSources).find(
-      (source) => source.extension === streamingSourceNumber,
-    )
+    const source = streamingSource
 
     // If source doesn't exist, show empty state
     if (!source) {
       return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
+    }
+
+    // Live video (only while the island is expanded, the preview is hidden when collapsed)
+    if (isRtspVideoSource(source)) {
+      return (
+        <div className='pi-mt-4 pi-w-full pi-flex pi-justify-center'>
+          <StreamingVideo
+            source={source}
+            active={isOpen}
+            className='pi-h-[10.5rem] pi-w-full pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700'
+          />
+        </div>
+      )
     }
 
     // Check if image is available
@@ -493,7 +495,7 @@ const CallView: FC<CallViewProps> = () => {
 
     // If we have an image, show StreamingImage component
     return <StreamingImage />
-  }, [streamingSourceNumber, videoSources, sourceImages])
+  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen])
 
   // Early return AFTER all hooks have been called
   if (latestAlert !== null) {
@@ -534,16 +536,16 @@ const CallView: FC<CallViewProps> = () => {
                     <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faPhone} />
                   </Button>
                 )}
-                {/* Open door button - only show if cmdOpen is valid */}
-                {unlockData?.canUnlock && (
-                  <Button
-                    variant='default'
-                    onClick={handleStreamingUnlock}
-                    data-tooltip-id='tooltip-unlock'
-                    data-tooltip-content={unlockData?.tooltipText}
-                  >
-                    <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
-                  </Button>
+                {/* Open door button(s) - only shown when the source has gates */}
+                {streamingSource && (
+                  <StreamingUnlock
+                    source={streamingSource}
+                    tooltipId='tooltip-unlock'
+                    tooltipPlace='left'
+                    feedbackPlacement='below'
+                    // the collapsed island has no room for the gates: expand it
+                    onChoose={!isOpen ? () => dispatch.island.toggleIsOpen(true) : undefined}
+                  />
                 )}
               </div>
             </div>
@@ -588,7 +590,6 @@ const CallView: FC<CallViewProps> = () => {
       </div>
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
       <CustomThemedTooltip id='tooltip-answer' place='left' />
-      <CustomThemedTooltip id='tooltip-unlock' place='left' />
       <CustomThemedTooltip id='tooltip-display-name' place='bottom' />
       <CustomThemedTooltip id='tooltip-queue' place='bottom' />
       <CustomThemedTooltip
