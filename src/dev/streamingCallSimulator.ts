@@ -11,16 +11,41 @@
  *
  * This module is imported only by src/dev-widget-example.ts (the `npm run dev`
  * harness). It is NEVER bundled into the published NPM module or the CDN widget.
+ *
+ * Image sources (kind "image") show an inline placeholder frame. Live video sources
+ * (kind "rtsp") open a real WHEP session: the token is requested to the configured CTI
+ * server (POST /streaming/token), so pass the `sourceId` of an existing rtsp source of that
+ * server to see its video (a fake id shows the "video not available" state).
  */
 
 import { store } from '../store'
+
+interface SimulateGate {
+  id: string
+  name: string
+  type?: string
+}
 
 interface SimulateOptions {
   name?: string
   number?: string
   withImage?: boolean
+  // image sources: one implicit gate (legacy cmdOpen), rtsp sources: see gates
   withUnlock?: boolean
+  // "image" (default) or "rtsp" (live video)
+  kind?: 'image' | 'rtsp'
+  // id of the video source (rtsp: an existing source of the CTI server to see its video)
+  sourceId?: string
+  // WHEP path (rtsp only), the one returned with the token wins
+  whep?: string
+  // gates of the source, default: one gate when withUnlock, none otherwise
+  gates?: SimulateGate[]
 }
+
+const DEFAULT_GATES: SimulateGate[] = [
+  { id: '1', name: 'Porta', type: 'dtmf' },
+  { id: '2', name: 'Cancello', type: 'url' },
+]
 
 const SOURCE_ID = 'dev-citofono-1'
 
@@ -46,27 +71,46 @@ export function simulateIncomingCitofono(opts: SimulateOptions = {}) {
     number = DEFAULT_NUMBER,
     withImage = true,
     withUnlock = true,
+    kind = 'image',
+    sourceId = SOURCE_ID,
   } = opts
+  const isRtsp = kind === 'rtsp'
+  const gates = opts.gates ?? (withUnlock ? DEFAULT_GATES.slice(0, 1) : [])
 
   const { dispatch } = store
 
   // 1. Register the streaming source (extension must match the call number).
   dispatch.streaming.updateVideoSources({
-    [SOURCE_ID]: {
-      id: SOURCE_ID,
-      extension: number,
-      description: name,
-      cmdOpen: withUnlock ? 'dev-open-command' : '',
-      frameRate: '1',
-      password: '',
-      url: '',
-      user: '',
-      image: withImage ? PLACEHOLDER_IMAGE : undefined,
-    },
+    [sourceId]: isRtsp
+      ? {
+          id: sourceId,
+          extension: number,
+          description: name,
+          cmdOpen: gates.length ? 'dev-open-command' : '',
+          frameRate: '1000',
+          password: '',
+          url: '',
+          user: '',
+          type: 'rtsp',
+          whep: opts.whep || `/streaming-gw/${sourceId}/whep`,
+          gates,
+        }
+      : {
+          id: sourceId,
+          extension: number,
+          description: name,
+          cmdOpen: withUnlock ? 'dev-open-command' : '',
+          frameRate: '1',
+          password: '',
+          url: '',
+          user: '',
+          image: withImage ? PLACEHOLDER_IMAGE : undefined,
+          ...(opts.gates ? { type: 'image' as const, whep: null, gates: opts.gates } : {}),
+        },
   })
 
-  if (withImage) {
-    dispatch.streaming.updateSourceImage({ source: SOURCE_ID, image: PLACEHOLDER_IMAGE })
+  if (withImage && !isRtsp) {
+    dispatch.streaming.updateSourceImage({ source: sourceId, image: PLACEHOLDER_IMAGE })
   }
 
   // 2. Mark the call as coming from a streaming source and open the island.
@@ -140,8 +184,25 @@ function injectPanel() {
     <label style="display:block;margin-bottom:4px">
       <input type="checkbox" id="pi-dev-img" checked/> image
     </label>
-    <label style="display:block;margin-bottom:8px">
+    <label style="display:block;margin-bottom:4px">
       <input type="checkbox" id="pi-dev-unlock" checked/> unlock button
+    </label>
+    <label style="display:block;margin-bottom:6px">Source type
+      <select id="pi-dev-kind" style="width:100%;margin-top:2px">
+        <option value="image">image (JPEG frames)</option>
+        <option value="rtsp">rtsp (live video)</option>
+      </select>
+    </label>
+    <label style="display:block;margin-bottom:6px">Source id (rtsp: existing source)
+      <input id="pi-dev-source" value="${SOURCE_ID}"
+        style="width:100%;box-sizing:border-box;margin-top:2px"/>
+    </label>
+    <label style="display:block;margin-bottom:8px">Gates (rtsp)
+      <select id="pi-dev-gates" style="width:100%;margin-top:2px">
+        <option value="0">none</option>
+        <option value="1" selected>one</option>
+        <option value="2">two</option>
+      </select>
     </label>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button id="pi-dev-ring" style="flex:1">Ring</button>
@@ -159,6 +220,12 @@ function injectPanel() {
       number: val('pi-dev-number').value,
       withImage: val('pi-dev-img').checked,
       withUnlock: val('pi-dev-unlock').checked,
+      kind: val('pi-dev-kind').value === 'rtsp' ? 'rtsp' : 'image',
+      sourceId: val('pi-dev-source').value || SOURCE_ID,
+      gates:
+        val('pi-dev-kind').value === 'rtsp'
+          ? DEFAULT_GATES.slice(0, Number(val('pi-dev-gates').value))
+          : undefined,
     }),
   )
   panel.querySelector('#pi-dev-answer')!.addEventListener('click', () => answerCitofono())

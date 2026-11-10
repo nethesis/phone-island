@@ -35,6 +35,8 @@ import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
+import { stopStreamingVideo } from '../streaming/streamingVideo'
 import { unsubscribe } from '../../services/user'
 
 /**
@@ -122,10 +124,16 @@ export function hangupCurrentCall() {
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
 
-    // If call was from a streaming source, unsubscribe and clear images
+    // If call was from a streaming source, close its live video or unsubscribe and clear images
     if (isFromStreaming && streamingSourceNumber) {
       const sourceId = getStreamingSourceId(streamingSourceNumber)
-      if (sourceId) {
+      const source = findVideoSourceByNumber(
+        store.getState().streaming.videoSources,
+        streamingSourceNumber,
+      )
+      if (sourceId && isRtspVideoSource(source)) {
+        stopStreamingVideo(sourceId)
+      } else if (sourceId) {
         // Unsubscribe from streaming updates
         unsubscribe({ id: sourceId })
           .then(() => console.debug(`Unsubscribed from streaming source: ${sourceId}`))
