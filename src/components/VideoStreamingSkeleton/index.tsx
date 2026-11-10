@@ -5,13 +5,14 @@ import { useTranslation } from 'react-i18next'
 
 interface VideoStreamingSkeletonProps {
   className?: string
+  style?: React.CSSProperties
 }
 
-const VideoStreamingSkeleton: React.FC<VideoStreamingSkeletonProps> = ({ className = '' }) => {
+const VideoStreamingSkeleton: React.FC<VideoStreamingSkeletonProps> = ({ className = '', style }) => {
   const { t } = useTranslation()
 
   return (
-    <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-animate-pulse ${className}`}>
+    <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-animate-pulse ${className}`} style={style}>
       <div className="pi-flex pi-flex-col pi-items-center pi-justify-center pi-space-y-4">
         <div className="pi-relative">
           <FontAwesomeIcon 

@@ -28,9 +28,12 @@ const defaultState = {
       expanded: {
         incoming: { width: 418, height: 96 },
         incomingQueue: { width: 418, height: 124 },
-        incomingStreaming: { width: 500, height: 278 },
+        // video source calls: the height grows with the preview (previewWidth wide, its height
+        // follows the picture aspect ratio) and with the gate chooser row (gatesHeight): height is
+        // the rest (the header row and the margin above the preview)
+        incomingStreaming: { width: 500, height: 68, previewWidth: 500, gatesHeight: 52 },
         outgoing: { width: 418, height: 96 },
-        outgoingStreaming: { width: 500, height: 278 },
+        outgoingStreaming: { width: 500, height: 68, previewWidth: 500, gatesHeight: 52 },
         accepted: {
           width: 348,
           height: 236,
@@ -97,15 +100,19 @@ const defaultState = {
       expanded: { width: 348, height: 360 },
       collapsed: { width: 180, height: 74 },
     },
+    // the height grows with the video (previewWidth wide, its height follows the picture
+    // aspect ratio): height is the rest (the buttons row below the video)
     streamingAnswer: {
       expanded: {
         width: 600,
-        height: 480,
+        height: 80,
+        previewWidth: 600,
         padding: 0,
       },
       extraLarge: {
         width: 936,
-        height: 748,
+        height: 80,
+        previewWidth: 936,
         padding: 0,
       },
       collapsed: commonCollapsed,

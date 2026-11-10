@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { FC, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCheck,
@@ -16,6 +17,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '../../store'
 import { Button } from '../Button'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
+import type { ITooltip } from 'react-tooltip'
 import type { VideoSourceGateType, VideoSourceType } from '../../models/streaming'
 import { StreamingRequestError } from '../../services/user'
 import { openStreamingGate } from '../../utils/streaming/streamingUtils'
@@ -41,6 +43,8 @@ interface Feedback {
  * The result of the opening is shown on the button and in a small message next to it.
  * DTMF gates are sent by the PBX into the call: until the call is answered they look disabled
  * and only show a hint (the tones would get lost).
+ * With a gatesContainer (the compact incoming call layout) the labelled gates and the results
+ * are shown in that element, a row of their own, and the button becomes the close button.
  */
 export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   source,
@@ -50,6 +54,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   feedbackPlacement = 'below',
   onChoose,
   onChooserChange,
+  gatesContainer,
 }) => {
   const { t } = useTranslation()
   const gates = getVideoSourceGates(source)
@@ -59,6 +64,9 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mounted = useRef(true)
+  // the gates and the results go in the gatesContainer row
+  const rowMode = gatesContainer !== undefined
+  const rowOpen = choosing || (rowMode && feedback !== null)
 
   useEffect(() => {
     mounted.current = true
@@ -75,8 +83,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   }, [source.id])
 
   useEffect(() => {
-    onChooserChange?.(choosing)
-  }, [choosing])
+    onChooserChange?.(rowOpen)
+  }, [rowOpen])
 
   useEffect(() => () => onChooserChange?.(false), [])
 
@@ -121,6 +129,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const openGate = async (gate: VideoSourceGateType) => {
     if (pendingGate !== null) return
     if (needsAnswer(gate)) {
+      // the single button already shows the hint in its tooltip
+      if (!choosing && tooltipId) return
       showFeedback({ gateId: gate.id, ok: false, hint: true, message: answerToOpen })
       return
     }
@@ -163,13 +173,85 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
 
   const feedbackClasses =
     feedbackPlacement === 'above' ? 'pi-bottom-full pi-mb-2' : 'pi-top-full pi-mt-2'
+  const feedbackColors = (shown: Feedback) =>
+    shown.ok
+      ? 'pi-bg-green-600 pi-text-white dark:pi-bg-green-400 dark:pi-text-gray-950'
+      : shown.hint
+      ? 'pi-bg-gray-700 pi-text-white dark:pi-bg-gray-200 dark:pi-text-gray-950'
+      : 'pi-bg-red-600 pi-text-white dark:pi-bg-red-400 dark:pi-text-gray-950'
+  const feedbackAttributes = (shown: Feedback) => ({
+    role: shown.ok || shown.hint ? 'status' : 'alert',
+    'data-streaming-unlock-feedback': shown.ok ? 'ok' : shown.hint ? 'hint' : 'error',
+  })
+  const closeChooser = () => {
+    setChoosing(false)
+    setFeedback(null)
+  }
+
+  const gateButtons = (
+    <div
+      className={`pi-flex pi-min-w-0 pi-items-center pi-gap-1.5 ${
+        // large (answered call bar): the room left by the other buttons
+        rowMode ? 'pi-w-full' : size === 'large' ? 'pi-max-w-full' : 'pi-max-w-[18rem]'
+      } pi-overflow-x-auto pi-scrollbar-none`}
+    >
+      {gates.map((gate) => {
+        // in the row the result replaces the name of its gate
+        const result = rowMode && feedback?.gateId === gate.id ? feedback : null
+        return (
+          <button
+            key={gate.id}
+            type='button'
+            data-stop-propagation={true}
+            data-streaming-gate={gate.id}
+            onClick={() => openGate(gate)}
+            disabled={pendingGate !== null}
+            aria-disabled={needsAnswer(gate) ? true : undefined}
+            title={result ? undefined : gateTitle(gate)}
+            className={`${
+              needsAnswer(gate) ? (result ? '!pi-cursor-not-allowed' : waitingClasses) : ''
+            } pi-flex pi-flex-shrink-0 pi-items-center pi-gap-1.5 pi-rounded-full pi-px-3 ${
+              size === 'large' ? 'pi-h-12' : 'pi-h-10'
+            } pi-text-xs pi-font-medium ${
+              result
+                ? feedbackColors(result)
+                : 'pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 pi-text-primaryInvert dark:pi-text-primaryInvertDark'
+            } pi-transition-colors pi-duration-200 disabled:pi-cursor-not-allowed focus:pi-outline-none focus:pi-ring-2 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300`}
+          >
+            <FontAwesomeIcon
+              className={`pi-h-3.5 pi-w-3.5 ${result ? '' : gateIconClass(gate.id)}`}
+              icon={gateIcon(gate.id, faUnlock)}
+            />
+            {result ? (
+              <span className='pi-max-w-[16rem] pi-truncate' {...feedbackAttributes(result)}>
+                {result.message}
+              </span>
+            ) : (
+              <span className='pi-max-w-[10rem] pi-truncate'>{gateName(gate)}</span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
 
   return (
     <div
       className='pi-relative pi-flex pi-min-w-0 pi-items-center pi-gap-1.5'
       data-stop-propagation={true}
     >
-      {!choosing ? (
+      {rowMode && choosing ? (
+        <Button
+          variant='default'
+          onClick={closeChooser}
+          aria-label={t('Common.Close') || 'Close'}
+          data-streaming-unlock='close'
+          data-tooltip-id={tooltipId}
+          data-tooltip-content={t('Common.Close') || 'Close'}
+        >
+          <FontAwesomeIcon className={iconSize} icon={faXmark} />
+        </Button>
+      ) : !choosing ? (
         <Button
           variant='default'
           onClick={() => {
@@ -201,38 +283,11 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
         </Button>
       ) : (
         <>
-          <div className='pi-flex pi-min-w-0 pi-items-center pi-gap-1.5 pi-max-w-[18rem] pi-overflow-x-auto pi-scrollbar-none'>
-            {gates.map((gate) => (
-              <button
-                key={gate.id}
-                type='button'
-                data-stop-propagation={true}
-                data-streaming-gate={gate.id}
-                onClick={() => openGate(gate)}
-                disabled={pendingGate !== null}
-                aria-disabled={needsAnswer(gate) ? true : undefined}
-                title={gateTitle(gate)}
-                className={`${
-                  needsAnswer(gate) ? waitingClasses : ''
-                } pi-flex pi-flex-shrink-0 pi-items-center pi-gap-1.5 pi-rounded-full pi-px-3 ${
-                  size === 'large' ? 'pi-h-12 pi-text-sm' : 'pi-h-10 pi-text-xs'
-                } pi-font-medium pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 pi-text-primaryInvert dark:pi-text-primaryInvertDark pi-transition-colors pi-duration-200 disabled:pi-cursor-not-allowed focus:pi-outline-none focus:pi-ring-2 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300`}
-              >
-                <FontAwesomeIcon
-                  className={`pi-h-3.5 pi-w-3.5 ${gateIconClass(gate.id)}`}
-                  icon={gateIcon(gate.id, faUnlock)}
-                />
-                <span className='pi-max-w-[7rem] pi-truncate'>{gateName(gate)}</span>
-              </button>
-            ))}
-          </div>
+          {gateButtons}
           <Button
             variant='transparent'
-            className={size === 'large' ? '!pi-h-10 !pi-w-10' : '!pi-h-8 !pi-w-8'}
-            onClick={() => {
-              setChoosing(false)
-              setFeedback(null)
-            }}
+            className={`pi-flex-shrink-0 ${size === 'large' ? '!pi-h-10 !pi-w-10' : '!pi-h-8 !pi-w-8'}`}
+            onClick={closeChooser}
             aria-label={t('Common.Close') || 'Close'}
             data-tooltip-id={tooltipId}
             data-tooltip-content={t('Common.Close') || 'Close'}
@@ -242,21 +297,40 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
         </>
       )}
 
-      {feedback && (
+      {feedback && !rowMode && (
         <div
-          role={feedback.ok || feedback.hint ? 'status' : 'alert'}
-          data-streaming-unlock-feedback={feedback.ok ? 'ok' : feedback.hint ? 'hint' : 'error'}
-          className={`pi-absolute pi-right-0 ${feedbackClasses} pi-z-20 pi-max-w-[16rem] pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${
-            feedback.ok
-              ? 'pi-bg-green-600 pi-text-white dark:pi-bg-green-400 dark:pi-text-gray-950'
-              : feedback.hint
-              ? 'pi-bg-gray-700 pi-text-white dark:pi-bg-gray-200 dark:pi-text-gray-950'
-              : 'pi-bg-red-600 pi-text-white dark:pi-bg-red-400 dark:pi-text-gray-950'
-          }`}
+          {...feedbackAttributes(feedback)}
+          className={`pi-absolute pi-right-0 ${feedbackClasses} pi-z-20 pi-max-w-[16rem] pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${feedbackColors(
+            feedback,
+          )}`}
         >
           {feedback.message}
         </div>
       )}
+      {/* the row: the gates to choose from, or the result of the single gate under its button */}
+      {gatesContainer &&
+        rowOpen &&
+        createPortal(
+          <div className='pi-flex pi-w-full pi-min-w-0 pi-items-center' data-stop-propagation={true}>
+            {choosing
+              ? gateButtons
+              : feedback && (
+                  <div
+                    {...feedbackAttributes(feedback)}
+                    className={`pi-ml-auto pi-flex pi-h-8 pi-max-w-full pi-items-center pi-gap-1.5 pi-rounded-full pi-px-3 pi-text-xs pi-font-medium ${feedbackColors(
+                      feedback,
+                    )}`}
+                  >
+                    <FontAwesomeIcon
+                      className='pi-h-3.5 pi-w-3.5 pi-flex-shrink-0'
+                      icon={feedback.ok ? faCheck : faTriangleExclamation}
+                    />
+                    <span className='pi-truncate'>{feedback.message}</span>
+                  </div>
+                )}
+          </div>,
+          gatesContainer,
+        )}
       {tooltipId && <CustomThemedTooltip className='pi-z-20' id={tooltipId} place={tooltipPlace} />}
     </div>
   )
@@ -266,13 +340,16 @@ export interface StreamingUnlockProps {
   source: VideoSourceType
   size?: 'small' | 'large'
   tooltipId?: string
-  tooltipPlace?: 'top' | 'right' | 'bottom' | 'left'
+  tooltipPlace?: ITooltip['place']
   // where the result message appears, relative to the buttons
   feedbackPlacement?: 'above' | 'below'
   // called when the gate chooser opens (e.g. to expand a collapsed island to make room)
   onChoose?: () => void
   // called when the gate chooser opens or closes (e.g. to give it the room of the caller name)
   onChooserChange?: (open: boolean) => void
+  // element where the gates and the results are shown (a row below the buttons): the
+  // chooser then never squeezes the buttons, null while the element is not mounted yet
+  gatesContainer?: HTMLElement | null
 }
 
 export default StreamingUnlock
