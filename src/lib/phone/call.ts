@@ -209,7 +209,7 @@ export function pauseCurrentCall() {
       // Pause remote audio
       store.dispatch.player.pauseRemoteAudio()
     }
-  } else {
+  } else if (!store.getState().currentCall.paused) {
     pausePhysical(true)
   }
   eventDispatch('phone-island-call-held', {})
@@ -229,7 +229,7 @@ export function unpauseCurrentCall() {
       // Play remote audio
       store.dispatch.player.playRemoteAudio()
     }
-  } else {
+  } else if (store.getState().currentCall.paused) {
     pausePhysical(false)
   }
   eventDispatch('phone-island-call-unheld', {})
