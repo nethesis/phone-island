@@ -49,6 +49,9 @@ export const initialStreamingVideoState: WhepPlayerState = {
 }
 
 const entries: Record<string, Entry> = {}
+// WHEP requests in flight per source, outliving the entries: the player of a new entry waits
+// for those of the stopped one (e.g. its POST still in flight), one gateway session at a time
+const pendingRequests: Record<string, Set<Promise<void>>> = {}
 let unsubscribeStore: (() => void) | null = null
 
 // Token provider of a source, using the CTI REST API
@@ -101,6 +104,7 @@ const createEntry = (sourceId: string, whep: string | null): Entry => {
       return { ...token, whep: token.whep || whep || '' }
     },
     resolveUrl: getWhepUrl,
+    pending: (pendingRequests[sourceId] = pendingRequests[sourceId] || new Set()),
     onStateChange: (state) => {
       if (entries[sourceId] !== entry) return
       let stream = entry.snapshot.stream
