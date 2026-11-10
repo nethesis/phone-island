@@ -14,7 +14,7 @@ export const isRtspVideoSource = (source?: VideoSourceType | null): boolean =>
 
 /**
  * Gates of a video source. Older servers send no gates list: a non-empty cmdOpen is then a
- * single implicit gate (opened by the server default, so no gate id is sent).
+ * single implicit gate (opened by the server default, so no gate id is sent), a DTMF one.
  */
 export const getVideoSourceGates = (source?: VideoSourceType | null): VideoSourceGateType[] => {
   if (!source) return []
@@ -22,10 +22,16 @@ export const getVideoSourceGates = (source?: VideoSourceType | null): VideoSourc
     return source.gates.filter((gate) => gate && gate.id !== undefined && gate.id !== null)
   }
   if (source.cmdOpen && source.cmdOpen.trim() !== '') {
-    return [{ id: '', name: source.description || '' }]
+    return [{ id: '', name: source.description || '', type: 'dtmf' }]
   }
   return []
 }
+
+/**
+ * True for a gate opened by DTMF tones sent by the PBX into the call with the video source
+ * extension: the tones get lost until the call is answered.
+ */
+export const isDtmfGate = (gate?: VideoSourceGateType | null): boolean => gate?.type === 'dtmf'
 
 /**
  * Video source associated with an extension (the counterpart number of the call)

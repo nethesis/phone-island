@@ -9,7 +9,7 @@ export type VideoSourceKind = 'image' | 'rtsp'
 export interface VideoSourceGateType {
   id: string
   name: string
-  // how the server opens the gate ("dtmf", "url", ...), informative only
+  // how the server opens the gate ("dtmf", "url", ...): a "dtmf" gate needs an answered call
   type?: string
 }
 

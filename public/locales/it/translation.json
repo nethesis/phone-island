@@ -156,7 +156,8 @@
     "The gate did not respond in time": "Il varco non ha risposto in tempo",
     "The gate is unreachable": "Il varco non è raggiungibile",
     "You are not allowed to open this gate": "Non hai i permessi per aprire questo varco",
-    "Unable to open the gate": "Impossibile aprire il varco"
+    "Unable to open the gate": "Impossibile aprire il varco",
+    "Answer the call to open": "Rispondi alla chiamata per aprire"
   },
   "TranscriptionView": {
     "New message": "Nuovo messaggio",
