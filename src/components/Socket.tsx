@@ -622,10 +622,18 @@ export const Socket: FC<SocketProps> = ({
               // An already connected conversation is not ringing anymore: the server emits
               // the conversations of an extension with its last known status, and the status
               // changes asynchronously, so right after the answer an update can still say
-              // "ringing". It must not bring the answered call back to the incoming state
-              // (that would replace the view of the call, e.g. the streaming answered view)
+              // "ringing". Likewise, once this client answered (or is answering) the call, the
+              // legs of the same call still ringing on the other devices of the user can be
+              // notified for a moment. They must not bring the answered call back to the
+              // incoming state (that would replace the view of the call, e.g. the streaming
+              // answered view)
+              const { accepted: acceptedHere, answering: answeringHere, number: currentNumber } =
+                store.getState().currentCall
+              const isCallAnsweredHere =
+                (acceptedHere || answeringHere) && currentNumber === `${conv.counterpartNum}`
               if (
                 !conv.connected &&
+                !isCallAnsweredHere &&
                 ((uaType === 'mobile' && hasOnlineNethlink()) ||
                   (uaType === 'desktop' &&
                     (default_device?.type === 'webrtc' ||
