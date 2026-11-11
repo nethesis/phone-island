@@ -6,9 +6,12 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { StyledNumber } from '../../styles/Island.styles'
 import { useTranslation } from 'react-i18next'
+import { getMainExtensionNumber } from '../../lib/phone/counterpartDevice'
 
 const Number: FC = () => {
-  const { number } = useSelector((state: RootState) => state.currentCall)
+  const number = useSelector((state: RootState) =>
+    getMainExtensionNumber(state.currentCall.number, state.users),
+  )
   const { isOpen } = useSelector((state: RootState) => state.island)
   const { t } = useTranslation()
 
