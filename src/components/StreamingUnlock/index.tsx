@@ -169,11 +169,21 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
         ? 'pi-text-green-500 dark:pi-text-green-600'
         : 'pi-text-red-500 dark:pi-text-red-600'
       : ''
-  const gateName = (gate: VideoSourceGateType) => gate.name || source.description || gate.id
-  // "Open <name>", or "Open door" for a gate without a name
+  // gates without a name are "Door", numbered by position when there are several of them
+  const unnamedGates = gates.filter((gate) => !gate.name)
+  const unnamedNumber = (gate: VideoSourceGateType) =>
+    unnamedGates.length > 1 ? unnamedGates.indexOf(gate) + 1 : 0
+  const gateName = (gate: VideoSourceGateType) =>
+    gate.name ||
+    (unnamedNumber(gate)
+      ? t('VideoStreaming.Door number', { number: unnamedNumber(gate) })
+      : t('VideoStreaming.Door'))
+  // "Open <name>", or "Open door" ("Open door 2") for a gate without a name
   const openLabel = (gate: VideoSourceGateType) =>
     gate.name
       ? t('VideoStreaming.Open gate name', { name: gate.name })
+      : unnamedNumber(gate)
+      ? t('VideoStreaming.Open door number', { number: unnamedNumber(gate) })
       : t('VideoStreaming.Open door')
   const gateTitle = (gate: VideoSourceGateType) =>
     needsAnswer(gate) ? answerToOpen : openLabel(gate)
