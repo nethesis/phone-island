@@ -142,7 +142,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
     try {
       await openStreamingGate(source.id, gate.id)
       if (!mounted.current) return
-      showFeedback({ gateId: gate.id, ok: true, message: t('VideoStreaming.Opened') })
+      // the PBX only sends the command: whether the door opened is unknown
+      showFeedback({ gateId: gate.id, ok: true, message: t('VideoStreaming.Command sent') })
     } catch (error) {
       console.error('Error opening the gate:', error)
       if (!mounted.current) return
@@ -169,13 +170,16 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
         : 'pi-text-red-500 dark:pi-text-red-600'
       : ''
   const gateName = (gate: VideoSourceGateType) => gate.name || source.description || gate.id
+  // "Open <name>", or "Open door" for a gate without a name
+  const openLabel = (gate: VideoSourceGateType) =>
+    gate.name
+      ? t('VideoStreaming.Open gate name', { name: gate.name })
+      : t('VideoStreaming.Open door')
   const gateTitle = (gate: VideoSourceGateType) =>
-    needsAnswer(gate) ? answerToOpen : `${t('VideoStreaming.Open')}: ${gateName(gate)}`
+    needsAnswer(gate) ? answerToOpen : openLabel(gate)
   // chooser gates: the full name (the label may be truncated) and what a click does
   const gateTooltip = (gate: VideoSourceGateType) =>
-    needsAnswer(gate)
-      ? `${gateName(gate)}: ${answerToOpen}`
-      : `${t('VideoStreaming.Open')}: ${gateName(gate)}`
+    needsAnswer(gate) ? `${gateName(gate)}: ${answerToOpen}` : openLabel(gate)
   const gatesTooltipId = `${tooltipId || 'tooltip-streaming-unlock'}-gates`
   // not the disabled attribute: the hint must still show on hover and on click
   const waitingClasses = '!pi-opacity-40 !pi-cursor-not-allowed'
@@ -290,7 +294,9 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
             }
           }}
           disabled={pendingGate !== null}
-          aria-label={t('VideoStreaming.Open door') || 'Open door'}
+          aria-label={
+            gates.length === 1 ? openLabel(gates[0]) : t('VideoStreaming.Open door') || 'Open door'
+          }
           aria-disabled={gates.length === 1 && needsAnswer(gates[0]) ? true : undefined}
           className={gates.length === 1 && needsAnswer(gates[0]) ? waitingClasses : ''}
           data-streaming-unlock={gates.length === 1 ? 'single' : 'multiple'}
