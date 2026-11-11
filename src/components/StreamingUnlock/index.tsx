@@ -100,18 +100,18 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
     const code = error instanceof StreamingRequestError ? error.code : undefined
     const status = error instanceof StreamingRequestError ? error.status : undefined
     if (code === 'gate_timeout' || status === 504) {
-      return t('VideoStreaming.The gate did not respond in time')
+      return t('VideoStreaming.The device did not respond in time')
     }
     if (code === 'gate_unreachable') {
-      return t('VideoStreaming.The gate is unreachable')
+      return t('VideoStreaming.The device is unreachable')
     }
     if (code === 'call_not_answered') {
       return answerToOpen
     }
     if (status === 403) {
-      return t('VideoStreaming.You are not allowed to open this gate')
+      return t('VideoStreaming.You are not allowed to open this door')
     }
-    return t('VideoStreaming.Unable to open the gate')
+    return t('VideoStreaming.Unable to open the door')
   }
 
   const showFeedback = (next: Feedback) => {
@@ -314,7 +314,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
           data-tooltip-content={
             gates.length === 1
               ? gateTitle(gates[0])
-              : t('VideoStreaming.Choose the gate to open') || ''
+              : t('VideoStreaming.Choose what to open') || ''
           }
         >
           <FontAwesomeIcon
