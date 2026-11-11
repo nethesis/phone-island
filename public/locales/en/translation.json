@@ -154,12 +154,12 @@
     "Reconnecting": "Reconnecting...",
     "The browser cannot play the video format of this source": "The browser cannot play the video format of this source",
     "You are not allowed to watch this video source": "You are not allowed to watch this video source",
-    "Choose the gate to open": "Choose the gate to open",
+    "Choose what to open": "Choose what to open",
     "Command sent": "Command sent",
-    "The gate did not respond in time": "The gate did not respond in time",
-    "The gate is unreachable": "The gate is unreachable",
-    "You are not allowed to open this gate": "You are not allowed to open this gate",
-    "Unable to open the gate": "Unable to open the gate",
+    "The device did not respond in time": "The device did not respond in time",
+    "The device is unreachable": "The device is unreachable",
+    "You are not allowed to open this door": "You are not allowed to open this door",
+    "Unable to open the door": "Unable to open the door",
     "Answer the call to open": "Answer the call to open"
   },
   "TranscriptionView": {
