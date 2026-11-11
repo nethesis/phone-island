@@ -28,7 +28,7 @@ export const Button: FC<ButtonProps> = ({
   ...props
 }) => {
   const classes = {
-    base: 'pi-flex pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus:pi-ring-2 focus:pi-z-20 focus:pi-ring-offset-2 disabled:pi-opacity-40 disabled:pi-cursor-not-allowed pi-border pi-border-transparent focus:pi-ring-offset-white dark:focus:pi-ring-offset-black pi-text-sm pi-leading-4 pi-col-start-auto pi-transition-color pi-shrink-0',
+    base: 'pi-flex pi-content-center pi-items-center pi-justify-center pi-tracking-wide pi-duration-200 pi-transform pi-outline-none focus-visible:pi-ring-2 focus-visible:pi-z-20 focus-visible:pi-ring-offset-2 disabled:pi-opacity-40 disabled:pi-cursor-not-allowed pi-border pi-border-transparent focus:pi-ring-offset-white dark:focus:pi-ring-offset-black pi-text-sm pi-leading-4 pi-col-start-auto pi-transition-color pi-shrink-0',
     variant: {
       red: 'pi-bg-phoneIslandClose dark:pi-bg-phoneIslandCloseDark hover:pi-bg-phoneIslandCloseHover dark:hover:pi-bg-phoneIslandCloseHoverDark focus:pi-ring-emerald-500 dark:focus:ring-emerald-300 pi-text-white dark:pi-text-gray-950 pi-h-12 pi-w-12 pi-rounded-full',
       green:
@@ -36,7 +36,7 @@ export const Button: FC<ButtonProps> = ({
       default:
         'pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300 pi-text-primaryInvert dark:pi-text-primaryInvertDark pi-h-12 pi-w-12 pi-rounded-full',
       neutral:
-        'pi-bg-transparent enabled:hover:pi-bg-gray-500 enabled:hover:pi-border-gray-500 pi-border pi-border-gray-700 focus:pi-ring-0 pi-h-12 pi-w-12 pi-rounded-full',
+        'pi-bg-transparent enabled:hover:pi-bg-gray-500 enabled:hover:pi-border-gray-500 pi-border pi-border-gray-700 focus-visible:pi-ring-0 pi-h-12 pi-w-12 pi-rounded-full',
       transparent:
         'pi-bg-transparent dark:enabled:hover:pi-bg-gray-700/30 enabled:hover:pi-bg-gray-300/70 focus:pi-ring-offset-gray-200 dark:focus:pi-ring-gray-500 dark:focus:pi-ring-gray-500 focus:pi-ring-gray-400 pi-text-secondaryNeutral dark:pi-text-secondaryNeutralDark pi-h-12 pi-w-12 pi-rounded-full',
       transparentSideView:

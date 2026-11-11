@@ -260,7 +260,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
               result
                 ? feedbackColors(result)
                 : 'pi-bg-phoneIslandActive dark:pi-bg-phoneIslandActiveDark hover:pi-bg-gray-500 dark:hover:pi-bg-gray-50 pi-text-primaryInvert dark:pi-text-primaryInvertDark'
-            } pi-transition-colors pi-duration-200 disabled:pi-cursor-not-allowed focus:pi-outline-none focus:pi-ring-2 focus:pi-ring-emerald-500 dark:focus:pi-ring-emerald-300`}
+            } pi-transition-colors pi-duration-200 disabled:pi-cursor-not-allowed focus:pi-outline-none focus-visible:pi-ring-2 focus-visible:pi-ring-inset focus-visible:pi-ring-emerald-500 dark:focus-visible:pi-ring-emerald-300`}
           >
             <FontAwesomeIcon
               className={`pi-h-3.5 pi-w-3.5 ${result ? '' : gateIconClass(gate.id)}`}
