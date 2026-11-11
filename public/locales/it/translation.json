@@ -160,6 +160,9 @@
     "The device is unreachable": "Il dispositivo non è raggiungibile",
     "You are not allowed to open this door": "Non hai i permessi per aprire questa porta",
     "Unable to open the door": "Impossibile aprire la porta",
+    "The device certificate has changed: contact the administrator": "Il certificato del dispositivo è cambiato: contatta l'amministratore",
+    "The device address is not allowed": "L'indirizzo del dispositivo non è consentito",
+    "Too many open videos: close one to watch this": "Troppi video aperti: chiudine uno per vedere questo",
     "Answer the call to open": "Rispondi alla chiamata per aprire"
   },
   "TranscriptionView": {

@@ -105,6 +105,12 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
     if (code === 'gate_unreachable') {
       return t('VideoStreaming.The device is unreachable')
     }
+    if (code === 'gate_certificate_changed') {
+      return t('VideoStreaming.The device certificate has changed: contact the administrator')
+    }
+    if (code === 'gate_address_not_allowed') {
+      return t('VideoStreaming.The device address is not allowed')
+    }
     if (code === 'call_not_answered') {
       return answerToOpen
     }
@@ -312,9 +318,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
           data-streaming-unlock={gates.length === 1 ? 'single' : 'multiple'}
           data-tooltip-id={tooltipId}
           data-tooltip-content={
-            gates.length === 1
-              ? gateTitle(gates[0])
-              : t('VideoStreaming.Choose what to open') || ''
+            gates.length === 1 ? gateTitle(gates[0]) : t('VideoStreaming.Choose what to open') || ''
           }
         >
           <FontAwesomeIcon
