@@ -40,7 +40,8 @@ interface Feedback {
  *
  * One gate: the button opens it. Several gates: the button expands in place into one small
  * labelled button per gate (no popup, so it also fits the compact incoming call layout).
- * The result of the opening is shown on the button and in a small message next to it.
+ * The result of the opening replaces the name of its gate, or (one gate) is shown in a small
+ * message attached to the button.
  * DTMF gates are sent by the PBX into the call: until the call is answered they look disabled
  * and only show a hint (the tones would get lost).
  * With a gatesContainer (the compact incoming call layout) the labelled gates and the results
@@ -63,6 +64,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const [pendingGate, setPendingGate] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // width of the pressed gate: its result keeps it, the row does not jump
+  const pressedWidth = useRef<number | undefined>(undefined)
   const mounted = useRef(true)
   // the gates and the results go in the gatesContainer row
   const rowMode = gatesContainer !== undefined
@@ -177,8 +180,10 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   // not the disabled attribute: the hint must still show on hover and on click
   const waitingClasses = '!pi-opacity-40 !pi-cursor-not-allowed'
 
-  const feedbackClasses =
+  // centred on the single button, not at the edge of the bar
+  const feedbackClasses = `pi-left-1/2 -pi-translate-x-1/2 ${
     feedbackPlacement === 'above' ? 'pi-bottom-full pi-mb-2' : 'pi-top-full pi-mt-2'
+  }`
   const feedbackColors = (shown: Feedback) =>
     shown.ok
       ? 'pi-bg-green-600 pi-text-white dark:pi-bg-green-400 dark:pi-text-gray-950'
@@ -206,22 +211,30 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
       }`}
     >
       {gates.map((gate) => {
-        // in the row the result replaces the name of its gate
-        const result = rowMode && feedback?.gateId === gate.id ? feedback : null
+        // the result replaces the name of its gate
+        const result = feedback?.gateId === gate.id ? feedback : null
+        // over the picture the result may be truncated: the full text in the tooltip
+        const resultTooltip = result && !rowMode
         return (
           <button
             key={gate.id}
             type='button'
             data-stop-propagation={true}
             data-streaming-gate={gate.id}
-            onClick={() => openGate(gate)}
+            onClick={(event) => {
+              pressedWidth.current = event.currentTarget.offsetWidth
+              openGate(gate)
+            }}
             disabled={pendingGate !== null}
             aria-disabled={needsAnswer(gate) ? true : undefined}
-            data-tooltip-id={result ? undefined : gatesTooltipId}
-            data-tooltip-content={result ? undefined : gateTooltip(gate)}
+            data-tooltip-id={result && !resultTooltip ? undefined : gatesTooltipId}
+            data-tooltip-content={
+              result ? (resultTooltip ? result.message : undefined) : gateTooltip(gate)
+            }
+            style={resultTooltip ? { minWidth: pressedWidth.current } : undefined}
             className={`${
               needsAnswer(gate) ? (result ? '!pi-cursor-not-allowed' : waitingClasses) : ''
-            } pi-flex pi-flex-shrink-0 pi-items-center pi-gap-1.5 pi-rounded-full pi-px-3 ${
+            } pi-flex pi-flex-shrink-0 pi-items-center pi-justify-center pi-gap-1.5 pi-rounded-full pi-px-3 ${
               size === 'large' ? 'pi-h-12' : 'pi-h-10'
             } pi-text-xs pi-font-medium ${
               result
@@ -234,7 +247,10 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
               icon={gateIcon(gate.id, faUnlock)}
             />
             {result ? (
-              <span className='pi-max-w-[16rem] pi-truncate' {...feedbackAttributes(result)}>
+              <span
+                className={`${rowMode ? 'pi-max-w-[16rem]' : 'pi-max-w-[9rem]'} pi-truncate`}
+                {...feedbackAttributes(result)}
+              >
                 {result.message}
               </span>
             ) : (
@@ -310,10 +326,10 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
         </>
       )}
 
-      {feedback && !rowMode && (
+      {feedback && !rowMode && !choosing && (
         <div
           {...feedbackAttributes(feedback)}
-          className={`pi-absolute pi-right-0 ${feedbackClasses} pi-z-20 pi-max-w-[16rem] pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${feedbackColors(
+          className={`pi-absolute ${feedbackClasses} pi-z-20 pi-max-w-[16rem] pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${feedbackColors(
             feedback,
           )}`}
         >
