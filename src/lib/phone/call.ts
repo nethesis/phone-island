@@ -64,6 +64,9 @@ export function callNumber(number: string, sipHost: string, options: { video?: b
  * Answer incoming call
  */
 export function answerIncomingCall() {
+  // The call is being answered here: the socket updates of its other ringing legs must not
+  // bring the island back to the incoming call view (see Socket.tsx, ringing)
+  store.dispatch.currentCall.updateCurrentCall({ answering: true })
   if (isWebRTC()) {
     answerWebRTC()
   } else {
