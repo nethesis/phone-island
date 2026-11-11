@@ -160,6 +160,9 @@
     "The device is unreachable": "The device is unreachable",
     "You are not allowed to open this door": "You are not allowed to open this door",
     "Unable to open the door": "Unable to open the door",
+    "The device certificate has changed: contact the administrator": "The device certificate has changed: contact the administrator",
+    "The device address is not allowed": "The device address is not allowed",
+    "Too many open videos: close one to watch this": "Too many open videos: close one to watch this",
     "Answer the call to open": "Answer the call to open"
   },
   "TranscriptionView": {

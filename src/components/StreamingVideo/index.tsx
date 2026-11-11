@@ -78,6 +78,8 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
     unavailableMessage = t('VideoStreaming.The browser cannot play the video format of this source')
   } else if (state.failure === 'forbidden') {
     unavailableMessage = t('VideoStreaming.You are not allowed to watch this video source')
+  } else if (state.failure === 'busy') {
+    unavailableMessage = t('VideoStreaming.Too many open videos: close one to watch this')
   }
 
   return (

@@ -19,7 +19,8 @@ export type WhepPlayerStatus = 'connecting' | 'playing' | 'reconnecting' | 'unav
 // codec: the browser cannot decode the stream (no retry)
 // forbidden: the user is not allowed to watch the source (no retry)
 // error: any other permanent error (no retry)
-export type WhepPlayerFailure = 'unreachable' | 'codec' | 'forbidden' | 'error'
+// busy: the user has too many videos open (no retry: the view must be closed and reopened)
+export type WhepPlayerFailure = 'unreachable' | 'codec' | 'forbidden' | 'error' | 'busy'
 
 export interface WhepPlayerState {
   status: WhepPlayerStatus
@@ -39,12 +40,20 @@ export interface WhepToken {
 export class WhepTokenError extends Error {
   permanent: boolean
   failure: WhepPlayerFailure
+  // too many token requests: retried with the backoff, never shown as unavailable
+  rateLimited: boolean
 
-  constructor(message: string, permanent: boolean, failure: WhepPlayerFailure = 'error') {
+  constructor(
+    message: string,
+    permanent: boolean,
+    failure: WhepPlayerFailure = 'error',
+    rateLimited = false,
+  ) {
     super(message)
     this.name = 'WhepTokenError'
     this.permanent = permanent
     this.failure = failure
+    this.rateLimited = rateLimited
     // keep instanceof working with the ES5 build target
     Object.setPrototypeOf(this, WhepTokenError.prototype)
   }
@@ -185,6 +194,9 @@ export class WhepPlayer {
       if (error instanceof WhepTokenError && error.permanent) {
         this.log('token error, giving up', error.message)
         this.fail(error.failure, false)
+      } else if (error instanceof WhepTokenError && error.rateLimited) {
+        this.log('token rate limited, backing off')
+        this.fail('unreachable', true, true)
       } else {
         this.log('token error, retrying', error)
         this.fail('unreachable', true)
@@ -225,6 +237,8 @@ export class WhepPlayer {
       // The POST is never aborted by a teardown: the gateway creates the session before
       // answering, and without its Location it could not be deleted. A stale answer frees it.
       const exchange = (async () => {
+        // a token opens one session only: never reuse it
+        if (this.token?.value === token.value) this.token = null
         const abort = new AbortController()
         const abortTimer = setTimeout(() => abort.abort(), WHEP_REQUEST_TIMEOUT_MS)
         let response: Response
@@ -260,7 +274,7 @@ export class WhepPlayer {
       if (!response || !isCurrent()) return
 
       if (response.status === 401) {
-        // token expired or revoked: get a new one, retry at once only the first time
+        // token expired, revoked or already used: new token, retry at once only the first time
         this.token = null
         this.consecutiveUnauthorized++
         this.log('401 from the gateway')
@@ -380,14 +394,17 @@ export class WhepPlayer {
     }, STABLE_PLAYING_MS)
   }
 
-  private fail(failure: WhepPlayerFailure, retry: boolean) {
+  // quiet: a transient failure (rate limit), shown as connecting/reconnecting, never unavailable
+  private fail(failure: WhepPlayerFailure, retry: boolean, quiet = false) {
     this.teardown()
     if (!retry) {
       this.setState({ status: 'unavailable', failure })
       return
     }
     this.failures++
-    if (this.hasPlayed && this.failures <= MAX_RECONNECTING_FAILURES) {
+    if (quiet) {
+      this.setState({ status: this.hasPlayed ? 'reconnecting' : 'connecting', failure: null })
+    } else if (this.hasPlayed && this.failures <= MAX_RECONNECTING_FAILURES) {
       this.setState({ status: 'reconnecting', failure: null })
     } else {
       this.setState({ status: 'unavailable', failure })
