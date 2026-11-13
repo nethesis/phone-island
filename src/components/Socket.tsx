@@ -757,9 +757,14 @@ export const Socket: FC<SocketProps> = ({
                     startTime: `${getTimestampInSeconds()}`,
                   })
 
-                  // Check if this is a streaming call that was accepted
+                  // Check if this is a streaming call that was accepted. The direction sent by
+                  // the server can be wrong once the call is connected (it orders the two
+                  // channels comparing the sequence part of their uniqueids as strings, so the
+                  // caller "x.9" comes after the called "x.10"): also trust the outgoing state
+                  // of the call placed by this client
                   const { isFromStreaming } = store.getState().island
-                  if (isFromStreaming && conv.direction === 'out') {
+                  const { outgoing: isOutgoingCall } = store.getState().currentCall
+                  if (isFromStreaming && (conv.direction === 'out' || isOutgoingCall)) {
                     // Set view to streamingAnswer for outgoing streaming calls when accepted
                     setTimeout(() => {
                       dispatch.island.setIslandView('streamingAnswer')
