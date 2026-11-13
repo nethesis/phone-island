@@ -46,6 +46,7 @@ export const initialStreamingVideoState: WhepPlayerState = {
   status: 'connecting',
   failure: null,
   hasAudio: false,
+  hasPicture: false,
 }
 
 const entries: Record<string, Entry> = {}

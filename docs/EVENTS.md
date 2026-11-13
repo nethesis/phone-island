@@ -1539,7 +1539,7 @@ Indicates that streaming devices received url update
 ```
 
 #### `phone-island-streaming-video-status`
-Indicates a change of the live video of an `rtsp` video source (door intercom) shown during a streaming call. `status` is one of `connecting`, `playing`, `reconnecting`, `unavailable`; `failure` (only when `unavailable`) is one of `unreachable`, `codec` (the browser cannot decode the stream), `forbidden`, `error`, otherwise `null`. Image sources do not dispatch it.
+Indicates a change of the live video of an `rtsp` video source (door intercom) shown during a streaming call. `status` is one of `connecting`, `playing`, `waiting` (the video arrives but no picture can be decoded yet: the device has not sent a complete keyframe), `reconnecting`, `unavailable`; `failure` (only when `unavailable`) is one of `unreachable`, `codec` (the browser cannot decode the stream), `forbidden`, `error`, otherwise `null`. Image sources do not dispatch it.
 
 ```json
 {
