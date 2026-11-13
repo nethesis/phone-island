@@ -32,7 +32,8 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
   const ownVideoRef = useRef<HTMLVideoElement>(null)
   const ref = videoRef || ownVideoRef
   // last frame shown while reconnecting: the <video> turns black when the stalled connection
-  // is closed, so the frame is grabbed when the stall is detected, before the close
+  // is closed, so the frame is grabbed when the stall is detected, before the close. It is kept
+  // while the new connection waits for its first picture.
   const [frozenFrame, setFrozenFrame] = useState<string | null>(null)
   const frozenFrameRef = useRef<string | null>(null)
   const { state, stream } = useStreamingVideo(source.id, source.whep, active, (next) => {
@@ -42,6 +43,8 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
         frozenFrameRef.current = captureVideoFrame(ref.current)
         setFrozenFrame(frozenFrameRef.current)
       }
+    } else if (next.state.status === 'waiting') {
+      // waiting on the same connection: its <video> keeps the last frame by itself
     } else if (frozenFrameRef.current) {
       frozenFrameRef.current = null
       setFrozenFrame(null)
@@ -70,8 +73,11 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
     }
   }
 
-  // the last frame stays visible while reconnecting
-  const showVideo = state.status === 'playing' || state.status === 'reconnecting'
+  // the last frame stays visible while waiting for the next picture or reconnecting
+  const showVideo =
+    state.status === 'playing' ||
+    state.status === 'reconnecting' ||
+    (state.status === 'waiting' && state.hasPicture)
 
   let unavailableMessage: string | undefined
   if (state.failure === 'codec') {
@@ -99,9 +105,12 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
           showVideo ? 'pi-opacity-100' : 'pi-opacity-0'
         } ${videoClassName}`}
       />
-      {state.status === 'connecting' && (
+      {(state.status === 'connecting' || (state.status === 'waiting' && !state.hasPicture)) && (
         <VideoStreamingSkeleton
           className={`pi-absolute pi-inset-0 pi-w-full pi-h-full ${overlayClassName}`}
+          message={
+            state.status === 'waiting' ? t('VideoStreaming.Waiting for the picture') : undefined
+          }
         />
       )}
       {state.status === 'unavailable' && (
@@ -110,20 +119,22 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
           message={unavailableMessage}
         />
       )}
-      {state.status === 'reconnecting' && frozenFrame && (
+      {(state.status === 'reconnecting' || state.status === 'waiting') && frozenFrame && (
         <img
           src={frozenFrame}
           alt=''
           className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-object-contain ${videoClassName}`}
         />
       )}
-      {state.status === 'reconnecting' && (
+      {(state.status === 'reconnecting' || (state.status === 'waiting' && state.hasPicture)) && (
         // bottom centre: devices often print the time in the top corners
         <div
           className={`pi-absolute ${reconnectingClassName} pi-left-1/2 -pi-translate-x-1/2 pi-flex pi-items-center pi-whitespace-nowrap pi-gap-1.5 pi-rounded-full pi-bg-black/60 pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-text-white`}
         >
           <FontAwesomeIcon icon={faCircleNotch} className='pi-h-3 pi-w-3 pi-animate-spin' />
-          {t('VideoStreaming.Reconnecting')}
+          {state.status === 'waiting'
+            ? t('VideoStreaming.Waiting for the picture')
+            : t('VideoStreaming.Reconnecting')}
         </div>
       )}
     </div>
@@ -152,7 +163,7 @@ export interface StreamingVideoProps {
   videoClassName?: string
   // classes of the skeleton and empty state overlays (rounded corners)
   overlayClassName?: string
-  // position of the "reconnecting" badge (bottom centre), e.g. above an overlay bar
+  // position of the "reconnecting" / "waiting" badge (bottom centre), e.g. above an overlay bar
   reconnectingClassName?: string
   videoRef?: RefObject<HTMLVideoElement>
 }
