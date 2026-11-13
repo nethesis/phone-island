@@ -81,9 +81,11 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
 
   let unavailableMessage: string | undefined
   if (state.failure === 'codec') {
-    unavailableMessage = t('VideoStreaming.The browser cannot play the video format of this source')
+    unavailableMessage = t(
+      'VideoStreaming.Your browser cannot play the video format of this source',
+    )
   } else if (state.failure === 'forbidden') {
-    unavailableMessage = t('VideoStreaming.You are not allowed to watch this video source')
+    unavailableMessage = t("VideoStreaming.You don't have permission to watch this video source")
   } else if (state.failure === 'busy') {
     unavailableMessage = t('VideoStreaming.Too many open videos: close one to watch this')
   }
@@ -95,6 +97,7 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
     >
       <video
         ref={ref}
+        aria-label={source.description || t('VideoStreaming.Video source')}
         muted
         autoPlay
         playsInline
@@ -129,6 +132,7 @@ const StreamingVideo: FC<StreamingVideoProps> = ({
       {(state.status === 'reconnecting' || (state.status === 'waiting' && state.hasPicture)) && (
         // bottom centre: devices often print the time in the top corners
         <div
+          role='status'
           className={`pi-absolute ${reconnectingClassName} pi-left-1/2 -pi-translate-x-1/2 pi-flex pi-items-center pi-whitespace-nowrap pi-gap-1.5 pi-rounded-full pi-bg-black/60 pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-text-white`}
         >
           <FontAwesomeIcon icon={faCircleNotch} className='pi-h-3 pi-w-3 pi-animate-spin' />
