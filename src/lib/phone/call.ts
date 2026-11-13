@@ -35,6 +35,8 @@ import { hangupConversation, parkConversation } from '../../services/astproxy'
 import { eventDispatch } from '../../utils'
 import { isEmpty } from '../../utils/genericFunctions/isEmpty'
 import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
+import { stopStreamingVideo } from '../streaming/streamingVideo'
 import { unsubscribe } from '../../services/user'
 
 /**
@@ -62,6 +64,9 @@ export function callNumber(number: string, sipHost: string, options: { video?: b
  * Answer incoming call
  */
 export function answerIncomingCall() {
+  // The call is being answered here: the socket updates of its other ringing legs must not
+  // bring the island back to the incoming call view (see Socket.tsx, ringing)
+  store.dispatch.currentCall.updateCurrentCall({ answering: true })
   if (isWebRTC()) {
     answerWebRTC()
   } else {
@@ -106,13 +111,49 @@ export function forceHangupConversation() {
 }
 
 /**
+ * Releases the video source of the current streaming call, if any: closes its live video or
+ * unsubscribes from its images, then resets the streaming call flag.
+ * To be called when the call is over for this client (ended, rejected or answered elsewhere).
+ */
+export function releaseStreamingSource() {
+  const { streamingSourceNumber } = store.getState().currentCall
+  const { isFromStreaming } = store.getState().island
+
+  if (isFromStreaming && streamingSourceNumber) {
+    const sourceId = getStreamingSourceId(streamingSourceNumber)
+    const source = findVideoSourceByNumber(
+      store.getState().streaming.videoSources,
+      streamingSourceNumber,
+    )
+    if (sourceId && isRtspVideoSource(source)) {
+      stopStreamingVideo(sourceId)
+    } else if (sourceId) {
+      // Unsubscribe from streaming updates
+      unsubscribe({ id: sourceId })
+        .then(() => console.debug(`Unsubscribed from streaming source: ${sourceId}`))
+        .catch((error) => console.error('Error unsubscribing from streaming source:', error))
+
+      // Clear source images to free up memory
+      store.dispatch.streaming.clearSourceImages()
+    }
+  }
+
+  // Reset isFromStreaming flag
+  if (isFromStreaming) {
+    store.dispatch.island.setIsFromStreaming(false)
+  }
+}
+
+/**
  * Hangup current call
  */
 export function hangupCurrentCall() {
-  const { outgoing, accepted, streamingSourceNumber } = store.getState().currentCall
-  const { isFromStreaming } = store.getState().island
+  const { outgoing, accepted } = store.getState().currentCall
 
   if (outgoing || accepted) {
+    // If call was from a streaming source, close its live video or unsubscribe and clear images
+    releaseStreamingSource()
+
     if (isWebRTC()) {
       hangup()
     } else {
@@ -121,23 +162,6 @@ export function hangupCurrentCall() {
     store.dispatch.player.stopAudioPlayer()
     store.dispatch.currentCall.reset()
     store.dispatch.listen.reset()
-
-    // If call was from a streaming source, unsubscribe and clear images
-    if (isFromStreaming && streamingSourceNumber) {
-      const sourceId = getStreamingSourceId(streamingSourceNumber)
-      if (sourceId) {
-        // Unsubscribe from streaming updates
-        unsubscribe({ id: sourceId })
-          .then(() => console.debug(`Unsubscribed from streaming source: ${sourceId}`))
-          .catch((error) => console.error('Error unsubscribing from streaming source:', error))
-
-        // Clear source images to free up memory
-        store.dispatch.streaming.clearSourceImages()
-      }
-    }
-
-    // Reset isFromStreaming flag
-    store.dispatch.island.setIsFromStreaming(false)
   }
   // Reset operator busy state when call ends
   store.dispatch.island.resetOperatorBusy()

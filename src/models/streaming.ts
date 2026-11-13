@@ -4,26 +4,57 @@
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
 
-interface VideoSourceType {
+export type VideoSourceKind = 'image' | 'rtsp'
+
+export interface VideoSourceGateType {
+  id: string
+  name: string
+  // how the server opens the gate ("dtmf", "url", ...): a "dtmf" gate needs an answered call
+  type?: string
+}
+
+export interface VideoSourceType {
   cmdOpen: string
   description: string
-  extension: string
+  // null when the source is not associated with an extension
+  extension: string | null
   frameRate: string
   id: string
   password: string
   url: string
   user: string
   image?: string
+  // "image": JPEG frames pushed through the websocket, "rtsp": live WebRTC video (WHEP).
+  // Missing on older servers, which only have image sources.
+  type?: VideoSourceKind
+  // WHEP path of the video gateway (rtsp sources only), null for image sources
+  whep?: string | null
+  // gates that can be opened, missing on older servers (see getVideoSourceGates)
+  gates?: VideoSourceGateType[]
 }
 
 interface StreamingStateType {
   videoSources: Record<string, VideoSourceType>
   sourceImages: Record<string, string>
+  // width / height of the picture of each source, once known (sizes the call views)
+  aspectRatios: Record<string, number>
+  // the gate chooser of the ringing call view is open (the island makes room for it)
+  gateChooserOpen: boolean
+  // measured height of the content of the streaming view shown (the island fits it)
+  contentHeight: StreamingContentHeight | null
+}
+
+export interface StreamingContentHeight {
+  view: 'call' | 'streamingAnswer'
+  height: number
 }
 
 const defaultState: StreamingStateType = {
   videoSources: {},
   sourceImages: {},
+  aspectRatios: {},
+  gateChooserOpen: false,
+  contentHeight: null,
 }
 
 export const streaming = createModel<RootModel>()({
@@ -60,6 +91,42 @@ export const streaming = createModel<RootModel>()({
         ...state,
         sourceImages: updatedSourceImages,
         videoSources: updatedVideoSources,
+      }
+    },
+    setSourceAspectRatio: (state, payload: { source: string; aspectRatio: number }) => {
+      const { source, aspectRatio } = payload
+      if (!source || !isFinite(aspectRatio) || aspectRatio <= 0) return state
+      // ignore rounding noise: the island is resized only on a real change
+      const current = state.aspectRatios[source]
+      if (current && Math.abs(current - aspectRatio) < 0.01) return state
+      return {
+        ...state,
+        aspectRatios: { ...state.aspectRatios, [source]: aspectRatio },
+      }
+    },
+    setGateChooserOpen: (state, payload: boolean) => {
+      if (state.gateChooserOpen === payload) return state
+      return {
+        ...state,
+        gateChooserOpen: payload,
+      }
+    },
+    setContentHeight: (state, payload: StreamingContentHeight | null) => {
+      const current = state.contentHeight
+      if (current === payload) return state
+      if (current && payload && current.view === payload.view && current.height === payload.height) {
+        return state
+      }
+      return {
+        ...state,
+        contentHeight: payload,
+      }
+    },
+    clearContentHeight: (state, view: StreamingContentHeight['view']) => {
+      if (state.contentHeight?.view !== view) return state
+      return {
+        ...state,
+        contentHeight: null,
       }
     },
     clearSourceImages: (state) => {

@@ -1,12 +1,15 @@
 // Copyright (C) 2025 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type ReactNode, FC, useMemo, useEffect } from 'react'
+import React, { type ReactNode, FC, useMemo, useEffect, useRef, useState } from 'react'
 import { RootState } from '../store'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { eventDispatch } from '../utils'
 import { isNumberOnlyName } from '../lib/phone/conversation'
+import { useStreamingAspectRatio } from '../utils/customHooks/useStreamingAspectRatio'
+import { useIsomorphicLayoutEffect } from '../utils'
+import { getStreamingPreviewHeight } from '../utils/streaming/previewSize'
 
 export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
   // Retrieve needed stored variables
@@ -39,6 +42,32 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     alert_padding_expanded,
   } = useSelector((state: RootState) => state.motions)
   const { isActive } = useSelector((state: RootState) => state.conference)
+  // video source calls: the island fits the picture of the source and the gate chooser
+  const streamingAspectRatio = useStreamingAspectRatio()
+  const { gateChooserOpen, contentHeight } = useSelector((state: RootState) => state.streaming)
+
+  // the measured content height of a streaming view becomes the island height: with a
+  // border-box island (host styles) its padding and border are added, with content-box not
+  const islandRef = useRef<HTMLDivElement>(null)
+  const [islandBox, setIslandBox] = useState({ borderBox: true, border: 2 })
+  useIsomorphicLayoutEffect(() => {
+    if (!islandRef.current) return
+    const style = getComputedStyle(islandRef.current)
+    const border =
+      (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0)
+    const borderBox = style.boxSizing === 'border-box'
+    if (borderBox !== islandBox.borderBox || border !== islandBox.border) {
+      setIslandBox({ borderBox, border })
+    }
+  }, [])
+  const streamingHeight = (
+    view: 'call' | 'streamingAnswer',
+    padding: number,
+    estimate: number,
+  ): number =>
+    contentHeight && contentHeight.view === view
+      ? contentHeight.height + (islandBox.borderBox ? padding * 2 + islandBox.border : 0)
+      : estimate
 
   const motionVariants = useMemo(() => {
     // Initial size
@@ -90,20 +119,25 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
                 width: variants.call.expanded.incoming.width,
                 height: variants.call.expanded.incoming.height,
               }
-          } else if (incoming && isFromStreaming) {
+          } else if ((incoming || outgoing) && isFromStreaming) {
+            const streaming = incoming
+              ? variants.call.expanded.incomingStreaming
+              : variants.call.expanded.outgoingStreaming
             size = {
-              width: variants.call.expanded.incomingStreaming.width,
-              height: variants.call.expanded.incomingStreaming.height,
+              width: streaming.width,
+              height: streamingHeight(
+                'call',
+                padding_expanded,
+                // until the content is measured
+                streaming.height +
+                  getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio) +
+                  (gateChooserOpen ? streaming.gatesHeight : 0),
+              ),
             }
           } else if (outgoing && !isFromStreaming) {
             size = {
               width: variants.call.expanded.outgoing.width,
               height: variants.call.expanded.outgoing.height,
-            }
-          } else if (outgoing && isFromStreaming) {
-            size = {
-              width: variants.call.expanded.outgoingStreaming.width,
-              height: variants.call.expanded.outgoingStreaming.height,
             }
           }
         } else {
@@ -180,24 +214,28 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
             height: variants.waitingConference.collapsed.height,
           }
         break
-      case 'streamingAnswer':
+      case 'streamingAnswer': {
+        const streaming = isExtraLarge
+          ? variants.streamingAnswer.extraLarge
+          : variants.streamingAnswer.expanded
         size = isOpen
-          ? isExtraLarge
-            ? {
-              width: variants.streamingAnswer.extraLarge.width,
-              height: variants.streamingAnswer.extraLarge.height,
-              padding: variants.streamingAnswer.extraLarge.padding,
-            }
-            : {
-              width: variants.streamingAnswer.expanded.width,
-              height: variants.streamingAnswer.expanded.height,
-              padding: variants.streamingAnswer.expanded.padding,
-            }
+          ? {
+            width: streaming.width,
+            height: streamingHeight(
+              'streamingAnswer',
+              streaming.padding,
+              // until the content is measured
+              streaming.height +
+                getStreamingPreviewHeight(streaming.previewWidth, streamingAspectRatio),
+            ),
+            padding: streaming.padding,
+          }
           : {
             width: variants.streamingAnswer.collapsed.width,
             height: variants.streamingAnswer.collapsed.height,
           }
         break
+      }
         case 'operatorBusy':
         size = isOpen
           ? {
@@ -255,6 +293,10 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
     isActive,
     isFromStreaming,
     isExtraLarge,
+    streamingAspectRatio,
+    gateChooserOpen,
+    contentHeight,
+    islandBox,
     throughQueue,
     queueName,
     queueNumber,
@@ -296,6 +338,7 @@ export const IslandMotion: FC<IslandMotionProps> = ({ children }) => {
 
   return (
     <motion.div
+      ref={islandRef}
       className={`${isOpen ? 'pi-cursor-grab' : 'pi-cursor-pointer'
         } pi-pointer-events-auto pi-overflow-hidden dark:pi-bg-gray-950 pi-bg-gray-50 pi-border pi-border-solid pi-border-gray-200 dark:pi-border-gray-800 pi-text-xs dark:pi-text-white pi-text-gray-900 hover:pi-shadow-2xl pi-rounded-3xl pi-transition-shadow`}
       animate={motionVariants}

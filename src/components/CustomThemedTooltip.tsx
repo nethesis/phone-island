@@ -6,7 +6,7 @@ import { Tooltip, type ITooltip } from 'react-tooltip'
 
 interface CustomThemedTooltipProps {
   id: string
-  place?: 'top' | 'right' | 'bottom' | 'left'
+  place?: ITooltip['place']
   className?: string
   openOnClick?: boolean
   clickable?: boolean

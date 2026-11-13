@@ -1538,6 +1538,40 @@ Indicates that streaming devices received url update
 {}
 ```
 
+#### `phone-island-streaming-video-status`
+Indicates a change of the live video of an `rtsp` video source (door intercom) shown during a streaming call. `status` is one of `connecting`, `playing`, `waiting` (the video arrives but no picture can be decoded yet: the device has not sent a complete keyframe), `reconnecting`, `unavailable`; `failure` (only when `unavailable`) is one of `unreachable`, `codec` (the browser cannot decode the stream), `forbidden`, `error`, otherwise `null`. Image sources do not dispatch it.
+
+```json
+{
+  "source": "vs_ingresso",
+  "status": "playing",
+  "failure": null
+}
+```
+
+#### `phone-island-streaming-gate-opened`
+Indicates that a gate of a video source was opened from the island. `gate` is `null` when the server default (first) gate was opened (older servers without a gates list).
+
+```json
+{
+  "source": "vs_ingresso",
+  "gate": "2"
+}
+```
+
+#### `phone-island-streaming-gate-open-failed`
+Indicates that the opening of a gate of a video source failed. `status` is the HTTP status (`null` on network errors) and `code` the error code returned by the server (`gate_timeout`, `gate_unreachable`, `gate_failed`, `dtmf_failed`, `gate_not_found`, `no_gates`, ...) when available. The island also shows the error next to the unlock button.
+
+```json
+{
+  "source": "vs_ingresso",
+  "gate": "2",
+  "status": 504,
+  "code": "gate_timeout",
+  "message": "gate did not answer"
+}
+```
+
 #### `phone-island-alert-removed`
 Indicates that alert is closed
 

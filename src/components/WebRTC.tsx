@@ -14,7 +14,7 @@ import {
   getCurrentAudioInputDeviceId,
   getCurrentVideoInputDeviceId,
 } from '../lib/devices/devices'
-import { attendedTransfer, hangupCurrentCall } from '../lib/phone/call'
+import { attendedTransfer, hangupCurrentCall, releaseStreamingSource } from '../lib/phone/call'
 import {
   notifyPeerVideoStart,
   releaseLocalVideo,
@@ -898,6 +898,9 @@ export const WebRTC: FC<WebRTCProps> = ({
                           // Stop the local audio element ringing
                           store.dispatch.player.stopAudioPlayer()
 
+                          // Release the video source of a streaming call that was not answered
+                          // here (e.g. answered on another device of the user)
+                          releaseStreamingSource()
                           // Reset current call info
                           store.dispatch.currentCall.reset()
                           if (janus.current.log)
@@ -907,6 +910,16 @@ export const WebRTC: FC<WebRTCProps> = ({
                           // Update webrtc lastActivity time
                           dispatch.webrtc.updateLastActivity(new Date().getTime())
                           // stopScreenSharingI()
+                        } else if (uaType === 'mobile') {
+                          // The ringing leg of this client ended before being answered here
+                          // (answered on another device of the user, or cancelled): leave the
+                          // incoming call state and release the video of a streaming call. The
+                          // calls answered here are reset by the socket events, as before
+                          const { incoming, accepted } = store.getState().currentCall
+                          if (incoming && !accepted) {
+                            releaseStreamingSource()
+                            store.dispatch.currentCall.reset()
+                          }
                         }
 
                         // Stop the local audio element ringing

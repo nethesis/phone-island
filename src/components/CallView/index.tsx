@@ -1,7 +1,7 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { type FC, useMemo, useCallback, memo } from 'react'
+import React, { type FC, useMemo, useCallback, memo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, Dispatch } from '../../store'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -10,7 +10,6 @@ import {
   faEarListen,
   faHandPointUp,
   faCircle,
-  faUnlock,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../'
@@ -31,10 +30,15 @@ import { faOfficePhone } from '@nethesis/nethesis-solid-svg-icons'
 import { isPhysical } from '../../lib/user/default_device'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
 import StreamingImage from '../StreamingImage'
+import StreamingVideo from '../StreamingVideo'
+import StreamingUnlock from '../StreamingUnlock'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 import VideoStreamingEmptyState from '../VideoStreamingEmptyState'
-import { handleStreamingUnlock } from '../../utils'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
 import { useDispatch } from 'react-redux'
+import { useStreamingAspectRatio } from '../../utils/customHooks/useStreamingAspectRatio'
+import { getStreamingPreviewBoxRatio } from '../../utils/streaming/previewSize'
+import { useStreamingContentHeight } from '../../utils/customHooks/useStreamingContentHeight'
 
 const onlyDigits = (value?: string) => (value || '').replace(/\D/g, '')
 
@@ -139,7 +143,14 @@ const CallView: FC<CallViewProps> = () => {
   const { isListen, isIntrude, isListenExtension, isIntrudeExtension } = listenState
   const { data: alertsData } = useSelector((state: RootState) => state.alerts)
   const currentUser = useSelector((state: RootState) => state.currentUser)
-  const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
+  const { videoSources, sourceImages, gateChooserOpen } = useSelector(
+    (state: RootState) => state.streaming,
+  )
+  // row below the buttons for the gates of the video source (and the result of an opening)
+  const [gatesRow, setGatesRow] = useState<HTMLDivElement | null>(null)
+  // the preview shows the whole picture: the available width, the height follows the aspect
+  // ratio of the picture
+  const previewBoxRatio = getStreamingPreviewBoxRatio(useStreamingAspectRatio())
 
   const activeAlerts = useMemo(
     () => Object.values(alertsData).filter((alert: any) => alert.active),
@@ -156,20 +167,11 @@ const CallView: FC<CallViewProps> = () => {
     [isFromStreaming, streamingSourceNumber, accepted],
   )
 
-  // Check if unlock button should be shown and get tooltip text
-  const unlockData = useMemo(() => {
-    if (!streamingSourceNumber || !videoSources) return { canUnlock: false, tooltipText: '' }
-
-    const source = Object.values(videoSources).find(
-      (source) => source?.extension === streamingSourceNumber,
-    )
-
-    const canUnlock = Boolean(source?.cmdOpen && source?.cmdOpen.trim() !== '')
-    const tooltipText =
-      canUnlock && source ? `${t('VideoStreaming.Open')}: ${source?.description}` : ''
-
-    return { canUnlock, tooltipText }
-  }, [streamingSourceNumber, videoSources, t])
+  // The video source of the streaming call
+  const streamingSource = useMemo(
+    () => findVideoSourceByNumber(videoSources, streamingSourceNumber),
+    [streamingSourceNumber, videoSources],
+  )
 
   const isNameNumberOnly = useMemo(() => isNumberOnlyName(displayName), [displayName])
 
@@ -467,20 +469,47 @@ const CallView: FC<CallViewProps> = () => {
     return null
   }, [accepted, isRecording, remoteAudioStream, isOpen, paused, renderPulseIcon])
 
+  // the island fits the measured content of the streaming call (see IslandMotion)
+  const streamingContentRef = useStreamingContentHeight(
+    'call',
+    Boolean(shouldShowStreamingImage && isOpen),
+  )
+
   const renderStreamingContent = useCallback(() => {
+    // the same box for every state (no jump when the picture arrives): the content fills it
+    const previewBox = (content: React.ReactNode) => (
+      <div
+        className='pi-relative pi-mt-4 pi-w-full pi-flex-shrink-0'
+        style={{ aspectRatio: previewBoxRatio }}
+      >
+        {content}
+      </div>
+    )
+    const fill = 'pi-absolute pi-inset-0'
+
     // Show skeleton while videoSources are loading or if streaming source number is not set yet
     if (!videoSources || Object.keys(videoSources).length === 0 || !streamingSourceNumber) {
-      return <VideoStreamingSkeleton className='pi-w-full pi-h-40 pi-mt-4' />
+      return previewBox(<VideoStreamingSkeleton className={fill} />)
     }
 
-    // Find the streaming source
-    const source = Object.values(videoSources).find(
-      (source) => source.extension === streamingSourceNumber,
-    )
+    const source = streamingSource
 
     // If source doesn't exist, show empty state
     if (!source) {
-      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
+      return previewBox(<VideoStreamingEmptyState className={fill} />)
+    }
+
+    // Live video (only while the island is expanded, the preview is hidden when collapsed)
+    if (isRtspVideoSource(source)) {
+      return previewBox(
+        <div className={fill}>
+          <StreamingVideo
+            source={source}
+            active={isOpen}
+            className='pi-h-full pi-w-full pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black'
+          />
+        </div>,
+      )
     }
 
     // Check if image is available
@@ -488,12 +517,12 @@ const CallView: FC<CallViewProps> = () => {
 
     // If no image available, show empty state
     if (!hasImage) {
-      return <VideoStreamingEmptyState className='pi-w-full pi-h-40 pi-mt-4' />
+      return previewBox(<VideoStreamingEmptyState className={fill} />)
     }
 
     // If we have an image, show StreamingImage component
-    return <StreamingImage />
-  }, [streamingSourceNumber, videoSources, sourceImages])
+    return previewBox(<StreamingImage className={fill} />)
+  }, [streamingSourceNumber, videoSources, sourceImages, streamingSource, isOpen, previewBoxRatio])
 
   // Early return AFTER all hooks have been called
   if (latestAlert !== null) {
@@ -510,11 +539,11 @@ const CallView: FC<CallViewProps> = () => {
 
   return (
     <div className='pi-bg-red pi-content-center pi-justify-center'>
-      <div className={callViewClasses}>
+      <div className={callViewClasses} ref={shouldShowStreamingImage ? streamingContentRef : undefined}>
         {shouldShowStreamingImage ? (
           <>
             <div className='pi-flex pi-items-center pi-justify-between pi-w-full pi-gap-2'>
-              <div className='pi-flex pi-items-center pi-gap-4 pi-min-w-0 pi-flex-1'>
+              <div className='pi-flex pi-items-center pi-gap-4 pi-flex-1 pi-min-w-0'>
                 {renderStatusIcon()}
                 <div className='pi-flex pi-flex-col pi-justify-center pi-space-y-2 pi-min-w-0'>
                   <DisplayName />
@@ -534,19 +563,27 @@ const CallView: FC<CallViewProps> = () => {
                     <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faPhone} />
                   </Button>
                 )}
-                {/* Open door button - only show if cmdOpen is valid */}
-                {unlockData?.canUnlock && (
-                  <Button
-                    variant='default'
-                    onClick={handleStreamingUnlock}
-                    data-tooltip-id='tooltip-unlock'
-                    data-tooltip-content={unlockData?.tooltipText}
-                  >
-                    <FontAwesomeIcon className='pi-w-5 pi-h-5' icon={faUnlock} />
-                  </Button>
+                {/* Open door button(s) - only shown when the source has gates */}
+                {streamingSource && (
+                  <StreamingUnlock
+                    source={streamingSource}
+                    tooltipId='tooltip-unlock'
+                    // not on the left: the hangup and answer buttons stay visible
+                    tooltipPlace='bottom-end'
+                    // the collapsed island has no room for the gates: expand it
+                    onChoose={!isOpen ? () => dispatch.island.toggleIsOpen(true) : undefined}
+                    onChooserChange={dispatch.streaming.setGateChooserOpen}
+                    gatesContainer={gatesRow}
+                  />
                 )}
               </div>
             </div>
+
+            {/* gates of the video source: the island grows by gatesHeight while it is shown */}
+            <div
+              ref={setGatesRow}
+              className={gateChooserOpen ? 'pi-mt-3 pi-flex pi-h-10 pi-w-full' : 'pi-hidden'}
+            />
 
             {renderStreamingContent()}
           </>
@@ -588,7 +625,6 @@ const CallView: FC<CallViewProps> = () => {
       </div>
       <CustomThemedTooltip id='tooltip-answer-left' place='left' />
       <CustomThemedTooltip id='tooltip-answer' place='left' />
-      <CustomThemedTooltip id='tooltip-unlock' place='left' />
       <CustomThemedTooltip id='tooltip-display-name' place='bottom' />
       <CustomThemedTooltip id='tooltip-queue' place='bottom' />
       <CustomThemedTooltip

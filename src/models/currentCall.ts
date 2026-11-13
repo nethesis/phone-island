@@ -18,6 +18,7 @@ const defaultState = {
   acceptedSocket: false,
   acceptedWebRTC: false,
   accepted: false,
+  answering: false,
   outgoingSocket: false,
   outgoingWebRTC: false,
   parked: false,
@@ -247,6 +248,8 @@ export interface CurrentCallTypes {
   acceptedSocket?: boolean
   acceptedWebRTC?: boolean
   accepted?: boolean
+  // the answer of the incoming call was requested on this client (until the call is reset)
+  answering?: boolean
   outgoingSocket?: boolean
   outgoingWebRTC?: boolean
   outgoing?: boolean
