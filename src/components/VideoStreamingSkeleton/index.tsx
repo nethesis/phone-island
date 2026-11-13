@@ -16,7 +16,8 @@ const VideoStreamingSkeleton: React.FC<VideoStreamingSkeletonProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg pi-animate-pulse ${className}`}>
+    // only the icon pulses: the text keeps its contrast
+    <div className={`pi-flex pi-items-center pi-justify-center pi-bg-gray-100 dark:pi-bg-gray-800 pi-rounded-lg ${className}`}>
       <div className="pi-flex pi-flex-col pi-items-center pi-justify-center pi-space-y-4">
         <div className="pi-relative">
           <FontAwesomeIcon 
@@ -25,7 +26,7 @@ const VideoStreamingSkeleton: React.FC<VideoStreamingSkeletonProps> = ({
           />
           <div className="pi-absolute pi-inset-0 pi-rounded-full pi-border-2 pi-border-gray-300 pi-animate-ping"></div>
         </div>
-        <div className="pi-text-sm pi-text-gray-500 dark:pi-text-gray-400 pi-animate-pulse">
+        <div className="pi-text-sm pi-text-gray-600 dark:pi-text-gray-400">
           {message || t('VideoStreaming.Loading video')}
         </div>
       </div>

@@ -5,11 +5,11 @@ import React, { FC, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faCheck,
+  faCircleCheck,
+  faCircleInfo,
   faCircleNotch,
+  faCircleXmark,
   faLockOpen,
-  faTriangleExclamation,
-  faUnlock,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'react-i18next'
@@ -67,6 +67,11 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   // width of the pressed gate: its result keeps it, the row does not jump
   const pressedWidth = useRef<number | undefined>(undefined)
   const mounted = useRef(true)
+  // keyboard focus: into the chooser when it opens, back to its button when it closes
+  const rootRef = useRef<HTMLDivElement>(null)
+  const gatesRef = useRef<HTMLDivElement>(null)
+  const focusFirstGate = useRef(false)
+  const wasChoosing = useRef(false)
   // the gates and the results go in the gatesContainer row
   const rowMode = gatesContainer !== undefined
   const rowOpen = choosing || (rowMode && feedback !== null)
@@ -91,6 +96,28 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
 
   useEffect(() => () => onChooserChange?.(false), [])
 
+  // the gates can be in the gatesContainer row, mounted later: wait for them
+  useEffect(() => {
+    if (!choosing || !focusFirstGate.current) return
+    const firstGate = gatesRef.current?.querySelector<HTMLElement>('[data-streaming-gate]')
+    if (firstGate) {
+      focusFirstGate.current = false
+      firstGate.focus()
+    }
+  }, [choosing, gatesContainer])
+
+  // the focused gate is gone with the chooser: the focus goes back to the unlock button
+  useEffect(() => {
+    if (wasChoosing.current && !choosing) {
+      focusFirstGate.current = false
+      const active = document.activeElement
+      if (!active || active === document.body || rootRef.current?.contains(active)) {
+        rootRef.current?.querySelector<HTMLElement>('[data-streaming-unlock]')?.focus()
+      }
+    }
+    wasChoosing.current = choosing
+  }, [choosing])
+
   if (gates.length === 0) return null
 
   const answerToOpen = t('VideoStreaming.Answer the call to open')
@@ -103,7 +130,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
       return t('VideoStreaming.The device did not respond in time')
     }
     if (code === 'gate_unreachable') {
-      return t('VideoStreaming.The device is unreachable')
+      return t('VideoStreaming.The device is not reachable')
     }
     if (code === 'gate_certificate_changed') {
       return t('VideoStreaming.The device certificate has changed: contact the administrator')
@@ -115,9 +142,9 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
       return answerToOpen
     }
     if (status === 403) {
-      return t('VideoStreaming.You are not allowed to open this door')
+      return t("VideoStreaming.You don't have permission to open this door")
     }
-    return t('VideoStreaming.Unable to open the door')
+    return t('VideoStreaming.Cannot open door')
   }
 
   const showFeedback = (next: Feedback) => {
@@ -160,21 +187,15 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   }
 
   const iconSize = size === 'large' ? 'pi-h-6 pi-w-6' : 'pi-h-5 pi-w-5'
-  const gateIcon = (gateId: string, base = size === 'large' ? faLockOpen : faUnlock) => {
+  // the result is told by the icon shape (and by the message), in the colour of the button
+  const gateIcon = (gateId: string) => {
     if (pendingGate === gateId) return faCircleNotch
     if (feedback?.gateId === gateId && !feedback.hint) {
-      return feedback.ok ? faCheck : faTriangleExclamation
+      return feedback.ok ? faCircleCheck : faCircleXmark
     }
-    return base
+    return faLockOpen
   }
-  const gateIconClass = (gateId: string) =>
-    pendingGate === gateId
-      ? 'pi-animate-spin'
-      : feedback?.gateId === gateId && !feedback.hint
-      ? feedback.ok
-        ? 'pi-text-green-500 dark:pi-text-green-600'
-        : 'pi-text-red-500 dark:pi-text-red-600'
-      : ''
+  const gateIconClass = (gateId: string) => (pendingGate === gateId ? 'pi-animate-spin' : '')
   // gates without a name are "Door", numbered by position when there are several of them
   const unnamedGates = gates.filter((gate) => !gate.name)
   const unnamedNumber = (gate: VideoSourceGateType) =>
@@ -195,7 +216,9 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
     needsAnswer(gate) ? answerToOpen : openLabel(gate)
   // chooser gates: the full name (the label may be truncated) and what a click does
   const gateTooltip = (gate: VideoSourceGateType) =>
-    needsAnswer(gate) ? `${gateName(gate)}: ${answerToOpen}` : openLabel(gate)
+    needsAnswer(gate)
+      ? t('VideoStreaming.Answer the call to open name', { name: gateName(gate) })
+      : openLabel(gate)
   const gatesTooltipId = `${tooltipId || 'tooltip-streaming-unlock'}-gates`
   // not the disabled attribute: the hint must still show on hover and on click
   const waitingClasses = '!pi-opacity-40 !pi-cursor-not-allowed'
@@ -204,12 +227,15 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
   const feedbackClasses = `pi-left-1/2 -pi-translate-x-1/2 ${
     feedbackPlacement === 'above' ? 'pi-bottom-full pi-mb-2' : 'pi-top-full pi-mt-2'
   }`
+  // Nebula Surface/Success and Surface/Error
   const feedbackColors = (shown: Feedback) =>
     shown.ok
-      ? 'pi-bg-green-600 pi-text-white dark:pi-bg-green-400 dark:pi-text-gray-950'
+      ? 'pi-bg-green-700 pi-text-white dark:pi-bg-green-200 dark:pi-text-gray-950'
       : shown.hint
       ? 'pi-bg-gray-700 pi-text-white dark:pi-bg-gray-200 dark:pi-text-gray-950'
-      : 'pi-bg-red-600 pi-text-white dark:pi-bg-red-400 dark:pi-text-gray-950'
+      : 'pi-bg-rose-700 pi-text-white dark:pi-bg-rose-200 dark:pi-text-gray-950'
+  const feedbackIcon = (shown: Feedback) =>
+    shown.ok ? faCircleCheck : shown.hint ? faCircleInfo : faCircleXmark
   const feedbackAttributes = (shown: Feedback) => ({
     role: shown.ok || shown.hint ? 'status' : 'alert',
     'data-streaming-unlock-feedback': shown.ok ? 'ok' : shown.hint ? 'hint' : 'error',
@@ -218,16 +244,23 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
     setChoosing(false)
     setFeedback(null)
   }
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Escape' && choosing) {
+      event.stopPropagation()
+      closeChooser()
+    }
+  }
 
   const gateButtons = (
     <div
+      ref={gatesRef}
       className={`pi-flex pi-min-w-0 pi-items-center pi-gap-1.5 ${
         rowMode
           ? 'pi-w-full pi-overflow-x-auto pi-scrollbar-none'
           : size === 'large'
           ? // answered call bar: the room left by the other buttons, more lines if needed
             'pi-max-w-full pi-flex-wrap pi-justify-center'
-          : 'pi-max-w-[18rem] pi-overflow-x-auto pi-scrollbar-none'
+          : 'pi-max-w-72 pi-overflow-x-auto pi-scrollbar-none'
       }`}
     >
       {gates.map((gate) => {
@@ -263,18 +296,18 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
             } pi-transition-colors pi-duration-200 disabled:pi-cursor-not-allowed focus:pi-outline-none focus-visible:pi-ring-2 focus-visible:pi-ring-inset focus-visible:pi-ring-emerald-500 dark:focus-visible:pi-ring-emerald-300`}
           >
             <FontAwesomeIcon
-              className={`pi-h-3.5 pi-w-3.5 ${result ? '' : gateIconClass(gate.id)}`}
-              icon={gateIcon(gate.id, faUnlock)}
+              className={`pi-h-4 pi-w-4 ${result ? '' : gateIconClass(gate.id)}`}
+              icon={result?.hint ? faCircleInfo : gateIcon(gate.id)}
             />
             {result ? (
               <span
-                className={`${rowMode ? 'pi-max-w-[16rem]' : 'pi-max-w-[9rem]'} pi-truncate`}
+                className={`${rowMode ? 'pi-max-w-64' : 'pi-max-w-36'} pi-truncate`}
                 {...feedbackAttributes(result)}
               >
                 {result.message}
               </span>
             ) : (
-              <span className='pi-max-w-[9rem] pi-truncate'>{gateName(gate)}</span>
+              <span className='pi-max-w-36 pi-truncate'>{gateName(gate)}</span>
             )}
           </button>
         )
@@ -284,17 +317,20 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
 
   return (
     <div
+      ref={rootRef}
       className='pi-relative pi-flex pi-min-w-0 pi-items-center pi-gap-1.5'
       data-stop-propagation={true}
+      // also gets the keys of the gates in the gatesContainer row (React portal)
+      onKeyDown={onKeyDown}
     >
       {rowMode && choosing ? (
         <Button
           variant='default'
           onClick={closeChooser}
-          aria-label={t('Common.Close') || 'Close'}
+          aria-label={t('Common.Close')}
           data-streaming-unlock='close'
           data-tooltip-id={tooltipId}
-          data-tooltip-content={t('Common.Close') || 'Close'}
+          data-tooltip-content={t('Common.Close')}
         >
           <FontAwesomeIcon className={iconSize} icon={faXmark} />
         </Button>
@@ -306,26 +342,25 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
               openGate(gates[0])
             } else {
               onChoose?.()
+              focusFirstGate.current = true
               setChoosing(true)
             }
           }}
           disabled={pendingGate !== null}
           aria-label={
-            gates.length === 1 ? openLabel(gates[0]) : t('VideoStreaming.Open door') || 'Open door'
+            gates.length === 1 ? gateTitle(gates[0]) : t('VideoStreaming.Choose what to open')
           }
           aria-disabled={gates.length === 1 && needsAnswer(gates[0]) ? true : undefined}
           className={gates.length === 1 && needsAnswer(gates[0]) ? waitingClasses : ''}
           data-streaming-unlock={gates.length === 1 ? 'single' : 'multiple'}
           data-tooltip-id={tooltipId}
           data-tooltip-content={
-            gates.length === 1 ? gateTitle(gates[0]) : t('VideoStreaming.Choose what to open') || ''
+            gates.length === 1 ? gateTitle(gates[0]) : t('VideoStreaming.Choose what to open')
           }
         >
           <FontAwesomeIcon
             className={`${iconSize} ${gates.length === 1 ? gateIconClass(gates[0].id) : ''}`}
-            icon={
-              gates.length === 1 ? gateIcon(gates[0].id) : size === 'large' ? faLockOpen : faUnlock
-            }
+            icon={gates.length === 1 ? gateIcon(gates[0].id) : faLockOpen}
           />
         </Button>
       ) : (
@@ -336,10 +371,10 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
             variant='default'
             className={`pi-flex-shrink-0 ${size === 'large' ? '' : '!pi-h-10 !pi-w-10'}`}
             onClick={closeChooser}
-            aria-label={t('Common.Close') || 'Close'}
+            aria-label={t('Common.Close')}
             data-streaming-unlock='close'
             data-tooltip-id={tooltipId}
-            data-tooltip-content={t('Common.Close') || 'Close'}
+            data-tooltip-content={t('Common.Close')}
           >
             <FontAwesomeIcon className={iconSize} icon={faXmark} />
           </Button>
@@ -349,7 +384,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
       {feedback && !rowMode && !choosing && (
         <div
           {...feedbackAttributes(feedback)}
-          className={`pi-absolute ${feedbackClasses} pi-z-20 pi-max-w-[16rem] pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${feedbackColors(
+          className={`pi-absolute ${feedbackClasses} pi-z-20 pi-max-w-64 pi-whitespace-nowrap pi-truncate pi-rounded-md pi-px-2.5 pi-py-1 pi-text-xs pi-font-medium pi-shadow-md ${feedbackColors(
             feedback,
           )}`}
         >
@@ -371,8 +406,8 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
                     )}`}
                   >
                     <FontAwesomeIcon
-                      className='pi-h-3.5 pi-w-3.5 pi-flex-shrink-0'
-                      icon={feedback.ok ? faCheck : faTriangleExclamation}
+                      className='pi-h-4 pi-w-4 pi-flex-shrink-0'
+                      icon={feedbackIcon(feedback)}
                     />
                     <span className='pi-truncate'>{feedback.message}</span>
                   </div>
@@ -387,7 +422,7 @@ export const StreamingUnlock: FC<StreamingUnlockProps> = ({
           className='pi-z-20'
           id={gatesTooltipId}
           place={rowMode || feedbackPlacement === 'below' ? 'bottom' : 'top'}
-          maxWidth='260px'
+          maxWidth='16rem'
         />
       )}
     </div>

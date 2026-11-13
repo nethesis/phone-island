@@ -162,7 +162,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                 <StreamingSourceImage
                   sourceId={streamingSource?.id}
                   src={streamingSourceData.image}
-                  alt='Streaming source'
+                  alt={streamingSource?.description || t('VideoStreaming.Video source')}
                   className='pi-absolute pi-inset-0 pi-rounded-[20px] pi-w-full pi-h-full'
                 />
               ) : (
@@ -184,6 +184,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       className='pi-flex-shrink-0'
                       onClick={muted ? unmuteCurrentCall : muteCurrentCall}
                       data-tooltip-id='tooltip-mute-streaming'
+                      aria-label={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
                       data-tooltip-content={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
                     >
                       <FontAwesomeIcon
@@ -198,7 +199,8 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       className='pi-flex-shrink-0'
                       onClick={handleScreenshot}
                       data-tooltip-id='tooltip-screenshot-streaming'
-                      data-tooltip-content={t('VideoStreaming.Take a screenshot') || 'Take a screenshot'}
+                      aria-label={t('VideoStreaming.Take a screenshot')}
+                      data-tooltip-content={t('VideoStreaming.Take a screenshot')}
                     >
                       <FontAwesomeIcon
                         className='pi-h-6 pi-w-6'

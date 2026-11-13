@@ -3,6 +3,7 @@
 
 import React, { FC, ImgHTMLAttributes, memo, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { Dispatch, RootState } from '../../store'
 import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
@@ -37,6 +38,7 @@ export const StreamingSourceImage: FC<
  * Component that displays the streaming image from a source
  */
 const StreamingImage: FC<StreamingImageProps> = ({ className = '' }) => {
+  const { t } = useTranslation()
   const streamingSourceNumber = useSelector(
     (state: RootState) => state.currentCall.streamingSourceNumber,
   )
@@ -91,7 +93,7 @@ const StreamingImage: FC<StreamingImageProps> = ({ className = '' }) => {
         key={refreshKey}
         sourceId={source?.id}
         src={imageUrl}
-        alt='Streaming view'
+        alt={source?.description || t('VideoStreaming.Video source')}
         className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-transition-opacity pi-duration-300 ${imageLoaded ? 'pi-opacity-100' : 'pi-opacity-0'
           }`}
         onLoad={() => setImageLoaded(true)}
