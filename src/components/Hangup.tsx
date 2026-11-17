@@ -95,7 +95,7 @@ const Hangup: FC<HangupProps> = ({
           className={`${transferring && description
             ? 'pi-grid pi-grid-cols-4 pi-ml-4 pi-justify-start'
             : useCompactLayout && showSecondaryControls
-              ? 'pi-relative pi-flex pi-h-12 pi-w-64 pi-items-center pi-justify-center pi-overflow-hidden'
+              ? 'pi-relative pi-flex pi-h-12 pi-w-64 pi-items-center pi-justify-center'
               : 'pi-flex pi-w-12 pi-items-center pi-justify-center'
             } `}
         >

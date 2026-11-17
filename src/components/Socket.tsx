@@ -44,9 +44,11 @@ import { ScreenSharingMessage, VideoCallMessage } from './VideoView'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { isFromStreaming } from '../utils/streaming/isFromStreaming'
 import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../utils/streaming/videoSource'
 import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
 import { getCurrentCallQueueContext } from '../lib/phone/queue'
+import { releaseStreamingSource } from '../lib/phone/call'
 
 interface SocketProps {
   children: ReactNode
@@ -201,9 +203,14 @@ export const Socket: FC<SocketProps> = ({
           streamingSourceNumber: conv.counterpartNum,
         })
 
-        // Find the source ID and subscribe to streaming updates
+        // Subscribe to the image updates (pushed through the websocket) of image sources only:
+        // rtsp sources are watched as live video by the views showing them
         const sourceId = getStreamingSourceId(conv.counterpartNum)
-        if (sourceId) {
+        const { videoSources } = store.getState().streaming
+        if (
+          sourceId &&
+          !isRtspVideoSource(findVideoSourceByNumber(videoSources, conv.counterpartNum))
+        ) {
           // Subscribe to streaming updates
           subscribe({ id: sourceId }).catch((error) =>
             console.error('Error subscribing to streaming source:', error),
@@ -612,12 +619,26 @@ export const Socket: FC<SocketProps> = ({
               // server could not (e.g. group-shared contacts).
               resolveContactName(conv)
 
+              // An already connected conversation is not ringing anymore: the server emits
+              // the conversations of an extension with its last known status, and the status
+              // changes asynchronously, so right after the answer an update can still say
+              // "ringing". Likewise, once this client answered (or is answering) the call, the
+              // legs of the same call still ringing on the other devices of the user can be
+              // notified for a moment. They must not bring the answered call back to the
+              // incoming state (that would replace the view of the call, e.g. the streaming
+              // answered view)
+              const { accepted: acceptedHere, answering: answeringHere, number: currentNumber } =
+                store.getState().currentCall
+              const isCallAnsweredHere =
+                (acceptedHere || answeringHere) && currentNumber === `${conv.counterpartNum}`
               if (
-                (uaType === 'mobile' && hasOnlineNethlink()) ||
-                (uaType === 'desktop' &&
-                  (default_device?.type === 'webrtc' ||
-                    (default_device?.type === undefined && !hasOnlineNethlink()) ||
-                    (!hasOnlineNethlink() && default_device?.type === 'physical')))
+                !conv.connected &&
+                !isCallAnsweredHere &&
+                ((uaType === 'mobile' && hasOnlineNethlink()) ||
+                  (uaType === 'desktop' &&
+                    (default_device?.type === 'webrtc' ||
+                      (default_device?.type === undefined && !hasOnlineNethlink()) ||
+                      (!hasOnlineNethlink() && default_device?.type === 'physical'))))
               ) {
                 dispatch.currentCall.checkIncomingUpdatePlay({
                   conversationId: conv.id,
@@ -736,9 +757,14 @@ export const Socket: FC<SocketProps> = ({
                     startTime: `${getTimestampInSeconds()}`,
                   })
 
-                  // Check if this is a streaming call that was accepted
+                  // Check if this is a streaming call that was accepted. The direction sent by
+                  // the server can be wrong once the call is connected (it orders the two
+                  // channels comparing the sequence part of their uniqueids as strings, so the
+                  // caller "x.9" comes after the called "x.10"): also trust the outgoing state
+                  // of the call placed by this client
                   const { isFromStreaming } = store.getState().island
-                  if (isFromStreaming && conv.direction === 'out') {
+                  const { outgoing: isOutgoingCall } = store.getState().currentCall
+                  if (isFromStreaming && (conv.direction === 'out' || isOutgoingCall)) {
                     // Set view to streamingAnswer for outgoing streaming calls when accepted
                     setTimeout(() => {
                       dispatch.island.setIslandView('streamingAnswer')
@@ -848,12 +874,12 @@ export const Socket: FC<SocketProps> = ({
 
           // Stop ringing sounds
           dispatch.player.stopAudioPlayer()
+          // Release the video source of a streaming call (and reset the isFromStreaming flag)
+          releaseStreamingSource()
           // Reset current call info
           dispatch.currentCall.reset()
           dispatch.listen.reset()
           dispatch.physicalRecorder.setRecordingTempVariable(false)
-          // Reset isFromStreaming flag
-          dispatch.island.setIsFromStreaming(false)
         }
       }
     }

@@ -170,21 +170,89 @@ export async function getVideoSources(): Promise<UserInfoTypes | undefined> {
   }
 }
 
-export async function openVideoSource(obj: any) {
-  try {
-    const { baseURL, headers } = store.getState().fetchDefaults
-    const response = await fetch(`${baseURL}/streaming/open`, {
-      method: 'POST',
-      headers: { ...headers },
-      body: JSON.stringify(obj),
-    })
-    if (!response.ok) {
-      throw new Error(response.statusText)
-    }
-    return true
-  } catch (error: any) {
-    throw error
+/**
+ * Error of a streaming request, with the HTTP status and the error code returned by the server
+ * (for example "gate_timeout"), when available
+ */
+export class StreamingRequestError extends Error {
+  status?: number
+  code?: string
+
+  constructor(message: string, status?: number, code?: string) {
+    super(message)
+    this.name = 'StreamingRequestError'
+    this.status = status
+    this.code = code
+    // keep instanceof working with the ES5 build target
+    Object.setPrototypeOf(this, StreamingRequestError.prototype)
   }
+}
+
+const streamingRequestError = async (response: Response) => {
+  let code: string | undefined
+  let message = response.statusText
+  try {
+    const body = await response.json()
+    code = typeof body?.code === 'string' ? body.code : undefined
+    message = body?.message || code || message
+  } catch {
+    // not JSON
+  }
+  return new StreamingRequestError(message, response.status, code)
+}
+
+/**
+ * Opens a gate of a video source. Without a gate the server opens the first one.
+ *
+ * @param obj.id the video source id
+ * @param obj.gate the gate id (optional)
+ */
+export async function openVideoSource(obj: { id: string; gate?: string } | any) {
+  const { baseURL, headers } = store.getState().fetchDefaults
+  const response = await fetch(`${baseURL}/streaming/open`, {
+    method: 'POST',
+    headers: { ...headers },
+    body: JSON.stringify(obj),
+  })
+  if (!response.ok) {
+    throw await streamingRequestError(response)
+  }
+  return true
+}
+
+export interface StreamingTokenType {
+  token: string
+  // seconds
+  expires_in: number
+  // WHEP path of the video gateway
+  whep: string
+}
+
+/**
+ * Gets a short-lived token to watch the live video of an "rtsp" video source
+ */
+export async function getStreamingToken(id: string): Promise<StreamingTokenType> {
+  const { baseURL, headers } = store.getState().fetchDefaults
+  const response = await fetch(`${baseURL}/streaming/token`, {
+    method: 'POST',
+    headers: { ...headers },
+    body: JSON.stringify({ id }),
+  })
+  if (!response.ok) {
+    throw await streamingRequestError(response)
+  }
+  return response.json()
+}
+
+/**
+ * Absolute URL of a WHEP path of the video gateway. The gateway is published on the CTI host,
+ * which is the host of the REST API (the page origin differs when embedded, e.g. in NethLink).
+ */
+export function getWhepUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path
+  const { baseURL } = store.getState().fetchDefaults
+  const base = baseURL ? new URL(baseURL, window.location.href).origin : window.location.origin
+  return new URL(path, base + '/').toString()
 }
 
 export async function subscribe(obj: any) {
