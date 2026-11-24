@@ -5,41 +5,27 @@ import React, { type ReactNode, type FC, useEffect, useLayoutEffect } from 'reac
 import { getCurrentUserInfo, getVideoSources, getFeatureCodes } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState } from '../store'
+import { Dispatch, RootState, store } from '../store'
 import { getAllExtensions } from '../services/astproxy'
 import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
 import { eventDispatch } from '../utils'
 
-// Storage key for API mode
+// Storage key used by older versions to save the API mode across sessions
 const API_MODE_STORAGE_KEY = 'phone_island_api_mode'
 
-// Function to get saved API mode from localStorage
-const getSavedApiMode = (username: string): 'new' | 'legacy' | 'unknown' => {
-  try {
-    const saved = localStorage.getItem(`${API_MODE_STORAGE_KEY}_${username}`)
-    if (saved === 'new' || saved === 'legacy') {
-      return saved
-    }
-  } catch (error) {
-    console.warn('Failed to read API mode from localStorage:', error)
-  }
-  return 'unknown'
-}
+// Probe attempts when the server cannot be reached
+const API_PROBE_ATTEMPTS = 3
+const API_PROBE_RETRY_DELAY = 2000
 
-// Function to save API mode to localStorage
-const saveApiMode = (username: string, mode: 'new' | 'legacy') => {
-  try {
-    localStorage.setItem(`${API_MODE_STORAGE_KEY}_${username}`, mode)
-  } catch (error) {
-    console.warn('Failed to save API mode to localStorage:', error)
-  }
-}
+// Tokens issued by the middleware are JWTs, legacy ones are plain hashes
+const isJwtToken = (token: string) => token.split('.').length === 3
 
-// Export function to get current API mode from localStorage
-export const getApiMode = (username: string) => getSavedApiMode(username)
+// Export function to get the API mode decided in the current session
+export const getApiMode = (username?: string): 'new' | 'legacy' =>
+  store.getState().fetchDefaults.apiMode
 
-// Export function to reset API mode (useful for error recovery)
+// Export function to remove the API mode saved by older versions
 export const resetApiMode = (username: string) => {
   try {
     localStorage.removeItem(`${API_MODE_STORAGE_KEY}_${username}`)
@@ -54,12 +40,15 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
 
   useEffect(() => {
     if (authToken && hostName && username) {
-      const initializeAPI = async () => {
-        let currentApiMode = getSavedApiMode(username)
+      let cancelled = false
 
-        // If mode is unknown or we need to test, probe the API
-        if (currentApiMode === 'unknown') {
-          // First time or after reset: test new API format
+      const initializeAPI = async () => {
+        // The mode is decided on every initialization: a value saved by an
+        // older version must not skip the probe
+        resetApiMode(username)
+        let currentApiMode: 'new' | 'legacy' = 'new'
+
+        for (let attempt = 1; attempt <= API_PROBE_ATTEMPTS; attempt++) {
           try {
             const response = await fetch(`https://${hostName}/api/user/me`, {
               headers: {
@@ -67,23 +56,32 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
               },
             })
 
-            if (response.ok) {
-              // New API format works
-              currentApiMode = 'new'
-              saveApiMode(username, 'new')
-            } else if (response.status === 404 || response.status === 401) {
-              // Fallback to legacy API format
+            if (response.status === 404) {
+              // No middleware on the server: use the legacy API
               currentApiMode = 'legacy'
-              saveApiMode(username, 'legacy')
-            } else {
+            } else if (response.status === 401) {
+              // A legacy token passed by the host application selects the
+              // legacy API, a rejected JWT is an expired session on the new API
+              if (!isJwtToken(authToken)) {
+                currentApiMode = 'legacy'
+              }
+            } else if (!response.ok) {
               throw new Error(`API test failed with status: ${response.status}`)
             }
+            break
           } catch (error) {
-            // Network error or other issues, fallback to legacy API
-            currentApiMode = 'legacy'
-            saveApiMode(username, 'legacy')
+            // Network error or server error: never select the legacy API from
+            // it, retry and then keep the new API
+            console.warn(`API mode probe failed (attempt ${attempt}):`, error)
+            if (attempt < API_PROBE_ATTEMPTS) {
+              await new Promise((resolve) => setTimeout(resolve, API_PROBE_RETRY_DELAY))
+            }
           }
+          if (cancelled) return
         }
+        if (cancelled) return
+
+        dispatch.fetchDefaults.setApiMode(currentApiMode)
 
         // Set the appropriate configuration based on the determined mode
         if (currentApiMode === 'new') {
@@ -102,6 +100,10 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
       }
 
       initializeAPI()
+
+      return () => {
+        cancelled = true
+      }
     }
   }, [authToken, hostName, username])
 

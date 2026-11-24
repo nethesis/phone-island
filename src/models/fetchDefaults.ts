@@ -11,6 +11,7 @@ const defaultState: FetchTypes = {
     'Content-Type': 'application/json;charset=UTF-8',
   },
   fetchReady: false,
+  apiMode: 'new',
 }
 
 export const fetchDefaults = createModel<RootModel>()({
@@ -31,6 +32,12 @@ export const fetchDefaults = createModel<RootModel>()({
         },
       }
     },
+    setApiMode: (state, payload: 'new' | 'legacy') => {
+      return {
+        ...state,
+        apiMode: payload,
+      }
+    },
     setFetchReady: (state) => {
       return {
         ...state,
@@ -48,4 +55,5 @@ interface FetchTypes {
   baseURL?: string
   headers?: HeadersTypes
   fetchReady?: boolean
+  apiMode: 'new' | 'legacy'
 }
