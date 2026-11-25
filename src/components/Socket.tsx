@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React, { type ReactNode, FC, useEffect, useRef } from 'react'
-import { useDispatch } from 'react-redux'
-import { Dispatch } from '../store'
+import { useDispatch, useSelector } from 'react-redux'
+import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
-import { getApiMode } from './RestAPI'
 import { getDisplayName, isNumberOnlyName } from '../lib/phone/conversation'
 import { getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
 import { searchPhonebook } from '../services/phonebook'
@@ -76,6 +75,8 @@ export const Socket: FC<SocketProps> = ({
   uaType,
 }) => {
   const dispatch = useDispatch<Dispatch>()
+  // API mode decided by the RestAPI probe of the current session
+  const { apiMode } = useSelector((state: RootState) => state.fetchDefaults)
   const connectionCheckInterval = useRef<any>()
   const socket = useRef<any>()
   const isUpdatingUserInfo = useRef(false)
@@ -862,7 +863,6 @@ export const Socket: FC<SocketProps> = ({
      * Initialize socket connection and listeners
      */
     const initSocketConnection = () => {
-      const currentApiMode = getApiMode(username)
       disconnectedSinceAuth.current = false
 
       const socketOptions: any = {
@@ -873,7 +873,7 @@ export const Socket: FC<SocketProps> = ({
       }
 
       // Only set path for new API mode
-      if (currentApiMode === 'new') {
+      if (apiMode === 'new') {
         socketOptions.path = '/api/ws'
       }
 
@@ -1608,7 +1608,7 @@ export const Socket: FC<SocketProps> = ({
       contactLookupConversationsRef.current.clear()
       socket.current.close()
     }
-  }, [hostName, username, authToken, uaType, dispatch])
+  }, [hostName, username, authToken, uaType, apiMode, dispatch])
 
   // Manage reload events
   useEffect(() => {
