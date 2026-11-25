@@ -5,7 +5,7 @@ import React, { type ReactNode, type FC, useEffect, useLayoutEffect } from 'reac
 import { getCurrentUserInfo, getVideoSources, getFeatureCodes } from '../services/user'
 import { retrieveAvatars } from '../lib/avatars/avatars'
 import { useDispatch, useSelector } from 'react-redux'
-import { Dispatch, RootState, store } from '../store'
+import { Dispatch, RootState } from '../store'
 import { getAllExtensions } from '../services/astproxy'
 import { getAllUsersEndpoints } from '../services/user'
 import { getExtensionsList } from '../lib/user/extensions'
@@ -17,13 +17,10 @@ const API_MODE_STORAGE_KEY = 'phone_island_api_mode'
 // Probe attempts when the server cannot be reached
 const API_PROBE_ATTEMPTS = 3
 const API_PROBE_RETRY_DELAY = 2000
+const API_PROBE_TIMEOUT = 5000
 
 // Tokens issued by the middleware are JWTs, legacy ones are plain hashes
 const isJwtToken = (token: string) => token.split('.').length === 3
-
-// Export function to get the API mode decided in the current session
-export const getApiMode = (username?: string): 'new' | 'legacy' =>
-  store.getState().fetchDefaults.apiMode
 
 // Export function to remove the API mode saved by older versions
 export const resetApiMode = (username: string) => {
@@ -49,11 +46,14 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
         let currentApiMode: 'new' | 'legacy' = 'new'
 
         for (let attempt = 1; attempt <= API_PROBE_ATTEMPTS; attempt++) {
+          const controller = new AbortController()
+          const timeout = setTimeout(() => controller.abort(), API_PROBE_TIMEOUT)
           try {
             const response = await fetch(`https://${hostName}/api/user/me`, {
               headers: {
                 Authorization: `Bearer ${authToken}`,
               },
+              signal: controller.signal,
             })
 
             if (response.status === 404) {
@@ -70,12 +70,14 @@ export const RestAPI: FC<RestAPIProps> = ({ hostName, username, authToken, child
             }
             break
           } catch (error) {
-            // Network error or server error: never select the legacy API from
-            // it, retry and then keep the new API
+            // Network error, timeout or server error: never select the legacy
+            // API from it, retry and then keep the new API
             console.warn(`API mode probe failed (attempt ${attempt}):`, error)
             if (attempt < API_PROBE_ATTEMPTS) {
               await new Promise((resolve) => setTimeout(resolve, API_PROBE_RETRY_DELAY))
             }
+          } finally {
+            clearTimeout(timeout)
           }
           if (cancelled) return
         }
