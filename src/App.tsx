@@ -44,6 +44,7 @@ interface PhoneIslandProps {
   showAlways?: boolean
   uaType: string
   urlParamWithEvent?: boolean
+  hideConnectionAlerts?: boolean
 }
 
 interface DeviceInputOutputTypes {
@@ -61,6 +62,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       showAlways = false,
       uaType,
       urlParamWithEvent = false,
+      hideConnectionAlerts = false,
     }: PhoneIslandProps,
     ref,
   ) => {
@@ -1251,7 +1253,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
                 uaType={uaType}
               >
                 <Events sipHost={SIP_HOST}>
-                  <Island showAlways={showAlways} uaType={uaType} />
+                  <Island
+                    showAlways={showAlways}
+                    uaType={uaType}
+                    hideConnectionAlerts={hideConnectionAlerts}
+                  />
                 </Events>
               </Socket>
             </RestAPI>
@@ -1271,7 +1277,11 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
-                <Island showAlways={showAlways} uaType={uaType} />
+                <Island
+                    showAlways={showAlways}
+                    uaType={uaType}
+                    hideConnectionAlerts={hideConnectionAlerts}
+                  />
               </Events>
             </Socket>
           </RestAPI>
