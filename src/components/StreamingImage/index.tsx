@@ -1,16 +1,44 @@
 // Copyright (C) 2024 Nethesis S.r.l.
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { FC, memo, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../store'
+import React, { FC, ImgHTMLAttributes, memo, useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
+import { Dispatch, RootState } from '../../store'
 import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 
 /**
+ * Image of a video source: the whole picture (letterboxed if needed), its aspect ratio is
+ * stored to size the box that shows it
+ */
+export const StreamingSourceImage: FC<
+  ImgHTMLAttributes<HTMLImageElement> & { sourceId?: string }
+> = ({ sourceId, className = '', onLoad, ...props }) => {
+  const dispatch = useDispatch<Dispatch>()
+  return (
+    <img
+      {...props}
+      className={`pi-object-contain ${className}`}
+      onLoad={(event) => {
+        const image = event.currentTarget
+        if (sourceId && image.naturalWidth && image.naturalHeight) {
+          dispatch.streaming.setSourceAspectRatio({
+            source: sourceId,
+            aspectRatio: image.naturalWidth / image.naturalHeight,
+          })
+        }
+        onLoad?.(event)
+      }}
+    />
+  )
+}
+
+/**
  * Component that displays the streaming image from a source
  */
-const StreamingImage: FC = () => {
+const StreamingImage: FC<StreamingImageProps> = ({ className = '' }) => {
+  const { t } = useTranslation()
   const streamingSourceNumber = useSelector(
     (state: RootState) => state.currentCall.streamingSourceNumber,
   )
@@ -51,27 +79,33 @@ const StreamingImage: FC = () => {
   }
 
   if (!imageUrl) {
-    return <VideoStreamingSkeleton className='pi-w-[28.2rem] pi-h-[10.5rem] pi-mt-4' />
+    return <VideoStreamingSkeleton className={className} />
   }
 
   return (
-    <div className='pi-mt-4 pi-w-[28.2rem] pi-flex pi-justify-center'>
-      <div className='pi-relative pi-h-[10.5rem] pi-w-[110rem] pi-overflow-hidden pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700'>
-        {!imageLoaded && (
-          <VideoStreamingSkeleton className='pi-absolute pi-inset-0 pi-w-full pi-h-full' />
-        )}
-        <img
-          key={refreshKey}
-          src={imageUrl}
-          alt='Streaming view'
-          className={`pi-w-full pi-h-full pi-object-cover pi-transition-opacity pi-duration-300 ${imageLoaded ? 'pi-opacity-100' : 'pi-opacity-0'
-            }`}
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageLoaded(false)}
-        />
-      </div>
+    <div
+      className={`pi-overflow-hidden pi-rounded-lg pi-border pi-border-gray-300 dark:pi-border-gray-700 pi-bg-black ${className}`}
+    >
+      {!imageLoaded && (
+        <VideoStreamingSkeleton className='pi-absolute pi-inset-0 pi-w-full pi-h-full' />
+      )}
+      <StreamingSourceImage
+        key={refreshKey}
+        sourceId={source?.id}
+        src={imageUrl}
+        alt={source?.description || t('VideoStreaming.Video source')}
+        className={`pi-absolute pi-inset-0 pi-w-full pi-h-full pi-transition-opacity pi-duration-300 ${imageLoaded ? 'pi-opacity-100' : 'pi-opacity-0'
+          }`}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageLoaded(false)}
+      />
     </div>
   )
+}
+
+export interface StreamingImageProps {
+  // size and position of the box (e.g. filling a box with the aspect ratio of the picture)
+  className?: string
 }
 
 export default memo(StreamingImage)

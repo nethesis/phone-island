@@ -23,8 +23,15 @@ import Timer from '../CallView/Timer'
 import { isPhysical } from '../../lib/user/default_device'
 import { AudioBars } from '../AudioBars'
 import { CustomThemedTooltip } from '../CustomThemedTooltip'
-import { faCamera, faLockOpen } from '@fortawesome/free-solid-svg-icons'
-import { capitalizeFirstLetter, getISODateForFilename, handleStreamingUnlock } from '../../utils'
+import { faCamera } from '@fortawesome/free-solid-svg-icons'
+import { capitalizeFirstLetter, getISODateForFilename } from '../../utils'
+import StreamingVideo, { captureVideoFrame } from '../StreamingVideo'
+import StreamingUnlock from '../StreamingUnlock'
+import { StreamingSourceImage } from '../StreamingImage'
+import { findVideoSourceByNumber, isRtspVideoSource } from '../../utils/streaming/videoSource'
+import { useStreamingAspectRatio } from '../../utils/customHooks/useStreamingAspectRatio'
+import { getStreamingPreviewBoxRatio } from '../../utils/streaming/previewSize'
+import { useStreamingContentHeight } from '../../utils/customHooks/useStreamingContentHeight'
 
 export interface StreamingAnswerViewProps { }
 
@@ -40,24 +47,31 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
   const { remoteAudioStream } = useSelector((state: RootState) => state.webrtc)
   const { videoSources, sourceImages } = useSelector((state: RootState) => state.streaming)
 
-  // Get streaming source image and check if unlock is available
+  // The video source of the call and its last image (image sources)
+  const streamingSource = React.useMemo(
+    () => findVideoSourceByNumber(videoSources, streamingSourceNumber),
+    [streamingSourceNumber, videoSources],
+  )
+  const isLiveVideo = isRtspVideoSource(streamingSource)
   const streamingSourceData = React.useMemo(() => {
-    if (!streamingSourceNumber || !videoSources) return { image: null, canUnlock: false, tooltipText: '' }
-
-    const source = Object.values(videoSources).find(
-      (source) => source.extension === streamingSourceNumber,
-    )
-    if (!source) return { image: null, canUnlock: false, tooltipText: '' }
-
-    const image = sourceImages[source.id] || source.image || null
-    const canUnlock = Boolean(source.cmdOpen && source.cmdOpen.trim() !== '')
-    const tooltipText = canUnlock ? `${t('VideoStreaming.Open')}: ${source.description}` : ''
-
-    return { image, canUnlock, tooltipText }
-  }, [streamingSourceNumber, videoSources, sourceImages, t])
+    if (!streamingSource) return { image: null }
+    return { image: sourceImages[streamingSource.id] || streamingSource.image || null }
+  }, [streamingSource, sourceImages])
+  const liveVideo = useRef<HTMLVideoElement>(null)
+  // the video box takes the island width and follows the aspect ratio of the picture
+  const previewBoxRatio = getStreamingPreviewBoxRatio(useStreamingAspectRatio())
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const streamingAnswerViewRef = useRef(null)
+  const streamingAnswerViewRef = useRef<HTMLDivElement | null>(null)
+  // the island fits the measured content (see IslandMotion), not in full screen
+  const measureContent = useStreamingContentHeight('streamingAnswer', isOpen && !isFullscreen)
+  const setStreamingAnswerView = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      streamingAnswerViewRef.current = node
+      measureContent(node)
+    },
+    [measureContent],
+  )
   const localScreen = useRef<HTMLVideoElement>(null)
   const remoteScreen = useRef<HTMLVideoElement>(null)
   const localVideo = useRef<HTMLVideoElement>(null)
@@ -100,12 +114,12 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
   }, [])
 
   const handleScreenshot = React.useCallback(() => {
-    if (!streamingSourceNumber || !videoSources) return
+    const source = streamingSource
+    if (!source) return
 
-    const source = Object.values(videoSources).find(
-      (source) => source.extension === streamingSourceNumber,
-    )
-    if (!source || !source.image) return
+    // live video: the current frame, image source: the last image
+    const image = isRtspVideoSource(source) ? captureVideoFrame(liveVideo.current) : source.image
+    if (!image) return
 
     const filename = source.description
       ? `${capitalizeFirstLetter(source.description).replace(/\s+/g, '_')}_${getISODateForFilename()}_screenshot.jpg`
@@ -113,32 +127,46 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
 
     // Create download link using the base64 image
     const link = document.createElement('a')
-    link.href = source.image
+    link.href = image
     link.download = filename
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }, [streamingSourceNumber, videoSources])
+  }, [streamingSource])
 
   return (
     <>
       {isOpen ? (
         <div
-          ref={streamingAnswerViewRef}
-          className={isFullscreen ? 'pi-h-screen pi-w-full' : isExtraLarge ? 'pi-h-[748px] pi-w-[936px]' : 'pi-h-[480px] pi-w-[600px]'}
+          ref={setStreamingAnswerView}
+          className={isFullscreen ? 'pi-h-screen pi-w-full' : 'pi-w-full'}
         >
-          <div className={`${isFullscreen ? `pi-h-[500px]` : isExtraLarge ? `pi-h-[648px]` : `pi-h-[380px]`} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
-            {/* Video container with rounded corners */}
-            <div className='pi-relative pi-flex-1'>
-              {/* Streaming source image or placeholder */}
-              {streamingSourceData.image ? (
-                <img
+          <div className={`${isFullscreen ? `pi-h-[500px]` : ''} pi-flex pi-relative pi-justify-center pi-w-full pi-flex-col`}>
+            {/* Video container with rounded corners: the whole picture, letterboxed if needed */}
+            <div
+              className={`pi-relative pi-bg-black pi-rounded-[20px] ${isFullscreen ? 'pi-flex-1' : ''}`}
+              style={isFullscreen ? undefined : { aspectRatio: previewBoxRatio }}
+            >
+              {/* Live video, streaming source image or placeholder */}
+              {isLiveVideo && streamingSource ? (
+                <div className='pi-absolute pi-inset-0'>
+                  <StreamingVideo
+                    source={streamingSource}
+                    videoRef={liveVideo}
+                    className='pi-w-full pi-h-full pi-rounded-[20px]'
+                    overlayClassName='pi-rounded-[20px]'
+                    reconnectingClassName='pi-bottom-24'
+                  />
+                </div>
+              ) : streamingSourceData.image ? (
+                <StreamingSourceImage
+                  sourceId={streamingSource?.id}
                   src={streamingSourceData.image}
-                  alt='Streaming source'
-                  className='pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px] pi-w-full pi-h-full pi-object-cover'
+                  alt={streamingSource?.description || t('VideoStreaming.Video source')}
+                  className='pi-absolute pi-inset-0 pi-rounded-[20px] pi-w-full pi-h-full'
                 />
               ) : (
-                <div className='pi-w-full pi-h-full pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
+                <div className='pi-absolute pi-inset-0 pi-bg-gray-200 dark:pi-bg-gray-800 pi-flex pi-items-center pi-justify-center pi-rounded-tl-[20px] pi-rounded-tr-[20px] pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
                   <FontAwesomeIcon
                     icon={faVideoSlash}
                     className='pi-w-24 pi-h-24 pi-text-gray-400 dark:pi-text-gray-600'
@@ -153,8 +181,10 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                     {/* Mute button */}
                     <Button
                       variant='default'
+                      className='pi-flex-shrink-0'
                       onClick={muted ? unmuteCurrentCall : muteCurrentCall}
                       data-tooltip-id='tooltip-mute-streaming'
+                      aria-label={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
                       data-tooltip-content={muted ? t('Tooltip.Unmute') : t('Tooltip.Mute')}
                     >
                       <FontAwesomeIcon
@@ -166,9 +196,11 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                     {/* Screenshot button */}
                     <Button
                       variant='default'
+                      className='pi-flex-shrink-0'
                       onClick={handleScreenshot}
                       data-tooltip-id='tooltip-screenshot-streaming'
-                      data-tooltip-content={t('VideoStreaming.Take a screenshot') || 'Take a screenshot'}
+                      aria-label={t('VideoStreaming.Take a screenshot')}
+                      data-tooltip-content={t('VideoStreaming.Take a screenshot')}
                     >
                       <FontAwesomeIcon
                         className='pi-h-6 pi-w-6'
@@ -176,19 +208,15 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
                       />
                     </Button>
 
-                    {/* Open door button - only show if cmdOpen is valid */}
-                    {streamingSourceData?.canUnlock && (
-                      <Button
-                        variant='default'
-                        onClick={handleStreamingUnlock}
-                        data-tooltip-id='tooltip-unlock-streaming'
-                        data-tooltip-content={streamingSourceData?.tooltipText}
-                      >
-                        <FontAwesomeIcon
-                          className='pi-h-6 pi-w-6'
-                          icon={faLockOpen}
-                        />
-                      </Button>
+                    {/* Open door button(s) - only shown when the source has gates */}
+                    {streamingSource && (
+                      <StreamingUnlock
+                        source={streamingSource}
+                        size='large'
+                        tooltipId='tooltip-unlock-streaming'
+                        tooltipPlace='bottom'
+                        feedbackPlacement='above'
+                      />
                     )}
                   </div>
                 </div>
@@ -196,7 +224,7 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
             </div>
 
             {/* Footer below the image */}
-            <div className='pi-bg-surfaceBackground dark:pi-bg-surfaceBackgroundDark pi-pt-4 pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
+            <div className='pi-bg-surfaceBackground dark:pi-bg-surfaceBackgroundDark pi-py-4 pi-rounded-bl-[20px] pi-rounded-br-[20px]'>
               <Hangup
                 buttonsVariant='default'
                 showFullscreenButton={true}
@@ -212,7 +240,6 @@ export const StreamingAnswerView: FC<StreamingAnswerViewProps> = () => {
           {/* Tooltips */}
           <CustomThemedTooltip className='pi-z-20' id='tooltip-mute-streaming' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-screenshot-streaming' place='bottom' />
-          <CustomThemedTooltip className='pi-z-20' id='tooltip-unlock-streaming' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-record-streaming' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-pause-streaming' place='bottom' />
           <CustomThemedTooltip className='pi-z-20' id='tooltip-screen-share-streaming' place='bottom' />
