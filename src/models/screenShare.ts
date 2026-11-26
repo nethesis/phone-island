@@ -9,6 +9,7 @@ export interface ScreenShareTypes {
   plugin?: any
   role?: 'publisher' | 'listener' | ''
   room?: string
+  roomSecret?: string
   source?: string
   remoteFeed?: any
   localTracks?: any
@@ -28,6 +29,7 @@ const defaultState = {
   plugin: null as any,
   role: '',
   room: '',
+  roomSecret: '',
   source: '',
   remoteFeed: null as any,
   localTracks: null as any,

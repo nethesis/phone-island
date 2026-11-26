@@ -41,7 +41,11 @@ import { getInitials } from '../../lib/avatars/avatars'
 import { checkWebCamPermission } from '../../lib/devices/devices'
 import { dispatchVideoCallStarted } from '../../events/SocketEvents'
 import { notifyPeerVideoStart } from '../../lib/phone/video'
-import { destroyScreenShareRoom, releaseScreenShareHandles } from '../../lib/phone/screenShare'
+import {
+  createScreenShareRoomSecret,
+  destroyScreenShareRoom,
+  releaseScreenShareHandles,
+} from '../../lib/phone/screenShare'
 
 export interface VideoViewProps {}
 
@@ -547,14 +551,18 @@ export const VideoView: FC<VideoViewProps> = () => {
       return
     }
 
-    // Create a new room
+    // Create a new room, hidden from the room list. Viewers join with the
+    // room ID they receive, only the publisher knows the secret to destroy it.
     const roomName = janus.current.randomString(32)
+    const roomSecret = createScreenShareRoomSecret()
 
     let create = {
       request: 'create',
       description: roomName,
       bitrate: 500000,
       publishers: 1,
+      is_private: true,
+      secret: roomSecret,
     }
 
     const { plugin } = store.getState().screenShare
@@ -574,12 +582,13 @@ export const VideoView: FC<VideoViewProps> = () => {
 
           const room = result['room']
           if (store.getState().screenShare.plugin !== plugin) {
-            destroyScreenShareRoom(plugin, room)
+            destroyScreenShareRoom(plugin, room, roomSecret)
             return
           }
           // Set room to the store
           dispatch.screenShare.update({
             room: room,
+            roomSecret,
           })
 
           janus.current.log?.('Screen sharing session created: ' + room)
@@ -901,7 +910,7 @@ export const VideoView: FC<VideoViewProps> = () => {
       return
     }
     screenSharePublisherJoinRequestedRef.current = false
-    dispatch.screenShare.update({ active: true, role: 'publisher', room: '' })
+    dispatch.screenShare.update({ active: true, role: 'publisher', room: '', roomSecret: '' })
     initScreenShare()
   }
   useEventListener('phone-island-screen-share-start', () => {
