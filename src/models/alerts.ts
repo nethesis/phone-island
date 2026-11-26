@@ -43,11 +43,6 @@ const defaultState: AlertsTypes = {
       message: 'Camera is already used.',
       type: 'busy_camera',
     },
-    screen_share_unavailable: {
-      active: false,
-      message: 'screen_share_unavailable_detail',
-      type: 'screen_share_unavailable',
-    },
     // Success alerts
     call_transfered: {
       active: false,
@@ -141,7 +136,6 @@ type AlertsKeys =
   | 'webrtc_down'
   | 'socket_down'
   | 'call_transfered'
-  | 'screen_share_unavailable'
 
 export interface AlertTypes {
   active: boolean

@@ -38,14 +38,12 @@ import { checkInternetConnection } from './utils/genericFunctions/checkConnectio
 import { isBackCallActive } from './utils/genericFunctions/isBackCallVisible'
 import { isFromTrunk } from './lib/user/extensions'
 import { callNumber } from './lib/phone/call'
-import type { ScreenShareRoomCreation } from './lib/phone/screenShare'
 
-export interface PhoneIslandProps {
+interface PhoneIslandProps {
   dataConfig: string
   showAlways?: boolean
   uaType: string
   urlParamWithEvent?: boolean
-  screenShareRoomCreation?: ScreenShareRoomCreation
 }
 
 interface DeviceInputOutputTypes {
@@ -63,7 +61,6 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       showAlways = false,
       uaType,
       urlParamWithEvent = false,
-      screenShareRoomCreation = 'direct',
     }: PhoneIslandProps,
     ref,
   ) => {
@@ -1254,11 +1251,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
                 uaType={uaType}
               >
                 <Events sipHost={SIP_HOST}>
-                  <Island
-                    showAlways={showAlways}
-                    uaType={uaType}
-                    screenShareRoomCreation={screenShareRoomCreation}
-                  />
+                  <Island showAlways={showAlways} uaType={uaType} />
                 </Events>
               </Socket>
             </RestAPI>
@@ -1278,11 +1271,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
               uaType={uaType}
             >
               <Events sipHost={SIP_HOST}>
-                <Island
-                    showAlways={showAlways}
-                    uaType={uaType}
-                    screenShareRoomCreation={screenShareRoomCreation}
-                  />
+                <Island showAlways={showAlways} uaType={uaType} />
               </Events>
             </Socket>
           </RestAPI>

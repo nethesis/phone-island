@@ -6,7 +6,6 @@ import JanusLib from '../../../lib/webrtc/janus.js'
 import { isFromTrunk } from '../../../lib/user/extensions'
 import { checkWebCamPermission } from '../../../lib/devices/devices'
 import { eventDispatch } from '../../../utils'
-import { isScreenShareCallCurrent } from '../../../lib/phone/screenShare'
 
 export interface UseSideViewLogicResult {
   userInformation: RootState['currentUser']
@@ -32,7 +31,6 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
   const paramUrlData = useSelector((state: RootState) => state.paramUrl)
   const videoInputDevices = store.select.mediaDevices.videoInputDevices(store.getState())
   const janus = useRef<any>(JanusLib)
-  const screenPickerPending = useRef(false)
   const conversations = useSelector((state: RootState) => state.currentUser.conversations)
 
   const [availableDevices, setAvailableDevices] = useState<any[]>([])
@@ -102,36 +100,17 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
       closeSideViewAndLaunchEvent('video')
       return
     }
-    if (screenPickerPending.current || store.getState().screenShare.isStartingScreenShare) {
-      return
-    }
-    const call = store.getState().currentCall
-    screenPickerPending.current = true
     let pendingScreenStream: MediaStream
     try {
       pendingScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
     } catch (error) {
       console.warn('Screen share not started:', error)
       return
-    } finally {
-      screenPickerPending.current = false
     }
-    const { active, isStartingScreenShare, isJoiningScreenShare } = store.getState().screenShare
-    if (!isScreenShareCallCurrent(call) || active || isStartingScreenShare || isJoiningScreenShare) {
+    if (!store.getState().currentCall.accepted || store.getState().screenShare.active) {
       pendingScreenStream.getTracks().forEach((track) => track.stop())
       return
     }
-    // The video view mounts after the picker closes. Watch the call until it takes over.
-    const unwatch = store.subscribe(() => {
-      const share = store.getState().screenShare
-      if (!share.isStartingScreenShare || share.pendingScreenStream !== pendingScreenStream) {
-        unwatch()
-      } else if (!isScreenShareCallCurrent(call)) {
-        unwatch()
-        pendingScreenStream.getTracks().forEach((track) => track.stop())
-        store.dispatch.screenShare.update({ isStartingScreenShare: false, pendingScreenStream: null })
-      }
-    })
     store.dispatch.screenShare.update({
       pendingScreenStream,
       isStartingScreenShare: true,

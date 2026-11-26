@@ -8,17 +8,16 @@ export interface ScreenShareTypes {
   active?: boolean
   plugin?: any
   role?: 'publisher' | 'listener' | ''
-  publisherUsername?: string
-  room?: string | number
+  room?: string
   source?: string
   remoteFeed?: any
   localTracks?: any
   remoteTracks?: any
   localVideos?: number
   remoteVideos?: number
-  localScreenStream?: MediaStream | null
+  localScreenStream?: MediaStream
   pendingScreenStream?: MediaStream | null
-  remoteScreenStream?: MediaStream | null
+  remoteScreenStream?: MediaStream
   isStartingScreenShare?: boolean
   isJoiningScreenShare?: boolean
   isLeavingScreenShare?: boolean
@@ -28,8 +27,7 @@ const defaultState = {
   active: false,
   plugin: null as any,
   role: '',
-  publisherUsername: '',
-  room: '' as string | number,
+  room: '',
   source: '',
   remoteFeed: null as any,
   localTracks: null as any,

@@ -29,11 +29,6 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
 
   // Display the latest active alert
   const latestAlert = activeAlerts.length > 0 ? activeAlerts[activeAlerts.length - 1] : null
-  const canReload =
-    latestAlert?.type !== 'call_transfered' && latestAlert?.type !== 'screen_share_unavailable'
-  const showReload =
-    canReload &&
-    (default_device?.type === 'webrtc' || (default_device?.type === 'nethlink' && uaType === 'mobile'))
 
   const handleClearAllAlerts = () => {
     dispatch.alerts.removeAllAlerts()
@@ -85,11 +80,9 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
         <Button
           variant='transparent'
           onClick={() => {
-            if (latestAlert.type === 'screen_share_unavailable') {
-              dispatch.alerts.removeAlert('screen_share_unavailable')
-            } else if (showReload && default_device?.type === 'nethlink') {
+            if (default_device?.type === 'nethlink' && uaType === 'mobile' && latestAlert?.type !== 'call_transfered') {
               reloadPhoneIsland()
-            } else if (showReload) {
+            } else if (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered') {
               handleReloadComponent()
             } else {
               handleClearAllAlerts()
@@ -97,12 +90,20 @@ const AlertView: FC<AlertViewProp> = ({ uaType }) => {
           }}
           className='pi-absolute pi--right-6 pi-transform pi--translate-y-1/2'
           data-tooltip-id='tooltip-close-alert'
-          aria-label={showReload ? t('Tooltip.Reload') : t('Tooltip.Close alert')}
-          data-tooltip-content={showReload ? t('Tooltip.Reload') : t('Tooltip.Close alert')}
+          data-tooltip-content={
+            (default_device?.type === 'nethlink' && uaType === 'mobile' && latestAlert?.type !== 'call_transfered') ||
+            (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered')
+              ? `${t('Tooltip.Reload')}`
+              : `${t('Tooltip.Close alert')}`
+          }
         >
           <FontAwesomeIcon
-            icon={showReload ? faArrowRotateRight : faTimes}
-            aria-hidden='true'
+            icon={
+              (default_device?.type === 'nethlink' && latestAlert?.type !== 'call_transfered') ||
+              (default_device?.type === 'webrtc' && latestAlert?.type !== 'call_transfered')
+                ? faArrowRotateRight
+                : faTimes
+            }
             className='pi-text-gray-700 dark:pi-text-gray-50 pi-w-4 pi-h-4'
           />
         </Button>
