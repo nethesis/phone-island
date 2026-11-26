@@ -443,6 +443,19 @@ async function createRoom(h, room) {
     const h = harness()
     h.render()
     h.start()
+    await resolveKey(h)
+    h.advance(30000)
+    assert.equal(h.state.screenShare.active, false)
+    assert.equal(h.handles[0].detached, false, 'keep the handle while Janus can still return the room')
+    h.advance(30000)
+    assert.equal(h.handles[0].detached, true, 'release the handle even when Janus never responds')
+    assert.deepEqual(h.sent(), ['create'])
+    assert.deepEqual(h.socket, [])
+  }
+  {
+    const h = harness()
+    h.render()
+    h.start()
     await createRoom(h, 800)
     const publisher = h.handles[0]
     publisher.callbacks.onmessage({ videoroom: 'joined' })
@@ -494,6 +507,29 @@ async function createRoom(h, room) {
     await pending2
     assert.equal(track.readyState, 'ended')
     assert.equal(h.state.island.view, 'call')
+    assert.equal(h.requests.length, 0)
+  }
+  for (const timing of ['picker', 'handoff']) {
+    const h = harness()
+    h.render()
+    h.update('island', { view: 'call' })
+    const track = new Track()
+    const pending = h.useSideViewLogic('desktop').goToScreenSharing()
+    if (timing === 'picker') {
+      h.hold()
+      // Resuming before the capture arrives must still discard the old request.
+      h.update('currentCall', { paused: false })
+    }
+    h.pickers[0].resolve(new MediaStream([track]))
+    await pending
+    if (timing === 'handoff') {
+      assert.equal(h.state.screenShare.isStartingScreenShare, true)
+      h.hold()
+    }
+    h.render()
+    assert.equal(track.readyState, 'ended')
+    assert.ok(!h.state.screenShare.isStartingScreenShare)
+    assert.equal(h.handles.length, 0)
     assert.equal(h.requests.length, 0)
   }
   {

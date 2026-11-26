@@ -13,6 +13,7 @@ export function isScreenShareCallCurrent(call: ScreenShareCall) {
   const current = store.getState().currentCall
   return (
     current.accepted &&
+    !current.paused &&
     !current.transferring &&
     !current.transferSwitching &&
     current.conversationId === call.conversationId &&

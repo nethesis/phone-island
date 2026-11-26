@@ -71,6 +71,7 @@ type ScreenShareAttempt = (
 let screenShareAttempt: ScreenShareAttempt | undefined
 
 const PUBLISHER_SIGNALLING_TIMEOUT = 30_000
+const ROOM_CREATE_TIMEOUT = 60_000
 
 const isCurrentScreenShare = (attempt: ScreenShareAttempt) => {
   const { active, plugin, role } = store.getState().screenShare
@@ -629,6 +630,8 @@ export const VideoView: FC<VideoViewProps> = () => {
     attempt.createPending = true
     const { plugin } = attempt
     const onError = () => {
+      if (!attempt.createPending) return
+      clearTimeout(createTimer)
       attempt.createPending = false
       if (isCurrentScreenShare(attempt)) {
         abortScreenShare(attempt, true)
@@ -636,6 +639,8 @@ export const VideoView: FC<VideoViewProps> = () => {
         plugin.detach()
       }
     }
+    // Keep the original handle briefly so a late room can still be destroyed.
+    const createTimer = setTimeout(onError, ROOM_CREATE_TIMEOUT)
     plugin.send({
       message: {
         request: 'create',
@@ -645,10 +650,14 @@ export const VideoView: FC<VideoViewProps> = () => {
         ...(adminKey && { admin_key: adminKey }),
       },
       success: (result) => {
-        attempt.createPending = false
+        if (!attempt.createPending) return
         if (result?.videoroom !== 'created' || !result.room) {
           onError()
-        } else if (!isCurrentScreenShare(attempt)) {
+          return
+        }
+        clearTimeout(createTimer)
+        attempt.createPending = false
+        if (!isCurrentScreenShare(attempt)) {
           destroyScreenShareRoom(plugin, result.room)
         } else {
           joinPublisher(attempt, result.room)

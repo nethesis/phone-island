@@ -106,32 +106,58 @@ export const useSideViewLogic = (uaType?: string): UseSideViewLogicResult => {
       return
     }
     const call = store.getState().currentCall
+    if (!isScreenShareCallCurrent(call)) return
+
+    let held = false
+    let cancelHandoff: (() => void) | undefined
+    const stopOnHold = () => {
+      held = true
+      cancelHandoff?.()
+    }
+    const removeHoldListener = () => window.removeEventListener('phone-island-call-held', stopOnHold)
+    window.addEventListener('phone-island-call-held', stopOnHold)
     screenPickerPending.current = true
     let pendingScreenStream: MediaStream
     try {
       pendingScreenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
     } catch (error) {
+      removeHoldListener()
       console.warn('Screen share not started:', error)
       return
     } finally {
       screenPickerPending.current = false
     }
     const { active, isStartingScreenShare, isJoiningScreenShare } = store.getState().screenShare
-    if (!isScreenShareCallCurrent(call) || active || isStartingScreenShare || isJoiningScreenShare) {
+    if (
+      held ||
+      !isScreenShareCallCurrent(call) ||
+      active ||
+      isStartingScreenShare ||
+      isJoiningScreenShare
+    ) {
+      removeHoldListener()
       pendingScreenStream.getTracks().forEach((track) => track.stop())
       return
     }
     // The video view mounts after the picker closes. Watch the call until it takes over.
+    const finishHandoff = () => {
+      unwatch()
+      removeHoldListener()
+    }
+    const discardCapture = () => {
+      finishHandoff()
+      pendingScreenStream.getTracks().forEach((track) => track.stop())
+      store.dispatch.screenShare.update({ isStartingScreenShare: false, pendingScreenStream: null })
+    }
     const unwatch = store.subscribe(() => {
       const share = store.getState().screenShare
       if (!share.isStartingScreenShare || share.pendingScreenStream !== pendingScreenStream) {
-        unwatch()
+        finishHandoff()
       } else if (!isScreenShareCallCurrent(call)) {
-        unwatch()
-        pendingScreenStream.getTracks().forEach((track) => track.stop())
-        store.dispatch.screenShare.update({ isStartingScreenShare: false, pendingScreenStream: null })
+        discardCapture()
       }
     })
+    cancelHandoff = discardCapture
     store.dispatch.screenShare.update({
       pendingScreenStream,
       isStartingScreenShare: true,
