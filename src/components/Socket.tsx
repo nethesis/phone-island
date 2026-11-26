@@ -1486,6 +1486,7 @@ export const Socket: FC<SocketProps> = ({
             dispatch.screenShare.update({
               isJoiningScreenShare: true,
               room: (data as ScreenSharingMessage).roomId,
+              publisherUsername: (data as ScreenSharingMessage).callUser,
             })
             break
           }

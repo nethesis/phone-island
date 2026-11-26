@@ -8,6 +8,7 @@ export interface ScreenShareTypes {
   active?: boolean
   plugin?: any
   role?: 'publisher' | 'listener' | ''
+  publisherUsername?: string
   room?: string | number
   source?: string
   remoteFeed?: any
@@ -27,6 +28,7 @@ const defaultState = {
   active: false,
   plugin: null as any,
   role: '',
+  publisherUsername: '',
   room: '' as string | number,
   source: '',
   remoteFeed: null as any,

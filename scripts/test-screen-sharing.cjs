@@ -14,6 +14,8 @@ const evaluate = (filename) => ts.transpileModule(fs.readFileSync(path.join(src,
 const modules = {
   useSideViewLogic: evaluate('components/SideView/hooks/useSideViewLogic.ts'),
   VideoView: evaluate('components/VideoView/index.tsx'),
+  CallEvents: evaluate('events/CallEvents.tsx'),
+  call: evaluate('lib/phone/call.ts'),
   screenShare: evaluate('lib/phone/screenShare.ts'),
   screenSharing: evaluate('services/screenSharing.ts'),
 }
@@ -39,6 +41,7 @@ const tick = () => new Promise(setImmediate)
 
 function harness(mode) {
   const events = new Map()
+  const eventTarget = new EventTarget()
   const notices = []
   const effects = []
   const tasks = []
@@ -71,7 +74,7 @@ function harness(mode) {
     dispatch: {
       alerts: { setAlert: (a) => state.alerts = a, removeAlert: () => state.alerts = '' },
       screenShare: { update: (patch) => update('screenShare', patch) },
-      player: { updatePlayer: (patch) => update('player', patch) },
+      player: { updatePlayer: (patch) => update('player', patch), pauseRemoteAudio() {} },
       currentCall: { updateCurrentCall: (patch) => update('currentCall', patch) },
       island: {
         setIslandView: (view) => update('island', { view }),
@@ -91,6 +94,7 @@ function harness(mode) {
         detach() { this.detached = true },
         webrtcStuff: { pc: { iceConnectionState: 'connected' } },
         createOffer(offer) { this.offer = offer; this.offerCount = (this.offerCount ?? 0) + 1 },
+        handleRemoteJsep(answer) { this.answer = answer },
         send(config) {
           messages.push({ id, ...config })
           if (config.message.request === 'destroy') config.success?.()
@@ -109,17 +113,22 @@ function harness(mode) {
     store: { store }, react: hooks,
     'react-redux': { useDispatch: () => store.dispatch, useSelector: (select) => select(state) },
     'janus.js': JanusLib,
+    default_device: { isWebRTC: () => true },
+    messages: { pauseWebRTC: () => true },
     utils: {
       useIsomorphicLayoutEffect: (effect) => effects.push(effect),
       useEventListener: (event, handler) => events.set(event, handler),
-      eventDispatch: (event) => notices.push(event),
+      eventDispatch(event) {
+        notices.push(event)
+        eventTarget.dispatchEvent(new Event(event))
+      },
     },
   }
   const globals = {
-    AbortController, MediaStream, document: {}, addEventListener() {}, removeEventListener() {},
+    AbortController, MediaStream, window: eventTarget, document: {}, addEventListener() {}, removeEventListener() {},
     Date: { now: () => now },
     setTimeout(cb, ms) { const task = { cb, at: now + ms }; tasks.push(task); return task },
-    clearTimeout(task) { task.cancel = true },
+    clearTimeout(task) { if (task) task.cancel = true },
     fetch(url, config) {
       const request = defer()
       requests.push({ url, config, ...request })
@@ -137,6 +146,8 @@ function harness(mode) {
     api[key] = exports
     return exports
   }
+  load('call')
+  load('CallEvents').CallEvents({})
   load('screenShare')
   load('screenSharing')
   const { VideoView } = load('VideoView')
@@ -147,6 +158,7 @@ function harness(mode) {
   }
   const start = () => events.get('phone-island-screen-share-start')()
   const stop = () => events.get('phone-island-screen-share-stop')()
+  const hold = () => events.get('phone-island-call-hold')()
   const advance = (ms) => {
     now += ms
     for (const task of tasks.filter(({ at, cancel }) => at <= now && !cancel)) {
@@ -154,11 +166,49 @@ function harness(mode) {
       task.cb()
     }
   }
-  return { state, store, update, render, start, stop, advance, notices, messages, socket,
+  return { state, store, update, render, start, stop, hold, advance, notices, messages, socket,
     requests, handles, pickers, useSideViewLogic, sent: () => messages.map(({ message }) => message.request) }
 }
 
+// Exercise the bundled Janus SDK's createOffer with a browser picker that finishes after teardown.
+async function checkLateCapture() {
+  let picker
+  const module = { exports: {} }
+  class PeerConnection { close() { this.signalingState = 'closed' } }
+  vm.runInNewContext(fs.readFileSync(path.join(src, 'lib/webrtc/janus.js'), 'utf8'), {
+    module, window: { RTCPeerConnection: PeerConnection }, RTCPeerConnection: PeerConnection,
+    RTCRtpSender: class {}, MediaStreamTrack: Track, MediaStream,
+    navigator: { mediaDevices: { getDisplayMedia: () => picker.promise } },
+  })
+  const Janus = module.exports
+  Object.assign(Janus, {
+    initDone: true, isArray: Array.isArray, log() {}, debug() {}, error() {}, warn() {},
+    httpAPICall(_url, req) {
+      if (req.verb === 'POST') req.success({ janus: 'success', data: { id: 1 } })
+    },
+  })
+  const session = new Janus({ server: 'https://example.invalid/janus' })
+  for (const teardown of ['detach', 'replace']) {
+    picker = defer()
+    let handle
+    session.attach({ plugin: 'janus.plugin.videoroom', success: (h) => { handle = h } })
+    const track = new Track()
+    let error
+    handle.createOffer({ tracks: [{ type: 'screen', capture: true }], error: (e) => { error = e } })
+    if (teardown === 'detach') handle.detach()
+    else {
+      handle.hangup()
+      handle.webrtcStuff.pc = new PeerConnection()
+    }
+    picker.resolve(new MediaStream([track]))
+    await tick()
+    assert.equal(track.readyState, 'ended')
+    assert.match(String(error), /Capture ended/)
+  }
+}
+
 ;(async () => {
+  await checkLateCapture()
   {
     const h = harness()
     h.render()
@@ -181,6 +231,20 @@ function harness(mode) {
     assert.equal(h.requests.length, 0)
     assert.equal(h.state.currentCall.accepted, true)
     assert.equal(h.state.alerts, 'screen_share_unavailable')
+  }
+  {
+    const h = harness()
+    h.render()
+    h.start()
+    h.update('currentCall', { transferring: true })
+    h.update('currentCall', { transferring: false, username: 'charlie', conversationId: 'new-call' })
+    assert.equal(h.state.screenShare.active, false)
+    h.start()
+    h.messages[0].success({ videoroom: 'created', room: 321 })
+    assert.deepEqual(h.sent(), ['create', 'create', 'destroy'])
+    assert.equal(h.handles[0].detached, true)
+    assert.equal(h.handles[1].detached, false)
+    assert.deepEqual(h.socket, [])
   }
   for (const status of [401, 403, 503]) {
     const h = harness('middleware')
@@ -229,10 +293,77 @@ function harness(mode) {
     publisher.callbacks.onlocaltrack(new Track(), true)
     publisher.offer.success('sdp')
     assert.deepEqual(h.sent(), ['destroy', 'join', 'configure'])
+    assert.deepEqual(h.socket, [])
+    publisher.callbacks.onmessage({ videoroom: 'event', configured: 'ok' }, { type: 'answer', sdp: 'answer' })
+    assert.deepEqual(h.socket, [])
+    publisher.answer.success()
+    h.advance(30000)
+    assert.equal(h.state.screenShare.active, true, 'successful publication clears the signalling deadline')
     assert.equal(h.socket.length, 1)
     assert.equal(h.socket[0].message, 'screenSharingStart')
     assert.equal(h.socket[0].destUser, 'alice')
     assert.equal(h.socket[0].roomId, 500)
+  }
+  {
+    const h = harness('middleware')
+    const track = new Track()
+    h.update('screenShare', { pendingScreenStream: new MediaStream([track]) })
+    let attach
+    h.state.webrtc.janusInstance.attach = (callbacks) => { attach = callbacks }
+    h.render()
+    h.start()
+    h.advance(30000)
+    assert.equal(h.state.screenShare.active, false)
+    assert.equal(track.readyState, 'ended')
+    assert.equal(h.state.alerts, 'screen_share_unavailable')
+    let detached = false
+    attach.success({ detach() { detached = true } })
+    assert.equal(detached, true)
+    assert.equal(h.requests.length, 0)
+  }
+  for (const mode of ['direct', 'middleware']) {
+    const h = harness(mode)
+    const track = new Track()
+    h.update('screenShare', { pendingScreenStream: new MediaStream([track]) })
+    h.render()
+    h.start()
+    if (mode === 'direct') h.messages[0].success({ videoroom: 'created', room: 123 })
+    else h.requests[0].resolve(response(201, 123))
+    await tick()
+    assert.equal(h.sent().at(-1), 'join')
+    h.advance(30000)
+    h.handles[0].callbacks.onmessage({ videoroom: 'joined' })
+    assert.equal(h.sent().at(-1), 'destroy')
+    assert.equal(h.handles[0].detached, true)
+    assert.equal(track.readyState, 'ended')
+    assert.equal(h.state.screenShare.active, false)
+    assert.equal(h.state.alerts, 'screen_share_unavailable')
+    assert.deepEqual(h.socket, [])
+  }
+  for (const failure of ['janus rejection', 'invalid SDP', 'no response']) {
+    const h = harness('middleware')
+    h.render()
+    h.start()
+    h.requests[0].resolve(response(201, 405))
+    await tick()
+    const publisher = h.handles[0]
+    publisher.callbacks.onmessage({ videoroom: 'joined' })
+    h.advance(30000)
+    assert.equal(h.state.screenShare.active, true, 'screen picker has no signalling deadline')
+    const track = new Track()
+    publisher.callbacks.onlocaltrack(track, true)
+    publisher.offer.success('sdp')
+    if (failure === 'janus rejection') {
+      publisher.callbacks.onmessage({ videoroom: 'event', error: 'Cannot publish' })
+    } else if (failure === 'invalid SDP') {
+      publisher.callbacks.onmessage({ videoroom: 'event', configured: 'ok' }, { type: 'answer', sdp: 'invalid' })
+      publisher.answer.error()
+    } else {
+      h.advance(30000)
+    }
+    assert.equal(track.readyState, 'ended')
+    assert.equal(h.state.screenShare.active, false)
+    assert.deepEqual(h.socket, [])
   }
   for (const update of [
     (h) => h.stop(),
@@ -271,17 +402,23 @@ function harness(mode) {
     assert.equal(h.state.screenShare.plugin, h.handles[1])
     assert.deepEqual(h.socket, [])
   }
-  {
+  for (const action of ['stop', 'hold']) {
     const h = harness('middleware')
-    h.update('screenShare', { isJoiningScreenShare: true, room: 123 })
+    h.update('screenShare', { isJoiningScreenShare: true, room: 123, publisherUsername: 'alice' })
     h.render()
     assert.equal(h.state.screenShare.role, 'listener')
     assert.equal(h.requests.length, 0)
     assert.deepEqual(h.sent(), ['join'])
     assert.equal(h.messages[0].message.room, 123)
-    h.stop()
+    h.update('currentCall', { username: 'charlie', conversationId: 'new-call' })
+    h.update('island', { view: 'transfer' })
+    h[action]()
     assert.equal(h.handles[0].detached, true)
     assert.deepEqual(h.sent(), ['join'])
+    assert.equal(h.socket.length, 1)
+    assert.equal(h.socket[0].message, 'screenSharingStop')
+    assert.equal(h.socket[0].destUser, 'alice')
+    assert.equal(h.socket[0].roomId, 123)
   }
   {
     const h = harness('middleware')
@@ -306,7 +443,7 @@ function harness(mode) {
   }
   {
     const h = harness('middleware')
-    h.update('screenShare', { isJoiningScreenShare: true, room: 123 })
+    h.update('screenShare', { isJoiningScreenShare: true, room: 123, publisherUsername: 'alice' })
     h.render()
     h.update('screenShare', { isLeavingScreenShare: true })
     h.stop()

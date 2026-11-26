@@ -53,14 +53,16 @@ export interface VideoViewProps {
   screenShareRoomCreation?: ScreenShareRoomCreation
 }
 
-interface ScreenShareAttempt {
-  role: 'publisher' | 'listener'
-  call?: ScreenShareCall
+type ScreenShareAttempt = (
+  | { role: 'publisher'; call: ScreenShareCall; roomCreation: ScreenShareRoomCreation }
+  | { role: 'listener'; publisher: string }
+) & {
   plugin?: any
   createPending?: boolean
   joinRequested?: boolean
   offerStarted?: boolean
-  publishRequested?: boolean
+  published?: boolean
+  signallingTimer?: ReturnType<typeof setTimeout>
   invited?: boolean
   unsubscribe?: () => void
   removePendingTrackListener?: () => void
@@ -69,7 +71,7 @@ interface ScreenShareAttempt {
 // A share can outlive the video view. Phone Island has one store per page.
 let screenShareAttempt: ScreenShareAttempt | undefined
 
-const PUBLISHER_JOIN_TIMEOUT = 30_000
+const PUBLISHER_SIGNALLING_TIMEOUT = 30_000
 const ROOM_REQUEST_TIMEOUT = 90_000
 
 const isCurrentScreenShare = (attempt: ScreenShareAttempt) => {
@@ -79,7 +81,7 @@ const isCurrentScreenShare = (attempt: ScreenShareAttempt) => {
     active &&
     role === attempt.role &&
     (!attempt.plugin || plugin === attempt.plugin) &&
-    (!attempt.call || isScreenShareCallCurrent(attempt.call))
+    (attempt.role === 'listener' || isScreenShareCallCurrent(attempt.call))
   )
 }
 
@@ -589,7 +591,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     if (isCurrentScreenShare(attempt)) {
       attempt.plugin.send({
         message: { request: 'join', room, ptype: 'publisher', display: username },
-        error: () => abortScreenShare(attempt, Boolean(attempt.call)),
+        error: () => abortScreenShare(attempt, true),
       })
     }
   }
@@ -599,8 +601,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     conversationId: string,
   ) => {
     const controller = new AbortController()
-    const deadline = Date.now() + PUBLISHER_JOIN_TIMEOUT
-    const joinTimer = setTimeout(() => abortScreenShare(attempt, true), PUBLISHER_JOIN_TIMEOUT)
+    const deadline = Date.now() + PUBLISHER_SIGNALLING_TIMEOUT
     // Keep reading the response after the UI deadline so a late room can be removed.
     const requestTimer = setTimeout(() => controller.abort(), ROOM_REQUEST_TIMEOUT)
     try {
@@ -618,22 +619,28 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     } catch {
       abortScreenShare(attempt, true)
     } finally {
-      clearTimeout(joinTimer)
       clearTimeout(requestTimer)
       attempt.createPending = false
     }
   }
 
+  const startSignallingTimeout = (attempt: ScreenShareAttempt) => {
+    attempt.signallingTimer = setTimeout(
+      () => abortScreenShare(attempt, true),
+      PUBLISHER_SIGNALLING_TIMEOUT,
+    )
+  }
+
   const shareScreen = (attempt: ScreenShareAttempt) => {
-    if (attempt.createPending || attempt.joinRequested) return
+    if (attempt.role !== 'publisher' || attempt.createPending || attempt.joinRequested) return
     if (!janus.current.isExtensionEnabled()) {
       janus.current.error?.('Screen sharing requires getDisplayMedia')
-      abortScreenShare(attempt, Boolean(attempt.call))
+      abortScreenShare(attempt, true)
       return
     }
 
     attempt.createPending = true
-    if (attempt.call) {
+    if (attempt.roomCreation === 'middleware') {
       void createRoomThroughMiddleware(attempt, attempt.call.conversationId)
       return
     }
@@ -670,7 +677,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
 
   const initScreenShare = (attempt: ScreenShareAttempt) => {
     if (!janusInstance) {
-      abortScreenShare(attempt, Boolean(attempt.call))
+      abortScreenShare(attempt, attempt.role === 'publisher')
       return
     }
     janusInstance.attach({
@@ -694,7 +701,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
       },
       error: function (error) {
         janus.current.error?.('Error attaching videoroom plugin', error)
-        abortScreenShare(attempt, Boolean(attempt.call))
+        abortScreenShare(attempt, attempt.role === 'publisher')
       },
       consentDialog: function (on) {},
       iceState: function (state) {
@@ -730,6 +737,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
           if (event === 'joined') {
             if (role === 'publisher') {
               if (!attempt.joinRequested || attempt.offerStarted) return
+              clearTimeout(attempt.signallingTimer)
               attempt.offerStarted = true
               // This is our session, publish our stream
               janus.current.debug?.('Negotiating WebRTC stream for our screen')
@@ -748,20 +756,19 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
                   if (!isCurrentScreenShare(attempt)) return
                   attempt.removePendingTrackListener?.()
                   janus.current.debug?.('Got publisher SDP!', jsep)
+                  startSignallingTimeout(attempt)
                   const publish = { request: 'configure', audio: true, video: true }
                   plugin.send({
                     message: publish,
                     jsep,
-                    error: () => abortScreenShare(attempt, Boolean(attempt.call)),
+                    error: () => abortScreenShare(attempt, true),
                   })
                   if (!isCurrentScreenShare(attempt)) return
-                  attempt.publishRequested = true
                   dispatch.screenShare.update({ pendingScreenStream: null })
-                  inviteOtherUser(attempt)
                 },
                 error: function (error) {
                   janus.current.error?.('WebRTC error:', error)
-                  abortScreenShare(attempt, Boolean(attempt.call))
+                  abortScreenShare(attempt, true)
                 },
               })
             } else {
@@ -796,14 +803,27 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
               janus.current.log?.('Publisher left: ' + leaving)
             } else if (msg['error']) {
               janus.current.error?.('Error event: ' + msg['error'])
-              abortScreenShare(attempt, Boolean(attempt.call))
+              abortScreenShare(attempt, attempt.role === 'publisher')
               return
             }
           }
         }
         if (jsep) {
           janus.current.debug?.('Handling SDP as well...', jsep)
-          plugin.handleRemoteJsep({ jsep: jsep })
+          plugin.handleRemoteJsep({
+            jsep,
+            success: () => {
+              if (
+                role === 'publisher' && msg.configured === 'ok' &&
+                jsep.type === 'answer' && isCurrentScreenShare(attempt)
+              ) {
+                clearTimeout(attempt.signallingTimer)
+                attempt.published = true
+                inviteOtherUser(attempt)
+              }
+            },
+            error: () => abortScreenShare(attempt, role === 'publisher'),
+          })
         }
       },
       onlocaltrack: function (track, on) {
@@ -926,14 +946,15 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
   const inviteOtherUser = (attempt: ScreenShareAttempt) => {
     const { room, localScreenStream } = store.getState().screenShare
     if (
+      attempt.role !== 'publisher' ||
       !isCurrentScreenShare(attempt) ||
       attempt.invited ||
-      !attempt.publishRequested ||
+      !attempt.published ||
       !localScreenStream
     ) return
 
     const { socket } = store.getState().websocket
-    const destUsername = (attempt.call ?? store.getState().currentCall).username
+    const destUsername = attempt.call.username
     const { username } = store.getState().currentUser
 
     attempt.invited = true
@@ -970,12 +991,31 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     if (showError && !screenShareAttempt) dispatch.alerts.setAlert('screen_share_unavailable')
   }
 
+  const watchScreenShare = (attempt: ScreenShareAttempt) => {
+    const stopOnHold = () => stopScreenShare()
+    window.addEventListener('phone-island-call-held', stopOnHold)
+    const unsubscribe = store.subscribe(() => {
+      if (
+        !isCurrentScreenShare(attempt) ||
+        store.getState().webrtc.janusInstance !== janusInstance
+      ) abortScreenShare(attempt)
+    })
+    attempt.unsubscribe = () => {
+      unsubscribe()
+      window.removeEventListener('phone-island-call-held', stopOnHold)
+    }
+  }
+
   const initAndStartScreenShare = () => {
     const { active, pendingScreenStream } = store.getState().screenShare
     if (active) return
 
-    const call = screenShareRoomCreation === 'middleware' ? store.getState().currentCall : undefined
-    const attempt: ScreenShareAttempt = { role: 'publisher', call }
+    const call = store.getState().currentCall
+    const attempt: ScreenShareAttempt = {
+      role: 'publisher',
+      call,
+      roomCreation: screenShareRoomCreation,
+    }
     screenShareAttempt = attempt
     dispatch.alerts.removeAlert('screen_share_unavailable')
     dispatch.screenShare.update({
@@ -997,18 +1037,15 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
       attempt.removePendingTrackListener = () => screenTrack.removeEventListener('ended', stop)
     }
 
-    if (call) {
-      if (!call.conversationId || !isScreenShareCallCurrent(call)) {
-        abortScreenShare(attempt, true)
-        return
-      }
-      attempt.unsubscribe = store.subscribe(() => {
-        if (
-          !isCurrentScreenShare(attempt) ||
-          store.getState().webrtc.janusInstance !== janusInstance
-        ) abortScreenShare(attempt)
-      })
+    if (
+      !isScreenShareCallCurrent(call) ||
+      (attempt.roomCreation === 'middleware' && !call.conversationId)
+    ) {
+      abortScreenShare(attempt, true)
+      return
     }
+    watchScreenShare(attempt)
+    startSignallingTimeout(attempt)
     initScreenShare(attempt)
   }
   useEventListener('phone-island-screen-share-start', () => {
@@ -1016,11 +1053,12 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
   })
 
   const initAndJoinScreenShare = () => {
-    const { active, isLeavingScreenShare } = store.getState().screenShare
+    const { active, isLeavingScreenShare, publisherUsername } = store.getState().screenShare
     if (active || isLeavingScreenShare) return
-    const attempt: ScreenShareAttempt = { role: 'listener' }
+    const attempt: ScreenShareAttempt = { role: 'listener', publisher: publisherUsername }
     screenShareAttempt = attempt
     dispatch.screenShare.update({ active: true, role: 'listener' })
+    watchScreenShare(attempt)
     initScreenShare(attempt)
     eventDispatch('phone-island-screen-share-joined', {})
   }
@@ -1046,6 +1084,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
       if (active) stopScreenShare(false)
       return
     }
+    screenShareAttempt?.unsubscribe?.()
     screenShareAttempt = undefined
     janus.current.stopAllTracks(remoteScreenStream)
     dispatch.screenShare.update({ active: false, role: '', remoteScreenStream: null })
@@ -1089,6 +1128,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     const attempt = screenShareAttempt
     if (!attempt) return
     screenShareAttempt = undefined
+    clearTimeout(attempt.signallingTimer)
     attempt.unsubscribe?.()
     attempt.removePendingTrackListener?.()
 
@@ -1097,7 +1137,9 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
     janus.current.stopAllTracks(localScreenStream)
     janus.current.stopAllTracks(remoteScreenStream)
     janus.current.stopAllTracks(pendingScreenStream)
-    releaseScreenShareHandles(role === 'publisher', !attempt.call && attempt.createPending === true)
+    const awaitingDirectRoom = attempt.role === 'publisher' &&
+      attempt.roomCreation === 'direct' && attempt.createPending === true
+    releaseScreenShareHandles(role === 'publisher', awaitingDirectRoom)
     dispatch.screenShare.update({
       active: false,
       role: '',
@@ -1109,10 +1151,10 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
       localVideos: 0,
     })
 
-    if (notifyRemote && attempt.invited) {
-      // Send stop to the peer that got this attempt's invitation.
+    if (notifyRemote && room && (attempt.invited || role === 'listener')) {
+      // A local listener stop, including Hold, also stops the publisher.
       const { socket } = store.getState().websocket
-      const destUsername = (attempt.call ?? store.getState().currentCall).username
+      const destUsername = attempt.role === 'listener' ? attempt.publisher : attempt.call.username
       const { username } = store.getState().currentUser
 
       socket.emit('message', {
@@ -1129,13 +1171,6 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
   useEventListener('phone-island-screen-share-stop', () => {
     stopScreenShare()
   })
-
-  const pauseCall = () => {
-    pauseCurrentCall()
-    if (store.getState().screenShare.active) {
-      stopScreenShare()
-    }
-  }
 
   const [isVideoCallButtonVisible, setIsVideoCallButtonVisible] = useState(true)
 
@@ -1360,7 +1395,7 @@ export const VideoView: FC<VideoViewProps> = ({ screenShareRoomCreation = 'direc
               {!(intrudeListenStatus?.isIntrude || intrudeListenStatus?.isListen) && (
                 <Button
                   variant='default'
-                  onClick={() => (paused ? unpauseCurrentCall() : pauseCall())}
+                  onClick={() => (paused ? unpauseCurrentCall() : pauseCurrentCall())}
                   data-tooltip-id='tooltip-pause-video-view'
                   data-tooltip-content={paused ? t('Tooltip.Play') : t('Tooltip.Pause')}
                 >
