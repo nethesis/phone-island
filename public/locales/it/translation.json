@@ -84,6 +84,8 @@
     "No contacts found": "Nessun contatto trovato"
   },
   "Errors": {
+    "screen_share_unavailable": "Impossibile condividere lo schermo",
+    "screen_share_unavailable_detail": "La condivisione dello schermo non è disponibile per questa chiamata.",
     "browser_permissions": "Errore nei permessi del browser",
     "user_permissions": "Errore nei permessi dei media",
     "unknown_media_permissions": "Errore generico nei permessi",

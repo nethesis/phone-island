@@ -1476,7 +1476,9 @@ export const Socket: FC<SocketProps> = ({
               destUser: (data as VideoCallMessage).destUser,
             })
             break
-          case 'screenSharingStart':
+          case 'screenSharingStart': {
+            const { active, isStartingScreenShare, isJoiningScreenShare } = store.getState().screenShare
+            if (active || isStartingScreenShare || isJoiningScreenShare) break
             dispatch.island.toggleSideViewVisible(false)
             dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
@@ -1486,10 +1488,11 @@ export const Socket: FC<SocketProps> = ({
               room: (data as ScreenSharingMessage).roomId,
             })
             break
+          }
           case 'screenSharingStop': {
             const { room: currentShareRoom } = store.getState().screenShare
             const stoppedRoom = (data as ScreenSharingMessage).roomId
-            if (currentShareRoom && stoppedRoom && `${stoppedRoom}` !== `${currentShareRoom}`) {
+            if (!currentShareRoom || !stoppedRoom || String(stoppedRoom) !== String(currentShareRoom)) {
               break
             }
             dispatch.island.toggleSideViewVisible(false)

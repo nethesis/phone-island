@@ -26,13 +26,14 @@ import { ContactListView } from './ContactView/ContactListView'
 import StreamingAnswerView from './StreamingAnswerView'
 import { OperatorBusyView } from './OperatorBusyView'
 import { TranscriptionView } from './TranscriptionView'
+import type { ScreenShareRoomCreation } from '../lib/phone/screenShare'
 
 /**
  * Provides the Island logic
  *
  * @param showAlways Sets the Island ever visible
  */
-export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent }) => {
+export const Island: FC<IslandProps> = ({ showAlways, uaType, screenShareRoomCreation }) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
@@ -159,7 +160,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
                       recorder: RecorderView ? <RecorderView /> : null,
                       physicalPhoneRecorder: PhysicalRecorderView ? <PhysicalRecorderView /> : null,
                       settings: SettingsView ? <SettingsView /> : null,
-                      video: VideoView ? <VideoView /> : null,
+                      video: VideoView ? <VideoView screenShareRoomCreation={screenShareRoomCreation} /> : null,
                       switchDevice: SwitchDeviceView ? <SwitchDeviceView /> : null,
                       waitingConference: WaitingConferenceView ? <WaitingConferenceView /> : null,
                       streamingAnswer: StreamingAnswerView ? <StreamingAnswerView /> : null,
@@ -194,4 +195,5 @@ interface IslandProps {
   showAlways?: boolean
   uaType?: string
   urlParamWithEvent?: boolean
+  screenShareRoomCreation?: ScreenShareRoomCreation
 }

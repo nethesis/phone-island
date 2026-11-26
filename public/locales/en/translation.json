@@ -90,6 +90,8 @@
     "webrtc_down": "Connection error",
     "socket_down": "Connection error",
     "busy_camera": "Webcam is busy",
+    "screen_share_unavailable": "Cannot share your screen",
+    "screen_share_unavailable_detail": "Screen sharing is unavailable for this call.",
     "call_transfered": "Transfer successful",
     "The browser doesn't have permission to access camera or microphone.": "The browser doesn't have permission to access camera or microphone.",
     "You must accept audio and video permissions.": "You must accept audio and video.",
