@@ -986,7 +986,7 @@ export const VideoView: FC<VideoViewProps> = () => {
 
   const abortScreenShare = (attempt: ScreenShareAttempt, showError = false) => {
     if (screenShareAttempt !== attempt) return
-    stopScreenShare(attempt.invited === true || attempt.role === 'listener')
+    stopScreenShare(attempt.invited === true)
     if (showError && !screenShareAttempt) dispatch.alerts.setAlert('screen_share_unavailable')
   }
 
@@ -994,6 +994,11 @@ export const VideoView: FC<VideoViewProps> = () => {
     const stopOnHold = () => stopScreenShare()
     window.addEventListener('phone-island-call-held', stopOnHold)
     const unsubscribe = store.subscribe(() => {
+      if (screenShareAttempt !== attempt) return
+      if (attempt.role === 'listener' && !isScreenShareCallCurrent(attempt.call)) {
+        stopScreenShare()
+        return
+      }
       if (
         !isCurrentScreenShare(attempt) ||
         store.getState().webrtc.janusInstance !== janusInstance

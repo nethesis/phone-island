@@ -181,6 +181,7 @@ function harness() {
   const start = () => events.get('phone-island-screen-share-start')()
   const stop = () => events.get('phone-island-screen-share-stop')()
   const hold = () => events.get('phone-island-call-hold')()
+  const emitHeld = () => eventTarget.dispatchEvent(new Event('phone-island-call-held'))
   const advance = (ms) => {
     now += ms
     for (const task of tasks.filter(({ at, cancel }) => at <= now && !cancel)) {
@@ -190,7 +191,7 @@ function harness() {
   }
   const receive = (message) => socketHandlers.get('message')(message)
   const invite = (roomId, callUser = 'alice') => receive({ message: 'screenSharingStart', roomId, callUser })
-  return { state, store, update, render, start, stop, hold, advance, notices, messages, socket, receive, invite,
+  return { state, store, update, render, start, stop, hold, emitHeld, advance, notices, messages, socket, receive, invite,
     requests, handles, pickers, useSideViewLogic, sent: () => messages.map(({ message }) => message.request) }
 }
 
@@ -505,6 +506,7 @@ async function createRoom(h, room) {
   }
   for (const cancel of [
     (h) => h.update('currentCall', { accepted: false }),
+    (h) => h.emitHeld(),
     (h) => h.receive({ message: 'screenSharingStop', roomId: 123 }),
   ]) {
     const h = harness()
@@ -567,6 +569,7 @@ async function createRoom(h, room) {
     }
     assert.equal(h.state.screenShare.active, false)
     assert.ok(h.handles.every((handle) => handle.detached))
+    assert.deepEqual(h.socket, [], 'a local subscriber failure must not stop the publisher')
     h.invite(124)
     h.render()
     assert.equal(h.state.screenShare.active, true)

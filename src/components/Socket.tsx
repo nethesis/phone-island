@@ -1499,23 +1499,31 @@ export const Socket: FC<SocketProps> = ({
             dispatch.island.setIslandView('video')
 
             // The call can end before the video view mounts and takes over.
+            const finishPendingJoin = () => {
+              unsubscribe()
+              window.removeEventListener('phone-island-call-held', cancelPendingJoin)
+            }
+            const cancelPendingJoin = () => {
+              finishPendingJoin()
+              dispatch.screenShare.update({
+                isJoiningScreenShare: false,
+                isLeavingScreenShare: false,
+                listenerCall: null,
+                room: '',
+              })
+              if (view !== 'video' && store.getState().island.view === 'video') {
+                dispatch.island.setIslandView(view ?? null)
+              }
+            }
             const unsubscribe = store.subscribe(() => {
               const { active, isJoiningScreenShare, isLeavingScreenShare } = store.getState().screenShare
               if (active || !isJoiningScreenShare) {
-                unsubscribe()
+                finishPendingJoin()
               } else if (isLeavingScreenShare || !isScreenShareCallCurrent(currentCall)) {
-                unsubscribe()
-                dispatch.screenShare.update({
-                  isJoiningScreenShare: false,
-                  isLeavingScreenShare: false,
-                  listenerCall: null,
-                  room: '',
-                })
-                if (view !== 'video' && store.getState().island.view === 'video') {
-                  dispatch.island.setIslandView(view ?? null)
-                }
+                cancelPendingJoin()
               }
             })
+            window.addEventListener('phone-island-call-held', cancelPendingJoin)
             dispatch.screenShare.update({
               isJoiningScreenShare: true,
               room: roomId,
