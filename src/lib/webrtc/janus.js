@@ -1742,7 +1742,9 @@ var Janus = (function (factory) {
         if (svc) request.jsep.svc = svc
       }
       Janus.debug('Sending message to plugin (handle=' + handleId + '):')
-      Janus.debug(request)
+      Janus.debug(
+        message?.admin_key ? { ...request, body: { ...message, admin_key: '[redacted]' } } : request,
+      )
       if (websockets) {
         request['session_id'] = sessionId
         request['handle_id'] = handleId
@@ -2530,7 +2532,8 @@ var Janus = (function (factory) {
         throw 'Invalid handle'
       }
       let config = pluginHandle.webrtcStuff
-      if (!config.pc) {
+      const pc = config.pc
+      if (!pc) {
         Janus.warn('Invalid PeerConnection')
         throw 'Invalid PeerConnection'
       }
@@ -2720,6 +2723,12 @@ var Janus = (function (factory) {
             } else {
               // Use getDisplayMedia
               stream = await navigator.mediaDevices.getDisplayMedia(constraints)
+            }
+            // The user may have ended the share or the call while the picker was open.
+            if (pluginHandles.get(handleId) !== pluginHandle || pluginHandle.detached ||
+                config.pc !== pc || pc.signalingState === 'closed') {
+              Janus.stopAllTracks(stream)
+              throw new Error('Capture ended with the original PeerConnection')
             }
             nt = track.type === 'audio' ? stream.getAudioTracks()[0] : stream.getVideoTracks()[0]
           }
