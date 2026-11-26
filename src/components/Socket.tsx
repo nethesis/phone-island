@@ -48,6 +48,7 @@ import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
 import { getCurrentCallQueueContext } from '../lib/phone/queue'
 import { releaseStreamingSource } from '../lib/phone/call'
+import { isScreenShareCallCurrent } from '../lib/phone/screenShare'
 
 interface SocketProps {
   children: ReactNode
@@ -1477,16 +1478,26 @@ export const Socket: FC<SocketProps> = ({
             })
             break
           case 'screenSharingStart': {
-            const { active, isStartingScreenShare, isJoiningScreenShare } = store.getState().screenShare
+            const { screenShare, currentCall } = store.getState()
+            const { active, isStartingScreenShare, isJoiningScreenShare } = screenShare
             if (active || isStartingScreenShare || isJoiningScreenShare) break
+            const { roomId, callUser } = data as ScreenSharingMessage
+            if (
+              !roomId ||
+              !callUser ||
+              callUser !== currentCall.username ||
+              !isScreenShareCallCurrent(currentCall)
+            ) {
+              break
+            }
             dispatch.island.toggleSideViewVisible(false)
             dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
             dispatch.screenShare.update({
               isJoiningScreenShare: true,
-              room: (data as ScreenSharingMessage).roomId,
-              publisherUsername: (data as ScreenSharingMessage).callUser,
+              room: roomId,
+              listenerCall: currentCall,
             })
             break
           }

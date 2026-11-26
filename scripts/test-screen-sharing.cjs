@@ -13,6 +13,7 @@ const evaluate = (filename) => ts.transpileModule(fs.readFileSync(path.join(src,
 
 const modules = {
   useSideViewLogic: evaluate('components/SideView/hooks/useSideViewLogic.ts'),
+  Socket: evaluate('components/Socket.tsx'),
   VideoView: evaluate('components/VideoView/index.tsx'),
   CallEvents: evaluate('events/CallEvents.tsx'),
   call: evaluate('lib/phone/call.ts'),
@@ -48,6 +49,12 @@ function harness() {
   const tasks = []
   const messages = []
   const socket = []
+  const socketHandlers = new Map()
+  const websocket = {
+    on(event, handler) { socketHandlers.set(event, handler) },
+    emit(_, message) { socket.push(message) },
+    io: { on() {} },
+  }
   const requests = []
   const pickers = []
   const handles = []
@@ -67,7 +74,7 @@ function harness() {
     player: {}, webrtc: {},
     screenShare: { active: false, room: '', role: '', localVideos: 0 },
     paramUrl: { openParamUrlType: 'never' },
-    websocket: { socket: { emit: (_, value) => socket.push(value) } },
+    websocket: { socket: null },
     fetchDefaults: { apiMode: 'new', baseURL: 'https://example.invalid/api', headers: { Authorization: 'Bearer mock', 'Content-Type': 'application/json' } },
   }
   const update = (dest, patch) => {
@@ -83,9 +90,11 @@ function harness() {
       screenShare: { update: (patch) => update('screenShare', patch) },
       player: { updatePlayer: (patch) => update('player', patch), pauseRemoteAudio() {} },
       currentCall: { updateCurrentCall: (patch) => update('currentCall', patch) },
+      websocket: { update: (patch) => update('websocket', patch) },
       island: {
         setIslandView: (view) => update('island', { view }),
         toggleSideViewVisible: (visible) => update('island', { visible }),
+        toggleTranscriptionViewVisible() {},
       },
     },
   }
@@ -99,8 +108,11 @@ function harness() {
       const handle = {
         id, callbacks, detached: false,
         detach() { this.detached = true },
+        getPlugin() { return callbacks.plugin },
+        getId() { return id },
         webrtcStuff: { pc: { iceConnectionState: 'connected' } },
         createOffer(offer) { this.offer = offer; this.offerCount = (this.offerCount ?? 0) + 1 },
+        createAnswer(answer) { this.answer = answer },
         handleRemoteJsep(answer) { this.answer = answer },
         send(config) {
           messages.push({ id, ...config })
@@ -118,6 +130,7 @@ function harness() {
   }
   const api = {
     store: { store }, react: hooks,
+    'socket.io-client': { io: () => websocket },
     'react-redux': { useDispatch: () => store.dispatch, useSelector: (select) => select(state) },
     'janus.js': JanusLib,
     default_device: { isWebRTC: () => true },
@@ -157,6 +170,8 @@ function harness() {
   load('CallEvents').CallEvents({})
   load('screenShare')
   load('screenSharing')
+  load('Socket').Socket({ hostName: 'example.invalid', username: 'bob', reload: false })
+  effects.splice(0).forEach((effect) => effect())
   const { VideoView } = load('VideoView')
   const { useSideViewLogic } = load('useSideViewLogic')
   const render = () => {
@@ -173,7 +188,9 @@ function harness() {
       task.cb()
     }
   }
-  return { state, store, update, render, start, stop, hold, advance, notices, messages, socket,
+  const receive = (message) => socketHandlers.get('message')(message)
+  const invite = (roomId, callUser = 'alice') => receive({ message: 'screenSharingStart', roomId, callUser })
+  return { state, store, update, render, start, stop, hold, advance, notices, messages, socket, receive, invite,
     requests, handles, pickers, useSideViewLogic, sent: () => messages.map(({ message }) => message.request) }
 }
 
@@ -470,23 +487,76 @@ async function createRoom(h, room) {
     assert.equal(h.state.screenShare.plugin, h.handles[1])
     assert.deepEqual(h.socket, [])
   }
-  for (const action of ['stop', 'hold']) {
+  {
     const h = harness()
-    h.update('screenShare', { isJoiningScreenShare: true, room: 123, publisherUsername: 'alice' })
+    h.update('island', { view: 'call' })
+    h.invite(123, 'charlie')
+    h.update('currentCall', { accepted: false })
+    h.invite(123)
+    assert.equal(h.state.island.view, 'call')
+    h.update('currentCall', { accepted: true })
+    h.invite(123)
+    assert.equal(h.state.island.view, 'video')
+    h.update('currentCall', { conversationId: 'new-call-with-same-peer' })
+    h.render()
+    assert.equal(h.handles.length, 0)
+    assert.equal(h.state.screenShare.room, '')
+    assert.equal(h.state.island.view, 'call')
+  }
+  for (const endCallShare of [
+    (h) => h.stop(),
+    (h) => h.hold(),
+    (h) => h.update('currentCall', { transferring: true }),
+    (h) => h.update('currentCall', { accepted: false }),
+    (h) => h.update('currentCall', { username: 'charlie', conversationId: 'new-call' }),
+  ]) {
+    const h = harness()
+    h.invite(123)
     h.render()
     assert.equal(h.state.screenShare.role, 'listener')
     assert.equal(h.requests.length, 0)
     assert.deepEqual(h.sent(), ['join'])
     assert.equal(h.messages[0].message.room, 123)
-    h.update('currentCall', { username: 'charlie', conversationId: 'new-call' })
-    h.update('island', { view: 'transfer' })
-    h[action]()
+    h.handles[0].callbacks.onmessage({ videoroom: 'joined', publishers: [{ id: 456, display: 'alice' }] })
+    const track = new Track()
+    h.handles[1].callbacks.onremotetrack(track, '0', true)
+    h.advance(30000)
+    assert.equal(h.state.screenShare.active, true)
+    endCallShare(h)
+    assert.equal(track.readyState, 'ended')
+    assert.equal(h.state.screenShare.active, false)
     assert.equal(h.handles[0].detached, true)
-    assert.deepEqual(h.sent(), ['join'])
+    assert.equal(h.handles[1].detached, true)
+    assert.deepEqual(h.sent(), ['join', 'join'])
     assert.equal(h.socket.length, 1)
     assert.equal(h.socket[0].message, 'screenSharingStop')
     assert.equal(h.socket[0].destUser, 'alice')
     assert.equal(h.socket[0].roomId, 123)
+  }
+  for (const failure of ['attach', 'answer', 'timeout']) {
+    const h = harness()
+    h.invite(123)
+    h.render()
+    const janus = h.state.webrtc.janusInstance
+    const attach = janus.attach
+    if (failure === 'attach') {
+      janus.attach = (callbacks) => callbacks.error(new Error('Subscriber attach failed'))
+    }
+    h.handles[0].callbacks.onmessage({ videoroom: 'joined', publishers: [{ id: 456, display: 'alice' }] })
+    janus.attach = attach
+    if (failure === 'answer') {
+      const subscriber = h.handles[1]
+      subscriber.callbacks.onmessage({ videoroom: 'attached' }, { type: 'offer', sdp: 'invalid' })
+      subscriber.answer.error(new Error('Invalid SDP'))
+    } else if (failure === 'timeout') {
+      h.advance(30000)
+    }
+    assert.equal(h.state.screenShare.active, false)
+    assert.ok(h.handles.every((handle) => handle.detached))
+    h.invite(124)
+    h.render()
+    assert.equal(h.state.screenShare.active, true)
+    assert.equal(h.messages.at(-1).message.room, 124)
   }
   {
     const h = harness()
@@ -534,9 +604,9 @@ async function createRoom(h, room) {
   }
   {
     const h = harness()
-    h.update('screenShare', { isJoiningScreenShare: true, room: 123, publisherUsername: 'alice' })
+    h.invite(123)
     h.render()
-    h.update('screenShare', { isLeavingScreenShare: true })
+    h.receive({ message: 'screenSharingStop', roomId: 123 })
     h.stop()
     h.start()
     h.render()

@@ -3,12 +3,13 @@
 
 import { createModel } from '@rematch/core'
 import type { RootModel } from '.'
+import type { ScreenShareCall } from '../lib/phone/screenShare'
 
 export interface ScreenShareTypes {
   active?: boolean
   plugin?: any
   role?: 'publisher' | 'listener' | ''
-  publisherUsername?: string
+  listenerCall?: ScreenShareCall | null
   room?: string | number
   source?: string
   remoteFeed?: any
@@ -28,7 +29,7 @@ const defaultState = {
   active: false,
   plugin: null as any,
   role: '',
-  publisherUsername: '',
+  listenerCall: null as ScreenShareCall | null,
   room: '' as string | number,
   source: '',
   remoteFeed: null as any,
