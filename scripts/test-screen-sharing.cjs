@@ -503,6 +503,20 @@ async function createRoom(h, room) {
     assert.equal(h.state.screenShare.room, '')
     assert.equal(h.state.island.view, 'call')
   }
+  for (const cancel of [
+    (h) => h.update('currentCall', { accepted: false }),
+    (h) => h.receive({ message: 'screenSharingStop', roomId: 123 }),
+  ]) {
+    const h = harness()
+    h.invite(123)
+    cancel(h) // VideoView never mounted for this invitation.
+    assert.equal(h.state.screenShare.isJoiningScreenShare, false)
+    h.update('currentCall', { accepted: true, conversationId: 'next-call' })
+    h.invite(124)
+    h.render()
+    assert.deepEqual(h.sent(), ['join'])
+    assert.equal(h.messages[0].message.room, 124)
+  }
   for (const endCallShare of [
     (h) => h.stop(),
     (h) => h.hold(),

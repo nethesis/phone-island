@@ -1478,7 +1478,11 @@ export const Socket: FC<SocketProps> = ({
             })
             break
           case 'screenSharingStart': {
-            const { screenShare, currentCall } = store.getState()
+            const {
+              screenShare,
+              currentCall,
+              island: { view },
+            } = store.getState()
             const { active, isStartingScreenShare, isJoiningScreenShare } = screenShare
             if (active || isStartingScreenShare || isJoiningScreenShare) break
             const { roomId, callUser } = data as ScreenSharingMessage
@@ -1494,6 +1498,24 @@ export const Socket: FC<SocketProps> = ({
             dispatch.island.toggleTranscriptionViewVisible(false)
             dispatch.island.setIslandView('video')
 
+            // The call can end before the video view mounts and takes over.
+            const unsubscribe = store.subscribe(() => {
+              const { active, isJoiningScreenShare, isLeavingScreenShare } = store.getState().screenShare
+              if (active || !isJoiningScreenShare) {
+                unsubscribe()
+              } else if (isLeavingScreenShare || !isScreenShareCallCurrent(currentCall)) {
+                unsubscribe()
+                dispatch.screenShare.update({
+                  isJoiningScreenShare: false,
+                  isLeavingScreenShare: false,
+                  listenerCall: null,
+                  room: '',
+                })
+                if (view !== 'video' && store.getState().island.view === 'video') {
+                  dispatch.island.setIslandView(view ?? null)
+                }
+              }
+            })
             dispatch.screenShare.update({
               isJoiningScreenShare: true,
               room: roomId,
