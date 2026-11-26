@@ -3,19 +3,30 @@
 
 import { store } from '../../store'
 
-export function destroyScreenShareRoom(plugin: any, room: string) {
+// Secret for a screen sharing room: only its publisher can destroy or edit it.
+export function createScreenShareRoomSecret() {
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+}
+
+export function destroyScreenShareRoom(plugin: any, room: string, secret?: string) {
   const detach = () => plugin.detach()
-  plugin.send({ message: { request: 'destroy', room }, success: detach, error: detach })
+  plugin.send({
+    message: { request: 'destroy', room, ...(secret && { secret }) },
+    success: detach,
+    error: detach,
+  })
 }
 
 export function releaseScreenShareHandles(destroyRoom: boolean) {
-  const { plugin, remoteFeed, room } = store.getState().screenShare
-  store.dispatch.screenShare.update({ plugin: null, remoteFeed: null, room: '' })
+  const { plugin, remoteFeed, room, roomSecret } = store.getState().screenShare
+  store.dispatch.screenShare.update({ plugin: null, remoteFeed: null, room: '', roomSecret: '' })
   remoteFeed?.detach()
   if (!plugin) return
   if (!destroyRoom) {
     plugin.detach()
     return
   }
-  if (room) destroyScreenShareRoom(plugin, room)
+  if (room) destroyScreenShareRoom(plugin, room, roomSecret)
 }
