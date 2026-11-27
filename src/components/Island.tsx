@@ -32,7 +32,12 @@ import { TranscriptionView } from './TranscriptionView'
  *
  * @param showAlways Sets the Island ever visible
  */
-export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent }) => {
+export const Island: FC<IslandProps> = ({
+  showAlways,
+  uaType,
+  urlParamWithEvent,
+  hideConnectionAlerts = false,
+}) => {
   // Get the currentCall info
   const { incoming, accepted, outgoing } = useSelector((state: RootState) => state.currentCall)
 
@@ -44,6 +49,10 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
 
   // Get activeAlertsCount from island store
   const { activeAlertsCount } = useSelector((state: RootState) => state.alerts.status)
+  const { webrtc_down, socket_down } = useSelector((state: RootState) => state.alerts.data)
+  const visibleAlertsCount = hideConnectionAlerts
+    ? activeAlertsCount - (webrtc_down?.active ? 1 : 0) - (socket_down?.active ? 1 : 0)
+    : activeAlertsCount
 
   // Get audioPlayerLoop value from player store
   const { audioPlayerLoop } = useSelector((state: RootState) => state.player)
@@ -126,7 +135,7 @@ export const Island: FC<IslandProps> = ({ showAlways, uaType, urlParamWithEvent 
         outgoing ||
         accepted ||
         showAlways ||
-        activeAlertsCount > 0 ||
+        visibleAlertsCount > 0 ||
         view === 'player' ||
         view === 'recorder' ||
         view === 'physicalPhoneRecorder' ||
@@ -194,4 +203,5 @@ interface IslandProps {
   showAlways?: boolean
   uaType?: string
   urlParamWithEvent?: boolean
+  hideConnectionAlerts?: boolean
 }
