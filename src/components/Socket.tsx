@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, isNumberOnlyName } from '../lib/phone/conversation'
-import { getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
+import { getCounterpartDeviceExten, getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
 import { searchPhonebook } from '../services/phonebook'
 import { getCurrentUserInfo } from '../services/user'
 import { loadVideoSources } from '../utils/streaming/loadVideoSources'
@@ -197,8 +197,28 @@ export const Socket: FC<SocketProps> = ({
       // Check if the call is from a streaming source: the device of the counterpart (a door
       // phone can be a device of a user with other devices), or its number
       const { videoSources } = store.getState().streaming
-      const source = findVideoSourceForConversation(videoSources, conv, store.getState().users)
-      if (source?.extension) {
+      const users = store.getState().users
+      const device = getCounterpartDeviceExten(conv, users)
+      const source = findVideoSourceForConversation(videoSources, conv, users)
+      const { streamingSourceNumber } = store.getState().currentCall
+      const { isFromStreaming } = store.getState().island
+
+      // The device is known now (e.g. an outgoing call answered by one of the devices of the
+      // user) and it is not the device of the source chosen by the number: release that source
+      if (
+        isFromStreaming &&
+        streamingSourceNumber &&
+        device &&
+        source?.extension !== streamingSourceNumber
+      ) {
+        releaseStreamingSource()
+        dispatch.currentCall.updateCurrentCall({ streamingSourceNumber: '' })
+      }
+
+      if (
+        source?.extension &&
+        store.getState().currentCall.streamingSourceNumber !== source.extension
+      ) {
         // Set isFromStreaming flag to true
         dispatch.island.setIsFromStreaming(true)
 
@@ -627,8 +647,11 @@ export const Socket: FC<SocketProps> = ({
               // notified for a moment. They must not bring the answered call back to the
               // incoming state (that would replace the view of the call, e.g. the streaming
               // answered view)
-              const { accepted: acceptedHere, answering: answeringHere, number: currentNumber } =
-                store.getState().currentCall
+              const {
+                accepted: acceptedHere,
+                answering: answeringHere,
+                number: currentNumber,
+              } = store.getState().currentCall
               const isCallAnsweredHere =
                 (acceptedHere || answeringHere) && currentNumber === `${conv.counterpartNum}`
               if (
@@ -1111,7 +1134,10 @@ export const Socket: FC<SocketProps> = ({
 
         if (uniqueId && linkedId && conversationWasConnected) {
           if (call_summary_enabled) {
-            eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
+            eventDispatch('phone-island-summary-call-check', {
+              linkedid: linkedId,
+              uniqueid: uniqueId,
+            })
           }
           if (summaryExtension) {
             summaryConversationCache.current.delete(summaryExtension)
