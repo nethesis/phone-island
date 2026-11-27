@@ -64,7 +64,7 @@ export function register(params: RegisterParams) {
     timestamp: new Date().toISOString(),
   })
 
-  const flush = (reason: string) => {
+  const flush = (reason: 'ready' | 'timeout') => {
     if (!pendingRegister) {
       return
     }
@@ -231,6 +231,8 @@ export function hangup() {
 }
 
 export function unregister() {
+  // A register still waiting for the user info must not fire on a handle being torn down
+  cancelPendingRegister()
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.send({
