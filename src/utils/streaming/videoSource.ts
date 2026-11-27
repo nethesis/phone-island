@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import type { VideoSourceGateType, VideoSourceKind, VideoSourceType } from '../../models/streaming'
+import type { ConversationTypes, ExtensionsTypes, UsersEndpointsTypes } from '../../types'
+import { getCounterpartDeviceExten } from '../../lib/phone/counterpartDevice'
 
 /**
  * Kind of a video source: older servers send no type and only have image sources
@@ -34,24 +36,38 @@ export const getVideoSourceGates = (source?: VideoSourceType | null): VideoSourc
 export const isDtmfGate = (gate?: VideoSourceGateType | null): boolean => gate?.type === 'dtmf'
 
 /**
- * True if the number is the extension of the source: the extension of its device or the main
- * extension of its user (a door phone 91242 of the user 242 calls as 242)
- */
-export const sourceHasNumber = (
-  source: VideoSourceType | undefined | null,
-  number: string | undefined | null,
-): boolean => {
-  if (!source || !number) return false
-  return source.extension === number || (!!source.mainExtension && source.mainExtension === number)
-}
-
-/**
- * Video source associated with an extension (the counterpart number of the call)
+ * Video source associated with a number: the extension of its device first, otherwise the main
+ * extension of the user of the device (a door phone 91242 of the user 242 calls as 242), only
+ * when a single source has it (two door phones of the same user cannot be told apart)
  */
 export const findVideoSourceByNumber = (
   videoSources: Record<string, VideoSourceType> | undefined | null,
   number: string | undefined | null,
 ): VideoSourceType | undefined => {
   if (!videoSources || !number) return undefined
-  return Object.values(videoSources).find((source) => sourceHasNumber(source, number))
+  const sources = Object.values(videoSources)
+  const exact = sources.find((source) => source?.extension === number)
+  if (exact) return exact
+  const byMain = sources.filter(
+    (source) => !!source?.mainExtension && source.mainExtension === number,
+  )
+  return byMain.length === 1 ? byMain[0] : undefined
+}
+
+/**
+ * Video source of a call: the device of the counterpart, when the channels tell it, must be the
+ * device of the source (a call from the desk phone of the user of a door phone is a normal
+ * call); otherwise (an outgoing call still ringing) the counterpart number
+ */
+export const findVideoSourceForConversation = (
+  videoSources: Record<string, VideoSourceType> | undefined | null,
+  conv: ConversationTypes | undefined | null,
+  users: { extensions: ExtensionsTypes | null; endpoints: UsersEndpointsTypes | null },
+): VideoSourceType | undefined => {
+  if (!videoSources || !conv?.counterpartNum) return undefined
+  const device = getCounterpartDeviceExten(conv, users)
+  if (device) {
+    return Object.values(videoSources).find((source) => source?.extension === device)
+  }
+  return findVideoSourceByNumber(videoSources, `${conv.counterpartNum}`)
 }
