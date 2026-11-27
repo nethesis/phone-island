@@ -8,7 +8,7 @@ import { io } from 'socket.io-client'
 import { getDisplayName, isNumberOnlyName } from '../lib/phone/conversation'
 import { getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
 import { searchPhonebook } from '../services/phonebook'
-import { getCurrentUserInfo } from '../services/user'
+import { getCurrentUserInfo, getVideoSources } from '../services/user'
 import busyRingtone from '../static/busy_ringtone'
 import {
   dispatchMainPresence,
@@ -1415,6 +1415,15 @@ export const Socket: FC<SocketProps> = ({
 
       // `serverReload` is the socket event when server is reloaded
       socket.current.on('serverReloaded', () => {
+        // The video sources may have changed (e.g. a door phone added in the wizard):
+        // reload them, or the calls of a new source are treated as normal calls
+        getVideoSources()
+          .then((videoSources: any) => {
+            if (videoSources) {
+              store.dispatch.streaming.updateVideoSources(videoSources)
+            }
+          })
+          .catch((error) => console.warn('Failed to reload the video sources:', error))
         // Dispatch serverReload event
         dispatchServerReload()
       })
