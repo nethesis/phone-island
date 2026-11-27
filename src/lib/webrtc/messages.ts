@@ -24,17 +24,75 @@ export function toSipDisplayName(name?: string): string {
     .replace(/^\*+\s*/, '')
 }
 
-export function register({
-  sipExten,
-  sipSecret,
-  sipHost,
-  sipPort,
-}: {
+interface RegisterParams {
   sipExten: string
   sipSecret: string
   sipHost: string
   sipPort: string
-}) {
+}
+
+// Janus keeps the display name given at REGISTER and puts it in the From header of
+// every outgoing call. The Janus plugin is often attached before /user/me answers,
+// so wait for the user info, but never longer than this: calls must keep working
+// even if /user/me fails.
+const CURRENT_USER_WAIT_MS = 5000
+
+let pendingRegister: { params: RegisterParams; cancel: () => void } | null = null
+
+function cancelPendingRegister() {
+  if (pendingRegister) {
+    pendingRegister.cancel()
+    pendingRegister = null
+  }
+}
+
+export function register(params: RegisterParams) {
+  if (store.getState().currentUser.currentUserReady) {
+    cancelPendingRegister()
+    sendRegister(params)
+    return
+  }
+
+  // Already waiting: just keep the latest parameters
+  if (pendingRegister) {
+    pendingRegister.params = params
+    return
+  }
+
+  console.log('[REGISTER] Waiting for user info before registering', {
+    sipExten: params.sipExten,
+    timestamp: new Date().toISOString(),
+  })
+
+  const flush = (reason: 'ready' | 'timeout') => {
+    if (!pendingRegister) {
+      return
+    }
+    const { params: latestParams } = pendingRegister
+    cancelPendingRegister()
+    if (reason === 'timeout') {
+      console.warn('[REGISTER] User info not available, registering without display name')
+    }
+    sendRegister(latestParams)
+  }
+
+  const unsubscribe = store.subscribe(() => {
+    if (store.getState().currentUser.currentUserReady) {
+      flush('ready')
+    }
+  })
+  const timeout = setTimeout(() => flush('timeout'), CURRENT_USER_WAIT_MS)
+
+  pendingRegister = {
+    params,
+    cancel: () => {
+      unsubscribe()
+      clearTimeout(timeout)
+    },
+  }
+}
+
+function sendRegister({ sipExten, sipSecret, sipHost, sipPort }: RegisterParams) {
   const { sipcall, registered }: { sipcall: any; registered: boolean } = store.getState().webrtc
   const { name } = store.getState().currentUser
 
@@ -173,6 +231,8 @@ export function hangup() {
 }
 
 export function unregister() {
+  // A register still waiting for the user info must not fire on a handle being torn down
+  cancelPendingRegister()
   const { sipcall }: { sipcall: any } = store.getState().webrtc
   if (sipcall) {
     sipcall.send({
