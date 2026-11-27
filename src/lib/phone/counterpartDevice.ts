@@ -60,11 +60,14 @@ export function getMainExtensionNumber(number: string, users: UsersDataTypes): s
   return users.endpoints?.[username]?.endpoints?.mainextension?.[0]?.id || number
 }
 
-export function getCounterpartDeviceType(
-  conv: ConversationTypes,
-  users: UsersDataTypes,
-): ExtensionTypeTypes | '' {
-  const { extensions, endpoints } = users
+/**
+ * Extension of the device of the counterpart of an internal call (e.g. the door phone 91242 of
+ * the user 242 calling as 242), from the channels of the conversation. Empty when it is not
+ * known yet (an outgoing call still ringing on all the devices of the user) or the counterpart
+ * is not a user.
+ */
+export function getCounterpartDeviceExten(conv: ConversationTypes, users: UsersDataTypes): string {
+  const { extensions } = users
   if (!conv || !extensions) return ''
 
   const counterpartNum = `${conv.counterpartNum || ''}`
@@ -75,14 +78,19 @@ export function getCounterpartDeviceType(
     .map(getExtensionFromChannel)
     .filter((exten) => exten && exten !== conv.owner)
 
-  let deviceExten =
+  const deviceExten =
     channelExtensions.find((exten) => extensions[exten]?.username === username) || ''
 
-  if (!deviceExten) {
-    deviceExten = findDeviceByLinkedId(conv, username, extensions)
-  }
+  return deviceExten || findDeviceByLinkedId(conv, username, extensions)
+}
 
+export function getCounterpartDeviceType(
+  conv: ConversationTypes,
+  users: UsersDataTypes,
+): ExtensionTypeTypes | '' {
+  const deviceExten = getCounterpartDeviceExten(conv, users)
   if (!deviceExten) return ''
 
-  return getDeviceType(deviceExten, username, endpoints)
+  const username = users.extensions?.[deviceExten]?.username || ''
+  return getDeviceType(deviceExten, username, users.endpoints)
 }

@@ -6,9 +6,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Dispatch, RootState } from '../store'
 import { io } from 'socket.io-client'
 import { getDisplayName, isNumberOnlyName } from '../lib/phone/conversation'
-import { getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
+import { getCounterpartDeviceExten, getCounterpartDeviceType } from '../lib/phone/counterpartDevice'
 import { searchPhonebook } from '../services/phonebook'
 import { getCurrentUserInfo } from '../services/user'
+import { loadVideoSources } from '../utils/streaming/loadVideoSources'
 import busyRingtone from '../static/busy_ringtone'
 import {
   dispatchMainPresence,
@@ -42,8 +43,7 @@ import { isPhysical } from '../lib/user/default_device'
 import { ScreenSharingMessage, VideoCallMessage } from './VideoView'
 import { checkMediaPermissions } from '../lib/devices/devices'
 import { isFromStreaming } from '../utils/streaming/isFromStreaming'
-import { getStreamingSourceId } from '../utils/streaming/getStreamingSourceId'
-import { findVideoSourceByNumber, isRtspVideoSource } from '../utils/streaming/videoSource'
+import { findVideoSourceForConversation, isRtspVideoSource } from '../utils/streaming/videoSource'
 import { subscribe } from '../services/user'
 import { isFromTrunk } from '../lib/user/extensions'
 import { getCurrentCallQueueContext } from '../lib/phone/queue'
@@ -194,26 +194,45 @@ export const Socket: FC<SocketProps> = ({
      * Helper function to handle streaming source detection and subscription
      */
     const handleStreamingSource = (conv: ConversationTypes) => {
-      // Check if the call is from a streaming source
-      if (conv.counterpartNum && isFromStreaming(conv.counterpartNum)) {
+      // Check if the call is from a streaming source: the device of the counterpart (a door
+      // phone can be a device of a user with other devices), or its number
+      const { videoSources } = store.getState().streaming
+      const users = store.getState().users
+      const device = getCounterpartDeviceExten(conv, users)
+      const source = findVideoSourceForConversation(videoSources, conv, users)
+      const { streamingSourceNumber } = store.getState().currentCall
+      const { isFromStreaming } = store.getState().island
+
+      // The device is known now (e.g. an outgoing call answered by one of the devices of the
+      // user) and it is not the device of the source chosen by the number: release that source
+      if (
+        isFromStreaming &&
+        streamingSourceNumber &&
+        device &&
+        source?.extension !== streamingSourceNumber
+      ) {
+        releaseStreamingSource()
+        dispatch.currentCall.updateCurrentCall({ streamingSourceNumber: '' })
+      }
+
+      if (
+        source?.extension &&
+        store.getState().currentCall.streamingSourceNumber !== source.extension
+      ) {
         // Set isFromStreaming flag to true
         dispatch.island.setIsFromStreaming(true)
 
-        // Store the streaming source number in the currentCall state for future reference
+        // Store the extension of the source device in the currentCall state for future
+        // reference: it identifies the source also when its user has other door phones
         dispatch.currentCall.updateCurrentCall({
-          streamingSourceNumber: conv.counterpartNum,
+          streamingSourceNumber: source.extension,
         })
 
         // Subscribe to the image updates (pushed through the websocket) of image sources only:
         // rtsp sources are watched as live video by the views showing them
-        const sourceId = getStreamingSourceId(conv.counterpartNum)
-        const { videoSources } = store.getState().streaming
-        if (
-          sourceId &&
-          !isRtspVideoSource(findVideoSourceByNumber(videoSources, conv.counterpartNum))
-        ) {
+        if (source.id && !isRtspVideoSource(source)) {
           // Subscribe to streaming updates
-          subscribe({ id: sourceId }).catch((error) =>
+          subscribe({ id: source.id }).catch((error) =>
             console.error('Error subscribing to streaming source:', error),
           )
         }
@@ -628,8 +647,11 @@ export const Socket: FC<SocketProps> = ({
               // notified for a moment. They must not bring the answered call back to the
               // incoming state (that would replace the view of the call, e.g. the streaming
               // answered view)
-              const { accepted: acceptedHere, answering: answeringHere, number: currentNumber } =
-                store.getState().currentCall
+              const {
+                accepted: acceptedHere,
+                answering: answeringHere,
+                number: currentNumber,
+              } = store.getState().currentCall
               const isCallAnsweredHere =
                 (acceptedHere || answeringHere) && currentNumber === `${conv.counterpartNum}`
               if (
@@ -1112,7 +1134,10 @@ export const Socket: FC<SocketProps> = ({
 
         if (uniqueId && linkedId && conversationWasConnected) {
           if (call_summary_enabled) {
-            eventDispatch('phone-island-summary-call-check', { linkedid: linkedId, uniqueid: uniqueId })
+            eventDispatch('phone-island-summary-call-check', {
+              linkedid: linkedId,
+              uniqueid: uniqueId,
+            })
           }
           if (summaryExtension) {
             summaryConversationCache.current.delete(summaryExtension)
@@ -1415,6 +1440,11 @@ export const Socket: FC<SocketProps> = ({
 
       // `serverReload` is the socket event when server is reloaded
       socket.current.on('serverReloaded', () => {
+        // The video sources may have changed (e.g. a door phone added in the wizard):
+        // reload them, or the calls of a new source are treated as normal calls
+        loadVideoSources().catch((error) =>
+          console.warn('Failed to reload the video sources:', error),
+        )
         // Dispatch serverReload event
         dispatchServerReload()
       })

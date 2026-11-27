@@ -16,8 +16,12 @@ export interface VideoSourceGateType {
 export interface VideoSourceType {
   cmdOpen: string
   description: string
-  // null when the source is not associated with an extension
+  // null when the source is not associated with an extension. The extension of the device
+  // (e.g. a door phone 91242): the server sends the DTMF gates to it
   extension: string | null
+  // main extension of the user of the device (242): the number shown and called, and the
+  // caller number of its calls. Missing on older servers
+  mainExtension?: string | null
   frameRate: string
   id: string
   password: string
