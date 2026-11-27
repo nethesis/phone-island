@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { store } from '../../store'
+import { sourceHasNumber } from './videoSource'
 
 /**
  * Checks if a number is from a streaming source
@@ -19,5 +20,5 @@ export const isFromStreaming = (number: string): boolean => {
   }
 
   // Check if the number matches any streaming source extension
-  return Object.values(videoSources).some((source) => source.extension === number)
+  return Object.values(videoSources).some((source) => sourceHasNumber(source, number))
 }

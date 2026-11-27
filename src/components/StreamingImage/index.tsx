@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { Dispatch, RootState } from '../../store'
 import { getStreamingSourceId } from '../../utils/streaming/getStreamingSourceId'
+import { findVideoSourceByNumber } from '../../utils/streaming/videoSource'
 import VideoStreamingSkeleton from '../VideoStreamingSkeleton'
 
 /**
@@ -54,7 +55,7 @@ const StreamingImage: FC<StreamingImageProps> = ({ className = '' }) => {
   // Find the source to get the image
   const source =
     streamingSourceNumber && videoSources
-      ? Object.values(videoSources).find((source) => source.extension === streamingSourceNumber)
+      ? findVideoSourceByNumber(videoSources, streamingSourceNumber)
       : null
 
   // get image URL from the source ID or from the source object

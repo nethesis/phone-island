@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { store } from '../../store'
+import { findVideoSourceByNumber } from './videoSource'
 
 /**
  * Returns the streaming source ID corresponding to an extension number
@@ -17,7 +18,7 @@ export const getStreamingSourceId = (extensionNumber: string): string | undefine
   }
 
   // Find the source that has the given extension
-  const source = Object.values(videoSources).find((source) => source.extension === extensionNumber)
+  const source = findVideoSourceByNumber(videoSources, extensionNumber)
 
   return source?.id
 }

@@ -34,6 +34,18 @@ export const getVideoSourceGates = (source?: VideoSourceType | null): VideoSourc
 export const isDtmfGate = (gate?: VideoSourceGateType | null): boolean => gate?.type === 'dtmf'
 
 /**
+ * True if the number is the extension of the source: the extension of its device or the main
+ * extension of its user (a door phone 91242 of the user 242 calls as 242)
+ */
+export const sourceHasNumber = (
+  source: VideoSourceType | undefined | null,
+  number: string | undefined | null,
+): boolean => {
+  if (!source || !number) return false
+  return source.extension === number || (!!source.mainExtension && source.mainExtension === number)
+}
+
+/**
  * Video source associated with an extension (the counterpart number of the call)
  */
 export const findVideoSourceByNumber = (
@@ -41,5 +53,5 @@ export const findVideoSourceByNumber = (
   number: string | undefined | null,
 ): VideoSourceType | undefined => {
   if (!videoSources || !number) return undefined
-  return Object.values(videoSources).find((source) => source?.extension === number)
+  return Object.values(videoSources).find((source) => sourceHasNumber(source, number))
 }
