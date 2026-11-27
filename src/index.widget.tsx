@@ -15,6 +15,8 @@ widgetDivs.forEach((div) => {
   const showAlways: boolean = div.getAttribute('showAlways') === 'true' ? true : false
   const uaType: string = div.getAttribute('ua-type') || ''
   const urlParamWithEvent: boolean = div.getAttribute('urlParamWithEvent') === 'true' ? true : false
+  const sipOnly: boolean = div.getAttribute('data-sip-only') === 'true'
+  const displayName: string | undefined = div.getAttribute('data-display-name') || undefined
 
   const root = createRoot(div)
   root.render(
@@ -24,6 +26,8 @@ widgetDivs.forEach((div) => {
         showAlways={showAlways}
         uaType={uaType}
         urlParamWithEvent={urlParamWithEvent}
+        sipOnly={sipOnly}
+        displayName={displayName}
       />
     </React.StrictMode>,
   )

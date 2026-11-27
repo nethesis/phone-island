@@ -85,6 +85,48 @@ Example generation:
 echo -n "<cti_host>:<cti_username>:<cti_token>:<sip_ext>:<sip_secret>:<sip_host>:<sip_port>" | base64 -w0
 ```
 
+### SIP-only mode
+
+By default Phone Island needs a NethVoice CTI user: it calls the CTI REST API and opens the CTI websocket. SIP-only mode runs the island with just a WebRTC extension, without any CTI account. It is opt-in: when it is not enabled the behavior does not change.
+
+In SIP-only mode the island:
+
+- registers the extension on Janus (`https://<cti_host>/janus`) and handles incoming and outgoing audio calls, answer, hangup, mute, hold and DTMF
+- shows the caller name and number taken from the SIP signaling
+- makes no request to `/api`, `/webrest` or `socket.io`
+
+The config token keeps the same format; `<cti_username>` and `<cti_token>` can be left empty:
+
+```sh
+echo -n "<cti_host>:::<sip_ext>:<sip_secret>:<sip_host>:<sip_port>" | base64 -w0
+```
+
+Standalone widget attributes:
+
+| Attribute | Value | Description |
+| --- | --- | --- |
+| `data-sip-only` | `true` | enables SIP-only mode; any other value or a missing attribute keeps the default behavior |
+| `data-display-name` | string | name sent in the SIP registration, default `Admin` |
+| `ua-type` | `desktop` | required to show incoming calls |
+
+```html
+<div
+    class="phone-island"
+    data-config="YOUR_BASE64_CONFIG_TOKEN"
+    data-sip-only="true"
+    data-display-name="Service extension"
+    ua-type="desktop"
+></div>
+```
+
+React props (NPM module):
+
+```tsx
+<PhoneIsland dataConfig={token} uaType='desktop' sipOnly displayName='Service extension' />
+```
+
+Limitations: every feature backed by the CTI server is unavailable, including presence, phonebook and contact lookup, transfers, call parking, call recording, conferences, video calls, screen sharing, streaming sources, transcription and call summaries. The related buttons stay visible: when used, the request fails and the call goes on.
+
 ### Full example
 
 For a complete browser integration example, including event log, device switching, toast notifications and debug actions, see:

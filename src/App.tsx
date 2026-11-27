@@ -7,6 +7,7 @@ import React, {
   useSyncExternalStore,
 } from 'react'
 import { Events, Socket, WebRTC, Island, RestAPI } from './components'
+import { LocalIdentity } from './components/LocalIdentity'
 import { Provider } from 'react-redux'
 import { store, downloadStoresAsJSON } from './store'
 import { Base64 } from 'js-base64'
@@ -44,6 +45,8 @@ interface PhoneIslandProps {
   showAlways?: boolean
   uaType: string
   urlParamWithEvent?: boolean
+  sipOnly?: boolean
+  displayName?: string
 }
 
 interface DeviceInputOutputTypes {
@@ -61,6 +64,8 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       showAlways = false,
       uaType,
       urlParamWithEvent = false,
+      sipOnly = false,
+      displayName,
     }: PhoneIslandProps,
     ref,
   ) => {
@@ -362,7 +367,7 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
       }
     }
 
-    if (!fetchReady || paramUrlInitialized) {
+    if (!fetchReady || paramUrlInitialized || sipOnly) {
       return
     }
 
@@ -1229,7 +1234,28 @@ const PhoneIslandComponent = forwardRef<PhoneIslandRef, PhoneIslandProps>(
   return (
     <>
       <Provider store={store}>
-        {SIP_EXTEN && SIP_EXTEN.trim() !== '' ? (
+        {sipOnly && SIP_EXTEN && SIP_EXTEN.trim() !== '' ? (
+          <WebRTC
+            hostName={HOST_NAME}
+            sipExten={SIP_EXTEN}
+            sipSecret={SIP_SECRET}
+            sipHost={SIP_HOST}
+            sipPort={SIP_PORT}
+            reload={reload}
+            reloadedCallback={() => {
+              setReloadedSocket(true)
+              setReloadedWebRTC(true)
+            }}
+            uaType={uaType}
+            sipOnly
+          >
+            <LocalIdentity sipExten={SIP_EXTEN} displayName={displayName}>
+              <Events sipHost={SIP_HOST}>
+                <Island showAlways={showAlways} uaType={uaType} />
+              </Events>
+            </LocalIdentity>
+          </WebRTC>
+        ) : SIP_EXTEN && SIP_EXTEN.trim() !== '' ? (
           // Full stack with WebRTC when SIP extension is provided
           <WebRTC
             hostName={HOST_NAME}

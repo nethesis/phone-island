@@ -38,6 +38,13 @@ interface WebRTCProps {
   reload: boolean
   uaType: string
   reloadedCallback?: () => void
+  sipOnly?: boolean
+}
+
+const getSipCaller = (result: any) => {
+  const number = String(result?.username || '').match(/^sips?:([^@;]+)/)?.[1] || ''
+  const displayName = String(result?.displayname || '').replace(/^"|"$/g, '').trim()
+  return { number, displayName: displayName || number }
 }
 
 export const WebRTC: FC<WebRTCProps> = ({
@@ -50,6 +57,7 @@ export const WebRTC: FC<WebRTCProps> = ({
   reload,
   uaType,
   reloadedCallback,
+  sipOnly = false,
 }) => {
   // Initialize store dispatch
   const dispatch = useDispatch<Dispatch>()
@@ -781,6 +789,7 @@ export const WebRTC: FC<WebRTCProps> = ({
                             dispatch.currentCall.checkIncomingUpdatePlay({
                               incoming: true,
                               incomingWebRTC: true,
+                              ...(sipOnly ? getSipCaller(result) : {}),
                             })
 
                             if (janus.current.log) {
